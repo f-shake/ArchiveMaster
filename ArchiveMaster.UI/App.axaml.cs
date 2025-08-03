@@ -19,12 +19,18 @@ using FzLib.Avalonia.Dialogs;
 using Microsoft.Extensions.DependencyInjection;
 using System.Runtime.CompilerServices;
 using Avalonia.Threading;
+using FzLib.Programming;
+using Serilog;
 
 namespace ArchiveMaster;
 
 public class App : Application
 {
+    private bool doNotOpen = false;
+
     private bool isMainWindowOpened = false;
+
+    public static readonly int ProcessId = Process.GetCurrentProcess().Id;
     public event EventHandler<ControlledApplicationLifetimeExitEventArgs> Exit;
 
     public override void Initialize()
@@ -35,11 +41,30 @@ public class App : Application
             ShowSplashScreenIfNeeded();
         }
 
+        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        {
+            if (!TcpSingleInstanceHelper.EnsureSingleInstance(OnActivatedAsync))
+            {
+                Log.Information("检测到已有实例在运行，程序将退出");
+                SplashWindow.CloseCurrent();
+                doNotOpen = true;
+                desktop.Shutdown();
+                Environment.Exit(0);
+                return;
+            }
+        }
+
         Initializer.Initialize();
         if (OperatingSystem.IsWindows())
         {
             Resources.Add("ContentControlThemeFontFamily", new FontFamily("Microsoft YaHei UI"));
         }
+    }
+
+    static Task OnActivatedAsync()
+    {
+        Dispatcher.UIThread.Invoke(() => { (App.Current as App).ActivateMainWindow(); });
+        return Task.CompletedTask;
     }
 
     private void ShowSplashScreenIfNeeded()
@@ -58,6 +83,11 @@ public class App : Application
 
     public override void OnFrameworkInitializationCompleted()
     {
+        if (doNotOpen)
+        {
+            return;
+        }
+
         // Line below is needed to remove Avalonia data validation.
         // Without this line you will get duplicate validations from both Avalonia and CT
         BindingPlugins.DataValidators.RemoveAt(0);
@@ -83,6 +113,7 @@ public class App : Application
     {
         TrayIcon.GetIcons(this)?[0]?.Dispose();
         Exit?.Invoke(sender, e);
+        TcpSingleInstanceHelper.Dispose();
         await Initializer.StopAsync();
     }
 
@@ -121,13 +152,6 @@ public class App : Application
         return desktop.MainWindow as MainWindow;
     }
 
-    public static void ActiveAppMainWindow()
-    {
-        if (Current is App app)
-        {
-            Dispatcher.UIThread.Invoke(() => { app.ActivateMainWindow(); });
-        }
-    }
 
     private void ActivateMainWindow()
     {

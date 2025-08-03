@@ -19,6 +19,7 @@ using Avalonia.Controls;
 using FzLib.Application.Startup;
 using FzLib.Avalonia.Dialogs;
 using FzLib.Avalonia.Services;
+using FzLib.Programming;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;

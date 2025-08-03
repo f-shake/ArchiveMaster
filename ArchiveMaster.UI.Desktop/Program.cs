@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using ArchiveMaster.Views;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Svg.Skia;
@@ -36,14 +39,12 @@ class Program
         Directory.SetCurrentDirectory(AppContext.BaseDirectory);
         Log.Logger = new LoggerConfiguration()
             .MinimumLevel.Debug()
-            .WriteTo.File("logs/logs.txt", rollingInterval: RollingInterval.Day)
+            .Enrich.WithProperty("ProcessId", App.ProcessId)
+            .WriteTo.File("logs/logs.txt",
+                outputTemplate: "{Timestamp:yyyy-MM-ddTHH:mm:ss.fffZ} [{Level:u3}] [PID:{ProcessId}] {Message:lj}{NewLine}{Exception}",
+                rollingInterval: RollingInterval.Day)
             .CreateLogger();
         Log.Information("程序启动");
-
-        if (!await TcpSingleInstanceHelper.EnsureSingleInstanceAsync(OnActivatedAsync))
-        {
-            return;
-        }
 
         UnhandledExceptionCatcher.WithCatcher(() =>
             {
@@ -54,13 +55,11 @@ class Program
                 Log.Fatal(ex, "未捕获的异常，来源：{ExceptionSource}", s);
                 Log.CloseAndFlush();
             })
-            .Finally(() => { Log.Information("程序结束"); })
+            .Finally(() =>
+            {
+                Log.Information("程序结束");
+                Log.CloseAndFlush();
+            })
             .Run();
-    }
-
-    static Task OnActivatedAsync()
-    {
-        App.ActiveAppMainWindow();
-        return Task.CompletedTask;
     }
 }
