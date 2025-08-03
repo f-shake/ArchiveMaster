@@ -3,7 +3,7 @@
     <Nullable>disable</Nullable>
     <AppVersion>2.1.0</AppVersion>
     <AvaloniaVersion>11.3.2</AvaloniaVersion>
-    <FzLibVersion>3.0.0</FzLibVersion>
+    <FzLibVersion>3.0.2</FzLibVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -12,10 +12,10 @@
 
   <ItemGroup Condition="'$(Configuration)' == 'Debug'">
     <Reference Include="FzLib">
-      <HintPath>..\..\FzLib\Publish\Release\net8.0\FzLib.dll</HintPath>
+      <HintPath>..\..\FzLib\Publish\libs\FzLib.dll</HintPath>
     </Reference>
     <Reference Include="FzLib.Avalonia">
-      <HintPath>..\..\FzLib\Publish\Release\net8.0\FzLib.Avalonia.dll</HintPath>
+      <HintPath>..\..\FzLib\Publish\libs\FzLib.Avalonia.dll</HintPath>
     </Reference>
   </ItemGroup>
 

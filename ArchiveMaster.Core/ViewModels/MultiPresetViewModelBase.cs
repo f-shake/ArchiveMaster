@@ -108,17 +108,19 @@ public abstract partial class MultiPresetViewModelBase<TConfig> : ViewModelBase 
         PresetName = newName;
     }
 
-    private void PresetNameValidation(string name)
+    private ValidationResult PresetNameValidation(string name)
     {
         if (string.IsNullOrWhiteSpace(name))
         {
-            throw new Exception("配置名为空");
+            return ValidationResult.Error("配置名为空");
         }
 
         if (PresetNames.Contains(name))
         {
-            throw new Exception("配置名已存在");
+            return ValidationResult.Error("配置名已存在");
         }
+
+        return ValidationResult.Valid();
     }
 
     /// <summary>

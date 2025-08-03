@@ -2,8 +2,11 @@
 using System.IO;
 using System.Threading.Tasks;
 using Avalonia;
+using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Svg.Skia;
+using Avalonia.Threading;
 using FzLib.Application;
+using FzLib.Programming;
 using Serilog;
 
 namespace ArchiveMaster.UI.Desktop;
@@ -28,7 +31,7 @@ class Program
     // SynchronizationContext-reliant code before AppMain is called: things aren't initialized
     // yet and stuff might break.
     [STAThread]
-    public static void Main(string[] args)
+    public static async Task Main(string[] args)
     {
         Directory.SetCurrentDirectory(AppContext.BaseDirectory);
         Log.Logger = new LoggerConfiguration()
@@ -36,6 +39,11 @@ class Program
             .WriteTo.File("logs/logs.txt", rollingInterval: RollingInterval.Day)
             .CreateLogger();
         Log.Information("程序启动");
+
+        if (!await TcpSingleInstanceHelper.EnsureSingleInstanceAsync(OnActivatedAsync))
+        {
+            return;
+        }
 
         UnhandledExceptionCatcher.WithCatcher(() =>
             {
@@ -48,5 +56,11 @@ class Program
             })
             .Finally(() => { Log.Information("程序结束"); })
             .Run();
+    }
+
+    static Task OnActivatedAsync()
+    {
+        App.ActiveAppMainWindow();
+        return Task.CompletedTask;
     }
 }

@@ -18,47 +18,28 @@ using FzLib;
 using FzLib.Avalonia.Dialogs;
 using Microsoft.Extensions.DependencyInjection;
 using System.Runtime.CompilerServices;
+using Avalonia.Threading;
 
 namespace ArchiveMaster;
 
-public partial class App : Application
+public class App : Application
 {
-    private bool dontOpen = false;
     private bool isMainWindowOpened = false;
     public event EventHandler<ControlledApplicationLifetimeExitEventArgs> Exit;
 
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
-        if (RuntimeFeature.IsDynamicCodeSupported)//非AOT，启动速度慢
+        if (RuntimeFeature.IsDynamicCodeSupported) //非AOT，启动速度慢
         {
             ShowSplashScreenIfNeeded();
         }
 
-        if (HasAnotherInstance())
+        Initializer.Initialize();
+        if (OperatingSystem.IsWindows())
         {
-            SplashWindow.CloseCurrent();
-            dontOpen = true;
-            ShowMultiInstanceDialog();
+            Resources.Add("ContentControlThemeFontFamily", new FontFamily("Microsoft YaHei UI"));
         }
-        else
-        {
-            Initializer.Initialize();
-            if (OperatingSystem.IsWindows())
-            {
-                Resources.Add("ContentControlThemeFontFamily", new FontFamily("Microsoft YaHei UI"));
-            }
-        }
-    }
-
-    private static bool HasAnotherInstance()
-    {
-        var currentProcess = Process.GetCurrentProcess();
-        var processes = Process
-            .GetProcessesByName(currentProcess.ProcessName)
-            .Where(p => p.MainModule?.FileName == currentProcess.MainModule?.FileName)
-            .Where(p => p.Id != currentProcess.Id);
-        return processes.Any();
     }
 
     private void ShowSplashScreenIfNeeded()
@@ -77,11 +58,6 @@ public partial class App : Application
 
     public override void OnFrameworkInitializationCompleted()
     {
-        if (dontOpen)
-        {
-            return;
-        }
-
         // Line below is needed to remove Avalonia data validation.
         // Without this line you will get duplicate validations from both Avalonia and CT
         BindingPlugins.DataValidators.RemoveAt(0);
@@ -145,25 +121,15 @@ public partial class App : Application
         return desktop.MainWindow as MainWindow;
     }
 
-    private async void ShowMultiInstanceDialog()
+    public static void ActiveAppMainWindow()
     {
-        if (TrayIcon.GetIcons(this) is { Count: > 0 })
+        if (Current is App app)
         {
-            TrayIcon.GetIcons(this)[0].IsVisible = false;
-        }
-        MessageDialog dialog = new MessageDialog(new MessageDialogViewModel()
-        {
-            Title = "重复启动应用",
-            Message = "当前位置的程序已启动，无法重复启动多个实例"
-        }, MessageDialog.MessageDialogButtonDefinition.OK);
-        await dialog.ShowModelessWindowDialog();
-        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-        {
-            desktop.Shutdown();
+            Dispatcher.UIThread.Invoke(() => { app.ActivateMainWindow(); });
         }
     }
 
-    private void TrayIcon_Clicked(object sender, EventArgs e)
+    private void ActivateMainWindow()
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
@@ -183,5 +149,10 @@ public partial class App : Application
         {
             throw new PlatformNotSupportedException();
         }
+    }
+
+    private void TrayIcon_Clicked(object sender, EventArgs e)
+    {
+        ActivateMainWindow();
     }
 }
