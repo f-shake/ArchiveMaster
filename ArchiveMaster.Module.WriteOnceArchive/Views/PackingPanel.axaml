@@ -38,7 +38,7 @@
                 <v:FilePickerTextBox
                     AllowMultiple="True"
                     FileNames="{Binding Config.ArchivedFilesHashFile}"
-                    StringFileTypeFilter="Hash文件;*.woaph;;"
+                    StringFileTypeFilter="Hash列表文件;*.woaph;;"
                     Type="OpenFolder" />
             </ctrl:FormItem>
 
@@ -47,7 +47,7 @@
                 Label="Hash计算缓存：">
                 <v:FilePickerTextBox
                     FileNames="{Binding Config.HashCacheFile}"
-                    StringFileTypeFilter="Hash文件;*.woahc;;"
+                    StringFileTypeFilter="Hash缓存文件;*.woahc;;"
                     Type="OpenFolder" />
             </ctrl:FormItem>
 
@@ -67,34 +67,44 @@
                         </ComboBox>
                     </ctrl:FormItem>
 
-                    <ctrl:FormItem Label="单包容量（MB）：">
+                    <ctrl:FormItem Label="单文件包容量（GB）：">
                         <StackPanel Orientation="Horizontal">
                             <NumericUpDown
                                 Width="160"
                                 HorizontalAlignment="Stretch"
-                                FormatString="0"
-                                Increment="100"
-                                Maximum="1000000"
-                                Minimum="100"
-                                Value="{Binding Config.WriteOnceSizeMB}" />
-                            <Button
-                                Grid.Column="16"
+                                FormatString="0.00"
+                                Increment="0.1"
+                                Maximum="1000"
+                                Minimum="0.1"
+                                Value="{Binding Config.PackageSizeGB}" />
+                            <HyperlinkButton
                                 Padding="27,6"
                                 Content="预设">
                                 <Button.Flyout>
-                                    <MenuFlyout ItemsSource="{Binding WriteOnceSizes}">
+                                    <MenuFlyout ItemsSource="{Binding Source={x:Static vm:PackingViewModel.PresetPackageSizes}}">
                                         <MenuFlyout.ItemContainerTheme>
                                             <ControlTheme
                                                 BasedOn="{StaticResource {x:Type MenuItem}}"
                                                 TargetType="MenuItem">
+                                                <Setter Property="HeaderTemplate">
+                                                    <DataTemplate>
+                                                        <TextBlock>
+                                                            <Run Text="{Binding ., Converter={x:Static cvt:Converters.Tuple}, ConverterParameter=Item2}" />
+                                                            <Run Text="（" />
+                                                            <Run Text="{Binding ., Converter={x:Static cvt:Converters.Tuple}, ConverterParameter=Item1}" />
+                                                            <Run Text="GB）" />
+                                                        </TextBlock>
+                                                    </DataTemplate>
+                                                </Setter>
                                                 <Setter Property="Header" Value="{Binding .}" />
+                                                <Setter Property="TextBlock.TextDecorations" Value="{x:Null}" />
                                                 <Setter Property="Command" Value="{Binding #root.DataContext.SetPackageSizeCommand}" />
-                                                <Setter Property="CommandParameter" Value="{Binding .}" />
+                                                <Setter Property="CommandParameter" Value="{Binding ., Converter={x:Static cvt:Converters.Tuple}, ConverterParameter=Item1}" />
                                             </ControlTheme>
                                         </MenuFlyout.ItemContainerTheme>
                                     </MenuFlyout>
                                 </Button.Flyout>
-                            </Button>
+                            </HyperlinkButton>
                         </StackPanel>
 
                     </ctrl:FormItem>
@@ -118,38 +128,39 @@
                 <ListBox
                     ItemsSource="{Binding WriteOnceFilePackages}"
                     SelectedItem="{Binding SelectedPackage}">
+                    <ListBox.Styles>
+                        <Style Selector="ListBoxItem">
+                            <Setter Property="Padding" Value="4" />
+                            <Setter Property="CornerRadius" Value="4" />
+                            <Setter Property="BorderBrush" Value="{DynamicResource Background3}" />
+                            <Setter Property="BorderThickness" Value="1" />
+                        </Style>
+                    </ListBox.Styles>
+                    <ListBox.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel
+                                Margin="8"
+                                ItemSpacing="8"
+                                ItemWidth="100"
+                                LineSpacing="8" />
+                        </ItemsPanelTemplate>
+                    </ListBox.ItemsPanel>
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <ContentControl x:Name="c">
-                                <Grid RowDefinitions="Auto,4,Auto">
-                                    <Grid ColumnDefinitions="*,8,*,8,*">
-                                        <CheckBox
-                                            Content="{Binding Index}"
-                                            FontWeight="Bold"
-                                            IsChecked="{Binding IsChecked}" />
-                                        <TextBlock
-                                            Grid.Column="2"
-                                            VerticalAlignment="Center">
-                                            <Run>共</Run>
-                                            <Run Text="{Binding Files.Count, Mode=OneWay}" />
-                                            <Run>个文件</Run>
-                                        </TextBlock>
-                                        <TextBlock
-                                            Grid.Column="4"
-                                            VerticalAlignment="Center"
-                                            Text="{Binding TotalLength, Converter={x:Static cvt:Converters.FileLength}}" />
-
-                                    </Grid>
-
+                                <Grid RowDefinitions="Auto,8,Auto,8,Auto">
+                                    <CheckBox
+                                        Content="{Binding Index}"
+                                        IsChecked="{Binding IsChecked}" />
+                                    <TextBlock Grid.Row="2">
+                                        <Run Text="{Binding Files.Count, Mode=OneWay}" />
+                                        <Run>个文件</Run>
+                                    </TextBlock>
                                     <TextBlock
-                                        Grid.Row="2"
-                                        Width="165"
-                                        HorizontalAlignment="Left"
-                                        Text="{Binding EarliestTime, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}" />
-                                    <TextBlock
-                                        Grid.Row="2"
+                                        Grid.Row="4"
                                         HorizontalAlignment="Right"
-                                        Text="{Binding LatestTime, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}" />
+                                        Text="{Binding TotalLength, Converter={x:Static cvt:Converters.FileLength}}" />
+
                                 </Grid>
                                 <Interaction.Behaviors>
                                     <DataTriggerBehavior
@@ -161,7 +172,12 @@
                                                 PropertyName="Content"
                                                 TargetObject="c">
                                                 <ChangePropertyAction.Value>
-                                                    <TextBlock FontWeight="Bold">大于光盘容量的文件</TextBlock>
+                                                    <TextBlock
+                                                        FontWeight="Bold"
+                                                        TextAlignment="Center"
+                                                        TextWrapping="Wrap">
+                                                        超过数据包容量的文件
+                                                    </TextBlock>
                                                 </ChangePropertyAction.Value>
                                             </ChangePropertyAction>
                                         </DataTriggerBehavior.Actions>
@@ -172,6 +188,8 @@
                     </ListBox.ItemTemplate>
 
                 </ListBox>
+
+
             </gb:GroupBox>
             <gb:GroupBox
                 Grid.RowSpan="99"
@@ -179,7 +197,14 @@
                 Header="文件包中的文件">
                 <v:SimpleFileDataGrid
                     ColumnIsCheckedIndex="-1"
-                    ItemsSource="{Binding SelectedPackage.Files}" />
+                    ItemsSource="{Binding SelectedPackage.Files}">
+                    <v:SimpleFileDataGrid.Columns>
+                        <DataGridTextColumn
+                            Binding="{Binding Hash}"
+                            Header="Hash"
+                            IsReadOnly="True" />
+                    </v:SimpleFileDataGrid.Columns>
+                </v:SimpleFileDataGrid>
             </gb:GroupBox>
 
             <Grid

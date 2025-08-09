@@ -10,10 +10,22 @@ using FzLib.Avalonia.Dialogs;
 namespace ArchiveMaster.ViewModels;
 
 public partial class PackingViewModel(AppConfig appConfig, IDialogService dialogService)
-    : TwoStepViewModelBase<PackingService, PackingConfig>(appConfig, dialogService, WriteOnceArchiveModuleInfo.CONFIG_GROUP)
+    : TwoStepViewModelBase<PackingService, PackingConfig>(appConfig, dialogService,
+        WriteOnceArchiveModuleInfo.CONFIG_GROUP)
 {
-    [ObservableProperty]
-    private List<FileSystem.WriteOncePackage> writeOnceFilePackages;
+    public static readonly (double sizeGB, string desc)[] PresetPackageSizes =
+    [
+        (0.63, "CD 650MB"),
+        (0.68, "CD 700MB"),
+        (4.3, "DVD5"),
+        (7.9, "DVD9"),
+        (8.7, "DVD10"),
+        (15.8, "DVD18"),
+        (23, "BD25"),
+        (46, "BD50"),
+        (93, "BD100"),
+        (119, "BD128"),
+    ];
 
     [ObservableProperty]
     private DateTime earliestDateTime = new DateTime(1, 1, 1);
@@ -21,12 +33,15 @@ public partial class PackingViewModel(AppConfig appConfig, IDialogService dialog
     [ObservableProperty]
     private FileSystem.WriteOncePackage selectedPackage;
 
-    public int[] PackageSizes { get; } = [700, 4480, 8500, 23500];
-
-    [RelayCommand]
-    private void SetPackageSize(int size)
+    [ObservableProperty]
+    private List<FileSystem.WriteOncePackage> writeOnceFilePackages;
+    protected override Task OnExecutingAsync(CancellationToken token)
     {
-        Config.PackageSizeMB = size;
+        if (!WriteOnceFilePackages.Any(p => p.IsChecked))
+        {
+            throw new Exception("没有任何被选中的文件包");
+        }
+        return base.OnExecutingAsync(token);
     }
 
     protected override Task OnInitializedAsync()
@@ -36,50 +51,13 @@ public partial class PackingViewModel(AppConfig appConfig, IDialogService dialog
         {
             pkgs.Add(new FileSystem.WriteOncePackage()
             {
-                Index = -1
+                Index = -1,
             });
             pkgs[^1].Files.AddRange(Service.Packages.OutOfSizeFiles);
         }
 
         WriteOnceFilePackages = pkgs;
         return base.OnInitializedAsync();
-    }
-
-    protected override async Task OnExecutingAsync(CancellationToken token)
-    {
-        if (!WriteOnceFilePackages.Any(p => p.IsChecked))
-        {
-            throw new Exception("没有任何被选中的文件包");
-        }
-
-        if (Directory.Exists(Config.TargetDir) && Directory.EnumerateFileSystemEntries(Config.TargetDir).Any())
-        {
-            var result = await DialogService.ShowYesNoDialogAsync("清空目录",
-                $"目录{Config.TargetDir}不为空，{Environment.NewLine}导出前将清空部分目录。{Environment.NewLine}是否继续？");
-            if (true.Equals(result))
-            {
-                try
-                {
-                    foreach (var index in Service.Packages.Packages.Where(p => p.IsChecked)
-                                 .Select(p => p.Index))
-                    {
-                        var dir = Path.Combine(Config.TargetDir, index.ToString());
-                        if (Directory.Exists(dir))
-                        {
-                            FileHelper.DeleteByConfig(dir);
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    throw new Exception("清空目录失败", ex);
-                }
-            }
-            else
-            {
-                throw new OperationCanceledException();
-            }
-        }
     }
 
     protected override void OnReset()
@@ -97,5 +75,11 @@ public partial class PackingViewModel(AppConfig appConfig, IDialogService dialog
     private void SelectNone()
     {
         WriteOnceFilePackages?.ForEach(p => p.IsChecked = false);
+    }
+
+    [RelayCommand]
+    private void SetPackageSize(double size)
+    {
+        Config.PackageSizeGB = size;
     }
 }

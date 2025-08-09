@@ -7,11 +7,10 @@
     <PackageVersion Include="Avalonia.Android" Version="$(AvaloniaVersion)" />
     <PackageVersion Include="Avalonia.Controls.DataGrid" Version="$(AvaloniaVersion)" />
     <PackageVersion Include="Avalonia.Themes.Fluent" Version="$(AvaloniaVersion)" />
-    <PackageVersion Include="DiscUtils.Udf" Version="0.16.13" />
+    <PackageVersion Include="DiscUtils.Iso9660" Version="0.16.13" />
     <PackageVersion Include="System.Reactive" Version="6.0.1" />
     <PackageVersion Include="Xaml.Behaviors.Avalonia" Version="11.3.2" />
     <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.0" />
-    <PackageVersion Include="WriteOnceUtils.Iso9660" Version="0.16.13" />
     <PackageVersion Include="ExifLibNet.Updated" Version="2.1.5" />
     <PackageVersion Include="ExifLibrary" Version="1.0.13" />
     <PackageVersion Include="FzLib.Avalonia" Version="$(FzLibVersion)" Condition="'$(Configuration)' == 'Release'" />
@@ -40,5 +39,6 @@
     <PackageVersion Include="Svg.Controls.Skia.Avalonia" Version="11.3.0.1" />
     <PackageVersion Include="Xamarin.AndroidX.Core.SplashScreen" Version="1.0.1.1" />
     <PackageVersion Include="Swashbuckle.AspNetCore" Version="6.7.3" />
+    <PackageVersion Include="HotAvalonia" Version="3.0.0" PrivateAssets="All" Publish="True" />
   </ItemGroup>
 </Project>

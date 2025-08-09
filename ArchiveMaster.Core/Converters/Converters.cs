@@ -65,7 +65,7 @@ public static class Converters
 
     public static readonly DateTimeConverter DateTime = new();
 
-    public static readonly ValueMappingConverter LogMap = new ValueMappingConverter()
+    public static readonly ValueMappingConverter LogMap = new()
     {
         Map = new Dictionary<string, string>()
         {
@@ -78,4 +78,6 @@ public static class Converters
             { "None", "全部" }
         }
     };
+
+    public static readonly TupleConverter Tuple = new();
 }

@@ -53,12 +53,13 @@ namespace ArchiveMaster.ViewModels.FileSystem
                 {
                     return relativePath;
                 }
+
                 if (string.IsNullOrEmpty(TopDirectory))
                 {
                     return Path;
                 }
 
-                
+
                 // if (Path.StartsWith(TopDirectory))
                 // {
                 //     return Path[TopDirectory.Length..].TrimStart([System.IO.Path.DirectorySeparatorChar,System.IO.Path.AltDirectorySeparatorChar]);
@@ -166,14 +167,23 @@ namespace ArchiveMaster.ViewModels.FileSystem
                 (s1, s2) => s1.Path == s2.Path,
                 s => s.Path.GetHashCode());
 
+        
         public override int GetHashCode()
         {
-#if WINDOWS
-            var comparer = StringComparer.OrdinalIgnoreCase;
-#else
-            var comparer = StringComparer.Ordinal;
-#endif
-            return HashCode.Combine(comparer.GetHashCode(Path ?? string.Empty), Length, Time.GetHashCode());
+            int hash = default;
+            //FNV算法，规避字符串每次GetHashCode都不一样的问题
+            unchecked
+            {
+                hash = (int)2166136261;
+                foreach (char c in Path)
+                {
+                    hash = (hash ^ c) * 16777619;
+                }
+
+                return hash;
+            }
+
+            return HashCode.Combine(hash, Length, Time);
         }
     }
 }

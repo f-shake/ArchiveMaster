@@ -17,7 +17,7 @@
 
 
   <ItemGroup>
-    <PackageReference Include="DiscUtils.Udf" />
+    <PackageReference Include="DiscUtils.Iso9660" />
   </ItemGroup>
 
   <ItemGroup>

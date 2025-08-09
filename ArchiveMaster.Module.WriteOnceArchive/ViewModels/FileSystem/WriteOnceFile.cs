@@ -4,6 +4,9 @@ namespace ArchiveMaster.ViewModels.FileSystem
 {
     public partial class WriteOnceFile : SimpleFileInfo
     {
+        [ObservableProperty]
+        private string hash;
+
         public WriteOnceFile()
         {
             
@@ -11,8 +14,5 @@ namespace ArchiveMaster.ViewModels.FileSystem
         public WriteOnceFile(FileInfo file,string topDir) : base(file,topDir)
         {
         }
-
-        [ObservableProperty]
-        private string hash;
     }
 }
