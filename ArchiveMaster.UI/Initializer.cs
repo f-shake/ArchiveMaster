@@ -44,12 +44,15 @@ public static class Initializer
     [
 #if DEBUG
         new TestModuleInfo(),
-#endif
+        new WriteOnceArchiveModuleInfo(),
+#else
         new FileToolsModuleInfo(),
         new PhotoToolsModuleInfo(),
         new OfflineSyncModuleInfo(),
         new DiscArchiveModuleInfo(),
+        new WriteOnceArchiveModuleInfo(),
         new FileBackupperModuleInfo(),
+#endif
     ];
 #endif
 

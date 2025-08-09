@@ -1,0 +1,128 @@
+﻿<v:TwoStepPanelBase
+    x:Class="ArchiveMaster.Views.RebuildPanel"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ctrl="clr-namespace:FzLib.Avalonia.Controls;assembly=FzLib.Avalonia"
+    xmlns:cvt="clr-namespace:ArchiveMaster.Converters;assembly=ArchiveMaster.Core"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:g="clr-namespace:GroupBox.Avalonia.Controls;assembly=GroupBox.Avalonia"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib"
+    xmlns:ui="http://schemas.modernwpf.com/2019"
+    xmlns:v="using:ArchiveMaster.Views"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
+
+    <v:TwoStepPanelBase.ConfigsContent>
+        <ctrl:StackFormItemGroup>
+            <ctrl:FormItem Label="光盘目录：">
+                <ctrl:FilePickerTextBox
+                    AllowMultiple="True"
+                    FileNames="{Binding Config.WriteOnceDirs}"
+                    Type="OpenFolder" />
+            </ctrl:FormItem>
+            <ctrl:FormItem Label="重建目录：">
+                <ctrl:FilePickerTextBox
+                    FileNames="{Binding Config.TargetDir}"
+                    Type="OpenFolder" />
+            </ctrl:FormItem>
+            <ctrl:FormItem Label="选项：">
+                <ctrl:WrapFormItemGroup>
+                    <ctrl:FormItem Label="最大可接受修改时间差异（秒）：">
+                        <NumericUpDown
+                            Width="180"
+                            FormatString="0.00"
+                            Increment="1"
+                            Maximum="3600"
+                            Minimum="0"
+                            Value="{Binding Config.MaxTimeToleranceSecond}" />
+                    </ctrl:FormItem>
+                    <CheckBox
+                        Content="跳过已存在的文件"
+                        IsChecked="{Binding Config.SkipIfExisted}" />
+                    <CheckBox
+                        Content="仅验证文件完整性，不重建文件"
+                        IsChecked="{Binding Config.CheckOnly}" />
+                </ctrl:WrapFormItemGroup>
+            </ctrl:FormItem>
+        </ctrl:StackFormItemGroup>
+    </v:TwoStepPanelBase.ConfigsContent>
+    <v:TwoStepPanelBase.ResultsContent>
+        <Grid
+            Grid.Row="2"
+            ColumnDefinitions="2*,8,*">
+            <GridSplitter
+                Grid.Column="1"
+                Width="8"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Stretch"
+                Background="Transparent" />
+            <g:GroupBox Header="目录结构树">
+
+                <TreeView
+                    x:Name="tree"
+                    ItemsSource="{Binding FileTree}">
+                    <TreeView.ItemTemplate>
+                        <TreeDataTemplate ItemsSource="{Binding All}">
+                            <TextBlock
+                                x:Name="txtTreeItem"
+                                FontWeight="Bold">
+                                <Run Text="{Binding Name}" />
+
+                                <Interaction.Behaviors>
+                                    <DataTriggerBehavior
+                                        Binding="{Binding IsFile}"
+                                        Value="true">
+                                        <ChangePropertyAction
+                                            PropertyName="FontWeight"
+                                            TargetObject="txtTreeItem"
+                                            Value="Normal" />
+                                        <ChangePropertyAction
+                                            PropertyName="Inlines"
+                                            TargetObject="txtTreeItem">
+                                            <ChangePropertyAction.Value>
+                                                <InlineCollection>
+                                                    <Run Text="{Binding Name, Mode=OneWay}" />
+                                                    <Run Text="（" />
+                                                    <Run Text="{Binding File.Length, Mode=OneWay, Converter={x:Static cvt:Converters.FileLength}}" />
+                                                    <Run Text="，" />
+                                                    <Run Text="{Binding File.Time, Mode=OneWay, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}" />
+                                                    <Run Text="）" />
+
+                                                </InlineCollection>
+                                            </ChangePropertyAction.Value>
+                                        </ChangePropertyAction>
+                                    </DataTriggerBehavior>
+                                </Interaction.Behaviors>
+                            </TextBlock>
+                        </TreeDataTemplate>
+                    </TreeView.ItemTemplate>
+                </TreeView>
+            </g:GroupBox>
+
+            <g:GroupBox
+                Grid.Column="2"
+                Header="重建错误">
+                <DataGrid ItemsSource="{Binding RebuildErrors}">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn
+                            Binding="{Binding File.WriteOnceName}"
+                            Header="光盘文件"
+                            IsReadOnly="True" />
+                        <DataGridTextColumn
+                            Binding="{Binding File.Path}"
+                            Header="目标目录"
+                            IsReadOnly="True" />
+                        <DataGridTextColumn
+                            Binding="{Binding Error}"
+                            Header="错误信息"
+                            IsReadOnly="True" />
+
+                    </DataGrid.Columns>
+                </DataGrid>
+            </g:GroupBox>
+        </Grid>
+    </v:TwoStepPanelBase.ResultsContent>
+
+</v:TwoStepPanelBase>

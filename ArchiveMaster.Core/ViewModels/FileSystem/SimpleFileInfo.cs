@@ -165,5 +165,15 @@ namespace ArchiveMaster.ViewModels.FileSystem
             = EqualityComparer<SimpleFileInfo>.Create(
                 (s1, s2) => s1.Path == s2.Path,
                 s => s.Path.GetHashCode());
+
+        public override int GetHashCode()
+        {
+#if WINDOWS
+            var comparer = StringComparer.OrdinalIgnoreCase;
+#else
+            var comparer = StringComparer.Ordinal;
+#endif
+            return HashCode.Combine(comparer.GetHashCode(Path ?? string.Empty), Length, Time.GetHashCode());
+        }
     }
 }

@@ -14,14 +14,12 @@
     <None Remove="obj\**" />
   </ItemGroup>
 
-
-
   <ItemGroup>
-    <PackageReference Include="DiscUtils.Udf" />
+    <ProjectReference Include="..\ArchiveMaster.Core\ArchiveMaster.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ArchiveMaster.Core\ArchiveMaster.Core.csproj" />
+    <PackageReference Include="DiscUtils.Udf" />
   </ItemGroup>
 
 </Project>
