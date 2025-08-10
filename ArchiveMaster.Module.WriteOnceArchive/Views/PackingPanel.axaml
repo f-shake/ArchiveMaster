@@ -113,9 +113,11 @@
                         IsVisible="{Binding Config.PackingType, Converter={x:Static cvt:Converters.EqualWithParameter}, ConverterParameter=Copy}"
                         Label="密码：">
                         <TextBox
+                            Width="200"
                             Classes="revealPasswordButton"
                             PasswordChar="*"
-                            Text="{Binding Config.Password}" />
+                            Text="{Binding Config.Password}"
+                            Watermark="若为空，则不进行加密" />
                     </ctrl:FormItem>
 
                 </ctrl:WrapFormItemGroup>

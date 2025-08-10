@@ -37,7 +37,11 @@ public partial class TreeFileDirInfo : FileSystem.SimpleFileInfo
         Index = index;
         Parent = parent;
         IsChecked = false;
+        RawFileInfo = file;
     }
+
+    public SimpleFileInfo RawFileInfo { get; }
+
     public bool IsLast()
     {
         return Index == Parent.Subs.Count - 1;

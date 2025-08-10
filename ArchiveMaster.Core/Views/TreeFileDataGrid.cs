@@ -14,6 +14,7 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Shapes;
 using Avalonia.Controls.Templates;
 using Avalonia.Data;
+using Avalonia.Data.Converters;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.LogicalTree;
@@ -42,14 +43,6 @@ public class TreeFileDataGrid : SimpleFileDataGrid
     public static readonly StyledProperty<int> RootDepthProperty
         = AvaloniaProperty.Register<TreeFileDataGrid, int>(nameof(RootDepth), 1);
 
-    // protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
-    // {
-    //     base.OnPropertyChanged(change);
-    //     if (change.Property == ExpandRequestFilesProperty)
-    //     {
-    //         ExpandToFiles(ExpandRequestFiles);
-    //     }
-    // }
     public static readonly StyledProperty<string> SearchTextProperty =
         AvaloniaProperty.Register<TreeFileDataGrid, string>(
             nameof(SearchText));
@@ -58,6 +51,7 @@ public class TreeFileDataGrid : SimpleFileDataGrid
         new TreeFileCheckBoxVisibleConverter();
 
     protected static readonly TreeFileDirLengthConverter TreeFileDirLengthConverter = new TreeFileDirLengthConverter();
+
     public TreeFileDataGrid()
     {
         DoubleTapped += DataGridDoubleTapped;
@@ -173,7 +167,7 @@ public class TreeFileDataGrid : SimpleFileDataGrid
                     ConverterParameter = this,
                 },
                 [!IsEnabledProperty] = new Binding("DataContext.IsWorking") //执行命令时，这CheckBox不可以Enable
-                { Source = rootPanel, Converter = InverseBoolConverter },
+                    { Source = rootPanel, Converter = InverseBoolConverter },
             };
         });
 
@@ -268,16 +262,10 @@ public class TreeFileDataGrid : SimpleFileDataGrid
                 // { Converter = new DirDepthMarginConverter() },
             };
 
-            //文件名
-            var tbkName = new TextBlock()
-            {
-                [!TextBlock.TextProperty] = new Binding(nameof(SimpleFileInfo.Name)),
-                // Margin = new Thickness(0, 0, 0, 0)
-            };
             return new StackPanel
             {
                 Orientation = Orientation.Horizontal,
-                Children = { lines, icon, tbkName }
+                Children = { lines, icon, GetNameContentTemplate() }
             };
         });
 
@@ -285,9 +273,17 @@ public class TreeFileDataGrid : SimpleFileDataGrid
         return column;
     }
 
+    protected virtual Control GetNameContentTemplate()
+    {
+        var tbkName = new TextBlock()
+        {
+            [!TextBlock.TextProperty] = new Binding(nameof(SimpleFileInfo.Name)),
+        };
+        return tbkName;
+    }
+
     protected override void OnFileDoubleTapped(SimpleFileInfo file)
     {
-
     }
 
     private void Collapse(TreeDirInfo dir)
@@ -352,6 +348,7 @@ public class TreeFileDataGrid : SimpleFileDataGrid
             }
         }
     }
+
     private void Expand(TreeDirInfo dir)
     {
         if (dir.IsExpanded == true)

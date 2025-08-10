@@ -7,6 +7,9 @@ namespace ArchiveMaster.ViewModels.FileSystem
         [ObservableProperty]
         private string hash;
 
+        [ObservableProperty]
+        private bool hasPhysicalFile;
+
         public WriteOnceFile()
         {
             

@@ -2,6 +2,7 @@
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
@@ -14,25 +15,14 @@ using ArchiveMaster.Models;
 using ArchiveMaster.ViewModels;
 using ArchiveMaster.ViewModels.FileSystem;
 using DiscUtils.Iso9660;
+using FzLib.Cryptography;
 using FzLib.IO;
 using WriteOnceFile = ArchiveMaster.ViewModels.FileSystem.WriteOnceFile;
 
 namespace ArchiveMaster.Services
 {
-    public class PackingService(AppConfig appConfig) : WriteOnceServiceBase<PackingConfig>(appConfig)
+    public class PackingService(AppConfig appConfig) : TwoStepServiceBase<PackingConfig>(appConfig)
     {
-        /// <summary>
-        /// 记录整个源目录的文件结构，格式为<see cref="WriteOnceFileModel"/>的<see cref="List{T}"/>的JSON序列化
-        /// </summary>
-        public const string PackageInfoFileName = "package_info.wpk";
-
-        /// <summary>
-        /// 记录每个文件的Hash值，格式为每行一个文件，每行格式为：<see cref="SimpleFileInfo"/>的HashCode + '\t' + Hash值
-        /// </summary>
-        public const string HashCacheFileName = "caches.whc";
-
-        private const FileHashHelper.HashAlgorithmType HashType = FileHashHelper.HashAlgorithmType.SHA256;
-
         private List<WriteOnceFileInfo> allFiles;
 
         /// <summary>
@@ -42,34 +32,6 @@ namespace ArchiveMaster.Services
 
         private IEnumerable<WriteOncePackage> ExecutingPackages =>
             Packages.Packages.Where(p => p.IsChecked && p.Index > 0);
-
-        public static bool IsValidHashString(string hash, FileHashHelper.HashAlgorithmType type)
-        {
-            if (string.IsNullOrEmpty(hash))
-                return false;
-
-            int expectedLength = type switch
-            {
-                FileHashHelper.HashAlgorithmType.MD5 => 32,
-                FileHashHelper.HashAlgorithmType.SHA1 => 40,
-                FileHashHelper.HashAlgorithmType.SHA256 => 64,
-                FileHashHelper.HashAlgorithmType.SHA384 => 96,
-                FileHashHelper.HashAlgorithmType.SHA512 => 128,
-                _ => 0
-            };
-
-            if (hash.Length != expectedLength)
-                return false;
-
-            foreach (char c in hash)
-            {
-                bool isHexDigit = c is >= '0' and <= '9' or >= 'a' and <= 'f' or >= 'A' and <= 'F';
-                if (!isHexDigit)
-                    return false;
-            }
-
-            return true;
-        }
 
         public override async Task ExecuteAsync(CancellationToken token)
         {
@@ -98,7 +60,8 @@ namespace ArchiveMaster.Services
                         throw new ArgumentOutOfRangeException(nameof(Config.PackingType));
                 }
 
-                await WritePackageInfoFileAsync(Path.Combine(Config.TargetDir, PackageInfoFileName),
+                await WritePackageInfoFileAsync(
+                    Path.Combine(Config.TargetDir, WriteOnceArchiveParameters.PackageInfoFileName),
                     ExecutingPackages.Select(p => p.TotalLength).Sum(),
                     ExecutingPackages.SelectMany(p => p.Files).Select(p => p.Hash));
             }, token);
@@ -126,14 +89,14 @@ namespace ArchiveMaster.Services
                     .Select(p => new WriteOnceFile(p, Config.SourceDir))
                     .ToList();
 
-                List<WriteOnceFileInfo> dirStructure = new List<WriteOnceFileInfo>();
+                allFiles = new List<WriteOnceFileInfo>();
 
                 //第二步：计算Hash
                 List<WriteOnceFile> packageFiles = new List<WriteOnceFile>(files.Count);
 
                 var hashCaches = await GetFileHashCacheAsync();
                 var packagedHashes = await GetPackagedFileHashesAsync();
-                string hashCacheFilePath = Path.Combine(Config.TargetDir, HashCacheFileName);
+                string hashCacheFilePath = Path.Combine(Config.TargetDir, WriteOnceArchiveParameters.HashCacheFileName);
                 await using (var hashCacheFile = new StreamWriter(hashCacheFilePath))
                 {
                     if (hashCaches.Count > 0)
@@ -151,11 +114,12 @@ namespace ArchiveMaster.Services
                         //从记忆中提取Hash
                         if (!hashCaches.TryGetValue(GetFileHashCode(file), out var hash))
                         {
-                            hash = await FileHashHelper.ComputeHashAsync(file.Path, HashType, token);
+                            hash = await FileHashHelper.ComputeHashAsync(file.Path, WriteOnceArchiveParameters.HashType,
+                                token);
                         }
 
                         //放入文件目录结构
-                        dirStructure.Add(new WriteOnceFileInfo(file.Path, hash, file.Length, file.Time));
+                        allFiles.Add(new WriteOnceFileInfo(file.RelativePath, hash, file.Length, file.Time));
                         //写入Hash缓存
                         await hashCacheFile.WriteLineAsync($"{GetFileHashCode(file)}\t{hash}");
 
@@ -261,6 +225,11 @@ namespace ArchiveMaster.Services
                 NotifyMessage(
                     $"正在复制（{indexOfPackage}/{totalPackages}包，{indexOfFile}/{totalFiles}文件，本文件{1.0 * p.ProcessedBytes / 1024 / 1024:0}MB/{1.0 * p.TotalBytes / 1024 / 1024:0}MB）：{Path.GetFileName(p.SourceFilePath)}");
             });
+            Aes aes = null;
+            if (string.IsNullOrWhiteSpace(Config.Password)) //复制
+            {
+                aes = AesHelper.GetDefaultAes(Config.Password);
+            }
 
             foreach (var package in ExecutingPackages)
             {
@@ -277,9 +246,18 @@ namespace ArchiveMaster.Services
                     indexOfFile++;
                     try
                     {
-                        await FileCopyHelper.CopyFileAsync(file.Path,
-                            Path.Combine(packageDir, file.Hash),
-                            progress: progress, cancellationToken: token);
+                        var targetFile = Path.Combine(packageDir, file.Hash);
+                        if (aes == null) //复制
+                        {
+                            await FileCopyHelper.CopyFileAsync(file.Path, targetFile,
+                                progress: progress, cancellationToken: token);
+                        }
+                        else //加密
+                        {
+                            await aes.EncryptFileAsync(file.Path, targetFile, progress: progress,
+                                cancellationToken: token);
+                        }
+
                         file.Complete();
                     }
                     catch (Exception ex)
@@ -293,7 +271,8 @@ namespace ArchiveMaster.Services
                     }
                 }
 
-                await WritePackageInfoFileAsync(Path.Combine(packageDir, PackageInfoFileName), package.TotalLength,
+                await WritePackageInfoFileAsync(
+                    Path.Combine(packageDir, WriteOnceArchiveParameters.PackageInfoFileName), package.TotalLength,
                     package.Files.Select(p => p.Hash));
             }
         }
@@ -336,7 +315,8 @@ namespace ArchiveMaster.Services
                     }
                 }
 
-                await WritePackageInfoFileAsync(Path.Combine(packageDir, PackageInfoFileName), package.TotalLength,
+                await WritePackageInfoFileAsync(
+                    Path.Combine(packageDir, WriteOnceArchiveParameters.PackageInfoFileName), package.TotalLength,
                     package.Files.Select(p => p.Hash));
 
                 NotifyProgress(1.0 * indexOfPackage / totalPackages);
@@ -377,7 +357,7 @@ namespace ArchiveMaster.Services
                 await WritePackageInfoFileAsync(tempFile, package.TotalLength, package.Files.Select(p => p.Hash));
 
                 NotifyMessage($"正在创建第{package.Index}个ISO");
-                builder.AddFile(PackageInfoFileName, tempFile);
+                builder.AddFile(WriteOnceArchiveParameters.PackageInfoFileName, tempFile);
                 builder.Build(Path.Combine(Config.TargetDir, $"{package.Index}.iso"));
                 NotifyProgress(1.0 * indexOfPackage / totalPackages);
             }
@@ -400,7 +380,7 @@ namespace ArchiveMaster.Services
                     throw new FormatException($"文件{Config.HashCacheFile}中存在不正确的格式：{line}");
                 }
 
-                if (!IsValidHashString(parts[1], HashType))
+                if (!FileHelper.IsValidHashString(parts[1], WriteOnceArchiveParameters.HashType))
                 {
                     throw new Exception($"文件{Config.HashCacheFile}中存在无效的Hash值：{line}");
                 }

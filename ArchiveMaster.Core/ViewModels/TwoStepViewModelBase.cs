@@ -260,8 +260,8 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
                 Config.Check();
                 await Service.InitializeAsync(token);
                 await OnInitializedAsync();
-                await CheckWarningFilesAsync(token);
-            }, "初始化失败"))
+            }, "初始化失败")//初始化成功
+            && !await CheckWarningFilesAsync(token))//有需要处理的文件
         {
             CanExecute = true;
             CanReset = true;
@@ -280,21 +280,37 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
         CancelCommand.NotifyCanExecuteChanged();
     }
 
-    private async Task CheckWarningFilesAsync(CancellationToken token)
+    /// <summary>
+    /// 检查并抛出警告
+    /// </summary>
+    /// <param name="token"></param>
+    /// <returns>如果不存在需要处理的文件，返回true</returns>
+    private async Task<bool> CheckWarningFilesAsync(CancellationToken token)
     {
-        if (CheckWarningFilesOnInitialized)
+        if (!CheckWarningFilesOnInitialized)
         {
-            var files = Service.GetInitializedFiles();
-            if (files == null || !files.Any())
-            {
-                return;
-            }
-
-            if (files.Any(p => p.Status is Enums.ProcessStatus.Warn or Enums.ProcessStatus.Error))
-            {
-                await DialogService.ShowWarningDialogAsync("存在警告", "初始化完成，但存在警告或错误文件，请仔细检查");
-            }
+            return false;
         }
+
+        var files = Service.GetInitializedFiles();
+        if (files == null)
+        {
+            return false;
+        }
+
+        if (!files.Any())
+        {
+            await DialogService.ShowWarningDialogAsync("结果为空", "不存在符合条件的需要处理的文件");
+            return true;
+        }
+
+        if (files.Any(p => p.Status is Enums.ProcessStatus.Warn or Enums.ProcessStatus.Error))
+        {
+            await DialogService.ShowWarningDialogAsync("存在警告", "初始化完成，但存在警告或错误文件，请仔细检查");
+            return false;
+        }
+
+        return false;
     }
 
     /// <summary>

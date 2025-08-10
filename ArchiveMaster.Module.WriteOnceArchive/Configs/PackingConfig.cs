@@ -34,9 +34,9 @@ public partial class PackingConfig : ConfigBase
     partial void OnTargetDirChanged(string oldValue, string newValue)
     {
         if (string.IsNullOrEmpty(HashCacheFile) ||
-            Path.Combine(oldValue, PackingService.HashCacheFileName) == HashCacheFile)
+            Path.Combine(oldValue, WriteOnceArchiveParameters.HashCacheFileName) == HashCacheFile)
         {
-            HashCacheFile = Path.Combine(newValue, PackingService.HashCacheFileName);
+            HashCacheFile = Path.Combine(newValue, WriteOnceArchiveParameters.HashCacheFileName);
         }
     }
 

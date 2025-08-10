@@ -33,7 +33,7 @@ namespace ArchiveMaster
         public IList<Type> TransientServices { get; } =
         [
             typeof(PackingService),
-            // typeof(RebuildService)
+            typeof(RebuildService)
         ];
 
         public ToolPanelGroupInfo Views => new ToolPanelGroupInfo()
@@ -42,8 +42,8 @@ namespace ArchiveMaster
             {
                 new ToolPanelInfo(typeof(PackingPanel), typeof(PackingViewModel), "打包",
                     "扫描文件特征，制作文件归档包", baseUrl + "disc.svg"),
-                // new ToolPanelInfo(typeof(RebuildPanel), typeof(RebuildViewModel), "重建", "从备份的文件包中提取文件并恢复为原始目录结构",
-                //     baseUrl + "rebuild.svg"),
+                new ToolPanelInfo(typeof(RebuildPanel), typeof(RebuildViewModel), "重建", "从备份的文件包中提取文件并恢复为原始目录结构",
+                    baseUrl + "rebuild.svg"),
             },
             GroupName = ModuleName
         };

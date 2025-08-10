@@ -5,10 +5,13 @@ namespace ArchiveMaster.Configs;
 public partial class RebuildConfig : ConfigBase
 {
     [ObservableProperty]
-    private string writeOnceDirs;
+    private string sourceDirs;
 
     [ObservableProperty]
     private string targetDir;
+
+    [ObservableProperty]
+    private string packageInfoFile;
 
     [ObservableProperty]
     private bool skipIfExisted = true;
@@ -22,7 +25,8 @@ public partial class RebuildConfig : ConfigBase
 
     public override void Check()
     {
-        CheckEmpty(WriteOnceDirs, "光盘目录");
+        CheckEmpty(SourceDirs, "源目录");
         CheckEmpty(TargetDir, "目标目录");
+        CheckFile(PackageInfoFile, "包信息文件", true);
     }
 }
