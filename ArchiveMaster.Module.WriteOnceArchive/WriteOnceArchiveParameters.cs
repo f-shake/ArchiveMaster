@@ -18,4 +18,5 @@ public static class WriteOnceArchiveParameters
 
     public const FileHashHelper.HashAlgorithmType HashType = FileHashHelper.HashAlgorithmType.SHA256;
     
+    public const string EncryptedFileSuffix = "_enc";
 }

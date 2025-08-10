@@ -61,7 +61,7 @@
                 HorizontalAlignment="Center"
                 VerticalAlignment="Stretch"
                 Background="Transparent" />
-            <g:GroupBox Header="目录结构树">
+            <g:GroupBox Header="目标结构树">
                 <v:WriteOnceTreeFileDataGrid
                     ColumnIsCheckedIndex="-1"
                     ColumnStatusIndex="-1"
@@ -71,8 +71,38 @@
 
             <g:GroupBox
                 Grid.Column="2"
-                Header="重建错误">
-                <v:SimpleFileDataGrid ItemsSource="{Binding MatchedFiles}" />
+                Header="需要重建的文件">
+                <v:SimpleFileDataGrid
+                    ColumnLengthIndex="1.2"
+                    ColumnNameIndex="1.1"
+                    ColumnPathIndex="1.3"
+                    ColumnTimeIndex="1.4"
+                    ItemsSource="{Binding MatchedFiles}">
+                    <v:SimpleFileDataGrid.Columns>
+                        <DataGridTemplateColumn
+                            CanUserResize="False"
+                            Header="已加密"
+                            SortMemberPath="AlreadyHasGps">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Ellipse
+                                        Width="8"
+                                        Height="8"
+                                        Fill="SkyBlue"
+                                        IsVisible="{Binding IsEncrypted}" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTextColumn
+                            Binding="{Binding Hash}"
+                            Header="文件Hash"
+                            IsReadOnly="True" />
+                        <DataGridTextColumn
+                            Binding="{Binding PhysicalFile}"
+                            Header="物理文件"
+                            IsReadOnly="True" />
+                    </v:SimpleFileDataGrid.Columns>
+                </v:SimpleFileDataGrid>
 
             </g:GroupBox>
         </Grid>

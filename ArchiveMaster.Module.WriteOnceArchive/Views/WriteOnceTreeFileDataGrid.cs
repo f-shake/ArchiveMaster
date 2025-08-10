@@ -17,10 +17,11 @@ public class WriteOnceTreeFileDataGrid : TreeFileDataGrid
         };
         if (FileNameHalfTransparentBindingPath != null)
         {
-            tbkName[!OpacityProperty] = new Binding($"{nameof(TreeFileDirInfo.RawFileInfo)}.{FileNameHalfTransparentBindingPath}")
-            {
-                Converter = new FuncValueConverter<bool, double>(p => p ? 0.5 : 1)
-            };
+            tbkName[!OpacityProperty] =
+                new Binding($"{nameof(TreeFileDirInfo.RawFileInfo)}.{FileNameHalfTransparentBindingPath}")
+                {
+                    Converter = new FuncValueConverter<bool, double>(p => p ? 1 : 0.4)
+                };
         }
 
         return tbkName;

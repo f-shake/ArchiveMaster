@@ -120,9 +120,17 @@ namespace ArchiveMaster.ViewModels.FileSystem
         [JsonIgnore]
         public bool Exists => File.Exists(Path);
 
+        public void Complete(string message)
+        {
+            Complete();
+            this.message = message;
+            OnPropertyChanged(nameof(Message));
+        }
+
         public void Complete()
         {
             status = ProcessStatus.Completed;
+            this.message = message;
             OnPropertyChanged(nameof(Status));
             OnPropertyChanged(nameof(IsCompleted));
         }
@@ -167,7 +175,7 @@ namespace ArchiveMaster.ViewModels.FileSystem
                 (s1, s2) => s1.Path == s2.Path,
                 s => s.Path.GetHashCode());
 
-        
+
         public override int GetHashCode()
         {
             int hash = default;

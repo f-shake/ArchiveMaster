@@ -218,15 +218,14 @@ namespace ArchiveMaster.Services
             int totalFiles = 0;
             long totalLength = ExecutingPackages.Sum(p => p.TotalLength);
 
-            Progress<FileProcessProgress> progress = null;
-            progress = new Progress<FileProcessProgress>(p =>
+            Progress<FileProcessProgress> progress = new Progress<FileProcessProgress>(p =>
             {
                 NotifyProgress(1.0 * (length + p.ProcessedBytes) / totalLength);
                 NotifyMessage(
                     $"正在复制（{indexOfPackage}/{totalPackages}包，{indexOfFile}/{totalFiles}文件，本文件{1.0 * p.ProcessedBytes / 1024 / 1024:0}MB/{1.0 * p.TotalBytes / 1024 / 1024:0}MB）：{Path.GetFileName(p.SourceFilePath)}");
             });
             Aes aes = null;
-            if (string.IsNullOrWhiteSpace(Config.Password)) //复制
+            if (!string.IsNullOrWhiteSpace(Config.Password))
             {
                 aes = AesHelper.GetDefaultAes(Config.Password);
             }
@@ -254,8 +253,9 @@ namespace ArchiveMaster.Services
                         }
                         else //加密
                         {
-                            await aes.EncryptFileAsync(file.Path, targetFile, progress: progress,
-                                cancellationToken: token);
+                            await aes.EncryptFileAsync(file.Path,
+                                targetFile + WriteOnceArchiveParameters.EncryptedFileSuffix,
+                                progress: progress, cancellationToken: token);
                         }
 
                         file.Complete();

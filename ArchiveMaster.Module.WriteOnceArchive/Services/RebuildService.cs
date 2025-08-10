@@ -1,6 +1,7 @@
 ﻿using System.Globalization;
 using System.IO;
 using System.Reflection.Metadata;
+using System.Security.Cryptography;
 using System.Text.Json;
 using ArchiveMaster.Configs;
 using ArchiveMaster.Helpers;
@@ -8,6 +9,7 @@ using ArchiveMaster.Models;
 using ArchiveMaster.Services;
 using ArchiveMaster.ViewModels;
 using ArchiveMaster.ViewModels.FileSystem;
+using FzLib.Cryptography;
 using FzLib.IO;
 using WriteOnceFile = ArchiveMaster.ViewModels.FileSystem.WriteOnceFile;
 
@@ -20,66 +22,62 @@ namespace ArchiveMaster.Services
 
         public override Task ExecuteAsync(CancellationToken token)
         {
-            // rebuildErrors = new List<RebuildError>();
-            // long length = 0;
-            // int count = 0;
-            // return Task.Run(() =>
-            // {
-            //     int count = files.Sum(p => p.Value.Count);
-            //     int index = 0;
-            //     long currentLength = 0;
-            //     long totalLength = files.Values.Sum(p => p.Sum(q => q.Length));
-            //
-            //     foreach (var dir in files.Keys)
-            //     {
-            //         token.ThrowIfCancellationRequested();
-            //         FilesLoopOptions options = FilesLoopOptions.Builder()
-            //             .SetCount(index, count)
-            //             .SetLength(currentLength, totalLength)
-            //             .AutoApplyFileLengthProgress()
-            //             .AutoApplyStatus()
-            //             .Catch((file, ex) =>
-            //             {
-            //                 rebuildErrors.Add(new RebuildError(file as WriteOnceFile, ex.Message));
-            //             })
-            //             .Build();
-            //
-            //         var states = TryForFiles(files[dir], (file, s) =>
-            //         {
-            //             length += file.Length;
-            //             var srcPath = Path.Combine(dir, file.WriteOnceName);
-            //             var distPath = Path.Combine(Config.TargetDir, file.Path);
-            //             var distFileDir = Path.GetDirectoryName(distPath);
-            //             NotifyMessage($"正在重建{s.GetFileNumberMessage()}：{file.Path}");
-            //             if (!Directory.Exists(distFileDir) && !Config.CheckOnly)
-            //             {
-            //                 Directory.CreateDirectory(distFileDir);
-            //             }
-            //
-            //             if (File.Exists(distPath) && Config.SkipIfExisted)
-            //             {
-            //                 throw new Exception("文件已存在");
-            //             }
-            //
-            //             string md5;
-            //             md5 = Config.CheckOnly ? GetMD5(srcPath) : CopyAndGetHash(srcPath, distPath);
-            //
-            //             if (md5 != file.Md5)
-            //             {
-            //                 throw new Exception("MD5验证失败");
-            //             }
-            //
-            //             if ((File.GetLastWriteTime(srcPath) - file.Time).Duration().TotalSeconds >
-            //                 Config.MaxTimeToleranceSecond)
-            //             {
-            //                 throw new Exception("修改时间不一致");
-            //             }
-            //         }, token, options);
-            //         index = states.FileIndex;
-            //         currentLength = states.AccumulatedLength;
-            //     }
-            // }, token);
-            return Task.CompletedTask;
+            return Task.Run(async () =>
+            {
+                var files = MatchedFiles.CheckedOnly().ToList();
+
+                Aes aes = null;
+                if (files.Any(p => p.IsEncrypted))
+                {
+                    if (string.IsNullOrWhiteSpace(Config.Password))
+                    {
+                        throw new Exception("部分文件被加密，但未提供密码");
+                    }
+
+                    aes = AesHelper.GetDefaultAes(Config.Password);
+                }
+
+                await TryForFilesAsync(files, async (file, s) =>
+                {
+                    string numMsg = s.GetFileNumberMessage("{0}/{1}");
+
+                    Progress<FileProcessProgress> progress = new Progress<FileProcessProgress>(p =>
+                    {
+                        NotifyProgress(1.0 * (s.AccumulatedLength + p.ProcessedBytes) / s.TotalLength);
+                        NotifyMessage(
+                            $"正在计算Hash（{numMsg}，本文件{1.0 * p.ProcessedBytes / 1024 / 1024:0}MB/{1.0 * p.TotalBytes / 1024 / 1024:0}MB）：{file.RelativePath}");
+                    });
+
+                    var targetFile = Path.Combine(Config.TargetDir, file.RelativePath);
+                    if (File.Exists(targetFile))
+                    {
+                        if (Config.SkipIfExisted)
+                        {
+                            file.Complete("目标文件已存在，跳过");
+                            return; //continue
+                        }
+                        else
+                        {
+                            FileHelper.DeleteByConfig(targetFile);
+                        }
+                    }
+
+                    Directory.CreateDirectory(Path.GetDirectoryName(targetFile));
+                    //后续加入检查Hash
+                    if (file.IsEncrypted)
+                    {
+                        await aes.DecryptFileAsync(file.PhysicalFile, targetFile, progress: progress,
+                            cancellationToken: token);
+                    }
+                    else
+                    {
+                        await FileCopyHelper.CopyFileAsync(file.PhysicalFile, targetFile, progress: progress,
+                            cancellationToken: token);
+                    }
+
+                    File.SetLastWriteTime(targetFile, file.Time);
+                }, token, FilesLoopOptions.Builder().AutoApplyFileLengthProgress().AutoApplyStatus().Build());
+            }, token);
         }
 
         public override IEnumerable<SimpleFileInfo> GetInitializedFiles()
@@ -110,6 +108,7 @@ namespace ArchiveMaster.Services
             {
                 throw new Exception("包信息文件格式错误，不包含目录结构");
             }
+
             return info.AllFiles;
         }
 
@@ -154,26 +153,42 @@ namespace ArchiveMaster.Services
 
                 foreach (var dir in sourceDirs)
                 {
-                    var phyFiles = Directory.EnumerateFiles(dir)
-                        .Where(p => FileHelper.IsValidHashString(Path.GetFileName(p),
-                            WriteOnceArchiveParameters.HashType))
-                        .ToList();
+                    var phyFiles = Directory.GetFiles(dir);
                     foreach (var phyFile in phyFiles)
                     {
-                        if (hash2Files.ContainsKey(Path.GetFileName(phyFile)))
+                        bool hasEncrypt = false;
+                        string name = Path.GetFileName(phyFile);
+                        if (name.EndsWith(WriteOnceArchiveParameters.EncryptedFileSuffix))
                         {
-                            if (hash2Files[Path.GetFileName(phyFile)] is WriteOnceFile file)
+                            name = name[..^WriteOnceArchiveParameters.EncryptedFileSuffix.Length];
+                            hasEncrypt = true;
+                        }
+
+                        if (!FileHelper.IsValidHashString(name, WriteOnceArchiveParameters.HashType))
+                        {
+                            continue;
+                        }
+
+                        if (!hash2Files.ContainsKey(name))
+                        {
+                            continue;
+                        }
+
+                        if (hash2Files[name] is WriteOnceFile file)
+                        {
+                            file.HasPhysicalFile = true;
+                            matchFiles.Add(file);
+                            file.PhysicalFile = phyFile;
+                            file.IsEncrypted = hasEncrypt;
+                        }
+                        else
+                        {
+                            foreach (var p in (List<WriteOnceFile>)hash2Files[name])
                             {
-                                file.HasPhysicalFile = true;
-                                matchFiles.Add(file);
-                            }
-                            else
-                            {
-                                foreach (var p in ((List<WriteOnceFile>)hash2Files[Path.GetFileName(phyFile)]))
-                                {
-                                    p.HasPhysicalFile = true;
-                                    matchFiles.Add(p);
-                                }
+                                p.HasPhysicalFile = true;
+                                matchFiles.Add(p);
+                                p.PhysicalFile = phyFile;
+                                p.IsEncrypted = hasEncrypt;
                             }
                         }
                     }
