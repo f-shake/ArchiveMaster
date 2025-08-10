@@ -18,10 +18,14 @@ public partial class RebuildViewModel(AppConfig appConfig, IDialogService dialog
     [ObservableProperty]
     private ObservableCollection<WriteOnceFile> matchedFiles;
 
+    [ObservableProperty]
+    private RebuildInitializeReport report;
+
     protected override Task OnInitializedAsync()
     {
         FileTree = new BulkObservableCollection<SimpleFileInfo>(Service.FileTree.Subs);
         MatchedFiles = new ObservableCollection<WriteOnceFile>(Service.MatchedFiles);
+        Report = Service.InitializeReport;
         return base.OnInitializedAsync();
     }
 
@@ -30,5 +34,6 @@ public partial class RebuildViewModel(AppConfig appConfig, IDialogService dialog
         base.OnReset();
         FileTree = null;
         MatchedFiles = null;
+        Report = null;
     }
 }

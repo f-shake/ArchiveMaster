@@ -51,10 +51,12 @@
             </ctrl:FormItem>
         </ctrl:StackFormItemGroup>
     </v:TwoStepPanelBase.ConfigsContent>
+
+
     <v:TwoStepPanelBase.ResultsContent>
         <Grid
-            Grid.Row="2"
-            ColumnDefinitions="*,8,*">
+            ColumnDefinitions="*,8,*"
+            RowDefinitions="*,Auto">
             <GridSplitter
                 Grid.Column="1"
                 Width="8"
@@ -105,6 +107,27 @@
                 </v:SimpleFileDataGrid>
 
             </g:GroupBox>
+
+            <TextBlock
+                Grid.Row="1"
+                Grid.ColumnSpan="3"
+                Margin="0,8,0,0"
+                IsVisible="{Binding Report, Converter={x:Static cvt:Converters.IsNotNull}}"
+                TextAlignment="Center">
+                <Run Text="匹配文件" />
+                <Run Text="{Binding Report.MatchedFileCount, Mode=OneWay}" />
+                <Run Text="个（" />
+                <Run Text="{Binding Report.MatchedFileLength, Mode=OneWay, Converter={x:Static cvt:Converters.FileLength}}" />
+                <Run Text="），共" />
+                <Run Text="{Binding Report.TotalFileCount, Mode=OneWay}" />
+                <Run Text="个（" />
+                <Run Text="{Binding Report.TotalFileLength, Mode=OneWay, Converter={x:Static cvt:Converters.FileLength}}" />
+                <Run Text="），占" />
+                <Run Text="{Binding Report.MatchCountPercent, StringFormat={}{0:P2}}" />
+                <Run Text="（" />
+                <Run Text="{Binding Report.MatchLengthPercent, StringFormat={}{0:P2}}" />
+                <Run Text="）" />
+            </TextBlock>
         </Grid>
     </v:TwoStepPanelBase.ResultsContent>
 

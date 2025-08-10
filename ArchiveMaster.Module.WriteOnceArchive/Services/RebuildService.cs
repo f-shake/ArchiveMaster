@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Frozen;
+using System.Diagnostics;
 using ArchiveMaster.Configs;
 using ArchiveMaster.Helpers;
 using ArchiveMaster.Models;
@@ -7,6 +8,7 @@ using FzLib.Cryptography;
 using FzLib.IO;
 using System.Security.Cryptography;
 using System.Text.Json;
+using ArchiveMaster.ViewModels;
 using WriteOnceFile = ArchiveMaster.ViewModels.FileSystem.WriteOnceFile;
 
 namespace ArchiveMaster.Services
@@ -15,6 +17,8 @@ namespace ArchiveMaster.Services
     {
         public TreeDirInfo FileTree { get; private set; }
         public List<WriteOnceFile> MatchedFiles { get; private set; }
+
+        public RebuildInitializeReport InitializeReport { get; private set; }
 
         public override Task ExecuteAsync(CancellationToken token)
         {
@@ -41,7 +45,7 @@ namespace ArchiveMaster.Services
                     {
                         NotifyProgress(1.0 * (s.AccumulatedLength + p.ProcessedBytes) / s.TotalLength);
                         NotifyMessage(
-                            $"正在计算Hash（{numMsg}，本文件{1.0 * p.ProcessedBytes / 1024 / 1024:0}MB/{1.0 * p.TotalBytes / 1024 / 1024:0}MB）：{file.RelativePath}");
+                            $"正在重建文件（{numMsg}，本文件{1.0 * p.ProcessedBytes / 1024 / 1024:0}MB/{1.0 * p.TotalBytes / 1024 / 1024:0}MB）：{file.RelativePath}");
                     });
 
                     var targetFile = Path.Combine(Config.TargetDir, file.RelativePath);
@@ -63,14 +67,15 @@ namespace ArchiveMaster.Services
                     byte[] hash = null;
                     if (file.IsEncrypted)
                     {
-                        hash= await aes.DecryptFileAsync(file.PhysicalFile, targetFile, progress: progress,
+                        hash = await aes.DecryptFileAsync(file.PhysicalFile, targetFile, progress: progress,
                             hashAlgorithmType: WriteOnceArchiveParameters.HashType, cancellationToken: token);
                     }
                     else
                     {
-                        hash=   await FileCopyHelper.CopyFileAsync(file.PhysicalFile, targetFile, progress: progress,
+                        hash = await FileCopyHelper.CopyFileAsync(file.PhysicalFile, targetFile, progress: progress,
                             hashAlgorithmType: WriteOnceArchiveParameters.HashType, cancellationToken: token);
                     }
+
                     File.SetLastWriteTime(targetFile, file.Time);
 
                     Debug.Assert(hash != null);
@@ -118,45 +123,55 @@ namespace ArchiveMaster.Services
             return info.AllFiles;
         }
 
-        public override async Task InitializeAsync(CancellationToken token)
+        private (TreeDirInfo Tree, IDictionary<string, object> hash2Files) GetHashFileMap(
+            IEnumerable<WriteOnceFileInfo> allFiles)
         {
-            NotifyMessage("正在建立文件树");
+            var hash2Files = new Dictionary<string, object>();
             TreeDirInfo tree = TreeDirInfo.CreateEmptyTree();
-            var sourceDirs = FileNameHelper.GetDirNames(Config.SourceDirs);
-            var allFiles = await GetAllFilesAsync(sourceDirs);
-            Dictionary<string, object> hash2Files = new Dictionary<string, object>();
-            List<WriteOnceFile> matchFiles = new List<WriteOnceFile>();
-            await Task.Run(() =>
+            foreach (var modelFile in allFiles)
             {
-                //构建文件树
-                foreach (var modelFile in allFiles)
+                var vmFile = new WriteOnceFile
                 {
-                    var vmFile = new WriteOnceFile
+                    Name = Path.GetFileName(modelFile.RelativePath),
+                    Length = modelFile.Length,
+                    Time = modelFile.LastWriteTime,
+                    Hash = modelFile.Hash
+                };
+                vmFile.SetRelativePath(modelFile.RelativePath);
+                tree.AddFile(vmFile);
+                if (hash2Files.ContainsKey(modelFile.Hash))
+                {
+                    if (hash2Files[vmFile.Hash] is WriteOnceFile anotherFile)
                     {
-                        Name = Path.GetFileName(modelFile.RelativePath),
-                        Length = modelFile.Length,
-                        Time = modelFile.LastWriteTime,
-                        Hash = modelFile.Hash
-                    };
-                    vmFile.SetRelativePath(modelFile.RelativePath);
-                    tree.AddFile(vmFile);
-                    if (hash2Files.ContainsKey(modelFile.Hash))
-                    {
-                        if (hash2Files[vmFile.Hash] is WriteOnceFile anotherFile)
-                        {
-                            hash2Files[vmFile.Hash] = new List<WriteOnceFile>() { anotherFile, vmFile };
-                        }
-                        else
-                        {
-                            ((List<WriteOnceFile>)hash2Files[vmFile.Hash]).Add(vmFile);
-                        }
+                        hash2Files[vmFile.Hash] = new List<WriteOnceFile>() { anotherFile, vmFile };
                     }
                     else
                     {
-                        hash2Files.Add(vmFile.Hash, vmFile);
+                        ((List<WriteOnceFile>)hash2Files[vmFile.Hash]).Add(vmFile);
                     }
                 }
+                else
+                {
+                    hash2Files.Add(vmFile.Hash, vmFile);
+                }
+            }
 
+            return (tree, hash2Files.ToFrozenDictionary());
+        }
+
+        public override async Task InitializeAsync(CancellationToken token)
+        {
+            NotifyMessage("正在建立文件树");
+            TreeDirInfo tree = null;
+            var sourceDirs = FileNameHelper.GetDirNames(Config.SourceDirs);
+            List<WriteOnceFileInfo> allFiles = await GetAllFilesAsync(sourceDirs);
+            RebuildInitializeReport initializeReport = null;
+            IDictionary<string, object> hash2Files = null;
+            List<WriteOnceFile> matchFiles = new List<WriteOnceFile>();
+            await Task.Run(() =>
+            {
+                HashSet<string> allHashes = new HashSet<string>();
+                (tree, hash2Files) = GetHashFileMap(allFiles);
                 foreach (var dir in sourceDirs)
                 {
                     var phyFiles = Directory.GetFiles(dir);
@@ -173,6 +188,11 @@ namespace ArchiveMaster.Services
                         if (!FileHashHelper.IsValidHashString(name, WriteOnceArchiveParameters.HashType))
                         {
                             continue;
+                        }
+
+                        if (!allHashes.Add(name))
+                        {
+                            
                         }
 
                         if (!hash2Files.ContainsKey(name))
@@ -199,9 +219,19 @@ namespace ArchiveMaster.Services
                         }
                     }
                 }
+
+                initializeReport = new RebuildInitializeReport
+                {
+                    TotalFileCount = tree.SubFileCount,
+                    TotalFileLength = tree.Flatten().Sum(p => p.Length),
+                    MatchedFileCount = matchFiles.Count,
+                    MatchedFileLength = matchFiles.Sum(p => p.Length)
+                };
             }, token);
+
             FileTree = tree;
             MatchedFiles = matchFiles;
+            InitializeReport = initializeReport;
         }
     }
 }

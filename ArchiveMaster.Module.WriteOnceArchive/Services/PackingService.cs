@@ -73,15 +73,14 @@ namespace ArchiveMaster.Services
         public override async Task InitializeAsync(CancellationToken token)
         {
             long maxSize = (long)(1024.0 * 1024 * 1024 * Config.PackageSizeGB);
-            List<WriteOncePackage> packages = [];
             List<WriteOnceFile> outOfSizeFiles = new List<WriteOnceFile>();
-
+            List<WriteOncePackage> packages = null;
             await Task.Run(async () =>
             {
                 //第一步：枚举文件
                 NotifyMessage("正在搜索文件");
                 var files = new DirectoryInfo(Config.SourceDir)
-                    .EnumerateFiles("*", SearchOption.AllDirectories)
+                    .EnumerateFiles("*", FileEnumerateExtension.GetEnumerationOptions())
                     .ApplyFilter(token, Config.Filter)
                     .OrderBy(p => p.LastWriteTime)
                     .Select(p => new WriteOnceFile(p, Config.SourceDir))
@@ -91,7 +90,6 @@ namespace ArchiveMaster.Services
 
                 //第二步：计算Hash
                 List<WriteOnceFile> packageFiles = new List<WriteOnceFile>(files.Count);
-
                 var hashCaches = await GetFileHashCacheAsync();
                 var packagedHashes = await GetPackagedFileHashesAsync();
                 string hashCacheFilePath = Path.Combine(Config.TargetDir, WriteOnceArchiveParameters.HashCacheFileName);
@@ -112,7 +110,8 @@ namespace ArchiveMaster.Services
                         //从记忆中提取Hash
                         if (!hashCaches.TryGetValue(GetFileHashCode(file), out var hash))
                         {
-                            hash = await FileHashHelper.ComputeHashStringAsync(file.Path, WriteOnceArchiveParameters.HashType,cancellationToken: token);
+                            hash = await FileHashHelper.ComputeHashStringAsync(file.Path,
+                                WriteOnceArchiveParameters.HashType, cancellationToken: token);
                         }
 
                         //放入文件目录结构
@@ -121,10 +120,12 @@ namespace ArchiveMaster.Services
                         await hashCacheFile.WriteLineAsync($"{GetFileHashCode(file)}\t{hash}");
 
                         //如果这个文件已经被打包过了，那么跳过
-                        if (packagedHashes.Contains(hash))
+                        if (!packagedHashes.Add(hash))
                         {
                             return; //continue
                         }
+                        //如果存在多个文件，拥有相同的Hash，他们仍然都会被放到AllFiles中，作为目录结构，
+                        //但是只有第一个文件会被打包为物理文件，其他文件会被跳过
 
                         NotifyMessage($"正在搜索文件{s.GetFileNumberMessage()}：{file.Path}");
 
@@ -141,37 +142,7 @@ namespace ArchiveMaster.Services
                 }
 
                 //第三步：计算打包文件
-                packageFiles = packageFiles.OrderByDescending(p => p.Length).ToList();
-                foreach (var file in packageFiles)
-                {
-                    Debug.Assert(file.Length <= maxSize);
-                    bool added = false;
-                    for (int i = 0; i < packages.Count; i++)
-                    {
-                        var package = packages[i];
-                        var freeSpace = maxSize - package.TotalLength;
-                        if (freeSpace >= file.Length)
-                        {
-                            added = true;
-                            package.Files.Add(file);
-                            package.TotalLength += file.Length;
-                            break;
-                        }
-                    }
-
-                    //所有包的容量都不够大，新开一个
-                    if (!added)
-                    {
-                        var package = new WriteOncePackage()
-                        {
-                            Index = packages.Count + 1,
-                            IsChecked = true
-                        };
-                        package.TotalLength = file.Length;
-                        package.Files.Add(file);
-                        packages.Add(package);
-                    }
-                }
+                packages = Pack(packageFiles, maxSize);
             }, token);
 
             Packages = new WriteOncePackageCollection()
@@ -179,6 +150,72 @@ namespace ArchiveMaster.Services
                 Packages = packages,
                 OutOfSizeFiles = outOfSizeFiles
             };
+        }
+        
+        private static void Shuffle<T>(IList<T> list)
+        {
+            Random rng = new Random();
+            int n = list.Count;
+            while (n > 1)
+            {
+                n--;
+                int k = rng.Next(n + 1);
+                (list[k], list[n]) = (list[n], list[k]);
+            }
+        }
+
+        
+        private List<WriteOncePackage> Pack(IEnumerable<WriteOnceFile> packageFiles, long maxSize)
+        {
+            //BFD，但是不进行排序，打乱顺序，避免前面的箱子文件少、后面的箱子文件多
+            
+            // 先按文件长度降序排序
+            // var filesSorted = packageFiles.OrderByDescending(f => f.Length).ToList();
+            var filesSorted = packageFiles.ToList();
+            Shuffle(filesSorted);
+
+            List<WriteOncePackage> packages = new List<WriteOncePackage>();
+
+            foreach (var file in filesSorted)
+            {
+                Debug.Assert(file.Length <= maxSize, $"文件长度 {file.Length} 超过包最大容量 {maxSize}");
+
+                int bestIndex = -1;
+                long minFreeSpace = long.MaxValue;
+
+                // 找到剩余容量 >= 文件长度且剩余容量最小的包
+                for (int i = 0; i < packages.Count; i++)
+                {
+                    long freeSpace = maxSize - packages[i].TotalLength;
+                    if (freeSpace >= file.Length && freeSpace < minFreeSpace)
+                    {
+                        minFreeSpace = freeSpace;
+                        bestIndex = i;
+                    }
+                }
+
+                if (bestIndex >= 0)
+                {
+                    // 放入找到的最合适包中
+                    var package = packages[bestIndex];
+                    package.Files.Add(file);
+                    package.TotalLength += file.Length;
+                }
+                else
+                {
+                    // 新开一个包
+                    var newPackage = new WriteOncePackage()
+                    {
+                        Index = packages.Count + 1,
+                        IsChecked = true
+                    };
+                    newPackage.Files.Add(file);
+                    newPackage.TotalLength = file.Length;
+                    packages.Add(newPackage);
+                }
+            }
+
+            return packages;
         }
 
         private void ClearTargetPackageDir()
@@ -393,7 +430,7 @@ namespace ArchiveMaster.Services
             return file.GetHashCode();
         }
 
-        private async Task<IReadOnlySet<string>> GetPackagedFileHashesAsync()
+        private async Task<HashSet<string>> GetPackagedFileHashesAsync()
         {
             HashSet<string> hashes = new HashSet<string>();
             if (string.IsNullOrEmpty(Config.PreviousPackageInfoFiles))
@@ -413,7 +450,7 @@ namespace ArchiveMaster.Services
                 hashes.UnionWith(packageInfo.Hashes);
             }
 
-            return hashes.ToFrozenSet();
+            return hashes;
         }
     }
 }

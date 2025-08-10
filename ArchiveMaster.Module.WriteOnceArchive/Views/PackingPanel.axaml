@@ -31,7 +31,7 @@
             <ctrl:FormItem Label="导出目录：">
                 <v:FilePickerTextBox
                     FileNames="{Binding Config.TargetDir}"
-                    Type="OpenFile" />
+                    Type="OpenFolder" />
             </ctrl:FormItem>
             <ctrl:FormItem
                 Description="记录已归档文件的哈希值，用于下次打包时跳过这些文件，避免重复收录。该文件位于上一次打包时的目标文件夹中。"
@@ -49,7 +49,7 @@
                 <v:FilePickerTextBox
                     FileNames="{Binding Config.HashCacheFile}"
                     StringFileTypeFilter="Hash缓存文件;*.whc;;"
-                    Type="OpenFolder" />
+                    Type="OpenFile" />
             </ctrl:FormItem>
 
             <ctrl:FormItem Label="选项：">

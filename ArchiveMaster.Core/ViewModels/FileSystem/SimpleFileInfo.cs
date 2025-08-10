@@ -183,7 +183,7 @@ namespace ArchiveMaster.ViewModels.FileSystem
             unchecked
             {
                 hash = (int)2166136261;
-                foreach (char c in Path)
+                foreach (char c in Path ?? RelativePath)
                 {
                     hash = (hash ^ c) * 16777619;
                 }
