@@ -16,7 +16,7 @@ public static class WriteOnceArchiveParameters
     /// </summary>
     public const string HashCacheFileName = "caches.whc";
 
-    public const FileHashHelper.HashAlgorithmType HashType = FileHashHelper.HashAlgorithmType.SHA256;
+    public const HashAlgorithmType HashType = HashAlgorithmType.SHA256;
 
     public const string EncryptedFileSuffix = "_enc";
 }

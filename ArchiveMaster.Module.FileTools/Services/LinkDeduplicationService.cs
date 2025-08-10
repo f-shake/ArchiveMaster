@@ -61,7 +61,7 @@ public class LinkDeduplicationService(AppConfig appConfig)
                     NotifyMessage(
                         $"正在计算Hash（{numMsg}，本文件{1.0 * p.ProcessedBytes / 1024 / 1024:0}MB/{1.0 * p.TotalBytes / 1024 / 1024:0}MB）：{f.RelativePath}");
                 });
-                string hash = await FileHashHelper.ComputeHashAsync(f.Path, Config.HashType, cancellationToken: token,
+                string hash = await FileHashHelper.ComputeHashStringAsync(f.Path, Config.HashType, cancellationToken: token,
                     progress: progress);
                 f.Hash = hash;
                 if (!hash2File.TryAdd(hash, f))

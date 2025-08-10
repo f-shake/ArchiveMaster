@@ -49,14 +49,13 @@ namespace ArchiveMaster.Services
                 var totalLength = files.Select(p => p.Length).Sum();
                 var currentLength = 0L;
 
-                var progressReport = new Progress<FileProcessProgress>(
-                    p =>
-                    {
-                        string baseMessage = isEncrypting ? "正在加密文件" : "正在解密文件";
-                        NotifyMessage(baseMessage +
-                                      $"（{numMsg}，当前文件{1.0 * p.ProcessedBytes / 1024 / 1024:0}MB/{1.0 * p.TotalBytes / 1024 / 1024:0}MB）：{Path.GetFileName(p.SourceFilePath)}");
-                        NotifyProgress(1.0 * (currentLength + p.ProcessedBytes) / totalLength);
-                    });
+                var progressReport = new Progress<FileProcessProgress>(p =>
+                {
+                    string baseMessage = isEncrypting ? "正在加密文件" : "正在解密文件";
+                    NotifyMessage(baseMessage +
+                                  $"（{numMsg}，当前文件{1.0 * p.ProcessedBytes / 1024 / 1024:0}MB/{1.0 * p.TotalBytes / 1024 / 1024:0}MB）：{Path.GetFileName(p.SourceFilePath)}");
+                    NotifyProgress(1.0 * (currentLength + p.ProcessedBytes) / totalLength);
+                });
 
                 await TryForFilesAsync(files, async (file, s) =>
                 {
@@ -69,7 +68,8 @@ namespace ArchiveMaster.Services
 
                     if (isEncrypting)
                     {
-                        await aes.EncryptFileAsync(file.Path, file.TargetPath, BufferSize, progressReport, token);
+                        await aes.EncryptFileAsync(file.Path, file.TargetPath, BufferSize, progressReport,
+                            cancellationToken: token);
                         if (Config.EncryptDirectoryStructure)
                         {
                             var bytes = aes.Encrypt(Encoding.UTF8.GetBytes(file.RelativePath));
@@ -79,8 +79,10 @@ namespace ArchiveMaster.Services
                     }
                     else
                     {
-                        await aes.DecryptFileAsync(file.Path, file.TargetPath, BufferSize, progressReport, token);
+                        await aes.DecryptFileAsync(file.Path, file.TargetPath, BufferSize, progressReport,
+                            cancellationToken: token);
                     }
+
                     currentLength += file.Length;
 
                     File.SetLastWriteTime(file.TargetPath, File.GetLastWriteTime(file.Path));

@@ -49,35 +49,7 @@ public static class FileHelper
         }
     }
     
-    public static bool IsValidHashString(string hash, FileHashHelper.HashAlgorithmType type)
-    {
-        if (string.IsNullOrEmpty(hash))
-            return false;
-
-        int expectedLength = type switch
-        {
-            FileHashHelper.HashAlgorithmType.MD5 => 32,
-            FileHashHelper.HashAlgorithmType.SHA1 => 40,
-            FileHashHelper.HashAlgorithmType.SHA256 => 64,
-            FileHashHelper.HashAlgorithmType.SHA384 => 96,
-            FileHashHelper.HashAlgorithmType.SHA512 => 128,
-            _ => 0
-        };
-
-        if (hash.Length != expectedLength)
-            return false;
-
-        foreach (char c in hash)
-        {
-            bool isHexDigit = c is >= '0' and <= '9' or >= 'a' and <= 'f' or >= 'A' and <= 'F';
-            if (!isHexDigit)
-                return false;
-        }
-
-        return true;
-    }
-
-    public static bool IsMatched(this FileFilterHelper fileFilterHelper, SimpleFileInfo file)
+   public static bool IsMatched(this FileFilterHelper fileFilterHelper, SimpleFileInfo file)
     {
         return fileFilterHelper.IsMatched(file.Path);
     }

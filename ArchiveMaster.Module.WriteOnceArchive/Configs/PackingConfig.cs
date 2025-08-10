@@ -30,7 +30,7 @@ public partial class PackingConfig : ConfigBase
     [ObservableProperty]
     private string hashCacheFile;
 
-    private partial void OnTargetDirChanged(string oldValue, string newValue)
+    partial void OnTargetDirChanged(string oldValue, string newValue)
     {
         if (string.IsNullOrEmpty(HashCacheFile) ||
             Path.Combine(oldValue, WriteOnceArchiveParameters.HashCacheFileName) == HashCacheFile)

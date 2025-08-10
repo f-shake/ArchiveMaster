@@ -32,7 +32,7 @@
                 <ct:WrapFormItemGroup>
                     <ct:FormItem Label="Hash类型：">
                         <ComboBox
-                            ItemsSource="{me:EnumValues io:FileHashHelper+HashAlgorithmType}"
+                            ItemsSource="{me:EnumValues io:HashAlgorithmType}"
                             SelectedItem="{Binding Config.HashType}" />
                     </ct:FormItem>
                     <CheckBox

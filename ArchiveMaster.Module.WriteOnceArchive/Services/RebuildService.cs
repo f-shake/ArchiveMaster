@@ -1,4 +1,5 @@
-﻿using ArchiveMaster.Configs;
+﻿using System.Diagnostics;
+using ArchiveMaster.Configs;
 using ArchiveMaster.Helpers;
 using ArchiveMaster.Models;
 using ArchiveMaster.ViewModels.FileSystem;
@@ -58,19 +59,29 @@ namespace ArchiveMaster.Services
                     }
 
                     Directory.CreateDirectory(Path.GetDirectoryName(targetFile));
-                    //后续加入检查Hash
+
+                    byte[] hash = null;
                     if (file.IsEncrypted)
                     {
-                        await aes.DecryptFileAsync(file.PhysicalFile, targetFile, progress: progress,
-                            cancellationToken: token);
+                        hash= await aes.DecryptFileAsync(file.PhysicalFile, targetFile, progress: progress,
+                            hashAlgorithmType: WriteOnceArchiveParameters.HashType, cancellationToken: token);
                     }
                     else
                     {
-                        await FileCopyHelper.CopyFileAsync(file.PhysicalFile, targetFile, progress: progress,
-                            cancellationToken: token);
+                        hash=   await FileCopyHelper.CopyFileAsync(file.PhysicalFile, targetFile, progress: progress,
+                            hashAlgorithmType: WriteOnceArchiveParameters.HashType, cancellationToken: token);
                     }
-
                     File.SetLastWriteTime(targetFile, file.Time);
+
+                    Debug.Assert(hash != null);
+                    if (hash != null)
+                    {
+                        var hashString = Convert.ToHexString(hash);
+                        if (hashString != file.Hash)
+                        {
+                            file.Error($"重建后的文件Hash{hashString}与源文件{file.Hash}不一致");
+                        }
+                    }
                 }, token, FilesLoopOptions.Builder().AutoApplyFileLengthProgress().AutoApplyStatus().Build());
             }, token);
         }
@@ -159,7 +170,7 @@ namespace ArchiveMaster.Services
                             hasEncrypt = true;
                         }
 
-                        if (!FileHelper.IsValidHashString(name, WriteOnceArchiveParameters.HashType))
+                        if (!FileHashHelper.IsValidHashString(name, WriteOnceArchiveParameters.HashType))
                         {
                             continue;
                         }

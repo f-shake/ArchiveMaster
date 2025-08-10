@@ -112,8 +112,7 @@ namespace ArchiveMaster.Services
                         //从记忆中提取Hash
                         if (!hashCaches.TryGetValue(GetFileHashCode(file), out var hash))
                         {
-                            hash = await FileHashHelper.ComputeHashAsync(file.Path, WriteOnceArchiveParameters.HashType,
-                                token);
+                            hash = await FileHashHelper.ComputeHashStringAsync(file.Path, WriteOnceArchiveParameters.HashType,cancellationToken: token);
                         }
 
                         //放入文件目录结构
@@ -378,7 +377,7 @@ namespace ArchiveMaster.Services
                     throw new FormatException($"文件{Config.HashCacheFile}中存在不正确的格式：{line}");
                 }
 
-                if (!FileHelper.IsValidHashString(parts[1], WriteOnceArchiveParameters.HashType))
+                if (!FileHashHelper.IsValidHashString(parts[1], WriteOnceArchiveParameters.HashType))
                 {
                     throw new Exception($"文件{Config.HashCacheFile}中存在无效的Hash值：{line}");
                 }
