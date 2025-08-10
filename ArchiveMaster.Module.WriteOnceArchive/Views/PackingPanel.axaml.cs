@@ -1,6 +1,4 @@
-﻿using PackingViewModel = ArchiveMaster.ViewModels.PackingViewModel;
-
-namespace ArchiveMaster.Views
+﻿namespace ArchiveMaster.Views
 {
     public partial class PackingPanel : TwoStepPanelBase
     {

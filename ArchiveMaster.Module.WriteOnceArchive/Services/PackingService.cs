@@ -1,22 +1,17 @@
-﻿using System.Collections.Frozen;
-using System.Collections.Immutable;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
-using System.Security.Cryptography;
-using System.Text;
-using System.Text.Encodings.Web;
-using System.Text.Json;
-using System.Text.RegularExpressions;
-using System.Text.Unicode;
-using ArchiveMaster.Configs;
+﻿using ArchiveMaster.Configs;
 using ArchiveMaster.Enums;
 using ArchiveMaster.Helpers;
 using ArchiveMaster.Models;
-using ArchiveMaster.ViewModels;
 using ArchiveMaster.ViewModels.FileSystem;
 using DiscUtils.Iso9660;
 using FzLib.Cryptography;
 using FzLib.IO;
+using System.Collections.Frozen;
+using System.Diagnostics;
+using System.Security.Cryptography;
+using System.Text.Encodings.Web;
+using System.Text.Json;
+using System.Text.Unicode;
 using WriteOnceFile = ArchiveMaster.ViewModels.FileSystem.WriteOnceFile;
 
 namespace ArchiveMaster.Services
@@ -50,12 +45,15 @@ namespace ArchiveMaster.Services
                     case PackingType.Copy:
                         await ExecuteCopy(token);
                         break;
+
                     case PackingType.ISO:
                         await ExecuteISO(token);
                         break;
+
                     case PackingType.HardLink:
                         await ExecuteHardLink(token);
                         break;
+
                     default:
                         throw new ArgumentOutOfRangeException(nameof(Config.PackingType));
                 }

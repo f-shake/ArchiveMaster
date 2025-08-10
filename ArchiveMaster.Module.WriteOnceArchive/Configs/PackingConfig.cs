@@ -1,5 +1,4 @@
 using ArchiveMaster.Enums;
-using ArchiveMaster.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
 using FzLib.IO;
 
@@ -31,7 +30,7 @@ public partial class PackingConfig : ConfigBase
     [ObservableProperty]
     private string hashCacheFile;
 
-    partial void OnTargetDirChanged(string oldValue, string newValue)
+    private partial void OnTargetDirChanged(string oldValue, string newValue)
     {
         if (string.IsNullOrEmpty(HashCacheFile) ||
             Path.Combine(oldValue, WriteOnceArchiveParameters.HashCacheFileName) == HashCacheFile)

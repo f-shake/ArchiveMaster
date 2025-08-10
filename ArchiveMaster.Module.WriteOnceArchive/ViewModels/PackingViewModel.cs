@@ -1,7 +1,4 @@
-using System.Collections;
 using ArchiveMaster.Configs;
-using ArchiveMaster.Enums;
-using ArchiveMaster.Helpers;
 using ArchiveMaster.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -35,6 +32,7 @@ public partial class PackingViewModel(AppConfig appConfig, IDialogService dialog
 
     [ObservableProperty]
     private List<FileSystem.WriteOncePackage> writeOnceFilePackages;
+
     protected override Task OnExecutingAsync(CancellationToken token)
     {
         if (!WriteOnceFilePackages.Any(p => p.IsChecked))

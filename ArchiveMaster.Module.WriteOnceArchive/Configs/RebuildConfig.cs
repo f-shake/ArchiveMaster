@@ -21,10 +21,9 @@ public partial class RebuildConfig : ConfigBase
 
     [ObservableProperty]
     private bool checkOnly;
-    
+
     [ObservableProperty]
     private string password;
-
 
     public override void Check()
     {

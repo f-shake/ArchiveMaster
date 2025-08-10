@@ -1,15 +1,8 @@
 ﻿using ArchiveMaster.Configs;
-using ArchiveMaster.ViewModels;
-using ArchiveMaster.Views;
-using Avalonia;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ArchiveMaster.Models;
 using ArchiveMaster.Services;
-using Microsoft.Extensions.DependencyInjection;
+using ArchiveMaster.ViewModels;
+using ArchiveMaster.Views;
 
 namespace ArchiveMaster
 {

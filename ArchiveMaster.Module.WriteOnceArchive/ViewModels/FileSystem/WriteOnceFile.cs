@@ -9,18 +9,18 @@ namespace ArchiveMaster.ViewModels.FileSystem
 
         [ObservableProperty]
         private bool hasPhysicalFile;
-        
+
         [ObservableProperty]
         private string physicalFile;
-        
+
         [ObservableProperty]
         private bool isEncrypted;
 
         public WriteOnceFile()
         {
-            
         }
-        public WriteOnceFile(FileInfo file,string topDir) : base(file,topDir)
+
+        public WriteOnceFile(FileInfo file, string topDir) : base(file, topDir)
         {
         }
     }

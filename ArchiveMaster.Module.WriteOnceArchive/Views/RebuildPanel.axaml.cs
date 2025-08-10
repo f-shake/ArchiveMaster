@@ -1,7 +1,4 @@
-﻿using System.Diagnostics;
-using ArchiveMaster.ViewModels;
-
-namespace ArchiveMaster.Views
+﻿namespace ArchiveMaster.Views
 {
     /// <summary>
     /// RebuildPanel.xaml 的交互逻辑
