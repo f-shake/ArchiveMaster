@@ -3,8 +3,10 @@ using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using System.Text.Unicode;
 using ArchiveMaster.Configs;
 using ArchiveMaster.Enums;
 using ArchiveMaster.Helpers;
@@ -22,21 +24,16 @@ namespace ArchiveMaster.Services
         /// <summary>
         /// 记录整个源目录的文件结构，格式为<see cref="WriteOnceFileModel"/>的<see cref="List{T}"/>的JSON序列化
         /// </summary>
-        public const string DirStructureFileName = "files.wds";
+        public const string PackageInfoFileName = "package_info.wpk";
 
         /// <summary>
         /// 记录每个文件的Hash值，格式为每行一个文件，每行格式为：<see cref="SimpleFileInfo"/>的HashCode + '\t' + Hash值
         /// </summary>
         public const string HashCacheFileName = "caches.whc";
 
-        /// <summary>
-        /// 记录数据包中所有文件的Hash值，格式为每行一个Hash值
-        /// </summary>
-        public const string HashListFileName = "hashes.wph";
-
         private const FileHashHelper.HashAlgorithmType HashType = FileHashHelper.HashAlgorithmType.SHA256;
 
-        private string dirStructureJson;
+        private List<WriteOnceFileInfo> allFiles;
 
         /// <summary>
         /// 光盘文件包
@@ -101,11 +98,9 @@ namespace ArchiveMaster.Services
                         throw new ArgumentOutOfRangeException(nameof(Config.PackingType));
                 }
 
-                string dirStructureFilePath = Path.Combine(Config.TargetDir, DirStructureFileName);
-                await File.WriteAllTextAsync(dirStructureFilePath, dirStructureJson, token);
-                string packagedHashFilePath = Path.Combine(Config.TargetDir, HashListFileName);
-                await File.WriteAllLinesAsync(packagedHashFilePath,
-                    Packages.Packages.SelectMany(p => p.Files.Select(p => p.Hash)), token);
+                await WritePackageInfoFileAsync(Path.Combine(Config.TargetDir, PackageInfoFileName),
+                    ExecutingPackages.Select(p => p.TotalLength).Sum(),
+                    ExecutingPackages.SelectMany(p => p.Files).Select(p => p.Hash));
             }, token);
         }
 
@@ -131,13 +126,13 @@ namespace ArchiveMaster.Services
                     .Select(p => new WriteOnceFile(p, Config.SourceDir))
                     .ToList();
 
-                List<WriteOnceFileModel> dirStructure = new List<WriteOnceFileModel>();
+                List<WriteOnceFileInfo> dirStructure = new List<WriteOnceFileInfo>();
 
                 //第二步：计算Hash
                 List<WriteOnceFile> packageFiles = new List<WriteOnceFile>(files.Count);
 
-                var hashCaches = GetFileHashCache();
-                var packagedHashes = GetPackagedFileHashes();
+                var hashCaches = await GetFileHashCacheAsync();
+                var packagedHashes = await GetPackagedFileHashesAsync();
                 string hashCacheFilePath = Path.Combine(Config.TargetDir, HashCacheFileName);
                 await using (var hashCacheFile = new StreamWriter(hashCacheFilePath))
                 {
@@ -160,7 +155,7 @@ namespace ArchiveMaster.Services
                         }
 
                         //放入文件目录结构
-                        dirStructure.Add(new WriteOnceFileModel(file.Path, hash, file.Length, file.Time));
+                        dirStructure.Add(new WriteOnceFileInfo(file.Path, hash, file.Length, file.Time));
                         //写入Hash缓存
                         await hashCacheFile.WriteLineAsync($"{GetFileHashCode(file)}\t{hash}");
 
@@ -183,13 +178,6 @@ namespace ArchiveMaster.Services
                         packageFiles.Add(file);
                     }, token, FilesLoopOptions.Builder().AutoApplyFileLengthProgress().Build());
                 }
-
-                //写入文件目录结构
-                string dirStructureFilePath = Path.Combine(Config.TargetDir, DirStructureFileName);
-                dirStructureJson =
-                    JsonSerializer.Serialize(dirStructure, new JsonSerializerOptions { WriteIndented = true });
-                await File.WriteAllTextAsync(dirStructureFilePath, dirStructureJson, token);
-
 
                 //第三步：计算打包文件
                 packageFiles = packageFiles.OrderByDescending(p => p.Length).ToList();
@@ -305,11 +293,20 @@ namespace ArchiveMaster.Services
                     }
                 }
 
-                string dirStructureFilePath = Path.Combine(packageDir, DirStructureFileName);
-                await File.WriteAllTextAsync(dirStructureFilePath, dirStructureJson, token);
-                string packagedHashFilePath = Path.Combine(packageDir, HashListFileName);
-                await File.WriteAllLinesAsync(packagedHashFilePath, package.Files.Select(p => p.Hash), token);
+                await WritePackageInfoFileAsync(Path.Combine(packageDir, PackageInfoFileName), package.TotalLength,
+                    package.Files.Select(p => p.Hash));
             }
+        }
+
+        private async Task WritePackageInfoFileAsync(string path, long totalLength, IEnumerable<string> hashes)
+        {
+            var packageInfo = new WriteOncePackageInfo(allFiles, totalLength, DateTime.Now, hashes.ToList());
+            var json = JsonSerializer.Serialize(packageInfo, new JsonSerializerOptions
+            {
+                WriteIndented = true,
+                Encoder = JavaScriptEncoder.Create(UnicodeRanges.All),
+            });
+            await File.WriteAllTextAsync(path, json);
         }
 
         private async Task ExecuteHardLink(CancellationToken token)
@@ -339,10 +336,8 @@ namespace ArchiveMaster.Services
                     }
                 }
 
-                string dirStructureFilePath = Path.Combine(packageDir, DirStructureFileName);
-                await File.WriteAllTextAsync(dirStructureFilePath, dirStructureJson, token);
-                string packagedHashFilePath = Path.Combine(packageDir, HashListFileName);
-                await File.WriteAllLinesAsync(packagedHashFilePath, package.Files.Select(p => p.Hash), token);
+                await WritePackageInfoFileAsync(Path.Combine(packageDir, PackageInfoFileName), package.TotalLength,
+                    package.Files.Select(p => p.Hash));
 
                 NotifyProgress(1.0 * indexOfPackage / totalPackages);
             }
@@ -378,28 +373,24 @@ namespace ArchiveMaster.Services
                     }
                 }
 
-
-                string dirStructureFilePath = Path.GetTempFileName();
-                await File.WriteAllTextAsync(dirStructureFilePath, dirStructureJson, token);
-                string packagedHashFilePath = Path.GetTempFileName();
-                await File.WriteAllLinesAsync(packagedHashFilePath, package.Files.Select(p => p.Hash), token);
+                string tempFile = Path.GetTempFileName();
+                await WritePackageInfoFileAsync(tempFile, package.TotalLength, package.Files.Select(p => p.Hash));
 
                 NotifyMessage($"正在创建第{package.Index}个ISO");
-                builder.AddFile(HashListFileName, packagedHashFilePath);
-                builder.AddFile(DirStructureFileName, dirStructureFilePath);
+                builder.AddFile(PackageInfoFileName, tempFile);
                 builder.Build(Path.Combine(Config.TargetDir, $"{package.Index}.iso"));
                 NotifyProgress(1.0 * indexOfPackage / totalPackages);
             }
         }
 
-        private IReadOnlyDictionary<long, string> GetFileHashCache()
+        private async Task<IReadOnlyDictionary<long, string>> GetFileHashCacheAsync()
         {
             if (string.IsNullOrEmpty(Config.HashCacheFile) || !File.Exists(Config.HashCacheFile))
             {
                 return new Dictionary<long, string>();
             }
 
-            var lines = File.ReadAllLines(Config.HashCacheFile);
+            var lines = await File.ReadAllLinesAsync(Config.HashCacheFile);
             List<KeyValuePair<long, string>> dic = [];
             foreach (var line in lines.Select(p => p.Trim()))
             {
@@ -425,23 +416,27 @@ namespace ArchiveMaster.Services
             return file.GetHashCode();
         }
 
-        private IReadOnlySet<string> GetPackagedFileHashes()
+        private async Task<IReadOnlySet<string>> GetPackagedFileHashesAsync()
         {
-            if (string.IsNullOrEmpty(Config.ArchivedFilesHashFile) || !File.Exists(Config.ArchivedFilesHashFile))
+            HashSet<string> hashes = new HashSet<string>();
+            if (string.IsNullOrEmpty(Config.PreviousPackageInfoFiles))
             {
-                return new HashSet<string>();
+                return hashes;
             }
 
-            var lines = File.ReadAllLines(Config.ArchivedFilesHashFile);
-            foreach (var line in lines.Select(p => p.Trim()))
+            var files = FileNameHelper.GetFileNames(Config.PreviousPackageInfoFiles);
+            if (files.Length == 0)
             {
-                if (!IsValidHashString(line, HashType))
-                {
-                    throw new Exception($"文件{Config.ArchivedFilesHashFile}中存在无效的Hash值：{line}");
-                }
+                return hashes;
             }
 
-            return lines.ToFrozenSet();
+            foreach (var file in files)
+            {
+                var packageInfo = JsonSerializer.Deserialize<WriteOncePackageInfo>(await File.ReadAllTextAsync(file));
+                hashes.UnionWith(packageInfo.Hashes);
+            }
+
+            return hashes.ToFrozenSet();
         }
     }
 }

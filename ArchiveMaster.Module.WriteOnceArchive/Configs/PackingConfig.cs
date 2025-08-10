@@ -23,7 +23,10 @@ public partial class PackingConfig : ConfigBase
     private double packageSizeGB = 23.5;
 
     [ObservableProperty]
-    private string archivedFilesHashFile;
+    private string previousPackageInfoFiles;
+
+    [ObservableProperty]
+    private string password;
 
     [ObservableProperty]
     private string hashCacheFile;

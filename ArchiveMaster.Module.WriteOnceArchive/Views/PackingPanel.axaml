@@ -6,6 +6,7 @@
     xmlns:cvt="using:ArchiveMaster.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:enums="using:ArchiveMaster.Enums"
+    xmlns:fcvt="using:FzLib.Avalonia.Converters"
     xmlns:gb="using:GroupBox.Avalonia.Controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:me="using:FzLib.Avalonia.MarkupExtensions"
@@ -30,16 +31,16 @@
             <ctrl:FormItem Label="导出目录：">
                 <v:FilePickerTextBox
                     FileNames="{Binding Config.TargetDir}"
-                    Type="OpenFolder" />
+                    Type="OpenFile" />
             </ctrl:FormItem>
             <ctrl:FormItem
                 Description="记录已归档文件的哈希值，用于下次打包时跳过这些文件，避免重复收录。该文件位于上一次打包时的目标文件夹中。"
-                Label="已归档文件的Hash列表：">
+                Label="早期文件包：">
                 <v:FilePickerTextBox
                     AllowMultiple="True"
-                    FileNames="{Binding Config.ArchivedFilesHashFile}"
-                    StringFileTypeFilter="Hash列表文件;*.woaph;;"
-                    Type="OpenFolder" />
+                    FileNames="{Binding Config.PreviousPackageInfoFiles}"
+                    StringFileTypeFilter="文件包信息;*.wpk;;"
+                    Type="OpenFile" />
             </ctrl:FormItem>
 
             <ctrl:FormItem
@@ -47,26 +48,12 @@
                 Label="Hash计算缓存：">
                 <v:FilePickerTextBox
                     FileNames="{Binding Config.HashCacheFile}"
-                    StringFileTypeFilter="Hash缓存文件;*.woahc;;"
+                    StringFileTypeFilter="Hash缓存文件;*.whc;;"
                     Type="OpenFolder" />
             </ctrl:FormItem>
 
             <ctrl:FormItem Label="选项：">
                 <ctrl:WrapFormItemGroup>
-                    <ctrl:FormItem Label="导出方式：">
-                        <ComboBox
-                            Width="140"
-                            HorizontalAlignment="Stretch"
-                            ItemsSource="{me:EnumValues enums:PackingType}"
-                            SelectedItem="{Binding Config.PackingType}">
-                            <ComboBox.ItemTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding ., Converter={x:Static cvt:Converters.Description}}" />
-                                </DataTemplate>
-                            </ComboBox.ItemTemplate>
-                        </ComboBox>
-                    </ctrl:FormItem>
-
                     <ctrl:FormItem Label="单文件包容量（GB）：">
                         <StackPanel Orientation="Horizontal">
                             <NumericUpDown
@@ -108,6 +95,29 @@
                         </StackPanel>
 
                     </ctrl:FormItem>
+                    <ctrl:FormItem Label="导出方式：">
+                        <ComboBox
+                            Width="140"
+                            HorizontalAlignment="Stretch"
+                            ItemsSource="{me:EnumValues enums:PackingType}"
+                            SelectedItem="{Binding Config.PackingType}">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding ., Converter={x:Static cvt:Converters.Description}}" />
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                    </ctrl:FormItem>
+
+                    <ctrl:FormItem
+                        IsVisible="{Binding Config.PackingType, Converter={x:Static cvt:Converters.EqualWithParameter}, ConverterParameter=Copy}"
+                        Label="密码：">
+                        <TextBox
+                            Classes="revealPasswordButton"
+                            PasswordChar="*"
+                            Text="{Binding Config.Password}" />
+                    </ctrl:FormItem>
+
                 </ctrl:WrapFormItemGroup>
             </ctrl:FormItem>
         </ctrl:StackFormItemGroup>
