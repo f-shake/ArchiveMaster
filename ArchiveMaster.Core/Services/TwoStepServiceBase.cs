@@ -13,6 +13,11 @@ namespace ArchiveMaster.Services
 
         public abstract IEnumerable<SimpleFileInfo> GetInitializedFiles();
 
+        public virtual IEnumerable<SimpleFileInfo> GetExecutedFiles()
+        {
+            return GetInitializedFiles();
+        }
+
         public abstract Task InitializeAsync(CancellationToken token = default);
     }
 }

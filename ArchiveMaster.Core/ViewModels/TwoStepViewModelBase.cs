@@ -40,6 +40,8 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
     [ObservableProperty]
     private bool canInitialize = true;
 
+    private bool canReceiveServiceMessage = false;
+
     /// <summary>
     /// 是否允许重置
     /// </summary>
@@ -52,8 +54,6 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ProgressIndeterminate))]
     private double progress;
-
-    private bool canReceiveServiceMessage = false;
 
     protected TwoStepViewModelBase(AppConfig appConfig, IDialogService dialogService, string configGroupName)
         : base(appConfig, dialogService, configGroupName)
@@ -74,6 +74,10 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
     /// 当进度为double.NaN时，认为进度为非确定模式
     /// </summary>
     public bool ProgressIndeterminate => double.IsNaN(Progress);
+
+    protected bool CheckWarningFilesOnExecuted { get; set; } = true;
+
+    protected bool CheckWarningFilesOnInitialized { get; set; } = true;
 
     /// <summary>
     /// 核心服务
@@ -182,6 +186,66 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
     }
 
     /// <summary>
+    /// 执行后检查
+    /// </summary>
+    /// <param name="token"></param>
+    /// <returns>如果不存在需要处理的文件，返回true</returns>
+    private async Task CheckWarningFilesOnExecutedAsync(CancellationToken token)
+    {
+        if (!CheckWarningFilesOnExecuted)
+        {
+            return;
+        }
+
+        var files = Service.GetExecutedFiles();
+        if (files == null)
+        {
+            return;
+        }
+
+        var wrongFiles = files.Where(p => p.Status is Enums.ProcessStatus.Warn or Enums.ProcessStatus.Error).ToList();
+        if (wrongFiles.Count>0)
+        {
+            await DialogService.ShowWarningDialogAsync("存在警告", $"执行完成，但存在{wrongFiles.Count}个警告或错误文件，请仔细检查",
+                string.Join(Environment.NewLine, wrongFiles.Select(p => p.RelativePath)));
+        }
+    }
+
+    /// <summary>
+    /// 初始化后检查并抛出警告
+    /// </summary>
+    /// <param name="token"></param>
+    /// <returns>如果不存在需要处理的文件，返回true</returns>
+    private async Task<bool> CheckWarningFilesOnInitializedAsync(CancellationToken token)
+    {
+        if (!CheckWarningFilesOnInitialized)
+        {
+            return false;
+        }
+
+        var files = Service.GetInitializedFiles();
+        if (files == null)
+        {
+            return false;
+        }
+
+        if (!files.Any())
+        {
+            await DialogService.ShowWarningDialogAsync("结果为空", "不存在符合条件的需要处理的文件");
+            return true;
+        }
+
+        var wrongFiles = files.Where(p => p.Status is Enums.ProcessStatus.Warn or Enums.ProcessStatus.Error).ToList();
+        if (wrongFiles.Count>0)
+        {
+            await DialogService.ShowWarningDialogAsync("存在警告", $"执行完成，但存在{wrongFiles.Count}个警告或错误文件，请仔细检查",
+                string.Join(Environment.NewLine, wrongFiles.Select(p => p.RelativePath)));
+        }
+
+        return false;
+    }
+
+    /// <summary>
     /// 注销服务
     /// </summary>
     private void DisposeService()
@@ -228,6 +292,7 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
             await Service.ExecuteAsync(token);
             Service.Dispose();
             await OnExecutedAsync(token);
+            await CheckWarningFilesOnExecutedAsync(token);
         }, "执行失败");
 
         CanReset = true;
@@ -235,8 +300,6 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
         CanCancel = false;
         CancelCommand.NotifyCanExecuteChanged();
     }
-
-    protected bool CheckWarningFilesOnInitialized { get; set; } = true;
 
     /// <summary>
     /// 初始化任务
@@ -260,8 +323,8 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
                 Config.Check();
                 await Service.InitializeAsync(token);
                 await OnInitializedAsync();
-            }, "初始化失败")//初始化成功
-            && !await CheckWarningFilesAsync(token))//有需要处理的文件
+            }, "初始化失败") //初始化成功
+            && !await CheckWarningFilesOnInitializedAsync(token)) //有需要处理的文件
         {
             CanExecute = true;
             CanReset = true;
@@ -278,39 +341,6 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
         InitializeCommand.NotifyCanExecuteChanged();
         CanCancel = false;
         CancelCommand.NotifyCanExecuteChanged();
-    }
-
-    /// <summary>
-    /// 检查并抛出警告
-    /// </summary>
-    /// <param name="token"></param>
-    /// <returns>如果不存在需要处理的文件，返回true</returns>
-    private async Task<bool> CheckWarningFilesAsync(CancellationToken token)
-    {
-        if (!CheckWarningFilesOnInitialized)
-        {
-            return false;
-        }
-
-        var files = Service.GetInitializedFiles();
-        if (files == null)
-        {
-            return false;
-        }
-
-        if (!files.Any())
-        {
-            await DialogService.ShowWarningDialogAsync("结果为空", "不存在符合条件的需要处理的文件");
-            return true;
-        }
-
-        if (files.Any(p => p.Status is Enums.ProcessStatus.Warn or Enums.ProcessStatus.Error))
-        {
-            await DialogService.ShowWarningDialogAsync("存在警告", "初始化完成，但存在警告或错误文件，请仔细检查");
-            return false;
-        }
-
-        return false;
     }
 
     /// <summary>
