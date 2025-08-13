@@ -15,6 +15,7 @@ using FzLib.Avalonia.Dialogs;
 using Mapster;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
+using ArchiveMaster.ViewModels.FileSystem;
 
 namespace ArchiveMaster.ViewModels;
 
@@ -185,6 +186,25 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
         }
     }
 
+    private async Task CheckWarningFiles(IEnumerable<SimpleFileInfo> files)
+    {
+        Debug.Assert(files != null);
+        var wrongFiles = files.Where(p => p.Status is Enums.ProcessStatus.Warn or Enums.ProcessStatus.Error).ToList();
+        if (wrongFiles.Count > 0)
+        {
+            string message = $"执行完成，但存在{wrongFiles.Count}个警告或错误文件，请仔细检查";
+            string details = string.Join(Environment.NewLine, wrongFiles.Select(p =>
+            {
+                if (string.IsNullOrWhiteSpace(p.Message))
+                {
+                    return p.RelativePath;
+                }
+                return $"{p.RelativePath}（{p.Message}）";
+            }));
+            await DialogService.ShowWarningDialogAsync("存在警告", message, details);
+        }
+    }
+
     /// <summary>
     /// 执行后检查
     /// </summary>
@@ -203,12 +223,7 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
             return;
         }
 
-        var wrongFiles = files.Where(p => p.Status is Enums.ProcessStatus.Warn or Enums.ProcessStatus.Error).ToList();
-        if (wrongFiles.Count>0)
-        {
-            await DialogService.ShowWarningDialogAsync("存在警告", $"执行完成，但存在{wrongFiles.Count}个警告或错误文件，请仔细检查",
-                string.Join(Environment.NewLine, wrongFiles.Select(p => p.RelativePath)));
-        }
+        await CheckWarningFiles(files);
     }
 
     /// <summary>
@@ -235,12 +250,7 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
             return true;
         }
 
-        var wrongFiles = files.Where(p => p.Status is Enums.ProcessStatus.Warn or Enums.ProcessStatus.Error).ToList();
-        if (wrongFiles.Count>0)
-        {
-            await DialogService.ShowWarningDialogAsync("存在警告", $"执行完成，但存在{wrongFiles.Count}个警告或错误文件，请仔细检查",
-                string.Join(Environment.NewLine, wrongFiles.Select(p => p.RelativePath)));
-        }
+        await CheckWarningFiles(files);
 
         return false;
     }

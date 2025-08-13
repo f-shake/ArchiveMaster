@@ -19,7 +19,7 @@ public partial class PackingConfig : ConfigBase
     private PackingType packingType = PackingType.Copy;
 
     [ObservableProperty]
-    private double packageSizeGB = 23.5;
+    private double packageSizeMB = 23500;
 
     [ObservableProperty]
     private string previousPackageInfoFiles;
@@ -43,7 +43,7 @@ public partial class PackingConfig : ConfigBase
     {
         CheckDir(SourceDir, "源目录");
         CheckEmpty(TargetDir, "目标目录");
-        if (PackageSizeGB < 0.1)
+        if (PackageSizeMB < 0.1)
         {
             throw new Exception("单文件包容量过小");
         }

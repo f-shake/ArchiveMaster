@@ -3,7 +3,7 @@
     <Nullable>disable</Nullable>
     <AppVersion>2.1.0</AppVersion>
     <AvaloniaVersion>11.3.2</AvaloniaVersion>
-    <FzLibVersion>3.0.4</FzLibVersion>
+    <FzLibVersion>3.0.5</FzLibVersion>
   </PropertyGroup>
 
   <ItemGroup>

@@ -55,12 +55,12 @@ public partial class RenameViewModel(AppConfig appConfig, IDialogService dialogS
         }
 
         if (true.Equals(await DialogService.ShowYesNoDialogAsync("重命名完成，请检查结果",
-                $"共重命名{Files.Count(p => p.IsCompleted)}项，失败{Files.Count(p => p.Status == ProcessStatus.Error)}项。{Environment.NewLine}" +
+                $"共重命名{Files.Count(p => p.Status==ProcessStatus.Success)}项，失败{Files.Count(p => p.Status == ProcessStatus.Error)}项。{Environment.NewLine}" +
                 $"请检查结果，若不符合预期，可以进行撤销。是否撤销？")))
         {
             Config.Manual = true;
             Config.ManualMaps = string.Join(Environment.NewLine, Files
-                .Where(p => p.IsCompleted)
+                .Where(p => p.Status == ProcessStatus.Success)
                 .Select(p => $"{p.GetNewPath()}\t{p.Name}"));
             await InitializeCommand.ExecuteAsync(null);
             isWithdraw = true;

@@ -199,7 +199,7 @@ namespace ArchiveMaster.Services
             {
                 if (file.Status == ProcessStatus.Ready)
                 {
-                    file.Complete();
+                    file.Success();
                 }
             }
         }

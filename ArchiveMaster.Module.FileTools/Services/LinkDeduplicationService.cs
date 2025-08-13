@@ -22,13 +22,13 @@ public class LinkDeduplicationService(AppConfig appConfig)
             TryForFiles(groups, (group, s) =>
             {
                 var sourceFile = group.SubFiles[0];
-                sourceFile.Complete();
+                sourceFile.Success();
                 foreach (var file in group.SubFiles.Skip(1))
                 {
                     NotifyMessage($"正在创建硬链接{s.GetFileNumberMessage()}：{file.RelativePath}");
                     FileHelper.DeleteByConfig(file.Path);
                     HardLinkCreator.CreateHardLink(file.Path, sourceFile.Path);
-                    file.Complete();
+                    file.Success();
                 }
             }, token, FilesLoopOptions.Builder().AutoApplyStatus().AutoApplyFileNumberProgress().Build());
         }, token);

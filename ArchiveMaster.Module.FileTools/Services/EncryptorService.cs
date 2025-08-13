@@ -195,11 +195,11 @@ namespace ArchiveMaster.Services
                         break;
 
                     case FilenameDuplicationPolicy.Skip:
-                        file.Warn("目标文件已存在");
+                        file.Skip();
                         return false;
 
                     case FilenameDuplicationPolicy.Throw:
-                        file.Error("目标文件已存在");
+                        file.Warn("目标文件已存在");
                         return false;
                 }
             }

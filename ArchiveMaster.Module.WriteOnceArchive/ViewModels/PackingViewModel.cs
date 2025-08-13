@@ -12,16 +12,16 @@ public partial class PackingViewModel(AppConfig appConfig, IDialogService dialog
 {
     public static readonly (double sizeGB, string desc)[] PresetPackageSizes =
     [
-        (0.63, "CD 650MB"),
-        (0.68, "CD 700MB"),
-        (4.3, "DVD5"),
-        (7.9, "DVD9"),
-        (8.7, "DVD10"),
-        (15.8, "DVD18"),
-        (23, "BD25"),
-        (46, "BD50"),
-        (93, "BD100"),
-        (119, "BD128"),
+        (650, "CD 650MB"),
+        (700, "CD 700MB"),
+        (4400, "DVD5"),
+        (8100, "DVD9"),
+        (8900, "DVD10"),
+        (16200, "DVD18"),
+        (23500, "BD25"),
+        (47000, "BD50"),
+        (95000, "BD100"),
+        (120000, "BD128"),
     ];
 
     [ObservableProperty]
@@ -78,6 +78,6 @@ public partial class PackingViewModel(AppConfig appConfig, IDialogService dialog
     [RelayCommand]
     private void SetPackageSize(double size)
     {
-        Config.PackageSizeGB = size;
+        Config.PackageSizeMB = size;
     }
 }

@@ -45,7 +45,7 @@ namespace ArchiveMaster.Services
                     {
                         NotifyProgress(1.0 * (s.AccumulatedLength + p.ProcessedBytes) / s.TotalLength);
                         NotifyMessage(
-                            $"正在重建文件（{numMsg}，本文件{1.0 * p.ProcessedBytes / 1024 / 1024:0}MB/{1.0 * p.TotalBytes / 1024 / 1024:0}MB）：{file.RelativePath}");
+                            $"正在{(Config.CheckOnly ? "验证" : "重建")}文件（{numMsg}，本文件{1.0 * p.ProcessedBytes / 1024 / 1024:0}MB/{1.0 * p.TotalBytes / 1024 / 1024:0}MB）：{file.RelativePath}");
                     });
 
                     var targetFile = Path.Combine(Config.TargetDir, file.RelativePath);
@@ -53,7 +53,7 @@ namespace ArchiveMaster.Services
                     {
                         if (Config.SkipIfExisted)
                         {
-                            file.Complete("目标文件已存在，跳过");
+                            file.Skip();
                             return; //continue
                         }
                         else
@@ -65,18 +65,33 @@ namespace ArchiveMaster.Services
                     Directory.CreateDirectory(Path.GetDirectoryName(targetFile));
 
                     byte[] hash = null;
-                    if (file.IsEncrypted)
+                    if (!Config.CheckOnly)
                     {
-                        hash = await aes.DecryptFileAsync(file.PhysicalFile, targetFile, progress: progress,
-                            hashAlgorithmType: WriteOnceArchiveParameters.HashType, cancellationToken: token);
+                        if (file.IsEncrypted)
+                        {
+                            hash = await aes.DecryptFileAsync(file.PhysicalFile, targetFile, progress: progress,
+                                hashAlgorithmType: WriteOnceArchiveParameters.HashType, cancellationToken: token);
+                        }
+                        else
+                        {
+                            hash = await FileCopyHelper.CopyFileAsync(file.PhysicalFile, targetFile, progress: progress,
+                                hashAlgorithmType: WriteOnceArchiveParameters.HashType, cancellationToken: token);
+                        }
+                        File.SetLastWriteTime(targetFile, file.Time);
                     }
                     else
                     {
-                        hash = await FileCopyHelper.CopyFileAsync(file.PhysicalFile, targetFile, progress: progress,
-                            hashAlgorithmType: WriteOnceArchiveParameters.HashType, cancellationToken: token);
+                        if (file.IsEncrypted)
+                        {
+                            hash = await aes.GetDecryptedFileHashAsync(file.PhysicalFile, progress: progress,
+                                hashAlgorithmType: WriteOnceArchiveParameters.HashType, cancellationToken: token);
+                        }
+                        else
+                        {
+                            hash = await FileHashHelper.ComputeHashAsync(file.PhysicalFile, WriteOnceArchiveParameters.HashType,
+                                progress: progress, cancellationToken: token);
+                        }
                     }
-
-                    File.SetLastWriteTime(targetFile, file.Time);
 
                     Debug.Assert(hash != null);
                     if (hash != null)
@@ -192,7 +207,7 @@ namespace ArchiveMaster.Services
 
                         if (!allHashes.Add(name))
                         {
-                            
+
                         }
 
                         if (!hash2Files.ContainsKey(name))

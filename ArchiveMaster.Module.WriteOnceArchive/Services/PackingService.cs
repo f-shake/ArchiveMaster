@@ -72,7 +72,7 @@ namespace ArchiveMaster.Services
 
         public override async Task InitializeAsync(CancellationToken token)
         {
-            long maxSize = (long)(1024.0 * 1024 * 1024 * Config.PackageSizeGB);
+            long maxSize = (long)(1024.0 * 1024 * 1024 * Config.PackageSizeMB);
             List<WriteOnceFile> outOfSizeFiles = new List<WriteOnceFile>();
             List<WriteOncePackage> packages = null;
             await Task.Run(async () =>
@@ -292,7 +292,7 @@ namespace ArchiveMaster.Services
                                 progress: progress, cancellationToken: token);
                         }
 
-                        file.Complete();
+                        file.Success();
                     }
                     catch (Exception ex)
                     {
@@ -341,7 +341,7 @@ namespace ArchiveMaster.Services
                     try
                     {
                         HardLinkCreator.CreateHardLink(Path.Combine(packageDir, file.Hash), file.Path);
-                        file.Complete();
+                        file.Success();
                     }
                     catch (Exception ex)
                     {
@@ -379,7 +379,7 @@ namespace ArchiveMaster.Services
                     {
                         builder.AddFile(file.Hash, file.Path);
 
-                        file.Complete();
+                        file.Success();
                     }
                     catch (Exception ex)
                     {

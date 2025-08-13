@@ -24,18 +24,19 @@
             MaxLines="3"
             Text="{Binding ElementName=root, Path=FileNames}"
             TextWrapping="{Binding ElementName=root, Path=AllowMultiple, Converter={x:Static cvt:Converters.TextWrapping}}" />
-        <Button
-            Grid.Column="4"
-            Margin="8,0,0,0"
-            VerticalAlignment="Center"
-            Click="Button_Click"
-            Content="{Binding ElementName=root, Path=ButtonContent}" />
+
         <views:FileFilterControl
-            Grid.Column="6"
+            Grid.Column="4"
             Margin="8,0,0,0"
             VerticalAlignment="Center"
             ButtonContent="筛选.."
             Filter="{Binding ElementName=root, Path=Filter}"
             IsVisible="{Binding ElementName=root, Path=IsFilterButtonVisible}" />
+        <Button
+            Grid.Column="6"
+            Margin="8,0,0,0"
+            VerticalAlignment="Center"
+            Click="Button_Click"
+            Content="{Binding ElementName=root, Path=ButtonContent}" />
     </Grid>
 </UserControl>

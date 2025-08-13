@@ -47,6 +47,10 @@
                     <CheckBox
                         Content="跳过已存在的文件"
                         IsChecked="{Binding Config.SkipIfExisted}" />
+
+                    <CheckBox
+                        Content="仅验证文件完整性"
+                        IsChecked="{Binding Config.CheckOnly}" />
                 </ctrl:WrapFormItemGroup>
             </ctrl:FormItem>
         </ctrl:StackFormItemGroup>

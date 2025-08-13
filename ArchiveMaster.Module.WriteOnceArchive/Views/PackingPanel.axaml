@@ -54,16 +54,16 @@
 
             <ctrl:FormItem Label="选项：">
                 <ctrl:WrapFormItemGroup>
-                    <ctrl:FormItem Label="单文件包容量（GB）：">
+                    <ctrl:FormItem Label="单文件包容量（MB）：">
                         <StackPanel Orientation="Horizontal">
                             <NumericUpDown
                                 Width="160"
                                 HorizontalAlignment="Stretch"
-                                FormatString="0.00"
-                                Increment="0.1"
-                                Maximum="1000"
-                                Minimum="0.1"
-                                Value="{Binding Config.PackageSizeGB}" />
+                                FormatString="N0"
+                                Increment="100"
+                                Maximum="1000000"
+                                Minimum="100"
+                                Value="{Binding Config.PackageSizeMB}" />
                             <HyperlinkButton
                                 Padding="27,6"
                                 Content="预设">
@@ -79,7 +79,7 @@
                                                             <Run Text="{Binding ., Converter={x:Static cvt:Converters.Tuple}, ConverterParameter=Item2}" />
                                                             <Run Text="（" />
                                                             <Run Text="{Binding ., Converter={x:Static cvt:Converters.Tuple}, ConverterParameter=Item1}" />
-                                                            <Run Text="GB）" />
+                                                            <Run Text="MB）" />
                                                         </TextBlock>
                                                     </DataTemplate>
                                                 </Setter>
