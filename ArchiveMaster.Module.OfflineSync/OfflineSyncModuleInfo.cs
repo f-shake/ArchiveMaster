@@ -38,7 +38,9 @@ namespace ArchiveMaster
             new ConfigMetadata(typeof(OfflineSyncStep3Config), CONFIG_GRROUP),
         ];
 
-        public string ModuleName => "异地备份离线同步";
+        public string ModuleName => "异地备份";
+        public string ModuleDescription => "解决在无法通过网络或实地全量同步的情况下，进行增量同步和备份的需求";
+
         public int Order => 3;
         public IList<Type> SingletonServices { get; }
 
@@ -57,6 +59,7 @@ namespace ArchiveMaster
                     baseUrl + "update.svg")
             },
             GroupName = ModuleName,
+            GroupDescription = ModuleDescription,
             MenuItems =
             {
                 new ModuleMenuItemInfo("生成测试数据", new AsyncRelayCommand(async () =>

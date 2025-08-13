@@ -109,10 +109,15 @@
                                             </Button.Flyout>
                                         </Button>
                                     </Grid>
+
                                     <Border
                                         MaxWidth="240"
                                         BorderBrush="{DynamicResource Foreground3}"
-                                        BorderThickness="0,2,0,0" />
+                                        BorderThickness="0,2,0,0" />   
+                                    <TextBlock
+                                        HorizontalAlignment="Center"
+                                        Opacity="0.7"
+                                        Text="{Binding GroupDescription}" />
                                     <ItemsControl ItemsSource="{Binding Panels}">
                                         <ItemsControl.ItemsPanel>
                                             <ItemsPanelTemplate>

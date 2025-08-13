@@ -34,6 +34,8 @@ namespace ArchiveMaster
         ];
 
         public string ModuleName => "测试";
+        public string ModuleDescription => "测试";
+
         public int Order => -100;
         public IList<Type> SingletonServices { get; }
 
@@ -51,6 +53,7 @@ namespace ArchiveMaster
                     "测试自写文件复制功能", baseUrl + "test.svg"),
             },
             GroupName = ModuleName,
+            GroupDescription = ModuleDescription
         };
     }
 }

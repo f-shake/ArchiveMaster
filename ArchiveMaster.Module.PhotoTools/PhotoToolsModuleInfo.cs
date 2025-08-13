@@ -27,6 +27,7 @@ namespace ArchiveMaster
         ];
 
         public string ModuleName => "照片工具";
+        public string ModuleDescription => "解决根据照片元数据分类或更新照片元数据的需求";
 
         public int Order => 2;
         public IList<Type> SingletonServices { get; }
@@ -52,7 +53,8 @@ namespace ArchiveMaster
                 new ToolPanelInfo(typeof(PhotoGeoSorterPanel), typeof(PhotoGeoSorterViewModel), "照片位置分类",
                     "根据照片的GPS位置信息，将照片分为不同地理区域的多个目录", baseUrl + "map.svg"),
             },
-            GroupName = ModuleName
+            GroupName = ModuleName,
+            GroupDescription = ModuleDescription
         };
     }
 }

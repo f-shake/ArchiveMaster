@@ -12,6 +12,7 @@ namespace ArchiveMaster
         public IList<Type> BackgroundServices { get; }
         public IList<ConfigMetadata> Configs { get; }
         public string ModuleName { get; }
+        public string ModuleDescription { get; }
         public int Order { get; }
         public IList<Type> SingletonServices { get; }
         public IList<Type> TransientServices { get; }

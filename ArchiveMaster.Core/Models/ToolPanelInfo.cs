@@ -6,6 +6,7 @@ namespace ArchiveMaster.Models;
 public class ToolPanelGroupInfo
 {
     public string GroupName { get; set; }
+    public string GroupDescription { get; set; }
     public List<ModuleMenuItemInfo> MenuItems { get; } = new List<ModuleMenuItemInfo>();
     public List<ToolPanelInfo> Panels { get; } = new List<ToolPanelInfo>();
 }

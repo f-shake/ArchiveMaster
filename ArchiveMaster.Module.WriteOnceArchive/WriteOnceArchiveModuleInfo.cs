@@ -18,7 +18,8 @@ namespace ArchiveMaster
             new ConfigMetadata(typeof(RebuildConfig), CONFIG_GROUP),
         ];
 
-        public string ModuleName => "一次性写入介质归档";
+        public string ModuleName => "动态固存备份";
+        public string ModuleDescription => "解决将动态更新目录中的定期文件备份到多个容量有限、写入后不可修改介质（如光盘、一次性磁带）的需求";
 
         public int Order => 4;
         public IList<Type> SingletonServices { get; }
@@ -38,7 +39,8 @@ namespace ArchiveMaster
                 new ToolPanelInfo(typeof(RebuildPanel), typeof(RebuildViewModel), "重建", "从备份的文件包中提取文件并恢复为原始目录结构",
                     baseUrl + "rebuild.svg"),
             },
-            GroupName = ModuleName
+            GroupName = ModuleName,
+            GroupDescription = ModuleDescription
         };
     }
 }

@@ -31,6 +31,7 @@ namespace ArchiveMaster
         ];
 
         public string ModuleName => "文件目录工具";
+        public string ModuleDescription => "解决对文件和目录进行批量操作的需求";
 
         public int Order => 1;
         public IList<Type> SingletonServices { get; }
@@ -73,7 +74,8 @@ namespace ArchiveMaster
                     "通过硬链接替换重复文件，节省磁盘空间", baseUrl + "link.svg"),
 
             },
-            GroupName = ModuleName
+            GroupName = ModuleName,
+            GroupDescription = ModuleDescription
         };
     }
 }
