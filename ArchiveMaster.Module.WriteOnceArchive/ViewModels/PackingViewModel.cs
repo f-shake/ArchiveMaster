@@ -10,7 +10,7 @@ public partial class PackingViewModel(AppConfig appConfig, IDialogService dialog
     : TwoStepViewModelBase<PackingService, PackingConfig>(appConfig, dialogService,
         WriteOnceArchiveModuleInfo.CONFIG_GROUP)
 {
-    public static readonly (double sizeGB, string desc)[] PresetPackageSizes =
+    public static readonly (long sizeGB, string desc)[] PresetPackageSizes =
     [
         (650, "CD 650MB"),
         (700, "CD 700MB"),
@@ -76,7 +76,7 @@ public partial class PackingViewModel(AppConfig appConfig, IDialogService dialog
     }
 
     [RelayCommand]
-    private void SetPackageSize(double size)
+    private void SetPackageSize(long size)
     {
         Config.PackageSizeMB = size;
     }

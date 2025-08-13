@@ -19,7 +19,7 @@ public partial class PackingConfig : ConfigBase
     private PackingType packingType = PackingType.Copy;
 
     [ObservableProperty]
-    private double packageSizeMB = 23500;
+    private long packageSizeMB = 23500;
 
     [ObservableProperty]
     private string previousPackageInfoFiles;

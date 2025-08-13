@@ -72,11 +72,13 @@ namespace ArchiveMaster.Services
 
         public override async Task InitializeAsync(CancellationToken token)
         {
-            long maxSize = (long)(1024.0 * 1024 * 1024 * Config.PackageSizeMB);
+            long maxSize = 1024L * 1024 * Config.PackageSizeMB;
             List<WriteOnceFile> outOfSizeFiles = new List<WriteOnceFile>();
             List<WriteOncePackage> packages = null;
+
             await Task.Run(async () =>
             {
+                Directory.CreateDirectory(Config.TargetDir);
                 //第一步：枚举文件
                 NotifyMessage("正在搜索文件");
                 var files = new DirectoryInfo(Config.SourceDir)
@@ -107,11 +109,20 @@ namespace ArchiveMaster.Services
 
                     await TryForFilesAsync(files, async (file, s) =>
                     {
+                        string numMsg = s.GetFileNumberMessage("{0}/{1}");
+                        Progress<FileProcessProgress> progress = new Progress<FileProcessProgress>(p =>
+                        {
+                            NotifyProgress(1.0 * (s.AccumulatedLength + p.ProcessedBytes) / s.TotalLength);
+                            NotifyMessage(
+                                $"正在计算文件Hash（{numMsg}，本文件{1.0 * p.ProcessedBytes / 1024 / 1024:0}MB/{1.0 * p.TotalBytes / 1024 / 1024:0}MB）：{file.RelativePath}");
+                        });
+
                         //从记忆中提取Hash
                         if (!hashCaches.TryGetValue(GetFileHashCode(file), out var hash))
                         {
                             hash = await FileHashHelper.ComputeHashStringAsync(file.Path,
-                                WriteOnceArchiveParameters.HashType, cancellationToken: token);
+                                WriteOnceArchiveParameters.HashType, cancellationToken: token,
+                                progress: progress);
                         }
 
                         //放入文件目录结构
@@ -126,8 +137,6 @@ namespace ArchiveMaster.Services
                         }
                         //如果存在多个文件，拥有相同的Hash，他们仍然都会被放到AllFiles中，作为目录结构，
                         //但是只有第一个文件会被打包为物理文件，其他文件会被跳过
-
-                        NotifyMessage($"正在搜索文件{s.GetFileNumberMessage()}：{file.Path}");
 
                         //文件超过单盘大小
                         if (file.Length > maxSize)
@@ -151,7 +160,7 @@ namespace ArchiveMaster.Services
                 OutOfSizeFiles = outOfSizeFiles
             };
         }
-        
+
         private static void Shuffle<T>(IList<T> list)
         {
             Random rng = new Random();
@@ -164,11 +173,11 @@ namespace ArchiveMaster.Services
             }
         }
 
-        
+
         private List<WriteOncePackage> Pack(IEnumerable<WriteOnceFile> packageFiles, long maxSize)
         {
             //BFD，但是不进行排序，打乱顺序，避免前面的箱子文件少、后面的箱子文件多
-            
+
             // 先按文件长度降序排序
             // var filesSorted = packageFiles.OrderByDescending(f => f.Length).ToList();
             var filesSorted = packageFiles.ToList();
