@@ -22,11 +22,14 @@ namespace ArchiveMaster.Configs
         [ObservableProperty]
         private FileFilterOperationTargetFileNameMode targetFileNameMode = FileFilterOperationTargetFileNameMode.PreserveDirectoryStructure;
 
+        [ObservableProperty]
+        private HashAlgorithmType hashType=HashAlgorithmType.SHA256;
+
         public override void Check()
         {
             CheckEmpty(SourceDirs, "源程序");
             CheckEmpty(Filter, "筛选器");
-            if (Type is not FileFilterOperationType.Delete)
+            if (Type is FileFilterOperationType.Copy or FileFilterOperationType.Move)
             {
                 CheckEmpty(TargetDir, "目标目录");
             }

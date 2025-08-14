@@ -25,34 +25,70 @@ namespace ArchiveMaster.Services
 
         public override IEnumerable<SimpleFileInfo> GetInitializedFiles()
         {
-            return Files.Cast<SimpleFileInfo>();
+            return Files;
         }
 
         public override Task ExecuteAsync(CancellationToken token)
         {
             FilesLoopOptions loopOptions = Config.Type switch
             {
-                FileFilterOperationType.Copy or FileFilterOperationType.Move =>
+                FileFilterOperationType.Copy or FileFilterOperationType.Move or FileFilterOperationType.Hash =>
                     FilesLoopOptions.Builder().AutoApplyStatus().AutoApplyFileLengthProgress().Build(),
-                FileFilterOperationType.Delete =>
+                _ =>
                     FilesLoopOptions.Builder().AutoApplyStatus().AutoApplyFileNumberProgress().Build(),
-                _ => throw new ArgumentOutOfRangeException()
             };
-            return TryForFilesAsync(Files.CheckedOnly().ToList(), async (file, s) =>
-                {
-                    switch (Config.Type)
+            return Task.Run(() =>
+            {
+                HashSet<string> usedPaths = new HashSet<string>();
+                return TryForFilesAsync(Files.CheckedOnly().ToList(), async (file, s) =>
                     {
-                        case FileFilterOperationType.Copy:
-                            break;
-                        case FileFilterOperationType.Move:
-                            break;
-                        case FileFilterOperationType.Delete:
-                            break;
-                        default:
-                            throw new ArgumentOutOfRangeException();
-                    }
-                },
-                token, loopOptions);
+                        string targetPath = null;
+                        if (Config.Type is FileFilterOperationType.Copy or FileFilterOperationType.Move
+                            or FileFilterOperationType.HardLink or FileFilterOperationType.SymbolLink)
+                        {
+                            targetPath = Path.Combine(Config.TargetDir, file.TargetPath);
+                            targetPath = FileNameHelper.GenerateUniquePath(targetPath, usedPaths);
+                            usedPaths.Add(targetPath);
+                        }
+
+                        switch (Config.Type)
+                        {
+                            case FileFilterOperationType.Copy:
+                                await FileCopyHelper.CopyFileAsync(file.Path, targetPath,
+                                    progress: s.GetFileProcessProgress("正在复制文件", file.Name, NotifyProgress,
+                                        NotifyMessage),
+                                    cancellationToken: token);
+                                File.SetLastWriteTime(targetPath, File.GetLastWriteTime(file.Path));
+                                break;
+                            case FileFilterOperationType.Move:
+                                await FileCopyHelper.CopyFileAsync(file.Path, targetPath,
+                                    progress: s.GetFileProcessProgress("正在移动文件", file.Name, NotifyProgress,
+                                        NotifyMessage),
+                                    cancellationToken: token);
+                                File.SetLastWriteTime(targetPath, File.GetLastWriteTime(file.Path));
+                                FileHelper.DeleteByConfig(file.Path);
+                                break;
+                            case FileFilterOperationType.HardLink:
+                                HardLinkCreator.CreateHardLink(targetPath, file.Path);
+                                break;
+                            case FileFilterOperationType.SymbolLink:
+                                File.CreateSymbolicLink(targetPath, file.Path);
+                                break;
+                            case FileFilterOperationType.Delete:
+                                FileHelper.DeleteByConfig(file.Path);
+                                break;
+                            case FileFilterOperationType.Hash:
+                                file.Success(await FileHashHelper.ComputeHashStringAsync(file.Path, Config.HashType,
+                                    progress: s.GetFileProcessProgress("正在计算文件Hash", file.Name, NotifyProgress,
+                                        NotifyMessage),
+                                    cancellationToken: token));
+                                break;
+                            default:
+                                throw new ArgumentOutOfRangeException();
+                        }
+                    },
+                    token, loopOptions);
+            }, token);
         }
 
         public override async Task InitializeAsync(CancellationToken token)
@@ -76,7 +112,7 @@ namespace ArchiveMaster.Services
         private FileFilterOperationFileInfo GetTargetFile(string sourceDir, FileInfo file)
         {
             var targetFile = new FileFilterOperationFileInfo(file, sourceDir);
-            if (Config.Type == FileFilterOperationType.Delete)
+            if (Config.Type is FileFilterOperationType.Delete or FileFilterOperationType.Hash) //不需要目标文件
             {
                 return targetFile;
             }
@@ -85,9 +121,10 @@ namespace ArchiveMaster.Services
             targetFile.TargetPath = Config.TargetFileNameMode switch
             {
                 FileFilterOperationTargetFileNameMode.PreserveDirectoryStructure => relativePath,
-                FileFilterOperationTargetFileNameMode.FlattenWithOriginalNames =>targetFile.Name,
-                FileFilterOperationTargetFileNameMode.FlattenWithRelativePathNames => relativePath.Replace('/', GlobalConfigs.Instance.FlattenPathSeparatorReplacement)
-                        .Replace('\\', GlobalConfigs.Instance.FlattenPathSeparatorReplacement),
+                FileFilterOperationTargetFileNameMode.FlattenWithOriginalNames => targetFile.Name,
+                FileFilterOperationTargetFileNameMode.FlattenWithRelativePathNames => relativePath
+                    .Replace('/', GlobalConfigs.Instance.FlattenPathSeparatorReplacement)
+                    .Replace('\\', GlobalConfigs.Instance.FlattenPathSeparatorReplacement),
                 _ => throw new ArgumentOutOfRangeException(),
             };
 

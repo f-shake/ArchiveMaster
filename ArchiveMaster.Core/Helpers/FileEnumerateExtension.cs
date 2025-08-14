@@ -55,7 +55,7 @@ public static class FileEnumerateExtension
 
             if (filter != null && canYieldReturn)
             {
-                canYieldReturn = item switch
+                canYieldReturn = filterHelper == null || item switch
                 {
                     string str => filterHelper.IsMatched(str),
                     FileSystemInfo fi => filterHelper.IsMatched(fi),

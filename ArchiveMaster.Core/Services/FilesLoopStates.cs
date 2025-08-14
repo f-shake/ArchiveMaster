@@ -1,3 +1,5 @@
+using FzLib.IO;
+
 namespace ArchiveMaster.Services;
 
 public class FilesLoopStates
@@ -100,5 +102,17 @@ public class FilesLoopStates
     public void Break()
     {
         NeedBroken = true;
+    }
+
+    public Progress<FileProcessProgress> GetFileProcessProgress(string message, string file,
+        Action<double> NotifyProgress, Action<string> NotifyMessage)
+    {
+        string numMsg = GetFileNumberMessage("{0}/{1}");
+        return new Progress<FileProcessProgress>(p =>
+        {
+            NotifyProgress(1.0 * (AccumulatedLength + p.ProcessedBytes) / TotalLength);
+            NotifyMessage(
+                $"{message}（{numMsg}，本文件{1.0 * p.ProcessedBytes / 1024 / 1024:0}MB/{1.0 * p.TotalBytes / 1024 / 1024:0}MB）：{file}");
+        });
     }
 }

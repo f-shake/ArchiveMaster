@@ -6,6 +6,7 @@
     xmlns:cvt="using:ArchiveMaster.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:e="using:ArchiveMaster.Enums"
+    xmlns:io="using:FzLib.IO"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:me="using:FzLib.Avalonia.MarkupExtensions"
     xmlns:v="using:ArchiveMaster.Views"
@@ -32,33 +33,42 @@
             </ct:FormItem>
 
             <ct:FormItem Label="选项：">
-                <StackPanel Orientation="8">
-                    <ct:WrapFormItemGroup>
-                        <ct:FormItem Label="文件操作类型：">
-                            <ComboBox
-                                Width="90"
-                                DisplayMemberBinding="{Binding ., Converter={x:Static cvt:Converters.Description}}"
-                                ItemsSource="{me:EnumValues e:FileFilterOperationType}"
-                                SelectedItem="{Binding Config.Type}" />
-                        </ct:FormItem>
-                        <ct:FormItem Label="目标文件：">
-                            <ComboBox
-                                Width="330"
-                                DisplayMemberBinding="{Binding ., Converter={x:Static cvt:Converters.Description}}"
-                                ItemsSource="{me:EnumValues e:FileFilterOperationTargetFileNameMode}"
-                                SelectedItem="{Binding Config.TargetFileNameMode}" />
-                        </ct:FormItem>
-                    </ct:WrapFormItemGroup>
-                    <TextBlock Opacity="0.7">
-                        <Run Text="保持原有目录结构，使用原文件名：将文件复制/移动到目标目录时，完全保留原始目录层级结构，且文件名不变。" />
-                        <LineBreak />
-                        <Run Text="平铺到目标目录，使用原文件名：将文件复制/移动到目标目录时，忽略原始目录结构（所有文件直接放在目标根目录），但保留原文件名。" />
-                        <LineBreak />
-                        <Run Text="保平铺到目标目录，使用相对路径作为新文件名：将文件复制/移动到目标目录时，忽略原始目录结构，但将原始相对路径信息编码到新文件名中，避免冲突。" />
-                        <LineBreak />
-                    </TextBlock>
-                </StackPanel>
+                <ct:WrapFormItemGroup>
+                    <ct:FormItem Header="文件操作类型">
+                        <ComboBox
+                            Width="120"
+                            DisplayMemberBinding="{Binding ., Converter={x:Static cvt:Converters.Description}}"
+                            ItemsSource="{me:EnumValues e:FileFilterOperationType}"
+                            SelectedItem="{Binding Config.Type}" />
+                    </ct:FormItem>
+                    <ct:FormItem Header="目标文件">
+                        <ComboBox
+                            Width="330"
+                            DisplayMemberBinding="{Binding ., Converter={x:Static cvt:Converters.Description}}"
+                            ItemsSource="{me:EnumValues e:FileFilterOperationTargetFileNameMode}"
+                            SelectedItem="{Binding Config.TargetFileNameMode}" />
+                    </ct:FormItem>
+                    <ct:FormItem Header="Hash类型">
+                        <ComboBox
+                            Width="100"
+                            DisplayMemberBinding="{Binding ., Converter={x:Static cvt:Converters.Description}}"
+                            ItemsSource="{me:EnumValues io:HashAlgorithmType}"
+                            SelectedItem="{Binding Config.HashType}" />
+                    </ct:FormItem>
+                </ct:WrapFormItemGroup>
             </ct:FormItem>
+
+            <TextBlock
+                Margin="90,0,0,0"
+                Opacity="0.7"
+                TextTrimming="CharacterEllipsis">
+                <Run Text="保持原有目录结构，使用原文件名：将文件复制/移动到目标目录时，完全保留原始目录层级结构，且文件名不变。" />
+                <LineBreak />
+                <Run Text="平铺到目标目录，使用原文件名：将文件复制/移动到目标目录时，忽略原始目录结构（所有文件直接放在目标根目录），但保留原文件名。" />
+                <LineBreak />
+                <Run Text="平铺到目标目录，使用相对路径作为新文件名：将文件复制/移动到目标目录时，忽略原始目录结构，但将原始相对路径信息编码到新文件名中，避免冲突。" />
+                <LineBreak />
+            </TextBlock>
 
         </ct:StackFormItemGroup>
     </v:TwoStepPanelBase.ConfigsContent>
