@@ -18,7 +18,7 @@
                 <v:FilePickerTextBox
                     FileNames="{Binding Config.Dir}"
                     Filter="{Binding Config.Filter}"
-                    IsFilterButtonVisible="True"
+                    IsFilterBarVisible="True"
                     Type="OpenFolder" />
             </ct:FormItem>
             <ct:FormItem Label="GPX文件：">

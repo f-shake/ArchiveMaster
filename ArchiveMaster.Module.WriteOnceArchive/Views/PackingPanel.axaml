@@ -25,7 +25,7 @@
                 <v:FilePickerTextBox
                     FileNames="{Binding Config.SourceDir}"
                     Filter="{Binding Config.Filter}"
-                    IsFilterButtonVisible="True"
+                    IsFilterBarVisible="True"
                     Type="OpenFolder" />
             </ctrl:FormItem>
             <ctrl:FormItem Label="导出目录：">

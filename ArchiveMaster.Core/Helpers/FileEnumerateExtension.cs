@@ -32,7 +32,7 @@ public static class FileEnumerateExtension
     public static IEnumerable<T> ApplyFilter<T>(this IEnumerable<T> source,
         CancellationToken cancellationToken, FileFilterRule filter = null, bool skipRecycleBin = true)
     {
-        var filterHelper = filter == null ? null : new FileFilterHelper(filter);
+        var filterHelper = (filter == null || filter.IsEnabled == false) ? null : new FileFilterHelper(filter);
         foreach (var item in source)
         {
             cancellationToken.ThrowIfCancellationRequested();

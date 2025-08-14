@@ -39,6 +39,6 @@
     <PackageVersion Include="Svg.Controls.Skia.Avalonia" Version="11.3.0.1" />
     <PackageVersion Include="Xamarin.AndroidX.Core.SplashScreen" Version="1.0.1.1" />
     <PackageVersion Include="Swashbuckle.AspNetCore" Version="6.7.3" />
-    <PackageVersion Include="HotAvalonia" Version="3.0.0" PrivateAssets="All" Publish="True" />
+    <PackageVersion Include="HotAvalonia" Version="3.0.0" />
   </ItemGroup>
 </Project>

@@ -24,7 +24,7 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.Extensions.Hosting" />
-        <PackageReference Include="Svg.Controls.Skia.Avalonia" />
+        <PackageReference Include="Svg.Controls.Skia.Avalonia" /> 
     </ItemGroup>
 
     <ItemGroup>
