@@ -12,4 +12,6 @@ public class GlobalConfigs
     public int DebugModeLoopDelay { get; set; } = 30;
 
     public bool PreferDeleteToRecycleBin { get; set; } = true;
+
+    public char FlattenPathSeparatorReplacement { get; set; } = '-';
 }

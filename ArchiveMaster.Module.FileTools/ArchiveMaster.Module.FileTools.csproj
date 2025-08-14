@@ -12,6 +12,9 @@
     <Compile Remove="obj\**" />
     <EmbeddedResource Remove="obj\**" />
     <None Remove="obj\**" />
+    <Compile Update="Views\FileFilterOperationPanel.axaml.cs">
+      <DependentUpon>FileFilterOperationPanel.axaml</DependentUpon>
+    </Compile>
     <Compile Update="Views\TimeClassifyPanel.axaml.cs">
       <DependentUpon>TimeClassifyPanel.axaml</DependentUpon>
       <SubType>Code</SubType>

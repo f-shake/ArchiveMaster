@@ -22,6 +22,7 @@ namespace ArchiveMaster.Services
         private ConcurrentBag<string> errorMessages;
         private Regex rCompress;
         private Regex rCopy;
+
         public enum TaskType
         {
             Compress,
@@ -67,6 +68,7 @@ namespace ArchiveMaster.Services
                 .Concat(DeleteFiles.ProcessingFiles)
                 .Cast<SimpleFileInfo>();
         }
+
         public override Task InitializeAsync(CancellationToken token)
         {
             rCopy = new Regex(@$"\.({string.Join('|', Config.CopyDirectlyExtensions)})$", RegexOptions.IgnoreCase);
@@ -151,11 +153,10 @@ namespace ArchiveMaster.Services
                     File.Copy(file.Path, distPath, true);
                 }
             }, token, FilesLoopOptions.Builder().AutoApplyStatus().AutoApplyFileLengthProgress()
-                .WithMultiThreads(Config.Thread).Catch(
-                    (file, ex) =>
-                    {
-                        errorMessages.Add($"压缩 {Path.GetRelativePath(Config.SourceDir, file.Path)} 失败：{ex.Message}");
-                    }).Build());
+                .WithMultiThreads(Config.Thread).Catch((file, ex) =>
+                {
+                    errorMessages.Add($"压缩 {Path.GetRelativePath(Config.SourceDir, file.Path)} 失败：{ex.Message}");
+                }).Build());
         }
 
         private void Copy(CancellationToken token)
@@ -178,11 +179,10 @@ namespace ArchiveMaster.Services
 
                 File.Copy(file.Path, distPath, true);
             }, token, FilesLoopOptions.Builder().AutoApplyStatus().AutoApplyFileLengthProgress()
-                .WithMultiThreads(Config.Thread).Catch(
-                    (file, ex) =>
-                    {
-                        errorMessages.Add($"压缩 {Path.GetRelativePath(Config.SourceDir, file.Path)} 失败：{ex.Message}");
-                    }).Build());
+                .WithMultiThreads(Config.Thread).Catch((file, ex) =>
+                {
+                    errorMessages.Add($"压缩 {Path.GetRelativePath(Config.SourceDir, file.Path)} 失败：{ex.Message}");
+                }).Build());
         }
 
         private string GetDistPath(string sourceFileName, string newExtension, out string subPath)
@@ -215,7 +215,7 @@ namespace ArchiveMaster.Services
                 string[] dirParts = subDir.Split(splitter);
                 subDir = string.Join(splitter, dirParts[..Config.DeepestLevel]);
                 fileNameWithoutExtension =
-                    $"{string.Join('-', dirParts[Config.DeepestLevel..])}-{fileNameWithoutExtension}";
+                    $"{string.Join(GlobalConfigs.Instance.FlattenPathSeparatorReplacement, dirParts[Config.DeepestLevel..])}{GlobalConfigs.Instance.FlattenPathSeparatorReplacement}{fileNameWithoutExtension}";
             }
 
             if (Config.FolderNameTemplate != PhotoSlimmingConfig.FolderNamePlaceholder && subDir.Length > 0)

@@ -1,0 +1,79 @@
+<v:TwoStepPanelBase
+    x:Class="ArchiveMaster.Views.FileFilterOperationPanel"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ct="using:FzLib.Avalonia.Controls"
+    xmlns:cvt="using:ArchiveMaster.Converters"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:e="using:ArchiveMaster.Enums"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:me="using:FzLib.Avalonia.MarkupExtensions"
+    xmlns:v="using:ArchiveMaster.Views"
+    xmlns:vm="clr-namespace:ArchiveMaster.ViewModels"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    x:DataType="vm:TwinFileCleanerViewModel"
+    mc:Ignorable="d">
+    <v:TwoStepPanelBase.ConfigsContent>
+        <ct:StackFormItemGroup>
+            <ct:FormItem Label="源目录：">
+                <v:FilePickerTextBox
+                    AllowMultiple="True"
+                    FileNames="{Binding Config.SourceDirs}"
+                    Filter="{Binding Config.Filter}"
+                    IsFilterBarVisible="True"
+                    Type="OpenFolder" />
+            </ct:FormItem>
+
+            <ct:FormItem Label="目标目录：">
+                <v:FilePickerTextBox
+                    FileNames="{Binding Config.TargetDir}"
+                    Type="OpenFolder" />
+            </ct:FormItem>
+
+            <ct:FormItem Label="选项：">
+                <StackPanel Orientation="8">
+                    <ct:WrapFormItemGroup>
+                        <ct:FormItem Label="文件操作类型：">
+                            <ComboBox
+                                Width="90"
+                                DisplayMemberBinding="{Binding ., Converter={x:Static cvt:Converters.Description}}"
+                                ItemsSource="{me:EnumValues e:FileFilterOperationType}"
+                                SelectedItem="{Binding Config.Type}" />
+                        </ct:FormItem>
+                        <ct:FormItem Label="目标文件：">
+                            <ComboBox
+                                Width="330"
+                                DisplayMemberBinding="{Binding ., Converter={x:Static cvt:Converters.Description}}"
+                                ItemsSource="{me:EnumValues e:FileFilterOperationTargetFileNameMode}"
+                                SelectedItem="{Binding Config.TargetFileNameMode}" />
+                        </ct:FormItem>
+                    </ct:WrapFormItemGroup>
+                    <TextBlock Opacity="0.7">
+                        <Run Text="保持原有目录结构，使用原文件名：将文件复制/移动到目标目录时，完全保留原始目录层级结构，且文件名不变。" />
+                        <LineBreak />
+                        <Run Text="平铺到目标目录，使用原文件名：将文件复制/移动到目标目录时，忽略原始目录结构（所有文件直接放在目标根目录），但保留原文件名。" />
+                        <LineBreak />
+                        <Run Text="保平铺到目标目录，使用相对路径作为新文件名：将文件复制/移动到目标目录时，忽略原始目录结构，但将原始相对路径信息编码到新文件名中，避免冲突。" />
+                        <LineBreak />
+                    </TextBlock>
+                </StackPanel>
+            </ct:FormItem>
+
+        </ct:StackFormItemGroup>
+    </v:TwoStepPanelBase.ConfigsContent>
+    <v:TwoStepPanelBase.ResultsContent>
+        <Grid RowDefinitions="*,8,Auto">
+            <v:SimpleFileDataGrid
+                ColumnLengthIndex="1.1"
+                ColumnTimeIndex="1.2"
+                ItemsSource="{Binding Files}">
+                <v:SimpleFileDataGrid.Columns>
+                    <DataGridTextColumn
+                        Binding="{Binding TargetPath}"
+                        Header="目标位置" />
+                </v:SimpleFileDataGrid.Columns>
+            </v:SimpleFileDataGrid>
+        </Grid>
+    </v:TwoStepPanelBase.ResultsContent>
+</v:TwoStepPanelBase>

@@ -58,6 +58,13 @@
                                 <v:FileFilterPanel Filter="{Binding #root.Filter}" />
                             </v:PopupFlyout>
                         </Button.Flyout>
+                        <Button.Styles>
+                            <Style Selector="Button">
+                                <Style Selector="^:disabled /template/ ContentPresenter#PART_ContentPresenter">
+                                    <Setter Property="Background" Value="Transparent" />
+                                </Style>
+                            </Style>
+                        </Button.Styles>
                     </Button>
                 </DataTemplate>
             </Grid.Resources>
