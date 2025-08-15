@@ -15,109 +15,120 @@
     mc:Ignorable="d">
     <v:TwoStepPanelBase.ConfigsContent>
         <StackPanel>
-            <gb:GroupBox Header="目录和文件">
-                <ct:StackFormItemGroup>
-                    <ct:FormItem Label="源目录：">
-                        <v:FilePickerTextBox
-                            Grid.Row="2"
-                            FileNames="{Binding Config.SourceDir}"
-                            Type="OpenFolder" />
-                    </ct:FormItem>
-                    <ct:FormItem Label="目标目录：">
-                        <v:FilePickerTextBox
-                            Grid.Row="2"
-                            FileNames="{Binding Config.DistDir}"
-                            Type="OpenFolder" />
-                    </ct:FormItem>
+            <ct:StackFormItemGroup>
+                <ct:FormItem Label="源目录：">
+                    <v:FilePickerTextBox
+                        FileNames="{Binding Config.SourceDir}"
+                        Filter="{Binding Config.Filter}"
+                        IsFilterBarVisible="True"
+                        Type="OpenFolder" />
+                </ct:FormItem>
+                <ct:FormItem Label="目标目录：">
+                    <v:FilePickerTextBox
+                        FileNames="{Binding Config.DistDir}"
+                        Type="OpenFolder" />
+                </ct:FormItem>
+                <ct:FormItem Label="导出选项：">
+                    <ct:WrapFormItemGroup>
+                        <ct:FormItem
+                            Description="将多级目录路径按指定层级转换为扁平化格式"
+                            Header="最深目录层级">
+                            <NumericUpDown
+                                Increment="1"
+                                Maximum="10000"
+                                Minimum="0"
+                                Value="{Binding Config.DeepestLevel}" />
+                        </ct:FormItem>
+                        <ct:FormItem Header="跳过已存在的文件">
+                            <ToggleSwitch
+                                VerticalAlignment="Center"
+                                IsChecked="{Binding Config.SkipIfExist}"
+                                OffContent="覆盖"
+                                OnContent="跳过" />
+                        </ct:FormItem>
 
-                    <ct:FormItem Label="最深目录层级：">
-                        <NumericUpDown
-                            Increment="1"
-                            Maximum="10000"
-                            Minimum="0"
-                            Value="{Binding Config.DeepestLevel}" />
-                    </ct:FormItem>
-                    <TextBlock
-                        Opacity="0.7"
-                        Text="例如设置为2，相对路径为D1/D2/D3/D4/File.ext，则目标相对路径将改为D1/D2/D3-D4-File.ext"
-                        TextWrapping="Wrap" />
-                    <CheckBox
-                        Grid.ColumnSpan="99"
-                        Content="跳过已经存在的文件（而不是覆盖）"
-                        IsChecked="{Binding Config.SkipIfExist}" />
+                        <ct:FormItem
+                            Description="{}{FileName}表示原文件名"
+                            Header="目标文件名">
+                            <TextBox
+                                Width="200"
+                                Text="{Binding Config.FileNameTemplate}" />
+                        </ct:FormItem>
+                        <ct:FormItem
+                            Width="200"
+                            Description="{}{FileName}表示原文文件夹名"
+                            Header="目标文件夹名">
+                            <TextBox Text="{Binding Config.FolderNameTemplate}" />
+                        </ct:FormItem>
+                    </ct:WrapFormItemGroup>
+                </ct:FormItem>
+                <ct:FormItem Label="压缩和复制：">
+                    <ct:WrapFormItemGroup>
+                        <ct:FormItem Header="复制后缀名">
+                            <TextBox
+                                MinWidth="200"
+                                MaxWidth="400"
+                                Text="{Binding Config.CopyDirectlyExtensions, Converter={x:Static cvt:Converters.StringList}}"
+                                TextWrapping="Wrap" />
+                        </ct:FormItem>
 
-                    <ct:FormItem Label="目标文件名：">
-                        <TextBox Text="{Binding Config.FileNameTemplate}" />
-                    </ct:FormItem>
-                    <ct:FormItem Label="目标文件夹名：">
-                        <TextBox Text="{Binding Config.FolderNameTemplate}" />
-                    </ct:FormItem>
-                </ct:StackFormItemGroup>
-            </gb:GroupBox>
+                        <ct:FormItem Header="压缩后缀名">
+                            <TextBox
+                                MinWidth="200"
+                                MaxWidth="400"
+                                Text="{Binding Config.CompressExtensions, Converter={x:Static cvt:Converters.StringList}}"
+                                TextWrapping="Wrap" />
+                        </ct:FormItem>
+                    </ct:WrapFormItemGroup>
+                </ct:FormItem>
+                <ct:FormItem Label="图像压缩：">
+                    <ct:WrapFormItemGroup>
+                        <ct:FormItem Header="最大长边像素">
+                            <NumericUpDown
+                                Width="150"
+                                Increment="10"
+                                Maximum="20000"
+                                Minimum="10"
+                                Value="{Binding Config.MaxLongSize}" />
+                        </ct:FormItem>
+                        <ct:FormItem Header="最大短边像素">
+                            <NumericUpDown
+                                Width="150"
+                                Increment="10"
+                                Maximum="10000"
+                                Minimum="10"
+                                Value="{Binding Config.MaxShortSize}" />
+                        </ct:FormItem>
+                        <ct:FormItem Header="压缩后类型">
+                            <TextBox
+                                Width="120"
+                                Text="{Binding Config.OutputFormat}" />
+                        </ct:FormItem>
+                        <ct:FormItem
+                            Header="图像质量（%）"
+                            IsVisible="{Binding}">
+                            <NumericUpDown
+                                Width="120"
+                                FormatString="0"
+                                Increment="10"
+                                Maximum="100"
+                                Minimum="10"
+                                Watermark="10%—100%"
+                                Value="{Binding Config.Quality}" />
+                        </ct:FormItem>
+                        <ct:FormItem Header="处理线程数">
+                            <NumericUpDown
+                                Width="120"
+                                FormatString="0"
+                                Increment="1"
+                                Maximum="16"
+                                Minimum="1"
+                                Value="{Binding Config.Thread}" />
+                        </ct:FormItem>
+                    </ct:WrapFormItemGroup>
+                </ct:FormItem>
 
-
-            <gb:GroupBox Header="文件筛选">
-                <ct:StackFormItemGroup>
-                    <ct:FormItem Label="匹配条件：">
-                        <v:FileFilterControl
-                            HorizontalAlignment="Right"
-                            Filter="{Binding Config.Filter}" />
-                    </ct:FormItem>
-                    <ct:FormItem Label="复制后缀名：">
-                        <TextBox Text="{Binding Config.CopyDirectlyExtensions, Converter={x:Static cvt:Converters.StringList}}" />
-                    </ct:FormItem>
-                    <TextBlock
-                        Opacity="0.7"
-                        Text="直接复制的文件的后缀名。使用逗号分隔。"
-                        TextWrapping="Wrap" />
-                    <ct:FormItem Label="压缩后缀名：">
-                        <TextBox Text="{Binding Config.CompressExtensions, Converter={x:Static cvt:Converters.StringList}}" />
-                    </ct:FormItem>
-                    <TextBlock
-                        Opacity="0.7"
-                        Text="需要压缩的图像的后缀名。使用逗号分隔。"
-                        TextWrapping="Wrap" />
-                </ct:StackFormItemGroup>
-            </gb:GroupBox>
-
-
-            <gb:GroupBox Header="图像压缩">
-                <ct:StackFormItemGroup>
-                    <ct:FormItem Label="最大长边像素：">
-                        <NumericUpDown
-                            Increment="10"
-                            Maximum="20000"
-                            Minimum="10"
-                            Value="{Binding Config.MaxLongSize}" />
-                    </ct:FormItem>
-                    <ct:FormItem Label="最大短边像素：">
-                        <NumericUpDown
-                            Increment="10"
-                            Maximum="10000"
-                            Minimum="10"
-                            Value="{Binding Config.MaxShortSize}" />
-                    </ct:FormItem>
-                    <ct:FormItem Label="压缩后类型：">
-                        <TextBox Text="{Binding Config.OutputFormat}" />
-                    </ct:FormItem>
-                    <ct:FormItem Label="JPEG质量：">
-                        <NumericUpDown
-                            FormatString="0"
-                            Increment="10"
-                            Maximum="100"
-                            Minimum="10"
-                            Value="{Binding Config.Quality}" />
-                    </ct:FormItem>
-                    <ct:FormItem Label="处理线程数：">
-                        <NumericUpDown
-                            FormatString="0"
-                            Increment="1"
-                            Maximum="16"
-                            Minimum="1"
-                            Value="{Binding Config.Thread}" />
-                    </ct:FormItem>
-                </ct:StackFormItemGroup>
-            </gb:GroupBox>
+            </ct:StackFormItemGroup>
 
         </StackPanel>
 

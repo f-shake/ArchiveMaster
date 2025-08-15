@@ -17,25 +17,25 @@
     <v:TwoStepPanelBase.ConfigsContent>
         <ctrl:StackFormItemGroup>
             <ctrl:FormItem Label="文件包目录：">
-                <ctrl:FilePickerTextBox
+                <v:FilePickerTextBox
                     AllowMultiple="True"
                     FileNames="{Binding Config.SourceDirs}"
                     Type="OpenFolder" />
             </ctrl:FormItem>
             <ctrl:FormItem Label="重建目录：">
-                <ctrl:FilePickerTextBox
+                <v:FilePickerTextBox
                     FileNames="{Binding Config.TargetDir}"
                     Type="OpenFolder" />
             </ctrl:FormItem>
             <ctrl:FormItem Label="强制指定目录结构：">
-                <ctrl:FilePickerTextBox
+                <v:FilePickerTextBox
                     FileNames="{Binding Config.PackageInfoFile}"
                     StringFileTypeFilter="文件包信息;*.wpk;;"
                     Type="OpenFile" />
             </ctrl:FormItem>
             <ctrl:FormItem Label="选项：">
                 <ctrl:WrapFormItemGroup>
-                    <ctrl:FormItem Label="密码：">
+                    <ctrl:FormItem Header="密码">
                         <TextBox
                             Width="240"
                             Classes="revealPasswordButton"

@@ -66,13 +66,13 @@
                         <TextBox Text="{Binding SelectedTask.Name}" />
                     </ctrl:FormItem>
                     <ctrl:FormItem Label="需要备份的目录：">
-                        <ctrl:FilePickerTextBox
+                        <v:FilePickerTextBox
                             FileNames="{Binding SelectedTask.SourceDir}"
                             Type="OpenFolder" />
                     </ctrl:FormItem>
 
                     <ctrl:FormItem Label="备份文件存放目录：">
-                        <ctrl:FilePickerTextBox
+                        <v:FilePickerTextBox
                             FileNames="{Binding SelectedTask.BackupDir}"
                             Type="OpenFolder" />
                     </ctrl:FormItem>

@@ -54,7 +54,7 @@
 
             <ctrl:FormItem Label="选项：">
                 <ctrl:WrapFormItemGroup>
-                    <ctrl:FormItem Label="单文件包容量（MB）：">
+                    <ctrl:FormItem Header="单文件包容量（MB）">
                         <StackPanel Orientation="Horizontal">
                             <NumericUpDown
                                 Width="160"
@@ -95,7 +95,7 @@
                         </StackPanel>
 
                     </ctrl:FormItem>
-                    <ctrl:FormItem Label="导出方式：">
+                    <ctrl:FormItem Header="导出方式">
                         <ComboBox
                             Width="140"
                             HorizontalAlignment="Stretch"
@@ -110,8 +110,8 @@
                     </ctrl:FormItem>
 
                     <ctrl:FormItem
-                        IsVisible="{Binding Config.PackingType, Converter={x:Static cvt:Converters.EqualWithParameter}, ConverterParameter=Copy}"
-                        Label="密码：">
+                        Header="密码"
+                        IsVisible="{Binding Config.PackingType, Converter={x:Static cvt:Converters.EqualWithParameter}, ConverterParameter=Copy}">
                         <TextBox
                             Width="200"
                             Classes="revealPasswordButton"

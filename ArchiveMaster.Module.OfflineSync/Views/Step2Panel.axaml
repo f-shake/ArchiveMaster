@@ -29,7 +29,7 @@
         <Grid ColumnDefinitions="2*,8,*">
             <ctrl:StackFormItemGroup x:Name="configs">
                 <ctrl:FormItem Label="异地快照文件：">
-                    <ctrl:FilePickerTextBox
+                    <v:FilePickerTextBox
                         FileNames="{Binding Config.OffsiteSnapshot}"
                         StringFileTypeFilter="异地快照文件;*.os1;;"
                         Type="OpenFile" />
@@ -57,7 +57,7 @@
                 </ctrl:FormItem>
 
                 <ctrl:FormItem Label="导出补丁目录：">
-                    <ctrl:FilePickerTextBox
+                    <v:FilePickerTextBox
                         FileNames="{Binding Config.PatchDir}"
                         Type="OpenFolder" />
                 </ctrl:FormItem>
@@ -84,11 +84,11 @@
 
                 <ctrl:FormItem Label="选项：">
                     <ctrl:WrapFormItemGroup>
-                        <ctrl:FormItem Label="筛选：">
+                        <ctrl:FormItem Header="筛选">
                             <v:FileFilterControl Filter="{Binding Config.Filter}" />
                         </ctrl:FormItem>
 
-                        <ctrl:FormItem Label="导出方式：">
+                        <ctrl:FormItem Header="导出方式">
                             <ComboBox
                                 Width="128"
                                 ItemsSource="{me:EnumValues e:ExportMode}"
@@ -119,7 +119,7 @@
                         </ctrl:FormItem>
 
                         <ctrl:FormItem
-                            Label="修改时间阈值（秒）："
+                            Header="修改时间阈值（秒）"
                             ToolTip.Tip="本地与异地的对应文件，若修改时间之差小于该值，则标识为同一文件">
                             <NumericUpDown
                                 Width="128"

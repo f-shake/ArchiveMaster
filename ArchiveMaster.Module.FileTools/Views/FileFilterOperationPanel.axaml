@@ -48,7 +48,9 @@
                             ItemsSource="{me:EnumValues e:FileFilterOperationTargetFileNameMode}"
                             SelectedItem="{Binding Config.TargetFileNameMode}" />
                     </ct:FormItem>
-                    <ct:FormItem Header="Hash类型">
+                    <ct:FormItem
+                        Header="Hash类型"
+                        IsVisible="{Binding Config.Type, Converter={x:Static cvt:Converters.EqualWithParameter}, ConverterParameter=Hash}">
                         <ComboBox
                             Width="100"
                             DisplayMemberBinding="{Binding ., Converter={x:Static cvt:Converters.Description}}"
@@ -62,11 +64,20 @@
                 Margin="90,0,0,0"
                 Opacity="0.7"
                 TextTrimming="CharacterEllipsis">
-                <Run Text="保持原有目录结构，使用原文件名：将文件复制/移动到目标目录时，完全保留原始目录层级结构，且文件名不变。" />
+                <Run
+                    FontWeight="Bold"
+                    Text="保持原有目录结构，使用原文件名：" />
+                <Run Text="将文件复制/移动到目标目录时，完全保留原始目录层级结构，且文件名不变。" />
                 <LineBreak />
-                <Run Text="平铺到目标目录，使用原文件名：将文件复制/移动到目标目录时，忽略原始目录结构（所有文件直接放在目标根目录），但保留原文件名。" />
+                <Run
+                    FontWeight="Bold"
+                    Text="平铺到目标目录，使用原文件名：" />
+                <Run Text="将文件复制/移动到目标目录时，忽略原始目录结构（所有文件直接放在目标根目录），但保留原文件名。" />
                 <LineBreak />
-                <Run Text="平铺到目标目录，使用相对路径作为新文件名：将文件复制/移动到目标目录时，忽略原始目录结构，但将原始相对路径信息编码到新文件名中，避免冲突。" />
+                <Run
+                    FontWeight="Bold"
+                    Text="平铺到目标目录，使用相对路径作为新文件名：" />
+                <Run Text="将文件复制/移动到目标目录时，忽略原始目录结构，但将原始相对路径信息编码到新文件名中，避免冲突。" />
                 <LineBreak />
             </TextBlock>
 

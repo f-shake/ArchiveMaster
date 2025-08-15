@@ -69,14 +69,14 @@
                 IsVisible="{Binding !Config.Manual}"
                 Label="搜索选项：">
                 <ct:WrapFormItemGroup>
-                    <ct:FormItem Label="类型：">
+                    <ct:FormItem Header="类型">
                         <ComboBox
                             Width="128"
                             DisplayMemberBinding="{Binding ., Converter={x:Static cvt:Converters.Description}}"
                             ItemsSource="{me:EnumValues enums:RenameTargetType}"
                             SelectedItem="{Binding Config.RenameTarget}" />
                     </ct:FormItem>
-                    <ct:FormItem Label="搜索模式：">
+                    <ct:FormItem Header="搜索模式">
                         <ComboBox
                             Width="128"
                             DisplayMemberBinding="{Binding ., Converter={x:Static cvt:Converters.Description}}"
@@ -97,13 +97,11 @@
             <ct:FormItem
                 IsVisible="{Binding !Config.Manual}"
                 Label="重命名选项：">
-                <ct:FormItem Label="重命名模式：">
-                    <ComboBox
-                        Width="192"
-                        DisplayMemberBinding="{Binding ., Converter={x:Static cvt:Converters.Description}}"
-                        ItemsSource="{me:EnumValues enums:RenameMode}"
-                        SelectedItem="{Binding Config.RenameMode}" />
-                </ct:FormItem>
+                <ComboBox
+                    Width="192"
+                    DisplayMemberBinding="{Binding ., Converter={x:Static cvt:Converters.Description}}"
+                    ItemsSource="{me:EnumValues enums:RenameMode}"
+                    SelectedItem="{Binding Config.RenameMode}" />
             </ct:FormItem>
 
         </ct:StackFormItemGroup>
