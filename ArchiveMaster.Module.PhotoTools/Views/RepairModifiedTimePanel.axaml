@@ -19,12 +19,12 @@
                 <v:FilePickerTextBox
                     FileNames="{Binding Config.Dir}"
                     Filter="{Binding Config.Filter}"
-                    IsFilterButtonVisible="True"
+                    IsFilterBarVisible="True"
                     Type="OpenFolder" />
             </ct:FormItem>
             <ct:FormItem Label="选项：">
                 <ct:WrapFormItemGroup>
-                    <ct:FormItem Label="线程数：">
+                    <ct:FormItem Header="线程数">
                         <NumericUpDown
                             Width="120"
                             FormatString="0"
@@ -32,7 +32,7 @@
                             Minimum="1"
                             Value="{Binding Config.ThreadCount}" />
                     </ct:FormItem>
-                    <ct:FormItem Label="最长容忍差异时间（秒）：">
+                    <ct:FormItem Header="允许最长差异时间（秒）">
                         <NumericUpDown
                             Width="120"
                             Maximum="86400"

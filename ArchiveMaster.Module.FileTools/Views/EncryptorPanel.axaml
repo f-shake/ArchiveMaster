@@ -50,20 +50,20 @@
 
             <ct:FormItem Label="算法参数：">
                 <ctrl:WrapFormItemGroup>
-                    <ct:FormItem Label="加密算法：">
+                    <ct:FormItem Header="加密算法">
                         <ComboBox
                             Width="128"
                             ItemsSource="{Binding CipherModes}"
                             SelectedItem="{Binding Config.CipherMode}" />
                     </ct:FormItem>
-                    <ct:FormItem Label="填充模式：">
+                    <ct:FormItem Header="填充模式">
                         <ComboBox
                             Width="128"
                             ItemsSource="{Binding PaddingModes}"
                             SelectedItem="{Binding Config.PaddingMode}" />
                     </ct:FormItem>
 
-                    <ct:FormItem Label="密钥长度：">
+                    <ct:FormItem Header="密钥长度">
                         <ComboBox
                             Width="128"
                             SelectedItem="{Binding Config.KeySize}">
@@ -76,19 +76,19 @@
             </ct:FormItem>
             <ct:FormItem Label="选项：">
                 <ctrl:WrapFormItemGroup>
-                    <CheckBox
-                        Content="加密目录结构（包括文件和文件夹名）"
-                        IsChecked="{Binding Config.EncryptDirectoryStructure}"
-                        ToolTip.Tip="使用单独的文件记录加密后的文件名，防止加密后文件名超过系统支持的最大长度" />
 
-
-                    <ct:FormItem Label="当目标文件存在时：">
+                    <ct:FormItem Header="当目标文件存在时">
                         <ComboBox
                             Width="128"
                             DisplayMemberBinding="{Binding ., Converter={x:Static c:Converters.Description}}"
                             ItemsSource="{me:EnumValues e:FilenameDuplicationPolicy}"
                             SelectedItem="{Binding Config.FilenameDuplicationPolicy}" />
                     </ct:FormItem>
+
+                    <CheckBox
+                        Content="加密目录结构（包括文件和文件夹名）"
+                        IsChecked="{Binding Config.EncryptDirectoryStructure}"
+                        ToolTip.Tip="使用单独的文件记录加密后的文件名，防止加密后文件名超过系统支持的最大长度" />
 
                     <CheckBox
                         Content="删除处理前文件"

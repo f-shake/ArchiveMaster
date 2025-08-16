@@ -66,21 +66,17 @@
                         <TextBox Text="{Binding SelectedTask.Name}" />
                     </ctrl:FormItem>
                     <ctrl:FormItem Label="需要备份的目录：">
-                        <ctrl:FilePickerTextBox
+                        <v:FilePickerTextBox
                             FileNames="{Binding SelectedTask.SourceDir}"
+                            Filter="{Binding SelectedTask.Filter}"
+                            IsFilterBarVisible="True"
                             Type="OpenFolder" />
                     </ctrl:FormItem>
 
                     <ctrl:FormItem Label="备份文件存放目录：">
-                        <ctrl:FilePickerTextBox
+                        <v:FilePickerTextBox
                             FileNames="{Binding SelectedTask.BackupDir}"
                             Type="OpenFolder" />
-                    </ctrl:FormItem>
-
-                    <ctrl:FormItem Label="筛选：">
-                        <v:FileFilterControl
-                            HorizontalAlignment="Right"
-                            Filter="{Binding SelectedTask.Filter}" />
                     </ctrl:FormItem>
 
                     <TextBlock

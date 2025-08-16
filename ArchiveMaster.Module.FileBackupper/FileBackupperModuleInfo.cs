@@ -24,7 +24,8 @@ namespace ArchiveMaster
             new ConfigMetadata(typeof(FileBackupperConfig)),
         ];
 
-        public string ModuleName => "文件备份服务";
+        public string ModuleName => "实时备份服务";
+        public string ModuleDescription => "解决定时备份目录文件到其他物理磁盘，实现文件历史版本控制的需求";
 
         public int Order => 5;
         public IList<Type> SingletonServices { get; } = [typeof(BackupService)];
@@ -40,7 +41,8 @@ namespace ArchiveMaster
                 new ToolPanelInfo(typeof(BackupManageCenterPanel), typeof(BackupManageCenterViewModel), "备份管理中心",
                     "控制后台备份，查看当前状态，查看任务日志", baseUrl + "configuration.svg"),
             },
-            GroupName = ModuleName
+            GroupName = ModuleName,
+            GroupDescription = ModuleDescription
         };
         public void RegisterMessages(Visual visual)
         {

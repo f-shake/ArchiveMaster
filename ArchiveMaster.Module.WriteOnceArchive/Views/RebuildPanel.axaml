@@ -1,0 +1,138 @@
+﻿<v:TwoStepPanelBase
+    x:Class="ArchiveMaster.Views.RebuildPanel"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ctrl="clr-namespace:FzLib.Avalonia.Controls;assembly=FzLib.Avalonia"
+    xmlns:cvt="clr-namespace:ArchiveMaster.Converters;assembly=ArchiveMaster.Core"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:g="clr-namespace:GroupBox.Avalonia.Controls;assembly=GroupBox.Avalonia"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib"
+    xmlns:ui="http://schemas.modernwpf.com/2019"
+    xmlns:v="using:ArchiveMaster.Views"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
+
+    <v:TwoStepPanelBase.ConfigsContent>
+        <ctrl:StackFormItemGroup>
+            <ctrl:FormItem Label="文件包目录：">
+                <v:FilePickerTextBox
+                    AllowMultiple="True"
+                    FileNames="{Binding Config.SourceDirs}"
+                    Type="OpenFolder" />
+            </ctrl:FormItem>
+            <ctrl:FormItem Label="重建目录：">
+                <v:FilePickerTextBox
+                    FileNames="{Binding Config.TargetDir}"
+                    Type="OpenFolder" />
+            </ctrl:FormItem>
+            <ctrl:FormItem Label="强制指定目录结构：">
+                <v:FilePickerTextBox
+                    FileNames="{Binding Config.PackageInfoFile}"
+                    StringFileTypeFilter="文件包信息;*.wpk;;"
+                    Type="OpenFile" />
+            </ctrl:FormItem>
+            <ctrl:FormItem Label="选项：">
+                <ctrl:WrapFormItemGroup>
+                    <ctrl:FormItem Header="密码">
+                        <TextBox
+                            Width="240"
+                            Classes="revealPasswordButton"
+                            PasswordChar="*"
+                            Text="{Binding Config.Password}"
+                            Watermark="若备份时未设置密码，此处可留空" />
+                    </ctrl:FormItem>
+
+                    <CheckBox
+                        Content="跳过已存在的文件"
+                        IsChecked="{Binding Config.SkipIfExisted}" />
+
+                    <CheckBox
+                        Content="仅验证文件完整性"
+                        IsChecked="{Binding Config.CheckOnly}" />
+                </ctrl:WrapFormItemGroup>
+            </ctrl:FormItem>
+        </ctrl:StackFormItemGroup>
+    </v:TwoStepPanelBase.ConfigsContent>
+
+
+    <v:TwoStepPanelBase.ResultsContent>
+        <Grid
+            ColumnDefinitions="*,8,*"
+            RowDefinitions="*,Auto">
+            <GridSplitter
+                Grid.Column="1"
+                Width="8"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Stretch"
+                Background="Transparent" />
+            <g:GroupBox Header="目标结构树">
+                <v:WriteOnceTreeFileDataGrid
+                    ColumnIsCheckedIndex="-1"
+                    ColumnStatusIndex="-1"
+                    FileNameHalfTransparentBindingPath="HasPhysicalFile"
+                    ItemsSource="{Binding FileTree}" />
+            </g:GroupBox>
+
+            <g:GroupBox
+                Grid.Column="2"
+                Header="需要重建的文件">
+                <v:SimpleFileDataGrid
+                    ColumnLengthIndex="1.2"
+                    ColumnNameIndex="1.1"
+                    ColumnPathIndex="1.3"
+                    ColumnTimeIndex="1.4"
+                    ItemsSource="{Binding MatchedFiles}">
+                    <v:SimpleFileDataGrid.Columns>
+                        <DataGridTemplateColumn
+                            CanUserResize="False"
+                            Header="已加密"
+                            SortMemberPath="AlreadyHasGps">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Ellipse
+                                        Width="8"
+                                        Height="8"
+                                        Fill="SkyBlue"
+                                        IsVisible="{Binding IsEncrypted}" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTextColumn
+                            Binding="{Binding Hash}"
+                            Header="文件Hash"
+                            IsReadOnly="True" />
+                        <DataGridTextColumn
+                            Binding="{Binding PhysicalFile}"
+                            Header="物理文件"
+                            IsReadOnly="True" />
+                    </v:SimpleFileDataGrid.Columns>
+                </v:SimpleFileDataGrid>
+
+            </g:GroupBox>
+
+            <TextBlock
+                Grid.Row="1"
+                Grid.ColumnSpan="3"
+                Margin="0,8,0,0"
+                IsVisible="{Binding Report, Converter={x:Static cvt:Converters.IsNotNull}}"
+                TextAlignment="Center">
+                <Run Text="匹配文件" />
+                <Run Text="{Binding Report.MatchedFileCount, Mode=OneWay}" />
+                <Run Text="个（" />
+                <Run Text="{Binding Report.MatchedFileLength, Mode=OneWay, Converter={x:Static cvt:Converters.FileLength}}" />
+                <Run Text="），共" />
+                <Run Text="{Binding Report.TotalFileCount, Mode=OneWay}" />
+                <Run Text="个（" />
+                <Run Text="{Binding Report.TotalFileLength, Mode=OneWay, Converter={x:Static cvt:Converters.FileLength}}" />
+                <Run Text="），占" />
+                <Run Text="{Binding Report.MatchCountPercent, StringFormat={}{0:P2}}" />
+                <Run Text="（" />
+                <Run Text="{Binding Report.MatchLengthPercent, StringFormat={}{0:P2}}" />
+                <Run Text="）" />
+            </TextBlock>
+        </Grid>
+    </v:TwoStepPanelBase.ResultsContent>
+
+</v:TwoStepPanelBase>

@@ -32,6 +32,8 @@ public class TreeFileDataGridStatisticsConverter : IValueConverter
             fileCount += dir.SubFileCount;
         }
 
+        fileCount += e.OfType<SimpleFileInfo>().Count(p => !p.IsDir);
+
         return $"共{folderCount}个文件夹，{fileCount}个文件";
     }
 

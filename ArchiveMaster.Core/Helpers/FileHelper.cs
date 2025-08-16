@@ -48,8 +48,8 @@ public static class FileHelper
             FileDeleteHelper.DirectlyDelete(path);
         }
     }
-
-    public static bool IsMatched(this FileFilterHelper fileFilterHelper, SimpleFileInfo file)
+    
+   public static bool IsMatched(this FileFilterHelper fileFilterHelper, SimpleFileInfo file)
     {
         return fileFilterHelper.IsMatched(file.Path);
     }

@@ -5,37 +5,101 @@
     xmlns:cvt="clr-namespace:ArchiveMaster.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:v="clr-namespace:ArchiveMaster.Views"
     xmlns:views="clr-namespace:ArchiveMaster.Views"
     x:Name="root"
     d:DesignHeight="450"
     d:DesignWidth="800"
     DragDrop.AllowDrop="True"
     mc:Ignorable="d">
-    <Grid ColumnDefinitions="Auto,0,*,0,Auto,0,Auto">
-        <TextBlock
-            Margin="0,0,8,0"
-            VerticalAlignment="Center"
-            IsVisible="{Binding ElementName=root, Path=Label, Converter={x:Static cvt:Converters.IsNotNull}}"
-            Text="{Binding ElementName=root, Path=Label}" />
-        <TextBox
-            Grid.Column="2"
-            VerticalAlignment="Center"
-            AcceptsReturn="{Binding ElementName=root, Path=AllowMultiple}"
-            MaxLines="3"
-            Text="{Binding ElementName=root, Path=FileNames}"
-            TextWrapping="{Binding ElementName=root, Path=AllowMultiple, Converter={x:Static cvt:Converters.TextWrapping}}" />
-        <Button
+    <Grid RowDefinitions="Auto,Auto">
+        <Grid ColumnDefinitions="*,Auto">
+            <TextBox
+                x:Name="txt"
+                VerticalAlignment="Center"
+                AcceptsReturn="{Binding #root.AllowMultiple}"
+                MaxLines="3"
+                Text="{Binding #root.FileNames}"
+                TextWrapping="{Binding #root.AllowMultiple, Converter={x:Static cvt:Converters.TextWrapping}}" />
+
+            <!--<views:FileFilterControl
             Grid.Column="4"
-            Margin="8,0,0,0"
-            VerticalAlignment="Center"
-            Click="Button_Click"
-            Content="{Binding ElementName=root, Path=ButtonContent}" />
-        <views:FileFilterControl
-            Grid.Column="6"
             Margin="8,0,0,0"
             VerticalAlignment="Center"
             ButtonContent="筛选.."
             Filter="{Binding ElementName=root, Path=Filter}"
-            IsVisible="{Binding ElementName=root, Path=IsFilterButtonVisible}" />
+            IsVisible="{Binding ElementName=root, Path=IsFilterBarVisible}" />-->
+            <Button
+                Grid.Column="1"
+                Margin="8,0,0,0"
+                VerticalAlignment="Center"
+                Click="Button_Click"
+                Content="{Binding #root.ButtonContent}" />
+        </Grid>
+        <Grid
+            Grid.Row="1"
+            Margin="0,2,0,0"
+            ColumnDefinitions="Auto,8,Auto,8,*,8,Auto"
+            IsVisible="{Binding #root.IsFilterBarVisible}">
+            <Grid.Resources>
+                <DataTemplate x:Key="SwitchContent">
+                    <Button
+                        Grid.Column="2"
+                        VerticalAlignment="Center"
+                        Classes="Link">
+                        <TextBlock Text="筛选.." />
+                        <Button.Flyout>
+                            <v:PopupFlyout
+                                Closed="FileFilterPopup_Closed"
+                                OverlayDismissEventPassThrough="True">
+                                <v:FileFilterPanel Filter="{Binding #root.Filter}" />
+                            </v:PopupFlyout>
+                        </Button.Flyout>
+
+                    </Button>
+                </DataTemplate>
+            </Grid.Resources>
+            <ToggleSwitch
+                IsChecked="{Binding #root.Filter.IsEnabled}"
+                OffContentTemplate="{StaticResource SwitchContent}"
+                OnContentTemplate="{StaticResource SwitchContent}" />
+            <TextBlock
+                x:Name="tbkFilterDescription"
+                Grid.Column="4"
+                Text="{Binding #root.Filter, Converter={x:Static cvt:Converters.FileFilter}}"
+                TextTrimming="CharacterEllipsis">
+                <Interaction.Behaviors>
+                    <DataTrigger
+                        Binding="{Binding #root.Filter.IsEnabled}"
+                        Value="False">
+                        <DataTrigger.Actions>
+                            <ChangePropertyAction
+                                PropertyName="Opacity"
+                                Value="0.5" />
+                        </DataTrigger.Actions>
+                    </DataTrigger>
+                    <DataTrigger
+                        Binding="{Binding #root.Filter.IsEnabled}"
+                        Value="True">
+                        <DataTrigger.Actions>
+                            <ChangePropertyAction
+                                PropertyName="Opacity"
+                                Value="1.0" />
+                        </DataTrigger.Actions>
+                    </DataTrigger>
+                </Interaction.Behaviors>
+            </TextBlock>
+
+            <Button
+                Grid.Column="6"
+                VerticalAlignment="Center"
+                Classes="Link"
+                Click="TestButton_Click"
+                IsEnabled="{Binding #root.FileNames, Converter={x:Static cvt:Converters.IsNotNull}}"
+                IsVisible="{Binding #root.Filter, Converter={x:Static cvt:Converters.IsNotNull}}">
+                <TextBlock Text="使用当前目录测试" />
+
+            </Button>
+        </Grid>
     </Grid>
 </UserControl>

@@ -114,27 +114,23 @@
     <v:TwoStepPanelBase.ConfigsContent>
         <ctrl:StackFormItemGroup>
             <ctrl:FormItem Label="模板目录：">
-                <ctrl:FilePickerTextBox
+                <v:FilePickerTextBox
                     FileNames="{Binding Config.TemplateDir}"
+                    Filter="{Binding Config.Filter}"
+                    IsFilterBarVisible="True"
                     Type="OpenFolder" />
             </ctrl:FormItem>
 
             <ctrl:FormItem Label="源目录：">
-                <ctrl:FilePickerTextBox
+                <v:FilePickerTextBox
                     FileNames="{Binding Config.SourceDir}"
                     Type="OpenFolder" />
             </ctrl:FormItem>
 
             <ctrl:FormItem Label="目标目录：">
-                <ctrl:FilePickerTextBox
+                <v:FilePickerTextBox
                     FileNames="{Binding Config.TargetDir}"
                     Type="OpenFolder" />
-            </ctrl:FormItem>
-
-            <ctrl:FormItem Label="筛选：">
-                <v:FileFilterControl
-                    HorizontalAlignment="Right"
-                    Filter="{Binding Config.Filter}" />
             </ctrl:FormItem>
 
             <ctrl:FormItem Label="文件匹配选项：">

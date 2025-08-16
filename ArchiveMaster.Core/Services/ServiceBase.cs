@@ -199,7 +199,7 @@ namespace ArchiveMaster.Services
             {
                 if (file.Status == ProcessStatus.Ready)
                 {
-                    file.Complete();
+                    file.Success();
                 }
             }
         }
@@ -373,7 +373,7 @@ namespace ArchiveMaster.Services
             }
             catch (System.Security.Cryptography.CryptographicException ex)
             {
-                throw new Exception($"密码学失败，可能是密钥或配置不正确", ex);
+                ProcessException(options, file, new Exception($"加解密操作失败，可能是密钥或配置不正确，也有可能是文件损坏（{ex.Message}）", ex));
             }
             catch (Exception ex)
             {

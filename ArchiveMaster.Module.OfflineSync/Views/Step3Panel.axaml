@@ -23,7 +23,7 @@
     <v:TwoStepPanelBase.ConfigsContent>
         <ctrl:StackFormItemGroup>
             <ctrl:FormItem Label="本地补丁目录：">
-                <ctrl:FilePickerTextBox
+                <v:FilePickerTextBox
                     ButtonContent="浏览.."
                     FileNames="{Binding Config.PatchDir}"
                     Type="OpenFolder" />

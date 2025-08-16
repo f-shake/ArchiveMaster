@@ -109,7 +109,7 @@ public partial class BackupService
             {
                 dbFile.BackupFileName = Guid.NewGuid().ToString("N");
                 string backupFilePath = Path.Combine(BackupTask.BackupDir, dbFile.BackupFileName);
-                dbFile.Hash = await FileHashHelper.ComputeHashAsync(file.FullName, cancellationToken: cancellationToken);
+                dbFile.Hash = await FileHashHelper.ComputeHashStringAsync(file.FullName, cancellationToken: cancellationToken);
 
                 var existedFile = db.GetSameFile(file.LastWriteTime, file.Length, dbFile.Hash);
                 if (existedFile != null) //已经存在一样的物理文件了

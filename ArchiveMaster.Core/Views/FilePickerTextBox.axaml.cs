@@ -1,30 +1,37 @@
 using ArchiveMaster.Configs;
+using ArchiveMaster.Helpers;
+using ArchiveMaster.Messages;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
+using CommunityToolkit.Mvvm.Messaging;
 using FzLib.Avalonia.Converters;
+using FzLib.Avalonia.Dialogs;
 using FzLib.IO;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace ArchiveMaster.Views;
 
 public partial class FilePickerTextBox : UserControl
 {
-    public static string AndroidExternalFilesDir { get; set; }
-    
+    public static readonly StyledProperty<bool> AllowMultipleProperty =
+        AvaloniaProperty.Register<FilePickerTextBox, bool>(nameof(AllowMultiple));
+
     public static readonly StyledProperty<object> ButtonContentProperty =
         AvaloniaProperty.Register<FilePickerTextBox, object>(nameof(ButtonContent), "浏览..");
 
     public static readonly StyledProperty<string> FileNamesProperty =
         AvaloniaProperty.Register<FilePickerTextBox, string>(nameof(FileNames), defaultBindingMode: BindingMode.TwoWay);
 
-    public static readonly StyledProperty<string> LabelProperty =
-        AvaloniaProperty.Register<FilePickerTextBox, string>(nameof(Label));
-
     public static readonly StyledProperty<FileFilterRule> FilterProperty =
         AvaloniaProperty.Register<FilePickerTextBox, FileFilterRule>(nameof(Filter));
+
+    public static readonly StyledProperty<bool> IsFilterBarVisibleProperty =
+        AvaloniaProperty.Register<FilePickerTextBox, bool>(nameof(IsFilterBarVisible));
 
     public static readonly DirectProperty<FilePickerTextBox, string> SaveFileDefaultExtensionProperty =
         AvaloniaProperty.RegisterDirect<FilePickerTextBox, string>(nameof(SaveFileDefaultExtension),
@@ -44,36 +51,14 @@ public partial class FilePickerTextBox : UserControl
     public static readonly StyledProperty<string> TitleProperty =
         AvaloniaProperty.Register<FilePickerTextBox, string>(nameof(Title));
 
-    public static readonly StyledProperty<bool> IsFilterButtonVisibleProperty =
-        AvaloniaProperty.Register<FilePickerTextBox, bool>(nameof(IsFilterButtonVisible));
-
-    public static readonly StyledProperty<bool> AllowMultipleProperty =
-        AvaloniaProperty.Register<FilePickerTextBox, bool>(nameof(AllowMultiple));
-
-    public bool IsFilterButtonVisible
-    {
-        get => GetValue(IsFilterButtonVisibleProperty);
-        set => SetValue(IsFilterButtonVisibleProperty, value);
-    }
-
-    public bool AllowMultiple
-    {
-        get => GetValue(AllowMultipleProperty);
-        set => SetValue(AllowMultipleProperty, value);
-    }
-
     private string saveFileDefaultExtension = default;
-
     private string saveFileSuggestedFileName = default;
-
     private string suggestedStartLocation = default;
-
-
     public FilePickerTextBox()
     {
         InitializeComponent();
-        AddHandler(DragDrop.DragEnterEvent, DragEnter);
-        AddHandler(DragDrop.DropEvent, Drop);
+        txt.AddHandler(DragDrop.DragEnterEvent, DragEnter);
+        txt.AddHandler(DragDrop.DropEvent, Drop);
     }
 
     public enum PickerType
@@ -83,16 +68,17 @@ public partial class FilePickerTextBox : UserControl
         SaveFile
     }
 
+    public static string AndroidExternalFilesDir { get; set; }
+    public bool AllowMultiple
+    {
+        get => GetValue(AllowMultipleProperty);
+        set => SetValue(AllowMultipleProperty, value);
+    }
+
     public object ButtonContent
     {
         get => GetValue(ButtonContentProperty);
         set => SetValue(ButtonContentProperty, value);
-    }
-
-    public FileFilterRule Filter
-    {
-        get => GetValue(FilterProperty);
-        set => SetValue(FilterProperty, value);
     }
 
     public string FileNames
@@ -103,12 +89,17 @@ public partial class FilePickerTextBox : UserControl
 
     public List<FilePickerFileType> FileTypeFilter { get; set; }
 
-    public string Label
+    public FileFilterRule Filter
     {
-        get => GetValue(LabelProperty);
-        set => SetValue(LabelProperty, value);
+        get => GetValue(FilterProperty);
+        set => SetValue(FilterProperty, value);
     }
 
+    public bool IsFilterBarVisible
+    {
+        get => GetValue(IsFilterBarVisibleProperty);
+        set => SetValue(IsFilterBarVisibleProperty, value);
+    }
     public string SaveFileDefaultExtension
     {
         get => saveFileDefaultExtension;
@@ -290,6 +281,12 @@ public partial class FilePickerTextBox : UserControl
         return false;
     }
 
+    private void FileFilterPopup_Closed(object sender, EventArgs e)
+    {
+        var binding = BindingOperations.GetBindingExpressionBase(tbkFilterDescription, TextBlock.TextProperty);
+        binding?.UpdateTarget();
+    }
+
     private string GetPath(IStorageItem file)
     {
         if (OperatingSystem.IsAndroid())
@@ -307,5 +304,65 @@ public partial class FilePickerTextBox : UserControl
         }
 
         return file.TryGetLocalPath();
+    }
+
+    private async void TestButton_Click(object sender, RoutedEventArgs e)
+    {
+        var dialog = HostServices.GetRequiredService<IDialogService>();
+        WeakReferenceMessenger.Default.Send(new LoadingMessage(true));
+        try
+        {
+            if (Type is not PickerType.OpenFolder)
+            {
+                throw new Exception("只有目录可供筛选测试");
+            }
+            if (Filter == null)
+            {
+                throw new Exception("筛选器为空");
+            }
+            string[] dirs = null;
+            if (AllowMultiple)
+            {
+                dirs = FileNameHelper.GetDirNames(FileNames);
+            }
+            else
+            {
+                dirs = [FileNames];
+            }
+            foreach (var dir in dirs)
+            {
+                if (!Directory.Exists(dir))
+                {
+                    throw new DirectoryNotFoundException(dir);
+                }
+            }
+
+            var results = new List<FileInfo>();
+            var filter = Filter;
+            await Task.Run(() =>
+            {
+                foreach (var dir in dirs)
+                {
+                    results.AddRange(new DirectoryInfo(dir)
+                    .EnumerateFiles("*", FileEnumerateExtension.GetEnumerationOptions())
+                    .ApplyFilter(default, filter));
+                }
+            });
+
+            var fileNames = string.Join(Environment.NewLine, results.Select(p => p.FullName).Take(1000));
+            if (results.Count > 1000)
+            {
+                fileNames = "仅显示前1000个：" + Environment.NewLine + fileNames;
+            }
+            await dialog.ShowOkDialogAsync("筛选测试", $"共筛选到{results.Count}个文件", fileNames);
+        }
+        catch (Exception ex)
+        {
+            await dialog.ShowErrorDialogAsync("测试失败", ex);
+        }
+        finally
+        {
+            WeakReferenceMessenger.Default.Send(new LoadingMessage(false));
+        }
     }
 }

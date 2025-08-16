@@ -6,6 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:dialog="using:FzLib.Avalonia.Dialogs"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:sys="using:System"
     xmlns:vm="using:ArchiveMaster.ViewModels"
     Title="设置"
     d:DesignHeight="450"
@@ -16,7 +17,7 @@
         <CheckBox
             Content="调试模式"
             IsChecked="{Binding Path=Configs.DebugMode}" />
-        <ct:FormItem Label="调试模式循环延迟（毫秒）：">
+        <ct:FormItem Header="调试模式循环延迟（毫秒）">
             <TextBox Text="{Binding Path=Configs.DebugModeLoopDelay}" />
         </ct:FormItem>
         <CheckBox
@@ -27,5 +28,19 @@
         <CheckBox
             Content="优先删除文件到回收站"
             IsChecked="{Binding Configs.PreferDeleteToRecycleBin}" />
+
+        <ct:FormItem
+            Description="将多级目录路径按指定层级转换为扁平化格式时，使用分隔符代替斜杠"
+            Header="目录编码分隔符">
+            <ComboBox SelectedItem="{Binding Path=Configs.FlattenPathSeparatorReplacement}">
+                <sys:Char>-</sys:Char>
+                <sys:Char>_</sys:Char>
+                <sys:Char>%</sys:Char>
+                <sys:Char>.</sys:Char>
+                <sys:Char>#</sys:Char>
+                <sys:Char>@</sys:Char>
+                <sys:Char>&#32;</sys:Char>
+            </ComboBox>
+        </ct:FormItem>
     </StackPanel>
 </dialog:DialogHost>

@@ -18,47 +18,53 @@ using FzLib;
 using FzLib.Avalonia.Dialogs;
 using Microsoft.Extensions.DependencyInjection;
 using System.Runtime.CompilerServices;
+using Avalonia.Threading;
+using FzLib.Programming;
+using Serilog;
 
 namespace ArchiveMaster;
 
-public partial class App : Application
+public class App : Application
 {
-    private bool dontOpen = false;
+    private bool doNotOpen = false;
+
     private bool isMainWindowOpened = false;
+
+    public static readonly int ProcessId = Process.GetCurrentProcess().Id;
     public event EventHandler<ControlledApplicationLifetimeExitEventArgs> Exit;
 
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
-        if (RuntimeFeature.IsDynamicCodeSupported)//非AOT，启动速度慢
+        if (RuntimeFeature.IsDynamicCodeSupported) //非AOT，启动速度慢
         {
             ShowSplashScreenIfNeeded();
         }
 
-        if (HasAnotherInstance())
+        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            SplashWindow.CloseCurrent();
-            dontOpen = true;
-            ShowMultiInstanceDialog();
-        }
-        else
-        {
-            Initializer.Initialize();
-            if (OperatingSystem.IsWindows())
+            if (!TcpSingleInstanceHelper.EnsureSingleInstance(OnActivatedAsync))
             {
-                Resources.Add("ContentControlThemeFontFamily", new FontFamily("Microsoft YaHei UI"));
+                Log.Information("检测到已有实例在运行，程序将退出");
+                SplashWindow.CloseCurrent();
+                doNotOpen = true;
+                desktop.Shutdown();
+                Environment.Exit(0);
+                return;
             }
+        }
+
+        Initializer.Initialize();
+        if (OperatingSystem.IsWindows())
+        {
+            Resources.Add("ContentControlThemeFontFamily", new FontFamily("Microsoft YaHei UI"));
         }
     }
 
-    private static bool HasAnotherInstance()
+    static Task OnActivatedAsync()
     {
-        var currentProcess = Process.GetCurrentProcess();
-        var processes = Process
-            .GetProcessesByName(currentProcess.ProcessName)
-            .Where(p => p.MainModule?.FileName == currentProcess.MainModule?.FileName)
-            .Where(p => p.Id != currentProcess.Id);
-        return processes.Any();
+        Dispatcher.UIThread.Invoke(() => { (App.Current as App).ActivateMainWindow(); });
+        return Task.CompletedTask;
     }
 
     private void ShowSplashScreenIfNeeded()
@@ -77,7 +83,7 @@ public partial class App : Application
 
     public override void OnFrameworkInitializationCompleted()
     {
-        if (dontOpen)
+        if (doNotOpen)
         {
             return;
         }
@@ -107,6 +113,7 @@ public partial class App : Application
     {
         TrayIcon.GetIcons(this)?[0]?.Dispose();
         Exit?.Invoke(sender, e);
+        TcpSingleInstanceHelper.Dispose();
         await Initializer.StopAsync();
     }
 
@@ -145,25 +152,8 @@ public partial class App : Application
         return desktop.MainWindow as MainWindow;
     }
 
-    private async void ShowMultiInstanceDialog()
-    {
-        if (TrayIcon.GetIcons(this) is { Count: > 0 })
-        {
-            TrayIcon.GetIcons(this)[0].IsVisible = false;
-        }
-        MessageDialog dialog = new MessageDialog(new MessageDialogViewModel()
-        {
-            Title = "重复启动应用",
-            Message = "当前位置的程序已启动，无法重复启动多个实例"
-        }, MessageDialog.MessageDialogButtonDefinition.OK);
-        await dialog.ShowModelessWindowDialog();
-        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-        {
-            desktop.Shutdown();
-        }
-    }
 
-    private void TrayIcon_Clicked(object sender, EventArgs e)
+    private void ActivateMainWindow()
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
@@ -183,5 +173,10 @@ public partial class App : Application
         {
             throw new PlatformNotSupportedException();
         }
+    }
+
+    private void TrayIcon_Clicked(object sender, EventArgs e)
+    {
+        ActivateMainWindow();
     }
 }

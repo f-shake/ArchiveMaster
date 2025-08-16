@@ -28,9 +28,11 @@ namespace ArchiveMaster
             new ConfigMetadata(typeof(TwinFileCleanerConfig)),
             new ConfigMetadata(typeof(BatchCommandLineConfig)),
             new ConfigMetadata(typeof(LinkDeduplicationConfig)),
+            new ConfigMetadata(typeof(FileFilterOperationConfig)),
         ];
 
         public string ModuleName => "文件目录工具";
+        public string ModuleDescription => "解决对文件和目录进行批量操作的需求";
 
         public int Order => 1;
         public IList<Type> SingletonServices { get; }
@@ -45,7 +47,8 @@ namespace ArchiveMaster
             typeof(TwinFileCleanerService),
             typeof(TimeClassifyService),
             typeof(BatchCommandLineService),
-            typeof(LinkDeduplicationService)
+            typeof(LinkDeduplicationService),
+            typeof(FileFilterOperationService),
         ];
 
         public ToolPanelGroupInfo Views => new ToolPanelGroupInfo()
@@ -71,9 +74,12 @@ namespace ArchiveMaster
                     "以文件或目录为元素，批量执行命令行", baseUrl + "cmd.svg"), 
                 new ToolPanelInfo(typeof(LinkDeduplicationPanel), typeof(LinkDeduplicationViewModel), "硬链接去重",
                     "通过硬链接替换重复文件，节省磁盘空间", baseUrl + "link.svg"),
+                new ToolPanelInfo(typeof(FileFilterOperationPanel), typeof(FileFilterOperationViewModel), "文件筛选操作",
+                    "对筛选后的文件进行复制、移动、删除操作", baseUrl + "filter.svg"),
 
             },
-            GroupName = ModuleName
+            GroupName = ModuleName,
+            GroupDescription = ModuleDescription
         };
     }
 }

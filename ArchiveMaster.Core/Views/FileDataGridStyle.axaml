@@ -162,26 +162,31 @@
                             Orientation="Horizontal"
                             Spacing="8">
                             <Button
+                                x:Name="PART_SelectAllButton"
                                 Classes="Icon"
                                 Content="{StaticResource SelectAll}"
                                 FontFamily="{StaticResource IconFont}"
                                 ToolTip.Tip="全选" />
                             <Button
-                                Classes="Icon"
-                                Content="{StaticResource Switch}"
-                                FontFamily="{StaticResource IconFont}"
-                                ToolTip.Tip="反选" />
-                            <Button
+                                x:Name="PART_SelectNoneButton"
                                 Classes="Icon"
                                 Content="{StaticResource ClearSelection}"
                                 FontFamily="{StaticResource IconFont}"
                                 ToolTip.Tip="全不选" />
+                            <Button
+                                x:Name="PART_SwitchSelectionButton"
+                                Classes="Icon"
+                                Content="{StaticResource Switch}"
+                                FontFamily="{StaticResource IconFont}"
+                                ToolTip.Tip="反选" />
                             <ToggleButton
+                                x:Name="PART_ProcessCheckedOnlyButton"
                                 Classes="Icon"
                                 Content="{StaticResource MultiSelect}"
                                 FontFamily="{StaticResource IconFont}"
                                 ToolTip.Tip="仅处理选中的行" />
                             <Button
+                                x:Name="PART_SearchButton"
                                 Classes="Icon"
                                 Content="{StaticResource Search}"
                                 FontFamily="{StaticResource IconFont}"
@@ -201,6 +206,7 @@
                                 </Button.Flyout>
                             </Button>
                             <Button
+                                x:Name="PART_FilterButton"
                                 Classes="Icon"
                                 Content="{StaticResource Filter}"
                                 FontFamily="{StaticResource IconFont}"
@@ -228,7 +234,8 @@
                                 Spacing="8">
                                 <TextBlock
                                     IsVisible="{Binding $parent[DataGrid].ItemsSource, Converter={x:Static cvt:Converters.IsNotNull}}"
-                                    Text="{Binding $parent[DataGrid].ItemsSource.Count, StringFormat='共 {0} 项'}" />
+                                    Text="{Binding $parent[DataGrid].ItemsSource.Count, StringFormat='共 {0} 项'}"
+                                    ToolTip.Tip="{Binding $parent[DataGrid].ItemsSource.Count, StringFormat='共 {0} 项'}" />
                             </StackPanel>
                         </ContentControl>
                         <ContentControl

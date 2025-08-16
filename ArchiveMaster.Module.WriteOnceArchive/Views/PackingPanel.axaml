@@ -1,0 +1,244 @@
+﻿<v:TwoStepPanelBase
+    x:Class="ArchiveMaster.Views.PackingPanel"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ctrl="clr-namespace:FzLib.Avalonia.Controls;assembly=FzLib.Avalonia"
+    xmlns:cvt="using:ArchiveMaster.Converters"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:enums="using:ArchiveMaster.Enums"
+    xmlns:fcvt="using:FzLib.Avalonia.Converters"
+    xmlns:gb="using:GroupBox.Avalonia.Controls"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:me="using:FzLib.Avalonia.MarkupExtensions"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib"
+    xmlns:ui="http://schemas.modernwpf.com/2019"
+    xmlns:v="using:ArchiveMaster.Views"
+    xmlns:vm="using:ArchiveMaster.ViewModels"
+    x:Name="root"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    ExecuteButtonContent="导出"
+    mc:Ignorable="d">
+    <v:TwoStepPanelBase.ConfigsContent>
+        <ctrl:StackFormItemGroup>
+            <ctrl:FormItem Label="源目录：">
+                <v:FilePickerTextBox
+                    FileNames="{Binding Config.SourceDir}"
+                    Filter="{Binding Config.Filter}"
+                    IsFilterBarVisible="True"
+                    Type="OpenFolder" />
+            </ctrl:FormItem>
+            <ctrl:FormItem Label="导出目录：">
+                <v:FilePickerTextBox
+                    FileNames="{Binding Config.TargetDir}"
+                    Type="OpenFolder" />
+            </ctrl:FormItem>
+            <ctrl:FormItem
+                Description="记录已归档文件的哈希值，用于下次打包时跳过这些文件，避免重复收录。该文件位于上一次打包时的目标文件夹中。"
+                Label="早期文件包：">
+                <v:FilePickerTextBox
+                    AllowMultiple="True"
+                    FileNames="{Binding Config.PreviousPackageInfoFiles}"
+                    StringFileTypeFilter="文件包信息;*.wpk;;"
+                    Type="OpenFile" />
+            </ctrl:FormItem>
+
+            <ctrl:FormItem
+                Description="缓存文件路径、修改时间、大小与其哈希值的对应关系，用于加速中断后的哈希计算。该文件位于上一次打包时的目标文件夹中。"
+                Label="Hash计算缓存：">
+                <v:FilePickerTextBox
+                    FileNames="{Binding Config.HashCacheFile}"
+                    StringFileTypeFilter="Hash缓存文件;*.whc;;"
+                    Type="OpenFile" />
+            </ctrl:FormItem>
+
+            <ctrl:FormItem Label="选项：">
+                <ctrl:WrapFormItemGroup>
+                    <ctrl:FormItem Header="单文件包容量（MB）">
+                        <StackPanel Orientation="Horizontal">
+                            <NumericUpDown
+                                Width="160"
+                                HorizontalAlignment="Stretch"
+                                FormatString="N0"
+                                Increment="100"
+                                Maximum="1000000"
+                                Minimum="100"
+                                Value="{Binding Config.PackageSizeMB}" />
+                            <HyperlinkButton
+                                Padding="27,6"
+                                Content="预设">
+                                <Button.Flyout>
+                                    <MenuFlyout ItemsSource="{Binding Source={x:Static vm:PackingViewModel.PresetPackageSizes}}">
+                                        <MenuFlyout.ItemContainerTheme>
+                                            <ControlTheme
+                                                BasedOn="{StaticResource {x:Type MenuItem}}"
+                                                TargetType="MenuItem">
+                                                <Setter Property="HeaderTemplate">
+                                                    <DataTemplate>
+                                                        <TextBlock>
+                                                            <Run Text="{Binding ., Converter={x:Static cvt:Converters.Tuple}, ConverterParameter=Item2}" />
+                                                            <Run Text="（" />
+                                                            <Run Text="{Binding ., Converter={x:Static cvt:Converters.Tuple}, ConverterParameter=Item1}" />
+                                                            <Run Text="MB）" />
+                                                        </TextBlock>
+                                                    </DataTemplate>
+                                                </Setter>
+                                                <Setter Property="Header" Value="{Binding .}" />
+                                                <Setter Property="TextBlock.TextDecorations" Value="{x:Null}" />
+                                                <Setter Property="Command" Value="{Binding #root.DataContext.SetPackageSizeCommand}" />
+                                                <Setter Property="CommandParameter" Value="{Binding ., Converter={x:Static cvt:Converters.Tuple}, ConverterParameter=Item1}" />
+                                            </ControlTheme>
+                                        </MenuFlyout.ItemContainerTheme>
+                                    </MenuFlyout>
+                                </Button.Flyout>
+                            </HyperlinkButton>
+                        </StackPanel>
+
+                    </ctrl:FormItem>
+                    <ctrl:FormItem Header="导出方式">
+                        <ComboBox
+                            Width="140"
+                            HorizontalAlignment="Stretch"
+                            ItemsSource="{me:EnumValues enums:PackingType}"
+                            SelectedItem="{Binding Config.PackingType}">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding ., Converter={x:Static cvt:Converters.Description}}" />
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                    </ctrl:FormItem>
+
+                    <ctrl:FormItem
+                        Header="密码"
+                        IsVisible="{Binding Config.PackingType, Converter={x:Static cvt:Converters.EqualWithParameter}, ConverterParameter=Copy}">
+                        <TextBox
+                            Width="200"
+                            Classes="revealPasswordButton"
+                            PasswordChar="*"
+                            Text="{Binding Config.Password}"
+                            Watermark="若为空，则不进行加密" />
+                    </ctrl:FormItem>
+
+                </ctrl:WrapFormItemGroup>
+            </ctrl:FormItem>
+        </ctrl:StackFormItemGroup>
+    </v:TwoStepPanelBase.ConfigsContent>
+    <v:TwoStepPanelBase.ResultsContent>
+        <Grid
+            Grid.Row="2"
+            ColumnDefinitions="360,8,*"
+            RowDefinitions="*,8,Auto">
+            <GridSplitter
+                Grid.RowSpan="99"
+                Grid.Column="1"
+                Width="8"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Stretch"
+                Background="Transparent" />
+            <gb:GroupBox Header="文件包">
+                <ListBox
+                    ItemsSource="{Binding WriteOnceFilePackages}"
+                    SelectedItem="{Binding SelectedPackage}">
+                    <ListBox.Styles>
+                        <Style Selector="ListBoxItem">
+                            <Setter Property="Padding" Value="4" />
+                            <Setter Property="CornerRadius" Value="4" />
+                            <Setter Property="BorderBrush" Value="{DynamicResource Background3}" />
+                            <Setter Property="BorderThickness" Value="1" />
+                        </Style>
+                    </ListBox.Styles>
+                    <ListBox.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel
+                                Margin="8"
+                                ItemSpacing="8"
+                                ItemWidth="100"
+                                LineSpacing="8" />
+                        </ItemsPanelTemplate>
+                    </ListBox.ItemsPanel>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <ContentControl x:Name="c">
+                                <Grid RowDefinitions="Auto,8,Auto,8,Auto">
+                                    <CheckBox
+                                        Content="{Binding Index}"
+                                        IsChecked="{Binding IsChecked}" />
+                                    <TextBlock Grid.Row="2">
+                                        <Run Text="{Binding Files.Count, Mode=OneWay}" />
+                                        <Run>个文件</Run>
+                                    </TextBlock>
+                                    <TextBlock
+                                        Grid.Row="4"
+                                        HorizontalAlignment="Right"
+                                        Text="{Binding TotalLength, Converter={x:Static cvt:Converters.FileLength}}" />
+
+                                </Grid>
+                                <Interaction.Behaviors>
+                                    <DataTriggerBehavior
+                                        Binding="{Binding Index}"
+                                        ComparisonCondition="Equal"
+                                        Value="-1">
+                                        <DataTriggerBehavior.Actions>
+                                            <ChangePropertyAction
+                                                PropertyName="Content"
+                                                TargetObject="c">
+                                                <ChangePropertyAction.Value>
+                                                    <TextBlock
+                                                        FontWeight="Bold"
+                                                        TextAlignment="Center"
+                                                        TextWrapping="Wrap">
+                                                        超过数据包容量的文件
+                                                    </TextBlock>
+                                                </ChangePropertyAction.Value>
+                                            </ChangePropertyAction>
+                                        </DataTriggerBehavior.Actions>
+                                    </DataTriggerBehavior>
+                                </Interaction.Behaviors>
+                            </ContentControl>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+
+                </ListBox>
+
+
+            </gb:GroupBox>
+            <gb:GroupBox
+                Grid.RowSpan="99"
+                Grid.Column="2"
+                Header="文件包中的文件">
+                <v:SimpleFileDataGrid
+                    ColumnIsCheckedIndex="-1"
+                    ItemsSource="{Binding SelectedPackage.Files}">
+                    <v:SimpleFileDataGrid.Columns>
+                        <DataGridTextColumn
+                            Binding="{Binding Hash}"
+                            Header="Hash"
+                            IsReadOnly="True" />
+                    </v:SimpleFileDataGrid.Columns>
+                </v:SimpleFileDataGrid>
+            </gb:GroupBox>
+
+            <Grid
+                Grid.Row="2"
+                HorizontalAlignment="Left"
+                ColumnDefinitions="Auto,8,Auto">
+                <Button
+                    Classes="Icon"
+                    Command="{Binding SelectAllCommand}"
+                    Content="{StaticResource SelectAll}"
+                    FontFamily="{StaticResource IconFont}"
+                    ToolTip.Tip="全选" />
+                <Button
+                    Grid.Column="2"
+                    Classes="Icon"
+                    Command="{Binding SelectNoneCommand}"
+                    Content="{StaticResource ClearSelection}"
+                    FontFamily="{StaticResource IconFont}"
+                    ToolTip.Tip="清除" />
+            </Grid>
+        </Grid>
+    </v:TwoStepPanelBase.ResultsContent>
+
+
+</v:TwoStepPanelBase>

@@ -10,15 +10,23 @@ namespace ArchiveMaster.ViewModels.FileSystem
     {
         [property: JsonIgnore]
         [ObservableProperty]
-        private bool isChecked = true;
+        private bool canCheck = true;
 
         [property: JsonIgnore]
         [ObservableProperty]
-        private bool canCheck = true;
+        private FileSystemInfo fileSystemInfo;
+
+        [property: JsonIgnore]
+        [ObservableProperty]
+        private bool isChecked = true;
+
+        [ObservableProperty]
+        private bool isDir;
+
+        [ObservableProperty]
+        private long length;
 
         private string message;
-
-        private string relativePath;
 
         [ObservableProperty]
         private string name;
@@ -27,50 +35,14 @@ namespace ArchiveMaster.ViewModels.FileSystem
         [NotifyPropertyChangedFor(nameof(RelativePath))]
         private string path;
 
+        private string relativePath;
+        private ProcessStatus status = ProcessStatus.Ready;
+
         [ObservableProperty]
         private DateTime time;
-
-        [ObservableProperty]
-        private bool isDir;
-
-        [ObservableProperty]
-        private long length;
-
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(RelativePath))]
         private string topDirectory;
-
-        [property: JsonIgnore]
-        [ObservableProperty]
-        private FileSystemInfo fileSystemInfo;
-
-        [JsonIgnore]
-        public string RelativePath
-        {
-            get
-            {
-                if (relativePath != null)
-                {
-                    return relativePath;
-                }
-                if (string.IsNullOrEmpty(TopDirectory))
-                {
-                    return Path;
-                }
-
-                
-                // if (Path.StartsWith(TopDirectory))
-                // {
-                //     return Path[TopDirectory.Length..].TrimStart([System.IO.Path.DirectorySeparatorChar,System.IO.Path.AltDirectorySeparatorChar]);
-                // }
-                //下面这个效率太低了，所以如果上面的可以就用上面的
-                //更新：上面的代码，潜在问题太多了，比如如果 TopDirectory 是 C:\Foo，而 Path 是 C:\Foo\Bar\file.txt，还是用下面的
-                return System.IO.Path.GetRelativePath(TopDirectory, Path);
-            }
-        }
-
-        private ProcessStatus status = ProcessStatus.Ready;
-
         public SimpleFileInfo()
         {
         }
@@ -107,23 +79,71 @@ namespace ArchiveMaster.ViewModels.FileSystem
             }
         }
 
-        [JsonIgnore]
-        public string Message => message;
-
-        [JsonIgnore]
-        public bool IsCompleted => status == ProcessStatus.Completed;
-
-        [JsonIgnore]
-        public ProcessStatus Status => status;
+        public static IEqualityComparer<SimpleFileInfo> EqualityComparer { get; }
+            = EqualityComparer<SimpleFileInfo>.Create(
+                (s1, s2) => s1.Path == s2.Path,
+                s => s.Path.GetHashCode());
 
         [JsonIgnore]
         public bool Exists => File.Exists(Path);
 
-        public void Complete()
+        [JsonIgnore]
+        public string Message => message;
+
+        [JsonIgnore]
+        public string RelativePath
         {
-            status = ProcessStatus.Completed;
-            OnPropertyChanged(nameof(Status));
-            OnPropertyChanged(nameof(IsCompleted));
+            get
+            {
+                if (relativePath != null)
+                {
+                    return relativePath;
+                }
+
+                if (string.IsNullOrEmpty(TopDirectory))
+                {
+                    return Path;
+                }
+
+
+                // if (Path.StartsWith(TopDirectory))
+                // {
+                //     return Path[TopDirectory.Length..].TrimStart([System.IO.Path.DirectorySeparatorChar,System.IO.Path.AltDirectorySeparatorChar]);
+                // }
+                //下面这个效率太低了，所以如果上面的可以就用上面的
+                //更新：上面的代码，潜在问题太多了，比如如果 TopDirectory 是 C:\Foo，而 Path 是 C:\Foo\Bar\file.txt，还是用下面的
+                return System.IO.Path.GetRelativePath(TopDirectory, Path);
+            }
+        }
+
+        public void SetRelativePath(string relativePath)
+        {
+            this.relativePath = relativePath;
+        }
+
+
+        #region 进度
+        [JsonIgnore]
+        public ProcessStatus Status => status;
+
+        public void Success(string message)
+        {
+            Success();
+            this.message = message;
+            NotifyStatusProperties();
+        }
+
+        public void Success()
+        {
+            status = ProcessStatus.Success;
+            NotifyStatusProperties();
+        }
+
+        public void Skip()
+        {
+            message = "文件已存在，跳过";
+            status = ProcessStatus.Skip;
+            NotifyStatusProperties();
         }
 
         public void Error(Exception ex)
@@ -135,8 +155,11 @@ namespace ArchiveMaster.ViewModels.FileSystem
         {
             status = ProcessStatus.Error;
             this.message = message;
+        }
+
+        private void NotifyStatusProperties()
+        {
             OnPropertyChanged(nameof(Status));
-            OnPropertyChanged(nameof(IsCompleted));
             OnPropertyChanged(nameof(Message));
         }
 
@@ -144,26 +167,33 @@ namespace ArchiveMaster.ViewModels.FileSystem
         {
             status = ProcessStatus.Warn;
             message = msg;
-            OnPropertyChanged(nameof(Status));
-            OnPropertyChanged(nameof(IsCompleted));
-            OnPropertyChanged(nameof(Message));
+            NotifyStatusProperties();
         }
 
         public void Processing()
         {
             status = ProcessStatus.Processing;
-            OnPropertyChanged(nameof(Status));
-            OnPropertyChanged(nameof(IsCompleted));
+            NotifyStatusProperties();
         }
+        #endregion
 
-        public void SetRelativePath(string relativePath)
+        public override int GetHashCode()
         {
-            this.relativePath = relativePath;
+            int hash = default;
+            //FNV算法，规避字符串每次GetHashCode都不一样的问题
+            unchecked
+            {
+                hash = (int)2166136261;
+                foreach (char c in Path ?? RelativePath)
+                {
+                    hash = (hash ^ c) * 16777619;
+                }
+
+                return hash;
+            }
+
+            return HashCode.Combine(hash, Length, Time);
         }
 
-        public static IEqualityComparer<SimpleFileInfo> EqualityComparer { get; }
-            = EqualityComparer<SimpleFileInfo>.Create(
-                (s1, s2) => s1.Path == s2.Path,
-                s => s.Path.GetHashCode());
     }
 }

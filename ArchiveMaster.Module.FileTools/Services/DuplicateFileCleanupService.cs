@@ -51,7 +51,7 @@ namespace ArchiveMaster.Services
                             var distPath = Path.Combine(Config.RecycleBin, file.RelativePath);
                             Directory.CreateDirectory(Path.GetDirectoryName(distPath));
                             File.Move(file.Path, distPath);
-                            file.Complete();
+                            file.Success();
                         }
                         catch (Exception ex)
                         {

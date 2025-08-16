@@ -19,6 +19,7 @@ using Avalonia.Controls;
 using FzLib.Application.Startup;
 using FzLib.Avalonia.Dialogs;
 using FzLib.Avalonia.Services;
+using FzLib.Programming;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
@@ -43,12 +44,15 @@ public static class Initializer
     [
 #if DEBUG
         new TestModuleInfo(),
+#else
 #endif
-        new FileToolsModuleInfo(),
+      new FileToolsModuleInfo(),
         new PhotoToolsModuleInfo(),
         new OfflineSyncModuleInfo(),
-        new DiscArchiveModuleInfo(),
+        // new DiscArchiveModuleInfo(),
+        new WriteOnceArchiveModuleInfo(),
         new FileBackupperModuleInfo(),
+
     ];
 #endif
 

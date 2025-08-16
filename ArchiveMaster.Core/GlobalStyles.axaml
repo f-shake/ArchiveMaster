@@ -1,6 +1,7 @@
 <Styles
     xmlns="https://github.com/avaloniaui"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ctrl="clr-namespace:FzLib.Avalonia.Controls;assembly=FzLib.Avalonia">
     <Design.PreviewWith>
         <Border Padding="20">
             <!--  Add Controls for Previewer Here  -->
@@ -14,6 +15,10 @@
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Styles.Resources>
+
+    <Style Selector="ctrl|WrapFormItemGroup CheckBox">
+        <Setter Property="VerticalAlignment" Value="Bottom" />
+    </Style>
 
     <Style Selector="TextBlock">
         <Setter Property="VerticalAlignment" Value="Center" />
@@ -81,7 +86,7 @@
         </Style>
         <Style Selector="^.Link">
             <Setter Property="Background" Value="Transparent" />
-            <Setter Property="Foreground" Value="{DynamicResource Foreground0}" />
+            <Setter Property="Foreground" Value="{DynamicResource Accent0}" />
             <Setter Property="Cursor" Value="Hand" />
             <Setter Property="Padding" Value="8,3" />
             <Style Selector="^:disabled /template/ ContentPresenter#PART_ContentPresenter">

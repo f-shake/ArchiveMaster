@@ -25,14 +25,14 @@
                 <v:FilePickerTextBox
                     FileNames="{Binding Config.Dir}"
                     Filter="{Binding Config.Filter}"
-                    IsFilterButtonVisible="True"
+                    IsFilterBarVisible="True"
                     Type="OpenFolder" />
             </ct:FormItem>
             <ct:FormItem Label="选项：">
                 <ct:WrapFormItemGroup>
-                    <ct:FormItem Label="Hash类型：">
+                    <ct:FormItem Header="Hash类型">
                         <ComboBox
-                            ItemsSource="{me:EnumValues io:FileHashHelper+HashAlgorithmType}"
+                            ItemsSource="{me:EnumValues io:HashAlgorithmType}"
                             SelectedItem="{Binding Config.HashType}" />
                     </ct:FormItem>
                     <CheckBox

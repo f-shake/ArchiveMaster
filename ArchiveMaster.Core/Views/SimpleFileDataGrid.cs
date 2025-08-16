@@ -237,15 +237,18 @@ public class SimpleFileDataGrid : DataGrid
         base.OnApplyTemplate(e);
         if (ColumnIsCheckedIndex >= 0)
         {
-            var buttons = this.GetVisualDescendants()
-                .OfType<Button>()
-                .ToList();
-            if (buttons.Count != 6)
-            {
-                return;
-            }
+            var btnSelectAll = e.NameScope.Find<Button>("PART_SelectAllButton");
+            var btnSwitchSelection = e.NameScope.Find<Button>("PART_SwitchSelectionButton");
+            var btnSelectNone = e.NameScope.Find<Button>("PART_SelectNoneButton");
+            var btnProcessCheckedOnly = e.NameScope.Find<ToggleButton>("PART_ProcessCheckedOnlyButton");
+            var btnSearch = e.NameScope.Find<Button>("PART_SearchButton");
+            var btnFilter = e.NameScope.Find<Button>("PART_FilterButton");
 
-            foreach (var btn in buttons)
+
+            foreach (var btn in new Button[]
+                     {
+                         btnSelectAll, btnSwitchSelection, btnSelectNone, btnProcessCheckedOnly, btnSearch, btnFilter
+                     })
             {
                 btn[!IsEnabledProperty] =
                     new Binding("IsWorking")
@@ -254,15 +257,14 @@ public class SimpleFileDataGrid : DataGrid
                     };
             }
 
-            var tbtn = (ToggleButton)buttons[3];
-
             IEnumerable<SimpleFileInfo> GetItems()
             {
-                return (tbtn.IsChecked == true ? SelectedItems : ItemsSource)?.OfType<SimpleFileInfo>() ?? [];
+                return (btnProcessCheckedOnly.IsChecked == true ? SelectedItems : ItemsSource)?
+                    .OfType<SimpleFileInfo>() ?? [];
             }
 
             //全选
-            buttons[0].Click += (_, _) =>
+            btnSelectAll.Click += (_, _) =>
             {
                 foreach (var file in GetItems())
                 {
@@ -271,16 +273,7 @@ public class SimpleFileDataGrid : DataGrid
             };
 
             //全不选
-            buttons[1].Click += (_, _) =>
-            {
-                foreach (var file in GetItems())
-                {
-                    file.IsChecked = !file.IsChecked;
-                }
-            };
-
-            //反选
-            buttons[2].Click += (_, _) =>
+            btnSelectNone.Click += (_, _) =>
             {
                 foreach (var file in GetItems())
                 {
@@ -288,8 +281,17 @@ public class SimpleFileDataGrid : DataGrid
                 }
             };
 
+            //反选
+            btnSwitchSelection.Click += (_, _) =>
+            {
+                foreach (var file in GetItems())
+                {
+                    file.IsChecked = !file.IsChecked;
+                }
+            };
+
             //搜索
-            var searchGrid = (buttons[4].Flyout as Flyout)?.Content as Grid;
+            var searchGrid = (btnSearch.Flyout as Flyout)?.Content as Grid;
             Debug.Assert(searchGrid != null);
             var searchTextBox = searchGrid.Children[0] as TextBox;
             Debug.Assert(searchTextBox != null);
@@ -335,7 +337,7 @@ public class SimpleFileDataGrid : DataGrid
             }
 
             //筛选
-            var filterGrid = (buttons[5].Flyout as Flyout)?.Content as Grid;
+            var filterGrid = (btnFilter.Flyout as Flyout)?.Content as Grid;
             Debug.Assert(filterGrid != null);
             var filterPanel = filterGrid.Children[0] as FileFilterPanel;
             Debug.Assert(filterPanel != null);

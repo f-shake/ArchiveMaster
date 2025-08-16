@@ -16,7 +16,7 @@ public partial class LinkDeduplicationConfig : ConfigBase
     private bool allowDifferentTime = true;
 
     [ObservableProperty]
-    private FileHashHelper.HashAlgorithmType hashType = FileHashHelper.HashAlgorithmType.SHA256;
+    private HashAlgorithmType hashType = HashAlgorithmType.SHA256;
 
     public override void Check()
     {

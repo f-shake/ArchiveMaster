@@ -17,5 +17,8 @@ public enum ProcessStatus
     Processing,
     
     [Description("完成")]
-    Completed,
+    Success,
+    
+    [Description("跳过")]
+    Skip,
 }
