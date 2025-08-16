@@ -45,12 +45,9 @@
                 <DataTemplate x:Key="SwitchContent">
                     <Button
                         Grid.Column="2"
-                        Padding="4"
                         VerticalAlignment="Center"
-                        Background="Transparent">
-                        <TextBlock
-                            Text="筛选.."
-                            TextDecorations="Underline" />
+                        Classes="Link">
+                        <TextBlock Text="筛选.." />
                         <Button.Flyout>
                             <v:PopupFlyout
                                 Closed="FileFilterPopup_Closed"
@@ -58,13 +55,7 @@
                                 <v:FileFilterPanel Filter="{Binding #root.Filter}" />
                             </v:PopupFlyout>
                         </Button.Flyout>
-                        <Button.Styles>
-                            <Style Selector="Button">
-                                <Style Selector="^:disabled /template/ ContentPresenter#PART_ContentPresenter">
-                                    <Setter Property="Background" Value="Transparent" />
-                                </Style>
-                            </Style>
-                        </Button.Styles>
+
                     </Button>
                 </DataTemplate>
             </Grid.Resources>
@@ -101,22 +92,13 @@
 
             <Button
                 Grid.Column="6"
-                Padding="4"
                 VerticalAlignment="Center"
-                Background="Transparent"
+                Classes="Link"
                 Click="TestButton_Click"
                 IsEnabled="{Binding #root.FileNames, Converter={x:Static cvt:Converters.IsNotNull}}"
                 IsVisible="{Binding #root.Filter, Converter={x:Static cvt:Converters.IsNotNull}}">
-                <TextBlock
-                    Text="使用当前目录测试"
-                    TextDecorations="Underline" />
-                <Button.Styles>
-                    <Style Selector="Button">
-                        <Style Selector="^:disabled /template/ ContentPresenter#PART_ContentPresenter">
-                            <Setter Property="Background" Value="Transparent" />
-                        </Style>
-                    </Style>
-                </Button.Styles>
+                <TextBlock Text="使用当前目录测试" />
+
             </Button>
         </Grid>
     </Grid>

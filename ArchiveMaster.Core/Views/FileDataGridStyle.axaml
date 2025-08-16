@@ -234,7 +234,8 @@
                                 Spacing="8">
                                 <TextBlock
                                     IsVisible="{Binding $parent[DataGrid].ItemsSource, Converter={x:Static cvt:Converters.IsNotNull}}"
-                                    Text="{Binding $parent[DataGrid].ItemsSource.Count, StringFormat='共 {0} 项'}" />
+                                    Text="{Binding $parent[DataGrid].ItemsSource.Count, StringFormat='共 {0} 项'}"
+                                    ToolTip.Tip="{Binding $parent[DataGrid].ItemsSource.Count, StringFormat='共 {0} 项'}" />
                             </StackPanel>
                         </ContentControl>
                         <ContentControl

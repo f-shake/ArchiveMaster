@@ -73,7 +73,7 @@ public partial class BackupService(AppConfig config)
                 BackupEngine engine = new BackupEngine(task);
 
                 var fullSnapshot =
-                    await db.GetLastSnapshotAsync(new[] { SnapshotType.VirtualFull, SnapshotType.Full }, ct);
+                    await db.GetLastSnapshotAsync([SnapshotType.VirtualFull, SnapshotType.Full], ct);
 
                 try
                 {
