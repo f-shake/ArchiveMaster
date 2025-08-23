@@ -39,15 +39,6 @@ namespace ArchiveMaster.Services
 
                 await TryForFilesAsync(files, async (file, s) =>
                 {
-                    string numMsg = s.GetFileNumberMessage("{0}/{1}");
-
-                    Progress<FileProcessProgress> progress = new Progress<FileProcessProgress>(p =>
-                    {
-                        NotifyProgress(1.0 * (s.AccumulatedLength + p.ProcessedBytes) / s.TotalLength);
-                        NotifyMessage(
-                            $"正在{(Config.CheckOnly ? "验证" : "重建")}文件（{numMsg}，本文件{1.0 * p.ProcessedBytes / 1024 / 1024:0}MB/{1.0 * p.TotalBytes / 1024 / 1024:0}MB）：{file.RelativePath}");
-                    });
-
                     var targetFile = Path.Combine(Config.TargetDir, file.RelativePath);
                     if (File.Exists(targetFile))
                     {
@@ -69,27 +60,33 @@ namespace ArchiveMaster.Services
                     {
                         if (file.IsEncrypted)
                         {
-                            hash = await aes.DecryptFileAsync(file.PhysicalFile, targetFile, progress: progress,
+                            hash = await aes.DecryptFileAsync(file.PhysicalFile, targetFile,
+                                progress: s.CreateFileProgressReporter("正在重建文件"),
                                 hashAlgorithmType: WriteOnceArchiveParameters.HashType, cancellationToken: token);
                         }
                         else
                         {
-                            hash = await FileCopyHelper.CopyFileAsync(file.PhysicalFile, targetFile, progress: progress,
+                            hash = await FileCopyHelper.CopyFileAsync(file.PhysicalFile, targetFile,
+                                progress: s.CreateFileProgressReporter("正在重建文件"),
                                 hashAlgorithmType: WriteOnceArchiveParameters.HashType, cancellationToken: token);
                         }
+
                         File.SetLastWriteTime(targetFile, file.Time);
                     }
                     else
                     {
                         if (file.IsEncrypted)
                         {
-                            hash = await aes.GetDecryptedFileHashAsync(file.PhysicalFile, progress: progress,
+                            hash = await aes.GetDecryptedFileHashAsync(file.PhysicalFile,
+                                progress: s.CreateFileProgressReporter("正在验证文件"),
                                 hashAlgorithmType: WriteOnceArchiveParameters.HashType, cancellationToken: token);
                         }
                         else
                         {
-                            hash = await FileHashHelper.ComputeHashAsync(file.PhysicalFile, WriteOnceArchiveParameters.HashType,
-                                progress: progress, cancellationToken: token);
+                            hash = await FileHashHelper.ComputeHashAsync(file.PhysicalFile,
+                                WriteOnceArchiveParameters.HashType,
+                                progress: s.CreateFileProgressReporter("正在验证文件"),
+                                cancellationToken: token);
                         }
                     }
 
@@ -207,7 +204,6 @@ namespace ArchiveMaster.Services
 
                         if (!allHashes.Add(name))
                         {
-
                         }
 
                         if (!hash2Files.ContainsKey(name))

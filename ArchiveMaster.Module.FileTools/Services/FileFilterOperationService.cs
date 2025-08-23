@@ -23,20 +23,12 @@ namespace ArchiveMaster.Services
     {
         public List<FileFilterOperationFileInfo> Files { get; set; }
 
-        public override IEnumerable<SimpleFileInfo> GetInitializedFiles()
-        {
-            return Files;
-        }
-
         public override Task ExecuteAsync(CancellationToken token)
         {
-            FilesLoopOptions loopOptions = Config.Type switch
-            {
-                FileFilterOperationType.Copy or FileFilterOperationType.Move or FileFilterOperationType.Hash =>
-                    FilesLoopOptions.Builder().AutoApplyStatus().AutoApplyFileLengthProgress().Build(),
-                _ =>
-                    FilesLoopOptions.Builder().AutoApplyStatus().AutoApplyFileNumberProgress().Build(),
-            };
+            FilesLoopOptions loopOptions = IsProgressFileLengthBased()
+                ? FilesLoopOptions.Builder().AutoApplyStatus().AutoApplyFileLengthProgress().Build()
+                : FilesLoopOptions.Builder().AutoApplyStatus().AutoApplyFileNumberProgress().Build();
+
             return Task.Run(() =>
             {
                 HashSet<string> usedPaths = new HashSet<string>();
@@ -55,15 +47,13 @@ namespace ArchiveMaster.Services
                         {
                             case FileFilterOperationType.Copy:
                                 await FileCopyHelper.CopyFileAsync(file.Path, targetPath,
-                                    progress: s.GetFileProcessProgress("正在复制文件", file.Name, NotifyProgress,
-                                        NotifyMessage),
+                                    progress: s.CreateFileProgressReporter("正在复制文件"),
                                     cancellationToken: token);
                                 File.SetLastWriteTime(targetPath, File.GetLastWriteTime(file.Path));
                                 break;
                             case FileFilterOperationType.Move:
                                 await FileCopyHelper.CopyFileAsync(file.Path, targetPath,
-                                    progress: s.GetFileProcessProgress("正在移动文件", file.Name, NotifyProgress,
-                                        NotifyMessage),
+                                    progress: s.CreateFileProgressReporter("正在移动文件"),
                                     cancellationToken: token);
                                 File.SetLastWriteTime(targetPath, File.GetLastWriteTime(file.Path));
                                 FileHelper.DeleteByConfig(file.Path);
@@ -79,8 +69,7 @@ namespace ArchiveMaster.Services
                                 break;
                             case FileFilterOperationType.Hash:
                                 file.Success(await FileHashHelper.ComputeHashStringAsync(file.Path, Config.HashType,
-                                    progress: s.GetFileProcessProgress("正在计算文件Hash", file.Name, NotifyProgress,
-                                        NotifyMessage),
+                                    progress: s.CreateFileProgressReporter("正在计算文件Hash"),
                                     cancellationToken: token));
                                 break;
                             default:
@@ -89,6 +78,11 @@ namespace ArchiveMaster.Services
                     },
                     token, loopOptions);
             }, token);
+        }
+
+        public override IEnumerable<SimpleFileInfo> GetInitializedFiles()
+        {
+            return Files;
         }
 
         public override async Task InitializeAsync(CancellationToken token)
@@ -112,7 +106,7 @@ namespace ArchiveMaster.Services
         private FileFilterOperationFileInfo GetTargetFile(string sourceDir, FileInfo file)
         {
             var targetFile = new FileFilterOperationFileInfo(file, sourceDir);
-            if (Config.Type is FileFilterOperationType.Delete or FileFilterOperationType.Hash) //不需要目标文件
+            if (!IsTargetDirNeeded()) //不需要目标文件
             {
                 return targetFile;
             }
@@ -129,6 +123,18 @@ namespace ArchiveMaster.Services
             };
 
             return targetFile;
+        }
+
+        private bool IsProgressFileLengthBased()
+        {
+            return Config.Type is FileFilterOperationType.Copy or FileFilterOperationType.Move
+                or FileFilterOperationType.Hash;
+        }
+
+        private bool IsTargetDirNeeded()
+        {
+            return Config.Type is FileFilterOperationType.Copy or FileFilterOperationType.Move
+                or FileFilterOperationType.HardLink or FileFilterOperationType.SymbolLink;
         }
     }
 }

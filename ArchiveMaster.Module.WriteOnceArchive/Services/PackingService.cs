@@ -122,7 +122,7 @@ namespace ArchiveMaster.Services
                         {
                             hash = await FileHashHelper.ComputeHashStringAsync(file.Path,
                                 WriteOnceArchiveParameters.HashType, cancellationToken: token,
-                                progress: progress);
+                                progress: s.CreateFileProgressReporter("正在计算文件Hash"));
                         }
 
                         //放入文件目录结构
@@ -174,59 +174,6 @@ namespace ArchiveMaster.Services
         }
 
 
-        private List<WriteOncePackage> Pack(IEnumerable<WriteOnceFile> packageFiles, long maxSize)
-        {
-            //BFD，但是不进行排序，打乱顺序，避免前面的箱子文件少、后面的箱子文件多
-
-            // 先按文件长度降序排序
-            // var filesSorted = packageFiles.OrderByDescending(f => f.Length).ToList();
-            var filesSorted = packageFiles.ToList();
-            Shuffle(filesSorted);
-
-            List<WriteOncePackage> packages = new List<WriteOncePackage>();
-
-            foreach (var file in filesSorted)
-            {
-                Debug.Assert(file.Length <= maxSize, $"文件长度 {file.Length} 超过包最大容量 {maxSize}");
-
-                int bestIndex = -1;
-                long minFreeSpace = long.MaxValue;
-
-                // 找到剩余容量 >= 文件长度且剩余容量最小的包
-                for (int i = 0; i < packages.Count; i++)
-                {
-                    long freeSpace = maxSize - packages[i].TotalLength;
-                    if (freeSpace >= file.Length && freeSpace < minFreeSpace)
-                    {
-                        minFreeSpace = freeSpace;
-                        bestIndex = i;
-                    }
-                }
-
-                if (bestIndex >= 0)
-                {
-                    // 放入找到的最合适包中
-                    var package = packages[bestIndex];
-                    package.Files.Add(file);
-                    package.TotalLength += file.Length;
-                }
-                else
-                {
-                    // 新开一个包
-                    var newPackage = new WriteOncePackage()
-                    {
-                        Index = packages.Count + 1,
-                        IsChecked = true
-                    };
-                    newPackage.Files.Add(file);
-                    newPackage.TotalLength = file.Length;
-                    packages.Add(newPackage);
-                }
-            }
-
-            return packages;
-        }
-
         private void ClearTargetPackageDir()
         {
             foreach (var package in ExecutingPackages)
@@ -261,11 +208,12 @@ namespace ArchiveMaster.Services
             int totalFiles = 0;
             long totalLength = ExecutingPackages.Sum(p => p.TotalLength);
 
+            string baseMessage = string.IsNullOrWhiteSpace(Config.Password) ? "正在复制" : "正在加密";
             Progress<FileProcessProgress> progress = new Progress<FileProcessProgress>(p =>
             {
                 NotifyProgress(1.0 * (length + p.ProcessedBytes) / totalLength);
                 NotifyMessage(
-                    $"正在复制（{indexOfPackage}/{totalPackages}包，{indexOfFile}/{totalFiles}文件，本文件{1.0 * p.ProcessedBytes / 1024 / 1024:0}MB/{1.0 * p.TotalBytes / 1024 / 1024:0}MB）：{Path.GetFileName(p.SourceFilePath)}");
+                    $"{baseMessage}（{indexOfPackage}/{totalPackages}包，{indexOfFile}/{totalFiles}文件，本文件{1.0 * p.ProcessedBytes / 1024 / 1024:0}MB/{1.0 * p.TotalBytes / 1024 / 1024:0}MB）：{Path.GetFileName(p.SourceFilePath)}");
             });
             Aes aes = null;
             if (!string.IsNullOrWhiteSpace(Config.Password))
@@ -318,17 +266,6 @@ namespace ArchiveMaster.Services
                     Path.Combine(packageDir, WriteOnceArchiveParameters.PackageInfoFileName), package.TotalLength,
                     package.Files.Select(p => p.Hash));
             }
-        }
-
-        private async Task WritePackageInfoFileAsync(string path, long totalLength, IEnumerable<string> hashes)
-        {
-            var packageInfo = new WriteOncePackageInfo(allFiles, totalLength, DateTime.Now, hashes.ToList());
-            var json = JsonSerializer.Serialize(packageInfo, new JsonSerializerOptions
-            {
-                WriteIndented = true,
-                Encoder = JavaScriptEncoder.Create(UnicodeRanges.All),
-            });
-            await File.WriteAllTextAsync(path, json);
         }
 
         private async Task ExecuteHardLink(CancellationToken token)
@@ -460,6 +397,69 @@ namespace ArchiveMaster.Services
             }
 
             return hashes;
+        }
+
+        private List<WriteOncePackage> Pack(IEnumerable<WriteOnceFile> packageFiles, long maxSize)
+        {
+            //BFD，但是不进行排序，打乱顺序，避免前面的箱子文件少、后面的箱子文件多
+
+            // 先按文件长度降序排序
+            // var filesSorted = packageFiles.OrderByDescending(f => f.Length).ToList();
+            var filesSorted = packageFiles.ToList();
+            Shuffle(filesSorted);
+
+            List<WriteOncePackage> packages = new List<WriteOncePackage>();
+
+            foreach (var file in filesSorted)
+            {
+                Debug.Assert(file.Length <= maxSize, $"文件长度 {file.Length} 超过包最大容量 {maxSize}");
+
+                int bestIndex = -1;
+                long minFreeSpace = long.MaxValue;
+
+                // 找到剩余容量 >= 文件长度且剩余容量最小的包
+                for (int i = 0; i < packages.Count; i++)
+                {
+                    long freeSpace = maxSize - packages[i].TotalLength;
+                    if (freeSpace >= file.Length && freeSpace < minFreeSpace)
+                    {
+                        minFreeSpace = freeSpace;
+                        bestIndex = i;
+                    }
+                }
+
+                if (bestIndex >= 0)
+                {
+                    // 放入找到的最合适包中
+                    var package = packages[bestIndex];
+                    package.Files.Add(file);
+                    package.TotalLength += file.Length;
+                }
+                else
+                {
+                    // 新开一个包
+                    var newPackage = new WriteOncePackage()
+                    {
+                        Index = packages.Count + 1,
+                        IsChecked = true
+                    };
+                    newPackage.Files.Add(file);
+                    newPackage.TotalLength = file.Length;
+                    packages.Add(newPackage);
+                }
+            }
+
+            return packages;
+        }
+        private async Task WritePackageInfoFileAsync(string path, long totalLength, IEnumerable<string> hashes)
+        {
+            var packageInfo = new WriteOncePackageInfo(allFiles, totalLength, DateTime.Now, hashes.ToList());
+            var json = JsonSerializer.Serialize(packageInfo, new JsonSerializerOptions
+            {
+                WriteIndented = true,
+                Encoder = JavaScriptEncoder.Create(UnicodeRanges.All),
+            });
+            await File.WriteAllTextAsync(path, json);
         }
     }
 }

@@ -142,9 +142,8 @@ namespace ArchiveMaster.Services
                     {
                         progress = new Progress<FileProcessProgress>(p =>
                         {
-                            NotifyProgress(1.0 * (length + p.ProcessedBytes) / totalLength);
-                            NotifyMessage(
-                                $"正在复制（{numMsg}，本文件{1.0 * p.ProcessedBytes / 1024 / 1024:0}MB/{1.0 * p.TotalBytes / 1024 / 1024:0}MB）：{file.RelativePath}");
+                            NotifyProgress(length + p.ProcessedBytes, totalLength);
+                            NotifyMessage(s.CreateFileProgressMessage("正在复制",p, file.RelativePath));
                         });
                         await CopyFileAsync(patch, target, file.Time, progress, token);
                     }

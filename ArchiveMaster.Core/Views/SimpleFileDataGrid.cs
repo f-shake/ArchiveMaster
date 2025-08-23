@@ -396,10 +396,7 @@ public class SimpleFileDataGrid : DataGrid
         else
         {
             //删除占位
-            var stk = this
-                .GetVisualDescendants()
-                .OfType<StackPanel>()
-                .FirstOrDefault(p => p.Name == "stkSelectionButtons");
+            var stk = e.NameScope.Find<StackPanel>("PART_DataGridButtons");
             if (stk != null)
             {
                 ((Grid)stk.Parent)?.Children.Remove(stk);

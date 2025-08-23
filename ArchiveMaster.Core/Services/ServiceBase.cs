@@ -2,6 +2,7 @@
 
 using System.Collections;
 using System.Diagnostics;
+using System.Numerics;
 using ArchiveMaster.Configs;
 using ArchiveMaster.Enums;
 using ArchiveMaster.ViewModels;
@@ -10,7 +11,12 @@ using SimpleFileInfo = ArchiveMaster.ViewModels.FileSystem.SimpleFileInfo;
 
 namespace ArchiveMaster.Services
 {
-    public abstract class ServiceBase<TConfig> : IDisposable where TConfig : ConfigBase
+    public abstract class ServiceBase<TConfig>(AppConfig appConfig) : ServiceBase(appConfig) where TConfig : ConfigBase
+    {
+        public TConfig Config { get; set; }
+    }
+
+    public abstract class ServiceBase : IDisposable
     {
         /// <summary>
         /// 消息最短通知间隔（毫秒）
@@ -28,7 +34,7 @@ namespace ArchiveMaster.Services
 
         private string pendingMessage;
 
-        public ServiceBase(AppConfig appConfig)
+        protected ServiceBase(AppConfig appConfig)
         {
             this.appConfig = appConfig;
             InitializeDebounceTimer();
@@ -37,7 +43,6 @@ namespace ArchiveMaster.Services
         public event EventHandler<MessageUpdateEventArgs> MessageUpdate;
 
         public event EventHandler<ProgressUpdateEventArgs> ProgressUpdate;
-        public TConfig Config { get; set; }
 
         public void Dispose()
         {
@@ -51,7 +56,7 @@ namespace ArchiveMaster.Services
             GC.SuppressFinalize(this);
         }
 
-        protected void NotifyMessage(string message)
+        protected internal void NotifyMessage(string message)
         {
 #if DEBUG && WRITEMESSAGE
             Debug.WriteLine("{0:HH:m:s.fff}\t{1}", DateTime.Now, message);
@@ -80,7 +85,13 @@ namespace ArchiveMaster.Services
             }
         }
 
-        protected void NotifyProgress(double percent)
+        protected internal void NotifyProgress<T>(T current,T total) where T : struct, INumber<T>
+        {
+            double percent = Convert.ToDouble(current) / Convert.ToDouble(total);
+            NotifyProgress(percent);
+        }
+        
+        protected internal void NotifyProgress(double percent)
         {
 #if DEBUG && WRITEMESSAGE
             Debug.WriteLine("{0:HH:m:s.fff}\t更新进度：{1:P2}", DateTime.Now, percent);
@@ -100,7 +111,7 @@ namespace ArchiveMaster.Services
             where T : SimpleFileInfo
         {
             options ??= FilesLoopOptions.DoNothing();
-            var states = new FilesLoopStates(options);
+            var states = new FilesLoopStates(this, options);
 
             PreProcessStatistic(files, options, states);
 
@@ -134,7 +145,7 @@ namespace ArchiveMaster.Services
             where T : SimpleFileInfo
         {
             options ??= FilesLoopOptions.DoNothing();
-            var states = new FilesLoopStates(options);
+            var states = new FilesLoopStates(this, options);
 
             PreProcessStatistic(files, options, states);
 
