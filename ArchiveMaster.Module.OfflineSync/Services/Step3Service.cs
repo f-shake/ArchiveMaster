@@ -138,14 +138,12 @@ namespace ArchiveMaster.Services
 
                     Progress<FileProcessProgress> progress = null;
 
-                    async Task CopyThisFileAsync()
+                    Task CopyThisFileAsync()
                     {
-                        progress = new Progress<FileProcessProgress>(p =>
-                        {
-                            NotifyProgress(length + p.ProcessedBytes, totalLength);
-                            NotifyMessage(s.CreateFileProgressMessage("正在复制",p, file.RelativePath));
-                        });
-                        await CopyFileAsync(patch, target, file.Time, progress, token);
+                        return CopyFileAsync(patch, target, file.Time,
+                            s.CreateFileProgressReporter("正在复制", p => length + p.ProcessedBytes, () => totalLength,
+                                p => Path.GetFileName(p.DestinationFilePath)),
+                            token);
                     }
 
                     switch (file.UpdateType)

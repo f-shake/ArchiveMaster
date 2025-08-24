@@ -127,13 +127,7 @@ namespace ArchiveMaster.Services
                         case ExportMode.Copy:
                             copy:
                             int tryCount = 10;
-
-                            Progress<FileProcessProgress> progress = new Progress<FileProcessProgress>(p =>
-                            {
-                                NotifyProgress(length + p.ProcessedBytes, totalLength);
-                                NotifyMessage(s.CreateFileProgressMessage("正在复制", p, file.RelativePath));
-                            });
-
+                            
                             while (--tryCount > 0)
                             {
                                 if (File.Exists(destFile))
@@ -143,7 +137,12 @@ namespace ArchiveMaster.Services
 
                                 try
                                 {
-                                    await CopyFileAsync(sourceFile, destFile, progress, token);
+                                    await CopyFileAsync(sourceFile, destFile,
+                                            s.CreateFileProgressReporter("正在复制", 
+                                                p => length + p.ProcessedBytes,
+                                                () => totalLength,
+                                                p => Path.GetFileName(p.SourceFilePath))
+                                        , token);
                                     tryCount = 0;
                                 }
                                 catch (IOException ex)

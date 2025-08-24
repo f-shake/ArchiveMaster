@@ -43,7 +43,7 @@ public static class Initializer
     public static IModuleInfo[] ModuleInitializers { get; } =
     [
 #if DEBUG
-        new TestModuleInfo(),
+        // new TestModuleInfo(),
 #else
 #endif
       new FileToolsModuleInfo(),

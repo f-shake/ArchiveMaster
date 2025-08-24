@@ -109,14 +109,6 @@ namespace ArchiveMaster.Services
 
                     await TryForFilesAsync(files, async (file, s) =>
                     {
-                        string numMsg = s.GetFileNumberMessage("{0}/{1}");
-                        Progress<FileProcessProgress> progress = new Progress<FileProcessProgress>(p =>
-                        {
-                            NotifyProgress(1.0 * (s.AccumulatedLength + p.ProcessedBytes) / s.TotalLength);
-                            NotifyMessage(
-                                $"正在计算文件Hash（{numMsg}，本文件{1.0 * p.ProcessedBytes / 1024 / 1024:0}MB/{1.0 * p.TotalBytes / 1024 / 1024:0}MB）：{file.RelativePath}");
-                        });
-
                         //从记忆中提取Hash
                         if (!hashCaches.TryGetValue(GetFileHashCode(file), out var hash))
                         {
@@ -208,12 +200,13 @@ namespace ArchiveMaster.Services
             int totalFiles = 0;
             long totalLength = ExecutingPackages.Sum(p => p.TotalLength);
 
+            //由于结构特殊，无法使用预设方法创建Progress<FileProcessProgress>
             string baseMessage = string.IsNullOrWhiteSpace(Config.Password) ? "正在复制" : "正在加密";
             Progress<FileProcessProgress> progress = new Progress<FileProcessProgress>(p =>
             {
-                NotifyProgress(1.0 * (length + p.ProcessedBytes) / totalLength);
+                NotifyProgress(length + p.ProcessedBytes, totalLength);
                 NotifyMessage(
-                    $"{baseMessage}（{indexOfPackage}/{totalPackages}包，{indexOfFile}/{totalFiles}文件，本文件{1.0 * p.ProcessedBytes / 1024 / 1024:0}MB/{1.0 * p.TotalBytes / 1024 / 1024:0}MB）：{Path.GetFileName(p.SourceFilePath)}");
+                    $"{baseMessage}（{indexOfPackage}/{totalPackages}包，{indexOfFile}/{totalFiles}文件，D当前文件{1.0 * p.ProcessedBytes / 1024 / 1024:0}MB/{1.0 * p.TotalBytes / 1024 / 1024:0}MB）：{Path.GetFileName(p.SourceFilePath)}");
             });
             Aes aes = null;
             if (!string.IsNullOrWhiteSpace(Config.Password))
@@ -451,6 +444,7 @@ namespace ArchiveMaster.Services
 
             return packages;
         }
+
         private async Task WritePackageInfoFileAsync(string path, long totalLength, IEnumerable<string> hashes)
         {
             var packageInfo = new WriteOncePackageInfo(allFiles, totalLength, DateTime.Now, hashes.ToList());

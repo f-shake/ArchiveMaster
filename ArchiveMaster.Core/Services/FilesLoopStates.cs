@@ -1,3 +1,4 @@
+using System.Numerics;
 using FzLib.IO;
 
 namespace ArchiveMaster.Services;
@@ -83,16 +84,22 @@ public class FilesLoopStates
 
     public Progress<FileProcessProgress> CreateFileProgressReporter(string message)
     {
-        return CreateFileProgressReporter(message, p => Path.GetFileName(p.SourceFilePath));
+        return CreateFileProgressReporter(message,
+            p => AccumulatedLength + p.ProcessedBytes,
+            () => TotalLength,
+            p => Path.GetFileName(p.SourceFilePath));
     }
 
-    public Progress<FileProcessProgress> CreateFileProgressReporter(string message,
-        Func<FileProcessProgress, string> GetFile)
+    public Progress<FileProcessProgress> CreateFileProgressReporter<T>(string message,
+        Func<FileProcessProgress, T> getCurrent,
+        Func<T> getTotal,
+        Func<FileProcessProgress, string> getFile)
+        where T : struct, INumber<T>
     {
         return new Progress<FileProcessProgress>(p =>
         {
-            Service.NotifyProgress(1.0 * (AccumulatedLength + p.ProcessedBytes) / TotalLength);
-            Service.NotifyMessage(CreateFileProgressMessage(message, p, GetFile(p)));
+            Service.NotifyProgress(getCurrent(p), getTotal());
+            Service.NotifyMessage(CreateFileProgressMessage(message, p, getFile(p)));
         });
     }
 
@@ -107,6 +114,7 @@ public class FilesLoopStates
 
         return string.Format(format, naturalIndex);
     }
+
     public void IncreaseFileIndex()
     {
         if (Options.Threads != 1)
