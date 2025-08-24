@@ -31,7 +31,8 @@
                 <v:FilePickerTextBox
                     FileNames="{Binding Config.PackageInfoFile}"
                     StringFileTypeFilter="文件包信息;*.wpk;;"
-                    Type="OpenFile" />
+                    Type="OpenFile"
+                    Watermark="*.wpk文件；若置空，默认选取文件包中最新的package_info.wpk" />
             </ctrl:FormItem>
             <ctrl:FormItem Label="选项：">
                 <ctrl:WrapFormItemGroup>

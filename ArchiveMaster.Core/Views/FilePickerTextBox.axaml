@@ -20,7 +20,8 @@
                 AcceptsReturn="{Binding #root.AllowMultiple}"
                 MaxLines="3"
                 Text="{Binding #root.FileNames}"
-                TextWrapping="{Binding #root.AllowMultiple, Converter={x:Static cvt:Converters.TextWrapping}}" />
+                TextWrapping="{Binding #root.AllowMultiple, Converter={x:Static cvt:Converters.TextWrapping}}"
+                Watermark="{Binding #root.Watermark}" />
 
             <!--<views:FileFilterControl
             Grid.Column="4"

@@ -96,7 +96,7 @@
 | 工具名 | 用途                                         | 类名前缀  | 原项目                                                       |
 | ------ | -------------------------------------------- | --------- | ------------------------------------------------------------ |
 | 打包   | 扫描文件特征，制作文件归档包                 | `Packing` | [光盘归档工具](https://github.com/autodotua/DiscArchivingTool) |
-| 重建   | 从备份的文件包中提取文件并恢复为原始目录结构 | `Rebuild` | [光盘归档工具](https://github.com/autodotua/DiscArchivingTool) |
+| 验证和重建   | 从文件归档包重建目录结构，或验证文件完整性 | `Rebuild` | [光盘归档工具](https://github.com/autodotua/DiscArchivingTool) |
 
 ## 文件备份服务（`FileBackupper`）
 

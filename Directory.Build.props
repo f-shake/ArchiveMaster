@@ -21,8 +21,8 @@
     </ItemGroup>
 
     <ItemGroup Condition="! ('$(Configuration)' == 'Debug' and '$(UseLocalFzLib)' == 'true')">
-        <PackageReference Include="FzLib" Version="$(FzLibVersion)" />
-        <PackageReference Include="FzLib.Avalonia" Version="$(FzLibVersion)" />
+        <PackageReference Include="FzLib"/>
+        <PackageReference Include="FzLib.Avalonia"/>
     </ItemGroup>
 
     <ItemGroup>

@@ -447,7 +447,8 @@ namespace ArchiveMaster.Services
 
         private async Task WritePackageInfoFileAsync(string path, long totalLength, IEnumerable<string> hashes)
         {
-            var packageInfo = new WriteOncePackageInfo(allFiles, totalLength, DateTime.Now, hashes.ToList());
+            var packageInfo =
+                new WriteOncePackageInfo(allFiles, totalLength, DateTime.Now, hashes.ToList(), Config.Filter);
             var json = JsonSerializer.Serialize(packageInfo, new JsonSerializerOptions
             {
                 WriteIndented = true,

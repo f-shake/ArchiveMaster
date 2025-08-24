@@ -27,6 +27,10 @@
       <DependentUpon>FileFilterPanel.axaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Views\FilterTestResultDialog.axaml.cs">
+      <DependentUpon>SettingDialog.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
 
 
