@@ -28,7 +28,7 @@ namespace ArchiveMaster.Services
         private IEnumerable<WriteOncePackage> ExecutingPackages =>
             Packages.Packages.Where(p => p.IsChecked && p.Index > 0);
 
-        public override async Task ExecuteAsync(CancellationToken token)
+        public override async Task ExecuteAsync(CancellationToken ct)
         {
             if (!Directory.Exists(Config.TargetDir))
             {
@@ -43,15 +43,15 @@ namespace ArchiveMaster.Services
                 switch (Config.PackingType)
                 {
                     case PackingType.Copy:
-                        await ExecuteCopy(token);
+                        await ExecuteCopy(ct);
                         break;
 
                     case PackingType.ISO:
-                        await ExecuteISO(token);
+                        await ExecuteISO(ct);
                         break;
 
                     case PackingType.HardLink:
-                        await ExecuteHardLink(token);
+                        await ExecuteHardLink(ct);
                         break;
 
                     default:
@@ -62,7 +62,7 @@ namespace ArchiveMaster.Services
                     Path.Combine(Config.TargetDir, WriteOnceArchiveParameters.PackageInfoFileName),
                     ExecutingPackages.Select(p => p.TotalLength).Sum(),
                     ExecutingPackages.SelectMany(p => p.Files).Select(p => p.Hash));
-            }, token);
+            }, ct);
         }
 
         public override IEnumerable<SimpleFileInfo> GetInitializedFiles()
@@ -70,7 +70,7 @@ namespace ArchiveMaster.Services
             return null;
         }
 
-        public override async Task InitializeAsync(CancellationToken token)
+        public override async Task InitializeAsync(CancellationToken ct)
         {
             long maxSize = 1024L * 1024 * Config.PackageSizeMB;
             List<WriteOnceFile> outOfSizeFiles = new List<WriteOnceFile>();
@@ -83,7 +83,7 @@ namespace ArchiveMaster.Services
                 NotifyMessage("正在搜索文件");
                 var files = new DirectoryInfo(Config.SourceDir)
                     .EnumerateFiles("*", FileEnumerateExtension.GetEnumerationOptions())
-                    .ApplyFilter(token, Config.Filter)
+                    .ApplyFilter(ct, Config.Filter)
                     .OrderBy(p => p.LastWriteTime)
                     .Select(p => new WriteOnceFile(p, Config.SourceDir))
                     .ToList();
@@ -104,7 +104,7 @@ namespace ArchiveMaster.Services
                             await hashCacheFile.WriteLineAsync($"{cache.Key}\t{cache.Value}");
                         }
 
-                        await hashCacheFile.FlushAsync(token);
+                        await hashCacheFile.FlushAsync(ct);
                     }
 
                     await TryForFilesAsync(files, async (file, s) =>
@@ -113,7 +113,7 @@ namespace ArchiveMaster.Services
                         if (!hashCaches.TryGetValue(GetFileHashCode(file), out var hash))
                         {
                             hash = await FileHashHelper.ComputeHashStringAsync(file.Path,
-                                WriteOnceArchiveParameters.HashType, cancellationToken: token,
+                                WriteOnceArchiveParameters.HashType, cancellationToken: ct,
                                 progress: s.CreateFileProgressReporter("正在计算文件Hash"));
                         }
 
@@ -139,12 +139,12 @@ namespace ArchiveMaster.Services
 
                         file.Hash = hash;
                         packageFiles.Add(file);
-                    }, token, FilesLoopOptions.Builder().AutoApplyFileLengthProgress().Build());
+                    }, ct, FilesLoopOptions.Builder().AutoApplyFileLengthProgress().Build());
                 }
 
                 //第三步：计算打包文件
                 packages = Pack(packageFiles, maxSize);
-            }, token);
+            }, ct);
 
             Packages = new WriteOncePackageCollection()
             {
@@ -189,7 +189,7 @@ namespace ArchiveMaster.Services
             }
         }
 
-        private async Task ExecuteCopy(CancellationToken token)
+        private async Task ExecuteCopy(CancellationToken ct)
         {
             Debug.Assert(Config.PackingType == PackingType.Copy);
 
@@ -216,7 +216,7 @@ namespace ArchiveMaster.Services
 
             foreach (var package in ExecutingPackages)
             {
-                token.ThrowIfCancellationRequested();
+                ct.ThrowIfCancellationRequested();
 
                 indexOfPackage++;
                 indexOfFile = 0;
@@ -233,13 +233,13 @@ namespace ArchiveMaster.Services
                         if (aes == null) //复制
                         {
                             await FileCopyHelper.CopyFileAsync(file.Path, targetFile,
-                                progress: progress, cancellationToken: token);
+                                progress: progress, cancellationToken: ct);
                         }
                         else //加密
                         {
                             await aes.EncryptFileAsync(file.Path,
                                 targetFile + WriteOnceArchiveParameters.EncryptedFileSuffix,
-                                progress: progress, cancellationToken: token);
+                                progress: progress, cancellationToken: ct);
                         }
 
                         file.Success();
@@ -261,14 +261,14 @@ namespace ArchiveMaster.Services
             }
         }
 
-        private async Task ExecuteHardLink(CancellationToken token)
+        private async Task ExecuteHardLink(CancellationToken ct)
         {
             int indexOfPackage = 0;
             int totalPackages = ExecutingPackages.Count();
 
             foreach (var package in ExecutingPackages)
             {
-                token.ThrowIfCancellationRequested();
+                ct.ThrowIfCancellationRequested();
                 NotifyMessage($"正在创建第{package.Index}个文件包的硬链接");
 
                 indexOfPackage++;
@@ -296,14 +296,14 @@ namespace ArchiveMaster.Services
             }
         }
 
-        private async Task ExecuteISO(CancellationToken token)
+        private async Task ExecuteISO(CancellationToken ct)
         {
             int indexOfPackage = 0;
             int totalPackages = ExecutingPackages.Count();
 
             foreach (var package in ExecutingPackages)
             {
-                token.ThrowIfCancellationRequested();
+                ct.ThrowIfCancellationRequested();
 
                 indexOfPackage++;
 

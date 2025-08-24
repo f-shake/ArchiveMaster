@@ -20,7 +20,7 @@ namespace ArchiveMaster.Services
 
         public RebuildInitializeReport InitializeReport { get; private set; }
 
-        public override Task ExecuteAsync(CancellationToken token)
+        public override Task ExecuteAsync(CancellationToken ct)
         {
             return Task.Run(async () =>
             {
@@ -62,13 +62,13 @@ namespace ArchiveMaster.Services
                         {
                             hash = await aes.DecryptFileAsync(file.PhysicalFile, targetFile,
                                 progress: s.CreateFileProgressReporter("正在重建文件"),
-                                hashAlgorithmType: WriteOnceArchiveParameters.HashType, cancellationToken: token);
+                                hashAlgorithmType: WriteOnceArchiveParameters.HashType, cancellationToken: ct);
                         }
                         else
                         {
                             hash = await FileCopyHelper.CopyFileAsync(file.PhysicalFile, targetFile,
                                 progress: s.CreateFileProgressReporter("正在重建文件"),
-                                hashAlgorithmType: WriteOnceArchiveParameters.HashType, cancellationToken: token);
+                                hashAlgorithmType: WriteOnceArchiveParameters.HashType, cancellationToken: ct);
                         }
 
                         File.SetLastWriteTime(targetFile, file.Time);
@@ -79,14 +79,14 @@ namespace ArchiveMaster.Services
                         {
                             hash = await aes.GetDecryptedFileHashAsync(file.PhysicalFile,
                                 progress: s.CreateFileProgressReporter("正在验证文件"),
-                                hashAlgorithmType: WriteOnceArchiveParameters.HashType, cancellationToken: token);
+                                hashAlgorithmType: WriteOnceArchiveParameters.HashType, cancellationToken: ct);
                         }
                         else
                         {
                             hash = await FileHashHelper.ComputeHashAsync(file.PhysicalFile,
                                 WriteOnceArchiveParameters.HashType,
                                 progress: s.CreateFileProgressReporter("正在验证文件"),
-                                cancellationToken: token);
+                                cancellationToken: ct);
                         }
                     }
 
@@ -99,8 +99,8 @@ namespace ArchiveMaster.Services
                             file.Error($"重建后的文件Hash{hashString}与源文件{file.Hash}不一致");
                         }
                     }
-                }, token, FilesLoopOptions.Builder().AutoApplyFileLengthProgress().AutoApplyStatus().Build());
-            }, token);
+                }, ct, FilesLoopOptions.Builder().AutoApplyFileLengthProgress().AutoApplyStatus().Build());
+            }, ct);
         }
 
         public override IEnumerable<SimpleFileInfo> GetInitializedFiles()
@@ -171,7 +171,7 @@ namespace ArchiveMaster.Services
             return (tree, hash2Files.ToFrozenDictionary());
         }
 
-        public override async Task InitializeAsync(CancellationToken token)
+        public override async Task InitializeAsync(CancellationToken ct)
         {
             NotifyMessage("正在建立文件树");
             TreeDirInfo tree = null;
@@ -238,7 +238,7 @@ namespace ArchiveMaster.Services
                     MatchedFileCount = matchFiles.Count,
                     MatchedFileLength = matchFiles.Sum(p => p.Length)
                 };
-            }, token);
+            }, ct);
 
             FileTree = tree;
             MatchedFiles = matchFiles;

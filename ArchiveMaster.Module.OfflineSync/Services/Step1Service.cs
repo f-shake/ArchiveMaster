@@ -13,7 +13,7 @@ namespace ArchiveMaster.Services
 {
     public class Step1Service(AppConfig appConfig) : TwoStepServiceBase<OfflineSyncStep1Config>(appConfig)
     {
-        public override async Task ExecuteAsync(CancellationToken token = default)
+        public override async Task ExecuteAsync(CancellationToken ct = default)
         {
             Config.Check();
             int index = 0;
@@ -40,7 +40,7 @@ namespace ArchiveMaster.Services
                         syncFiles.Add(file);
                         index++;
                         NotifyMessage($"正在搜索：{dir}，已加入 {index} 个文件");
-                    }, token, FilesLoopOptions.Builder().AutoApplyStatus().Build());
+                    }, ct, FilesLoopOptions.Builder().AutoApplyStatus().Build());
                 }
 
 
@@ -51,14 +51,14 @@ namespace ArchiveMaster.Services
                     Files = syncFiles.ToList(),
                 };
                 ZipService.WriteToZip(model, Config.OutputFile);
-            }, token);
+            }, ct);
         }
 
         public override IEnumerable<SimpleFileInfo> GetInitializedFiles()
         {
             return null;
         }
-        public override Task InitializeAsync(CancellationToken token = default)
+        public override Task InitializeAsync(CancellationToken ct = default)
         {
             throw new NotImplementedException();
         }

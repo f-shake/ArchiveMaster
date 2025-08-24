@@ -33,13 +33,13 @@ public partial class PackingViewModel(AppConfig appConfig, IDialogService dialog
     [ObservableProperty]
     private List<FileSystem.WriteOncePackage> writeOnceFilePackages;
 
-    protected override Task OnExecutingAsync(CancellationToken token)
+    protected override Task OnExecutingAsync(CancellationToken ct)
     {
         if (!WriteOnceFilePackages.Any(p => p.IsChecked))
         {
             throw new Exception("没有任何被选中的文件包");
         }
-        return base.OnExecutingAsync(token);
+        return base.OnExecutingAsync(ct);
     }
 
     protected override Task OnInitializedAsync()

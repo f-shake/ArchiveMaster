@@ -19,7 +19,7 @@ namespace ArchiveMaster.Services
     {
         public ConcurrentBag<ExifTimeFileInfo> Files { get; } = new ConcurrentBag<ExifTimeFileInfo>();
 
-        public override Task ExecuteAsync(CancellationToken token)
+        public override Task ExecuteAsync(CancellationToken ct)
         {
             return TryForFilesAsync(Files, (file, s) =>
             {
@@ -30,14 +30,14 @@ namespace ArchiveMaster.Services
 
                 NotifyMessage($"正在处理{s.GetFileNumberMessage()}：{file.Name}");
                 File.SetLastWriteTime(file.Path, file.ExifTime.Value);
-            }, token, FilesLoopOptions.Builder().AutoApplyStatus().AutoApplyFileNumberProgress().Build());
+            }, ct, FilesLoopOptions.Builder().AutoApplyStatus().AutoApplyFileNumberProgress().Build());
         }
 
         public override IEnumerable<SimpleFileInfo> GetInitializedFiles()
         {
             return Files.Cast<SimpleFileInfo>();
         }
-        public override async Task InitializeAsync(CancellationToken token)
+        public override async Task InitializeAsync(CancellationToken ct)
         {
             NotifyProgressIndeterminate();
             NotifyMessage("正在查找文件");
@@ -46,7 +46,7 @@ namespace ArchiveMaster.Services
             {
                 files = new DirectoryInfo(Config.Dir)
                     .EnumerateFiles("*", FileEnumerateExtension.GetEnumerationOptions())
-                    .ApplyFilter(token, Config.Filter)
+                    .ApplyFilter(ct, Config.Filter)
                     .Select(p => new ExifTimeFileInfo(p, Config.Dir))
                     .ToList();
             });
@@ -66,7 +66,7 @@ namespace ArchiveMaster.Services
                             Files.Add(file);
                         }
                     }
-                }, token,
+                }, ct,
                 FilesLoopOptions.Builder()
                     .AutoApplyFileNumberProgress()
                     .WithMultiThreads(Config.ThreadCount)

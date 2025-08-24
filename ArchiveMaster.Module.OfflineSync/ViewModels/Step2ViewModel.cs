@@ -73,17 +73,17 @@ namespace ArchiveMaster.ViewModels
             }
         }
 
-        protected override Task OnExecutingAsync(CancellationToken token)
+        protected override Task OnExecutingAsync(CancellationToken ct)
         {
             if (Files.Count == 0)
             {
                 throw new Exception("本地和异地没有差异");
             }
 
-            return base.OnExecutingAsync(token);
+            return base.OnExecutingAsync(ct);
         }
 
-        protected override async Task OnExecutedAsync(CancellationToken token)
+        protected override async Task OnExecutedAsync(CancellationToken ct)
         {
             if (Files.Any(p => p.Status == ProcessStatus.Error))
             {

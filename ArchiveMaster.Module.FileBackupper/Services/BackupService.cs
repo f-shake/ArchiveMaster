@@ -88,7 +88,7 @@ public partial class BackupService(AppConfig config)
                     {
                         var snapshotCountAfterLastFullSnapshot = await db.GetSnapshotCountAsync(
                             otherQueryAction: q => { return q.Where(p => p.BeginTime > fullSnapshot.BeginTime); },
-                            token: ct);
+                            ct: ct);
                         if (snapshotCountAfterLastFullSnapshot > task.MaxAutoIncrementBackupCount)
                         {
                             await db.LogAsync(LogLevel.Information,
@@ -129,8 +129,8 @@ public partial class BackupService(AppConfig config)
             await using var db = new DbService(task);
             if (type == SnapshotType.Increment)
             {
-                var hasFullSnapshot = (await db.GetSnapshotsAsync(SnapshotType.Full, token: ct)).Count != 0
-                                      || (await db.GetSnapshotsAsync(SnapshotType.VirtualFull, token: ct)).Count != 0;
+                var hasFullSnapshot = (await db.GetSnapshotsAsync(SnapshotType.Full, ct: ct)).Count != 0
+                                      || (await db.GetSnapshotsAsync(SnapshotType.VirtualFull, ct: ct)).Count != 0;
                 if (!hasFullSnapshot)
                 {
                     throw new ArgumentException("没有找到全量备份，无法进行增量备份");

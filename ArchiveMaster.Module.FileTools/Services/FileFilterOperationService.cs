@@ -23,7 +23,7 @@ namespace ArchiveMaster.Services
     {
         public List<FileFilterOperationFileInfo> Files { get; set; }
 
-        public override Task ExecuteAsync(CancellationToken token)
+        public override Task ExecuteAsync(CancellationToken ct)
         {
             FilesLoopOptions loopOptions = IsProgressFileLengthBased()
                 ? FilesLoopOptions.Builder().AutoApplyStatus().AutoApplyFileLengthProgress().Build()
@@ -48,13 +48,13 @@ namespace ArchiveMaster.Services
                             case FileFilterOperationType.Copy:
                                 await FileCopyHelper.CopyFileAsync(file.Path, targetPath,
                                     progress: s.CreateFileProgressReporter("正在复制文件"),
-                                    cancellationToken: token);
+                                    cancellationToken: ct);
                                 File.SetLastWriteTime(targetPath, File.GetLastWriteTime(file.Path));
                                 break;
                             case FileFilterOperationType.Move:
                                 await FileCopyHelper.CopyFileAsync(file.Path, targetPath,
                                     progress: s.CreateFileProgressReporter("正在移动文件"),
-                                    cancellationToken: token);
+                                    cancellationToken: ct);
                                 File.SetLastWriteTime(targetPath, File.GetLastWriteTime(file.Path));
                                 FileHelper.DeleteByConfig(file.Path);
                                 break;
@@ -70,14 +70,14 @@ namespace ArchiveMaster.Services
                             case FileFilterOperationType.Hash:
                                 file.Success(await FileHashHelper.ComputeHashStringAsync(file.Path, Config.HashType,
                                     progress: s.CreateFileProgressReporter("正在计算文件Hash"),
-                                    cancellationToken: token));
+                                    cancellationToken: ct));
                                 break;
                             default:
                                 throw new ArgumentOutOfRangeException();
                         }
                     },
-                    token, loopOptions);
-            }, token);
+                    ct, loopOptions);
+            }, ct);
         }
 
         public override IEnumerable<SimpleFileInfo> GetInitializedFiles()
@@ -85,7 +85,7 @@ namespace ArchiveMaster.Services
             return Files;
         }
 
-        public override async Task InitializeAsync(CancellationToken token)
+        public override async Task InitializeAsync(CancellationToken ct)
         {
             List<FileFilterOperationFileInfo> files = new List<FileFilterOperationFileInfo>();
             await Task.Run(() =>
@@ -95,11 +95,11 @@ namespace ArchiveMaster.Services
                     NotifyMessage($"正在搜索目录{sourceDir}下的文件");
                     var tempFiles = new DirectoryInfo(sourceDir)
                         .EnumerateFiles("*", FileEnumerateExtension.GetEnumerationOptions())
-                        .ApplyFilter(token, Config.Filter)
+                        .ApplyFilter(ct, Config.Filter)
                         .Select(p => GetTargetFile(sourceDir, p));
                     files.AddRange(tempFiles);
                 }
-            }, token);
+            }, ct);
             Files = files;
         }
 

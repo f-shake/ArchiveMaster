@@ -10,7 +10,7 @@ public class LinkDeduplicationService(AppConfig appConfig)
 {
     public TreeDirInfo TreeRoot { get; private set; }
 
-    public override async Task ExecuteAsync(CancellationToken token)
+    public override async Task ExecuteAsync(CancellationToken ct)
     {
         await Task.Run(() =>
         {
@@ -26,15 +26,15 @@ public class LinkDeduplicationService(AppConfig appConfig)
                     HardLinkCreator.CreateHardLink(file.Path, sourceFile.Path);
                     file.Success();
                 }
-            }, token, FilesLoopOptions.Builder().AutoApplyStatus().AutoApplyFileNumberProgress().Build());
-        }, token);
+            }, ct, FilesLoopOptions.Builder().AutoApplyStatus().AutoApplyFileNumberProgress().Build());
+        }, ct);
     }
 
     public override IEnumerable<SimpleFileInfo> GetInitializedFiles()
     {
         return TreeRoot.Flatten();
     }
-    public override Task InitializeAsync(CancellationToken token)
+    public override Task InitializeAsync(CancellationToken ct)
     {
         List<LinkDeduplicationFileInfo> files = new List<LinkDeduplicationFileInfo>();
         Dictionary<string, LinkDeduplicationFileInfo> hash2File = new Dictionary<string, LinkDeduplicationFileInfo>();
@@ -45,13 +45,13 @@ public class LinkDeduplicationService(AppConfig appConfig)
             files = new DirectoryInfo(Config.Dir)
                 .EnumerateFiles("*", FileEnumerateExtension.GetEnumerationOptions())
                 .Select(p => new LinkDeduplicationFileInfo(p, Config.Dir))
-                .ApplyFilter(token, Config.Filter)
+                .ApplyFilter(ct, Config.Filter)
                 .ToList();
 
             NotifyMessage("正在计算文件Hash");
             await TryForFilesAsync(files, async (f, s) =>
             {
-                string hash = await FileHashHelper.ComputeHashStringAsync(f.Path, Config.HashType, cancellationToken: token,
+                string hash = await FileHashHelper.ComputeHashStringAsync(f.Path, Config.HashType, cancellationToken: ct,
                     progress: s.CreateFileProgressReporter("正在计算Hash"));
                 f.Hash = hash;
                 if (!hash2File.TryAdd(hash, f))
@@ -60,7 +60,7 @@ public class LinkDeduplicationService(AppConfig appConfig)
                     sameFile.CanMakeHardLink = true;
                     f.CanMakeHardLink = true;
                 }
-            }, token, FilesLoopOptions.Builder().AutoApplyFileLengthProgress().Build());
+            }, ct, FilesLoopOptions.Builder().AutoApplyFileLengthProgress().Build());
 
             NotifyMessage("正在统计相同文件");
             var tree = TreeDirInfo.CreateEmptyTree();
@@ -100,6 +100,6 @@ public class LinkDeduplicationService(AppConfig appConfig)
             }
 
             TreeRoot = tree;
-        }, token);
+        }, ct);
     }
 }

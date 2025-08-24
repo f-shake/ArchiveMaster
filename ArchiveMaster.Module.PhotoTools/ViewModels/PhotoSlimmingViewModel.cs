@@ -35,10 +35,10 @@ public partial class PhotoSlimmingViewModel(AppConfig appConfig,IDialogService d
     [ObservableProperty]
     private ObservableCollection<string> errorMessages;
 
-    protected override Task OnExecutedAsync(CancellationToken token)
+    protected override Task OnExecutedAsync(CancellationToken ct)
     {
         ErrorMessages = new ObservableCollection<string>(Service.ErrorMessages);
-        return base.OnExecutedAsync(token);
+        return base.OnExecutedAsync(ct);
     }
 
     protected override async Task OnInitializedAsync()

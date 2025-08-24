@@ -31,7 +31,7 @@ namespace ArchiveMaster.Services
 
         public List<EncryptorFileInfo> ProcessingFiles { get; set; }
 
-        public override async Task ExecuteAsync(CancellationToken token)
+        public override async Task ExecuteAsync(CancellationToken ct)
         {
             ArgumentNullException.ThrowIfNull(ProcessingFiles, nameof(ProcessingFiles));
 
@@ -52,19 +52,19 @@ namespace ArchiveMaster.Services
                     {
                         await aes.EncryptFileAsync(file.Path, file.TargetPath, BufferSize,
                             s.CreateFileProgressReporter("正在加密"),
-                            cancellationToken: token);
+                            cancellationToken: ct);
                         if (Config.EncryptDirectoryStructure)
                         {
                             var bytes = aes.Encrypt(Encoding.UTF8.GetBytes(file.RelativePath));
                             await File.WriteAllBytesAsync(file.TargetPath + EncryptedFileMetadataExtension, bytes,
-                                token);
+                                ct);
                         }
                     }
                     else
                     {
                         await aes.DecryptFileAsync(file.Path, file.TargetPath, BufferSize,
                             s.CreateFileProgressReporter("正在解密"),
-                            cancellationToken: token);
+                            cancellationToken: ct);
                     }
 
                     File.SetLastWriteTime(file.TargetPath, File.GetLastWriteTime(file.Path));
@@ -78,15 +78,15 @@ namespace ArchiveMaster.Services
 
                         FileHelper.DeleteByConfig(file.Path);
                     }
-                }, token, FilesLoopOptions.Builder().AutoApplyStatus().AutoApplyFileLengthProgress().Build());
-            }, token);
+                }, ct, FilesLoopOptions.Builder().AutoApplyStatus().AutoApplyFileLengthProgress().Build());
+            }, ct);
         }
 
         public override IEnumerable<SimpleFileInfo> GetInitializedFiles()
         {
             return ProcessingFiles.Cast<SimpleFileInfo>();
         }
-        public override async Task InitializeAsync(CancellationToken token)
+        public override async Task InitializeAsync(CancellationToken ct)
         {
             InitializeAes();
             List<EncryptorFileInfo> files = new List<EncryptorFileInfo>();
@@ -103,14 +103,14 @@ namespace ArchiveMaster.Services
             await TryForFilesAsync(new DirectoryInfo(sourceDir)
                 .EnumerateFiles("*", FileEnumerateExtension.GetEnumerationOptions())
                 .Where(p => p.Extension != EncryptedFileMetadataExtension)
-                .ApplyFilter(token)
+                .ApplyFilter(ct)
                 .Select(p => new EncryptorFileInfo(p, sourceDir)), (file, s) =>
             {
                 ProcessFileNames(file);
 
                 NotifyMessage($"正在加入{s.GetFileNumberMessage()}：{file.Name}");
                 files.Add(file);
-            }, token, FilesLoopOptions.DoNothing());
+            }, ct, FilesLoopOptions.DoNothing());
 
             ProcessingFiles = files;
         }

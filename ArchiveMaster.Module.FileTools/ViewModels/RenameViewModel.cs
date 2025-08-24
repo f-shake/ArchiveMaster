@@ -47,7 +47,7 @@ public partial class RenameViewModel(AppConfig appConfig, IDialogService dialogS
         return base.OnInitializedAsync();
     }
 
-    protected override async Task OnExecutedAsync(CancellationToken token)
+    protected override async Task OnExecutedAsync(CancellationToken ct)
     {
         if (isWithdraw)
         {

@@ -20,7 +20,7 @@ namespace ArchiveMaster.Services
     {
         public TreeDirInfo RootDir { get; private set; }
 
-        public override async Task ExecuteAsync(CancellationToken token)
+        public override async Task ExecuteAsync(CancellationToken ct)
         {
             await Task.Run(() =>
             {
@@ -31,7 +31,7 @@ namespace ArchiveMaster.Services
                     {
                         NotifyMessage($"正在创建{s.GetFileNumberMessage()}：{file.RelativePath}");
                         CreateSparseFile(file);
-                    }, token, FilesLoopOptions.Builder().AutoApplyFileNumberProgress().AutoApplyStatus().Build());
+                    }, ct, FilesLoopOptions.Builder().AutoApplyFileNumberProgress().AutoApplyStatus().Build());
                 }
 
                 if (!string.IsNullOrWhiteSpace(Config.TargetFile))
@@ -46,20 +46,20 @@ namespace ArchiveMaster.Services
                     });
                     File.WriteAllText(Config.TargetFile, json);
                 }
-            }, token);
+            }, ct);
         }
 
         public override IEnumerable<SimpleFileInfo> GetInitializedFiles()
         {
             return RootDir.Flatten();
         }
-        public override async Task InitializeAsync(CancellationToken token)
+        public override async Task InitializeAsync(CancellationToken ct)
         {
             List<SimpleFileInfo> files = new List<SimpleFileInfo>();
 
             NotifyMessage("正在枚举文件");
             NotifyProgressIndeterminate();
-            RootDir = await TreeDirInfo.BuildTreeAsync(Config.SourceDir, token);
+            RootDir = await TreeDirInfo.BuildTreeAsync(Config.SourceDir, ct);
         }
 
         [DllImport("Kernel32.dll", SetLastError = true, CharSet = CharSet.Auto)]

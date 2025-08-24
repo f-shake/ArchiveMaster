@@ -57,7 +57,7 @@ namespace ArchiveMaster.Services
             return matchingDirs;
         }
 
-        public override async Task ExecuteAsync(CancellationToken token = default)
+        public override async Task ExecuteAsync(CancellationToken ct = default)
         {
             if (!Directory.Exists(Config.PatchDir))
             {
@@ -142,7 +142,7 @@ namespace ArchiveMaster.Services
                                                 p => length + p.ProcessedBytes,
                                                 () => totalLength,
                                                 p => Path.GetFileName(p.SourceFilePath))
-                                        , token);
+                                        , ct);
                                     tryCount = 0;
                                 }
                                 catch (IOException ex)
@@ -167,7 +167,7 @@ namespace ArchiveMaster.Services
                         default:
                             throw new ArgumentOutOfRangeException();
                     }
-                }, token, FilesLoopOptions.Builder().AutoApplyStatus().Finally(file =>
+                }, ct, FilesLoopOptions.Builder().AutoApplyStatus().Finally(file =>
                 {
                     var f = file as SyncFileInfo;
                     if (f.UpdateType is FileUpdateType.Delete or FileUpdateType.Move)
@@ -191,7 +191,7 @@ namespace ArchiveMaster.Services
                     LocalDirectories = LocalDirectories
                 };
                 ZipService.WriteToZip(model, Path.Combine(Config.PatchDir, "file.os2"));
-            }, token);
+            }, ct);
         }
 
         public override IEnumerable<SimpleFileInfo> GetInitializedFiles()
@@ -199,7 +199,7 @@ namespace ArchiveMaster.Services
             return UpdateFiles.Cast<SimpleFileInfo>();
         }
 
-        public override async Task InitializeAsync(CancellationToken token = default)
+        public override async Task InitializeAsync(CancellationToken ct = default)
         {
             UpdateFiles.Clear();
             LocalDirectories.Clear();
@@ -245,7 +245,7 @@ namespace ArchiveMaster.Services
                     NotifyMessage($"正在查找：{offsiteDir}→{localDir}");
                     var localFileList = localDir
                         .EnumerateFiles("*", FileEnumerateExtension.GetEnumerationOptions())
-                        .ApplyFilter(token)
+                        .ApplyFilter(ct)
                         .ToList();
                     var localFilePathSet = localFileList.Select(p => p.FullName).ToHashSet();
 
@@ -318,7 +318,7 @@ namespace ArchiveMaster.Services
                     */
                     foreach (var file in localFileList)
                     {
-                        token.ThrowIfCancellationRequested();
+                        ct.ThrowIfCancellationRequested();
 
                         string relativePath = Path.GetRelativePath(localDir.FullName, file.FullName);
                         NotifyMessage($"正在比对（{++index}/{localFileList.Count}）：{relativePath}");
@@ -426,7 +426,7 @@ namespace ArchiveMaster.Services
                         }
                     }
 
-                    token.ThrowIfCancellationRequested();
+                    ct.ThrowIfCancellationRequested();
 
 
                     NotifyMessage($"正在查找删除的文件:{offsiteDir}→{localDir}");
@@ -460,7 +460,7 @@ namespace ArchiveMaster.Services
                         }
                     }
                 }
-            }, token);
+            }, ct);
         }
 
         private static void BeginScript(StringBuilder batScript, StringBuilder ps1Script)
