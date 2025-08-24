@@ -1,36 +1,41 @@
 <Project>
-  <PropertyGroup>
-    <Nullable>disable</Nullable>
-    <AppVersion>2.1.0</AppVersion>
-    <AvaloniaVersion>11.3.2</AvaloniaVersion>
-    <FzLibVersion>3.0.7</FzLibVersion>
-  </PropertyGroup>
+    <PropertyGroup>
+        <Nullable>disable</Nullable>
+        <AppVersion>2.1.0</AppVersion>
+        <AvaloniaVersion>11.3.2</AvaloniaVersion>
+        <FzLibVersion>3.0.7</FzLibVersion>
+        <UseLocalFzLib>true</UseLocalFzLib>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <AvaloniaResource Include="Assets\**"/>
-  </ItemGroup>
+    <ItemGroup>
+        <AvaloniaResource Include="Assets\**"/>
+    </ItemGroup>
 
-  <ItemGroup Condition="'$(Configuration)' == 'Debug'">
-    <Reference Include="FzLib">
-      <HintPath>..\..\FzLib\Publish\libs\FzLib.dll</HintPath>
-    </Reference>
-    <Reference Include="FzLib.Avalonia">
-      <HintPath>..\..\FzLib\Publish\libs\FzLib.Avalonia.dll</HintPath>
-    </Reference>
-  </ItemGroup>
+    <ItemGroup Condition="'$(Configuration)' == 'Debug' and '$(UseLocalFzLib)' == 'true'">
+        <Reference Include="FzLib">
+            <HintPath>..\..\FzLib\Publish\libs\FzLib.dll</HintPath>
+        </Reference>
+        <Reference Include="FzLib.Avalonia">
+            <HintPath>..\..\FzLib\Publish\libs\FzLib.Avalonia.dll</HintPath>
+        </Reference>
+    </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Avalonia"/>
-    <PackageReference Include="Avalonia.Controls.DataGrid"/>
-    <PackageReference Include="Avalonia.Themes.Fluent"/>
-    <PackageReference Include="Xaml.Behaviors.Avalonia"/>
-    <PackageReference Include="BinToss.GroupBox.Avalonia"/>
-    <PackageReference Include="CommunityToolkit.Mvvm"/>
-    <PackageReference Include="Serilog"/>
-    <PackageReference Include="Serilog.Sinks.File"/>
-    <PackageReference Condition="'$(Configuration)' == 'Release'" Include="FzLib.Avalonia"/>
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection"/>
-    <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics"/>
-    <!--<PackageReference Include="Mapster" />-->
-  </ItemGroup>
+    <ItemGroup Condition="! ('$(Configuration)' == 'Debug' and '$(UseLocalFzLib)' == 'true')">
+        <PackageReference Include="FzLib" Version="$(FzLibVersion)" />
+        <PackageReference Include="FzLib.Avalonia" Version="$(FzLibVersion)" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Avalonia"/>
+        <PackageReference Include="Avalonia.Controls.DataGrid"/>
+        <PackageReference Include="Avalonia.Themes.Fluent"/>
+        <PackageReference Include="Xaml.Behaviors.Avalonia"/>
+        <PackageReference Include="BinToss.GroupBox.Avalonia"/>
+        <PackageReference Include="CommunityToolkit.Mvvm"/>
+        <PackageReference Include="Serilog"/>
+        <PackageReference Include="Serilog.Sinks.File"/>
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection"/>
+        <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics"/>
+        <!--<PackageReference Include="Mapster" />-->
+    </ItemGroup>
 </Project>

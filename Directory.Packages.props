@@ -13,7 +13,7 @@
     <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.0" />
     <PackageVersion Include="ExifLibNet.Updated" Version="2.1.5" />
     <PackageVersion Include="ExifLibrary" Version="1.0.13" />
-    <PackageVersion Include="FzLib.Avalonia" Version="$(FzLibVersion)" Condition="'$(Configuration)' == 'Release'" />
+    <PackageVersion Include="FzLib.Avalonia" Version="$(FzLibVersion)" />
     <PackageVersion Include="Irihi.Ursa" Version="1.6.0" />
     <PackageVersion Include="Irihi.Ursa.Themes.Semi" Version="1.6.0.2" />
     <PackageVersion Include="Magick.NET-Q16-AnyCPU" Version="14.7.0" />
