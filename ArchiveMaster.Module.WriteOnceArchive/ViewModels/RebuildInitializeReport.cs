@@ -1,6 +1,8 @@
-﻿namespace ArchiveMaster.ViewModels;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 
-public class RebuildInitializeReport
+namespace ArchiveMaster.ViewModels;
+
+public partial class RebuildInitializeReport : ObservableObject
 {
     public int TotalFileCount { get; set; }
     public long TotalFileLength { get; set; }
@@ -8,4 +10,11 @@ public class RebuildInitializeReport
     public long MatchedFileLength { get; set; }
     public double MatchCountPercent => 1.0 * MatchedFileCount / TotalFileCount;
     public double MatchLengthPercent => 1.0 * MatchedFileLength / TotalFileLength;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(MeanReadSpeedBytePerSecond))]
+    private double? totalReadTimeCostSecond;
+
+    public double? MeanReadSpeedBytePerSecond =>
+        TotalReadTimeCostSecond.HasValue ? MatchedFileLength / TotalReadTimeCostSecond : null;
 }

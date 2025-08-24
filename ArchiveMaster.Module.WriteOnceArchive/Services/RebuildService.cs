@@ -108,82 +108,20 @@ namespace ArchiveMaster.Services
             return MatchedFiles;
         }
 
-        private async Task<List<WriteOnceFileInfo>> GetAllFilesAsync(IEnumerable<string> sourceDirs)
-        {
-            string file = Config.PackageInfoFile;
-            if (string.IsNullOrWhiteSpace(file))
-            {
-                file = sourceDirs
-                    .Select(p => Path.Combine(p, WriteOnceArchiveParameters.PackageInfoFileName))
-                    .Where(File.Exists)
-                    .OrderByDescending(File.GetLastWriteTime)
-                    .FirstOrDefault();
-            }
-
-            if (string.IsNullOrWhiteSpace(file) || !File.Exists(file))
-            {
-                throw new FileNotFoundException("未找到包信息文件");
-            }
-
-            var json = await File.ReadAllTextAsync(file);
-            var info = JsonSerializer.Deserialize<WriteOncePackageInfo>(json);
-            if (info.AllFiles == null)
-            {
-                throw new Exception("包信息文件格式错误，不包含目录结构");
-            }
-
-            return info.AllFiles;
-        }
-
-        private (TreeDirInfo Tree, IDictionary<string, object> hash2Files) GetHashFileMap(
-            IEnumerable<WriteOnceFileInfo> allFiles)
-        {
-            var hash2Files = new Dictionary<string, object>();
-            TreeDirInfo tree = TreeDirInfo.CreateEmptyTree();
-            foreach (var modelFile in allFiles)
-            {
-                var vmFile = new WriteOnceFile
-                {
-                    Name = Path.GetFileName(modelFile.RelativePath),
-                    Length = modelFile.Length,
-                    Time = modelFile.LastWriteTime,
-                    Hash = modelFile.Hash
-                };
-                vmFile.SetRelativePath(modelFile.RelativePath);
-                tree.AddFile(vmFile);
-                if (hash2Files.ContainsKey(modelFile.Hash))
-                {
-                    if (hash2Files[vmFile.Hash] is WriteOnceFile anotherFile)
-                    {
-                        hash2Files[vmFile.Hash] = new List<WriteOnceFile>() { anotherFile, vmFile };
-                    }
-                    else
-                    {
-                        ((List<WriteOnceFile>)hash2Files[vmFile.Hash]).Add(vmFile);
-                    }
-                }
-                else
-                {
-                    hash2Files.Add(vmFile.Hash, vmFile);
-                }
-            }
-
-            return (tree, hash2Files.ToFrozenDictionary());
-        }
-
         public override async Task InitializeAsync(CancellationToken ct)
         {
             NotifyMessage("正在建立文件树");
             TreeDirInfo tree = null;
             var sourceDirs = FileNameHelper.GetDirNames(Config.SourceDirs);
-            List<WriteOnceFileInfo> allFiles = await GetAllFilesAsync(sourceDirs);
+            List<WriteOnceFileInfo> allFiles =
+                (await WriteOnceArchiveHelper.ReadPackageInfoAsync(sourceDirs, Config.PackageInfoFile)).AllFiles;
             RebuildInitializeReport initializeReport = null;
             IDictionary<string, object> hash2Files = null;
             List<WriteOnceFile> matchFiles = new List<WriteOnceFile>();
             await Task.Run(() =>
             {
                 HashSet<string> allHashes = new HashSet<string>();
-                (tree, hash2Files) = GetHashFileMap(allFiles);
+                (tree, hash2Files) = WriteOnceArchiveHelper.GetHashFileMap(allFiles);
                 foreach (var dir in sourceDirs)
                 {
                     var phyFiles = Directory.GetFiles(dir);

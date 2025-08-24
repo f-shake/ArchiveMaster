@@ -16,6 +16,7 @@ namespace ArchiveMaster
         [
             new ConfigMetadata(typeof(PackingConfig), CONFIG_GROUP),
             new ConfigMetadata(typeof(RebuildConfig), CONFIG_GROUP),
+            new ConfigMetadata(typeof(VerifyConfig), CONFIG_GROUP),
         ];
 
         public string ModuleName => "动态固存备份";
@@ -27,7 +28,8 @@ namespace ArchiveMaster
         public IList<Type> TransientServices { get; } =
         [
             typeof(PackingService),
-            typeof(RebuildService)
+            typeof(RebuildService),
+            typeof(VerifyService),
         ];
 
         public ToolPanelGroupInfo Views => new ToolPanelGroupInfo()
@@ -36,8 +38,10 @@ namespace ArchiveMaster
             {
                 new ToolPanelInfo(typeof(PackingPanel), typeof(PackingViewModel), "打包",
                     "扫描文件特征，制作文件归档包", baseUrl + "disc.svg"),
-                new ToolPanelInfo(typeof(RebuildPanel), typeof(RebuildViewModel), "验证和重建", "从文件归档包重建目录结构，或验证文件完整性",
+                new ToolPanelInfo(typeof(RebuildPanel), typeof(RebuildViewModel), "重建", "从文件归档包重建目录结构，或验证文件完整性",
                     baseUrl + "rebuild.svg"),
+                new ToolPanelInfo(typeof(VerifyPanel), typeof(VerifyViewModel), "包信息和验证", "查看备份介质中文件包的信息，验证文件完整性",
+                    baseUrl + "package.svg"),
             },
             GroupName = ModuleName,
             GroupDescription = ModuleDescription

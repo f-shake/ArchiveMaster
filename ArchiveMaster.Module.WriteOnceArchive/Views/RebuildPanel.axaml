@@ -84,12 +84,11 @@
                     ColumnNameIndex="1.1"
                     ColumnPathIndex="1.3"
                     ColumnTimeIndex="1.4"
-                    ItemsSource="{Binding MatchedFiles}">
+                    ItemsSource="{Binding Files}">
                     <v:SimpleFileDataGrid.Columns>
                         <DataGridTemplateColumn
                             CanUserResize="False"
-                            Header="已加密"
-                            SortMemberPath="AlreadyHasGps">
+                            Header="已加密">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <Ellipse

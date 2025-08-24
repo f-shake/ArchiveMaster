@@ -1,0 +1,201 @@
+﻿<v:TwoStepPanelBase
+    x:Class="ArchiveMaster.Views.VerifyPanel"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ctrl="clr-namespace:FzLib.Avalonia.Controls;assembly=FzLib.Avalonia"
+    xmlns:cvt="using:ArchiveMaster.Converters"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:g="clr-namespace:GroupBox.Avalonia.Controls;assembly=GroupBox.Avalonia"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib"
+    xmlns:ui="http://schemas.modernwpf.com/2019"
+    xmlns:v="using:ArchiveMaster.Views"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    ExecuteButtonContent="验证文件包"
+    InitializeButtonContent="加载文件包"
+    mc:Ignorable="d">
+
+    <v:TwoStepPanelBase.ConfigsContent>
+        <ctrl:StackFormItemGroup>
+            <ctrl:FormItem Label="文件包目录：">
+                <v:FilePickerTextBox
+                    FileNames="{Binding Config.PackageDir}"
+                    Type="OpenFolder" />
+            </ctrl:FormItem>
+
+            <ctrl:FormItem Label="选项：">
+                <ctrl:WrapFormItemGroup>
+                    <ctrl:FormItem Header="密码">
+                        <TextBox
+                            Width="240"
+                            Classes="revealPasswordButton"
+                            PasswordChar="*"
+                            Text="{Binding Config.Password}"
+                            Watermark="若备份时未设置密码，此处可留空" />
+                    </ctrl:FormItem>
+                </ctrl:WrapFormItemGroup>
+            </ctrl:FormItem>
+        </ctrl:StackFormItemGroup>
+    </v:TwoStepPanelBase.ConfigsContent>
+
+
+    <v:TwoStepPanelBase.ResultsContent>
+        <Grid
+            ColumnDefinitions="*,8,*"
+            RowDefinitions="2*,8,4*">
+            <GridSplitter
+                Grid.RowSpan="3"
+                Grid.Column="1"
+                Width="8"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Stretch"
+                Background="Transparent" />
+            <GridSplitter
+                Grid.Row="1"
+                Height="8"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Center"
+                Background="Transparent" />
+
+            <g:GroupBox Header="文件包基本信息">
+                <ScrollViewer
+                    HorizontalScrollBarVisibility="Disabled"
+                    VerticalScrollBarVisibility="Auto">
+                    <WrapPanel IsVisible="{Binding Report, Converter={x:Static cvt:Converters.IsNotNull}}">
+                        <WrapPanel.Styles>
+                            <Style Selector="ctrl|FormItem">
+                                <Setter Property="LabelWidth" Value="96" />
+                                <Setter Property="Width" Value="200" />
+                                <Setter Property="Margin" Value="0,4" />
+                                <Style Selector="^ /template/ TextBlock#PART_LabelText">
+                                    <Setter Property="FontWeight" Value="Bold" />
+                                </Style>
+                            </Style>
+                        </WrapPanel.Styles>
+                        <ctrl:FormItem Label="匹配文件：">
+                            <TextBlock Text="{Binding Report.MatchedFileCount}" />
+                        </ctrl:FormItem>
+                        <ctrl:FormItem Label="匹配文件大小：">
+                            <TextBlock Text="{Binding Report.MatchedFileLength, Converter={x:Static cvt:Converters.FileLength}}" />
+                        </ctrl:FormItem>
+                        <ctrl:FormItem Label="总文件数：">
+                            <TextBlock Text="{Binding Report.TotalFileCount}" />
+                        </ctrl:FormItem>
+                        <ctrl:FormItem Label="总文件大小：">
+                            <TextBlock Text="{Binding Report.TotalFileLength, Converter={x:Static cvt:Converters.FileLength}}" />
+                        </ctrl:FormItem>
+                        <ctrl:FormItem Label="匹配文件占比：">
+                            <TextBlock Text="{Binding Report.MatchCountPercent, StringFormat={}{0:P2}}" />
+                        </ctrl:FormItem>
+                        <ctrl:FormItem Label="匹配大小占比：">
+                            <TextBlock Text="{Binding Report.MatchLengthPercent, StringFormat={}{0:P2}}" />
+                        </ctrl:FormItem>
+                        <ctrl:FormItem
+                            IsVisible="{Binding Report.TotalReadTimeCostSecond, Converter={x:Static cvt:Converters.IsNotNull}}"
+                            Label="读取总时间：">
+                            <TextBlock Text="{Binding Report.TotalReadTimeCostSecond, StringFormat={}{0:F2} 秒}" />
+                        </ctrl:FormItem>
+                        <ctrl:FormItem
+                            IsVisible="{Binding Report.MeanReadSpeedBytePerSecond, Converter={x:Static cvt:Converters.IsNotNull}}"
+                            Label="读取平均速度：">
+                            <TextBlock Text="{Binding Report.MeanReadSpeedBytePerSecond, Mode=OneWay, Converter={x:Static cvt:Converters.TransferSpeed}}" />
+                        </ctrl:FormItem>
+                    </WrapPanel>
+                </ScrollViewer>
+            </g:GroupBox>
+
+            <g:GroupBox
+                Grid.Row="2"
+                Header="目标结构树">
+                <v:WriteOnceTreeFileDataGrid
+                    ColumnIsCheckedIndex="-1"
+                    ColumnStatusIndex="-1"
+                    FileNameHalfTransparentBindingPath="HasPhysicalFile"
+                    ItemsSource="{Binding FileTree}" />
+            </g:GroupBox>
+
+            <g:GroupBox
+                Grid.RowSpan="3"
+                Grid.Column="2"
+                Header="文件列表">
+                <v:SimpleFileDataGrid
+                    ColumnIsCheckedIndex="-1"
+                    ColumnLengthIndex="10.2"
+                    ColumnNameIndex="10.1"
+                    ColumnPathIndex="10.3"
+                    ColumnTimeIndex="10.4"
+                    ItemsSource="{Binding Files}"
+                    RowDetailsTemplate="{x:Null}"
+                    RowDetailsVisibilityMode="Collapsed">
+                    <v:SimpleFileDataGrid.Columns>
+                        <DataGridTemplateColumn
+                            CanUserResize="False"
+                            Header="已加密"
+                            SortMemberPath="IsEncrypted">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Ellipse
+                                        Width="8"
+                                        Height="8"
+                                        Fill="SkyBlue"
+                                        IsVisible="{Binding IsEncrypted}" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header="存在的问题">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <ItemsControl ItemsSource="{Binding ., Converter={x:Static cvt:VerifyErrorTagConverter.Instance}}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <StackPanel
+                                                    Orientation="Horizontal"
+                                                    Spacing="8" />
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border
+                                                    Padding="4"
+                                                    HorizontalAlignment="Center"
+                                                    VerticalAlignment="Center"
+                                                    Background="Red"
+                                                    CornerRadius="4">
+                                                    <Border.RenderTransform>
+                                                        <ScaleTransform ScaleX="0.9" ScaleY="0.9" />
+                                                    </Border.RenderTransform>
+                                                    <TextBlock
+                                                        Margin="0"
+                                                        Foreground="White"
+                                                        Text="{Binding .}" />
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <DataGridTextColumn
+                            Binding="{Binding ReadTimeCostSecond, Mode=OneWay, StringFormat={}{0:F2}}"
+                            Header="读取耗时（秒）"
+                            IsReadOnly="True" />
+
+                        <DataGridTextColumn
+                            Binding="{Binding ReadSpeedBytePerSecond, Mode=OneWay, Converter={x:Static cvt:Converters.TransferSpeed}}"
+                            Header="读取速度"
+                            IsReadOnly="True" />
+
+                        <DataGridTextColumn
+                            Binding="{Binding Hash}"
+                            Header="文件Hash"
+                            IsReadOnly="True" />
+                    </v:SimpleFileDataGrid.Columns>
+                </v:SimpleFileDataGrid>
+
+            </g:GroupBox>
+        </Grid>
+    </v:TwoStepPanelBase.ResultsContent>
+
+</v:TwoStepPanelBase>
