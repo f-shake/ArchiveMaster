@@ -38,7 +38,8 @@
                             Text="文件名：" />
                         <SelectableTextBlock
                             Grid.Column="2"
-                            Text="{Binding Name}" />
+                            Text="{Binding Name}"
+                            TextWrapping="Wrap" />
 
                         <TextBlock
                             Grid.Row="2"
@@ -66,7 +67,8 @@
                         <SelectableTextBlock
                             Grid.Row="6"
                             Grid.Column="2"
-                            Text="{Binding Message}" />
+                            Text="{Binding Message}"
+                            TextWrapping="Wrap" />
 
                     </Grid>
                 </Border>

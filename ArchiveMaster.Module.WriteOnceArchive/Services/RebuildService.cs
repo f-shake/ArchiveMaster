@@ -111,76 +111,87 @@ namespace ArchiveMaster.Services
         public override async Task InitializeAsync(CancellationToken ct)
         {
             NotifyMessage("正在建立文件树");
-            TreeDirInfo tree = null;
             var sourceDirs = FileNameHelper.GetDirNames(Config.SourceDirs);
-            List<WriteOnceFileInfo> allFiles =
-                (await WriteOnceArchiveHelper.ReadPackageInfoAsync(sourceDirs, Config.PackageInfoFile)).AllFiles;
-            RebuildInitializeReport initializeReport = null;
-            IDictionary<string, object> hash2Files = null;
-            List<WriteOnceFile> matchFiles = new List<WriteOnceFile>();
-            await Task.Run(() =>
-            {
-                HashSet<string> allHashes = new HashSet<string>();
-                (tree, hash2Files) = WriteOnceArchiveHelper.GetHashFileMap(allFiles);
-                foreach (var dir in sourceDirs)
-                {
-                    var phyFiles = Directory.GetFiles(dir);
-                    foreach (var phyFile in phyFiles)
-                    {
-                        bool hasEncrypt = false;
-                        string name = Path.GetFileName(phyFile);
-                        if (name.EndsWith(WriteOnceArchiveParameters.EncryptedFileSuffix))
-                        {
-                            name = name[..^WriteOnceArchiveParameters.EncryptedFileSuffix.Length];
-                            hasEncrypt = true;
-                        }
+            var packageInfo =
+                (await WriteOnceArchiveHelper.ReadPackageInfoAsync(sourceDirs, Config.PackageInfoFile));
 
-                        if (!FileHashHelper.IsValidHashString(name, WriteOnceArchiveParameters.HashType))
-                        {
-                            continue;
-                        }
-
-                        if (!allHashes.Add(name))
-                        {
-                        }
-
-                        if (!hash2Files.ContainsKey(name))
-                        {
-                            continue;
-                        }
-
-                        if (hash2Files[name] is WriteOnceFile file)
-                        {
-                            file.HasPhysicalFile = true;
-                            matchFiles.Add(file);
-                            file.PhysicalFile = phyFile;
-                            file.IsEncrypted = hasEncrypt;
-                        }
-                        else
-                        {
-                            foreach (var p in (List<WriteOnceFile>)hash2Files[name])
-                            {
-                                p.HasPhysicalFile = true;
-                                matchFiles.Add(p);
-                                p.PhysicalFile = phyFile;
-                                p.IsEncrypted = hasEncrypt;
-                            }
-                        }
-                    }
-                }
-
-                initializeReport = new RebuildInitializeReport
-                {
-                    TotalFileCount = tree.SubFileCount,
-                    TotalFileLength = tree.Flatten().Sum(p => p.Length),
-                    MatchedFileCount = matchFiles.Count,
-                    MatchedFileLength = matchFiles.Sum(p => p.Length)
-                };
-            }, ct);
-
-            FileTree = tree;
-            MatchedFiles = matchFiles;
-            InitializeReport = initializeReport;
+            (FileTree, MatchedFiles, InitializeReport) =
+                await WriteOnceArchiveHelper.ReadPackageFilesAsync(packageInfo, sourceDirs, false, ct);
+            // await Task.Run(() =>
+            // {
+            //     HashSet<string> allHashes = new HashSet<string>();
+            //     (tree, hash2Files) = WriteOnceArchiveHelper.GetHashFileMap(allFiles);
+            //     foreach (var dir in sourceDirs)
+            //     {
+            //         var phyFiles = Directory.GetFiles(dir);
+            //         foreach (var phyFile in phyFiles)
+            //         {
+            //             bool hasEncrypt = false;
+            //             string name = Path.GetFileName(phyFile);
+            //             if (name.EndsWith(WriteOnceArchiveParameters.EncryptedFileSuffix))
+            //             {
+            //                 name = name[..^WriteOnceArchiveParameters.EncryptedFileSuffix.Length];
+            //                 hasEncrypt = true;
+            //             }
+            //
+            //             if (!FileHashHelper.IsValidHashString(name, WriteOnceArchiveParameters.HashType))
+            //             {
+            //                 continue;
+            //             }
+            //
+            //             if (!allHashes.Add(name))
+            //             {
+            //             }
+            //
+            //             if (!hash2Files.ContainsKey(name))
+            //             {
+            //                 continue;
+            //             }
+            //
+            //             if (hash2Files[name] is WriteOnceFile file)
+            //             {
+            //                 file.HasPhysicalFile = true;
+            //                 matchFiles.Add(file);
+            //                 file.PhysicalFile = phyFile;
+            //                 file.IsEncrypted = hasEncrypt;
+            //             }
+            //             else
+            //             {
+            //                 foreach (var p in (List<WriteOnceFile>)hash2Files[name])
+            //                 {
+            //                     p.HasPhysicalFile = true;
+            //                     matchFiles.Add(p);
+            //                     p.PhysicalFile = phyFile;
+            //                     p.IsEncrypted = hasEncrypt;
+            //                 }
+            //             }
+            //         }
+            //     }
+            //     initializeReport = new RebuildInitializeReport
+            //     {
+            //         TotalFiles = new FileCountLength(tree.SubFileCount, tree.Flatten().Sum(p => p.Length)),
+            //         PackageFiles = new FileCountLength(files.Count(p => !p.ErrorNotInFileList),
+            //             files.Where(p => !p.ErrorNotInFileList).Sum(p => p.Length)),
+            //         FoundPhysicalFiles = new FileCountLength(files.Count(p => p.Status == ProcessStatus.Ready),
+            //             files.Where(p => p.Status == ProcessStatus.Ready).Sum(p => p.Length)),
+            //         PackageTime = packageInfo.PackageTime,
+            //         UnreferencedFiles = new FileCountLength(files.Count(p => p.ErrorNotInFileList),
+            //             files.Where(p => p.ErrorNotInFileList).Sum(p => p.Length)),
+            //         LostFiles = new FileCountLength(files.Count(p => p.ErrorNoPhysicalFile),
+            //             files.Where(p => p.ErrorNoPhysicalFile).Sum(p => p.Length))
+            //     };
+            //     initializeReport = new RebuildInitializeReport
+            //     {
+            //         TotalFileCount = tree.SubFileCount,
+            //         TotalFileLength = tree.Flatten().Sum(p => p.Length),
+            //         MatchedFileCount = matchFiles.Count,
+            //         MatchedFileLength = matchFiles.Sum(p => p.Length)
+            //     };
+            // }, ct);
+            //
+            // FileTree = tree;
+            // MatchedFiles = matchFiles;
+            // InitializeReport = initializeReport;
         }
     }
 }

@@ -66,31 +66,92 @@
                         <WrapPanel.Styles>
                             <Style Selector="ctrl|FormItem">
                                 <Setter Property="LabelWidth" Value="96" />
-                                <Setter Property="Width" Value="200" />
+                                <Setter Property="Width" Value="260" />
                                 <Setter Property="Margin" Value="0,4" />
                                 <Style Selector="^ /template/ TextBlock#PART_LabelText">
                                     <Setter Property="FontWeight" Value="Bold" />
                                 </Style>
                             </Style>
                         </WrapPanel.Styles>
-                        <ctrl:FormItem Label="匹配文件：">
-                            <TextBlock Text="{Binding Report.MatchedFileCount}" />
+
+                        <ctrl:FormItem
+                            Label="源目录文件："
+                            ToolTip.Tip="打包前目录中存在的所有文件">
+                            <TextBlock>
+                                <TextBlock.Text>
+                                    <MultiBinding StringFormat="{}{0}个 ({1})">
+                                        <Binding Path="Report.TotalFiles.Count" />
+                                        <Binding
+                                            Converter="{x:Static cvt:Converters.FileLength}"
+                                            Path="Report.TotalFiles.TotalLength" />
+                                    </MultiBinding>
+                                </TextBlock.Text>
+                            </TextBlock>
                         </ctrl:FormItem>
-                        <ctrl:FormItem Label="匹配文件大小：">
-                            <TextBlock Text="{Binding Report.MatchedFileLength, Converter={x:Static cvt:Converters.FileLength}}" />
+
+                        <ctrl:FormItem
+                            Label="清单文件："
+                            ToolTip.Tip="文件包清单中记录的所有文件">
+                            <TextBlock>
+                                <TextBlock.Text>
+                                    <MultiBinding StringFormat="{}{0}个 ({1})">
+                                        <Binding Path="Report.PackageFiles.Count" />
+                                        <Binding
+                                            Converter="{x:Static cvt:Converters.FileLength}"
+                                            Path="Report.PackageFiles.TotalLength" />
+                                    </MultiBinding>
+                                </TextBlock.Text>
+                            </TextBlock>
                         </ctrl:FormItem>
-                        <ctrl:FormItem Label="总文件数：">
-                            <TextBlock Text="{Binding Report.TotalFileCount}" />
+
+                        <ctrl:FormItem
+                            Label="文件："
+                            ToolTip.Tip="实际在文件包中找到的物理文件">
+                            <TextBlock>
+                                <TextBlock.Text>
+                                    <MultiBinding StringFormat="{}{0}个 ({1})">
+                                        <Binding Path="Report.FoundPhysicalFiles.Count" />
+                                        <Binding
+                                            Converter="{x:Static cvt:Converters.FileLength}"
+                                            Path="Report.FoundPhysicalFiles.TotalLength" />
+                                    </MultiBinding>
+                                </TextBlock.Text>
+                            </TextBlock>
                         </ctrl:FormItem>
-                        <ctrl:FormItem Label="总文件大小：">
-                            <TextBlock Text="{Binding Report.TotalFileLength, Converter={x:Static cvt:Converters.FileLength}}" />
+
+                        <ctrl:FormItem
+                            Label="丢失文件："
+                            ToolTip.Tip="清单中存在，但物理文件缺失的文件">
+                            <TextBlock>
+                                <TextBlock.Text>
+                                    <MultiBinding StringFormat="{}{0}个 ({1})">
+                                        <Binding Path="Report.LostFiles.Count" />
+                                        <Binding
+                                            Converter="{x:Static cvt:Converters.FileLength}"
+                                            Path="Report.LostFiles.TotalLength" />
+                                    </MultiBinding>
+                                </TextBlock.Text>
+                            </TextBlock>
                         </ctrl:FormItem>
-                        <ctrl:FormItem Label="匹配文件占比：">
-                            <TextBlock Text="{Binding Report.MatchCountPercent, StringFormat={}{0:P2}}" />
+
+                        <!--  <ctrl:FormItem Label="多余物理文件："  -->
+                        <!--  ToolTip.Tip="存在于文件包，但物理备份文件不存在的文件">  -->
+                        <!--     <TextBlock> -->
+                        <!--         <TextBlock.Text> -->
+                        <!--             <MultiBinding StringFormat="{}{0} ({1})"> -->
+                        <!--                 <Binding Path="Report.UnreferencedFiles.Count" /> -->
+                        <!--  <Binding  -->
+                        <!--  Converter="{x:Static cvt:Converters.FileLength}"  -->
+                        <!--  Path="Report.UnreferencedFiles.TotalLength" />  -->
+                        <!--             </MultiBinding> -->
+                        <!--         </TextBlock.Text> -->
+                        <!--     </TextBlock> -->
+                        <!-- </ctrl:FormItem> -->
+
+                        <ctrl:FormItem Label="打包时间：">
+                            <TextBlock Text="{Binding Report.PackageTime}" />
                         </ctrl:FormItem>
-                        <ctrl:FormItem Label="匹配大小占比：">
-                            <TextBlock Text="{Binding Report.MatchLengthPercent, StringFormat={}{0:P2}}" />
-                        </ctrl:FormItem>
+
                         <ctrl:FormItem
                             IsVisible="{Binding Report.TotalReadTimeCostSecond, Converter={x:Static cvt:Converters.IsNotNull}}"
                             Label="读取总时间：">
