@@ -36,9 +36,9 @@ namespace ArchiveMaster
         {
             Panels =
             {
-                new ToolPanelInfo(typeof(PackingPanel), typeof(PackingViewModel), "打包",
+                new ToolPanelInfo(typeof(PackingPanel), typeof(PackingViewModel), "打包和备份",
                     "扫描文件特征，制作文件归档包", baseUrl + "disc.svg"),
-                new ToolPanelInfo(typeof(RebuildPanel), typeof(RebuildViewModel), "重建", "从文件归档包重建目录结构，或验证文件完整性",
+                new ToolPanelInfo(typeof(RebuildPanel), typeof(RebuildViewModel), "重建和恢复", "从文件归档包重建目录结构，或验证文件完整性",
                     baseUrl + "rebuild.svg"),
                 new ToolPanelInfo(typeof(VerifyPanel), typeof(VerifyViewModel), "包信息和验证", "查看备份介质中文件包的信息，验证文件完整性",
                     baseUrl + "package.svg"),
