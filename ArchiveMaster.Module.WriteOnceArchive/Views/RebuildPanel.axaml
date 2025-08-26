@@ -70,9 +70,9 @@
                 Background="Transparent" />
             <g:GroupBox Header="目标结构树">
                 <v:WriteOnceTreeFileDataGrid
-                    ColumnIsCheckedIndex="-1"
                     ColumnStatusIndex="-1"
                     FileNameHalfTransparentBindingPath="HasPhysicalFile"
+                    IsDirCheckBoxVisible="True"
                     ItemsSource="{Binding FileTree}" />
             </g:GroupBox>
 

@@ -1,6 +1,6 @@
 namespace ArchiveMaster.ViewModels.FileSystem;
 
-public class TreeFileInfo : FileSystem.TreeFileDirInfo
+public class TreeFileInfo : TreeFileDirInfo
 {
     public TreeFileInfo()
         : base()
@@ -12,7 +12,7 @@ public class TreeFileInfo : FileSystem.TreeFileDirInfo
     {
     }
 
-    public TreeFileInfo(FileSystem.SimpleFileInfo file, TreeDirInfo parent, int depth, int index)
+    public TreeFileInfo(SimpleFileInfo file, TreeDirInfo parent, int depth, int index)
         : base(file, parent, depth, index)
     {
     }
