@@ -45,7 +45,6 @@ class Program
                 rollingInterval: RollingInterval.Day)
             .CreateLogger();
         Log.Information("程序启动");
-
         UnhandledExceptionCatcher.WithCatcher(() =>
             {
                 BuildAvaloniaApp()
