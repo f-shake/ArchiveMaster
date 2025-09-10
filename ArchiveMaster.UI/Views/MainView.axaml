@@ -25,150 +25,210 @@
         <vm:MainViewModel />
     </Design.DataContext>
 
-    <Grid Margin="8">
+    <Grid>
         <SplitView
+            x:Name="spl"
             DisplayMode="Inline"
             IsPaneOpen="True"
             OpenPaneLength="200">
             <SplitView.Pane>
-                <Grid
-                    x:Name="grdLeft"
-                    RowDefinitions="*,8,Auto">
-                    <ScrollViewer
-                        b:SmoothScrollBehavior.IsEnabled="True"
-                        BringIntoViewOnFocusChange="{Binding ScrollViewBringIntoViewOnFocusChange}"
-                        HorizontalScrollBarVisibility="Disabled"
-                        VerticalScrollBarVisibility="Auto">
-                        <Interaction.Behaviors>
-                            <RoutedEventTriggerBehavior RoutedEvent="{x:Static InputElement.KeyDownEvent}">
-                                <InvokeCommandAction Command="{Binding ScrollViewKeyDownCommand}" />
-                            </RoutedEventTriggerBehavior>
-                        </Interaction.Behaviors>
+                <Border Background="{DynamicResource Background2}">
+                    <Grid
+                        x:Name="grdLeft"
+                        RowDefinitions="*,8,Auto">
 
-                        <ItemsControl
-                            x:Name="lstGroups"
-                            ItemsSource="{Binding PanelGroups}">
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <StackPanel
-                                        Orientation="Vertical"
-                                        Spacing="16" />
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <StackPanel Orientation="Vertical">
-                                        <Grid ColumnDefinitions="*,Auto,*">
-                                            <TextBlock
-                                                Grid.Column="1"
-                                                FontSize="20"
-                                                FontWeight="Bold"
-                                                Text="{Binding GroupName}"
-                                                ToolTip.Tip="{Binding GroupDescription}" />
-                                            <Button
-                                                Grid.Column="2"
-                                                Margin="8,0,0,0"
-                                                Padding="4"
-                                                HorizontalAlignment="Left"
-                                                Background="Transparent"
-                                                IsVisible="{Binding MenuItems, Converter={x:Static cvt:Converters.CountGreaterThanZero}}">
+                        <!--  主菜单  -->
+                        <ScrollViewer
+                            Margin="0,12,0,8"
+                            b:SmoothScrollBehavior.IsEnabled="True"
+                            BringIntoViewOnFocusChange="{Binding ScrollViewBringIntoViewOnFocusChange}"
+                            HorizontalScrollBarVisibility="Disabled"
+                            VerticalScrollBarVisibility="Auto">
+                            <Interaction.Behaviors>
+                                <RoutedEventTriggerBehavior RoutedEvent="{x:Static InputElement.KeyDownEvent}">
+                                    <InvokeCommandAction Command="{Binding ScrollViewKeyDownCommand}" />
+                                </RoutedEventTriggerBehavior>
+                            </Interaction.Behaviors>
+
+                            <ItemsControl
+                                x:Name="lstGroups"
+                                ItemsSource="{Binding PanelGroups}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel
+                                            Orientation="Vertical"
+                                            Spacing="16" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Vertical">
+                                            <Grid ColumnDefinitions="*,Auto,*">
                                                 <TextBlock
-                                                    FontFamily="{StaticResource IconFont}"
-                                                    FontSize="16"
-                                                    Text="{StaticResource More}" />
-                                                <Button.Flyout>
-                                                    <MenuFlyout ItemsSource="{Binding MenuItems}">
-                                                        <MenuFlyout.ItemContainerTheme>
-                                                            <ControlTheme
-                                                                x:DataType="cvm:ModuleMenuItemInfo"
-                                                                BasedOn="{StaticResource {x:Type MenuItem}}"
-                                                                TargetType="MenuItem">
-                                                                <Setter Property="Header" Value="{Binding Header}" />
-                                                                <Setter Property="Command" Value="{Binding Command}" />
-                                                            </ControlTheme>
-                                                        </MenuFlyout.ItemContainerTheme>
-                                                    </MenuFlyout>
-                                                </Button.Flyout>
-                                            </Button>
-                                        </Grid>
+                                                    Grid.Column="1"
+                                                    FontSize="20"
+                                                    FontWeight="Bold"
+                                                    Text="{Binding GroupName}"
+                                                    ToolTip.Tip="{Binding GroupDescription}" />
+                                                <Button
+                                                    Grid.Column="2"
+                                                    Margin="8,0,0,0"
+                                                    Padding="4"
+                                                    HorizontalAlignment="Left"
+                                                    Background="Transparent"
+                                                    IsVisible="{Binding MenuItems, Converter={x:Static cvt:Converters.CountGreaterThanZero}}">
+                                                    <TextBlock
+                                                        FontFamily="{StaticResource IconFont}"
+                                                        FontSize="16"
+                                                        Text="{StaticResource More}" />
+                                                    <Button.Flyout>
+                                                        <MenuFlyout ItemsSource="{Binding MenuItems}">
+                                                            <MenuFlyout.ItemContainerTheme>
+                                                                <ControlTheme
+                                                                    x:DataType="cvm:ModuleMenuItemInfo"
+                                                                    BasedOn="{StaticResource {x:Type MenuItem}}"
+                                                                    TargetType="MenuItem">
+                                                                    <Setter Property="Header" Value="{Binding Header}" />
+                                                                    <Setter Property="Command" Value="{Binding Command}" />
+                                                                </ControlTheme>
+                                                            </MenuFlyout.ItemContainerTheme>
+                                                        </MenuFlyout>
+                                                    </Button.Flyout>
+                                                </Button>
+                                            </Grid>
 
-                                        <ListBox
-                                            Background="Transparent"
-                                            ItemsSource="{Binding Panels}"
-                                            SelectionChanged="SelectingItemsControl_OnSelectionChanged">
-                                            <ListBox.Styles>
-                                                <Style Selector="ListBoxItem">
-                                                    <Setter Property="IsSelected" Value="{Binding IsSelected}" />
-                                                </Style>
-                                            </ListBox.Styles>
-                                            <ListBox.ItemTemplate>
-                                                <DataTemplate>
-                                                    <StackPanel
-                                                        Background="Transparent"
-                                                        Orientation="Horizontal"
-                                                        ToolTip.Tip="{Binding Description}">
-                                                        <Svg
-                                                            Width="24"
-                                                            Height="24"
-                                                            Css=".icon { fill: #FF0000; }"
-                                                            Path="{Binding IconUri}" />
-                                                        <TextBlock Text="{Binding Title}" />
-                                                    </StackPanel>
-                                                </DataTemplate>
-                                            </ListBox.ItemTemplate>
-                                        </ListBox>
-                                    </StackPanel>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
+                                            <ListBox
+                                                Background="Transparent"
+                                                ItemsSource="{Binding Panels}"
+                                                SelectionChanged="SelectingItemsControl_OnSelectionChanged">
+                                                <ListBox.Styles>
+                                                    <Style Selector="ListBoxItem">
+                                                        <Setter Property="IsSelected" Value="{Binding IsSelected}" />
+                                                    </Style>
+                                                </ListBox.Styles>
+                                                <ListBox.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <StackPanel
+                                                            Background="Transparent"
+                                                            Orientation="Horizontal"
+                                                            ToolTip.Tip="{Binding Description}">
+                                                            <Svg
+                                                                Width="24"
+                                                                Height="24"
+                                                                Css=".icon { fill: #FF0000; }"
+                                                                Path="{Binding IconUri}" />
+                                                            <TextBlock Text="{Binding Title}" />
+                                                        </StackPanel>
+                                                    </DataTemplate>
+                                                </ListBox.ItemTemplate>
+                                            </ListBox>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
 
-                    </ScrollViewer>
+                        </ScrollViewer>
 
-                    <Button
-                        Grid.Row="2"
-                        Padding="6"
-                        HorizontalAlignment="Stretch"
-                        HorizontalContentAlignment="Left"
-                        Background="Transparent"
-                        Command="{Binding OpenSettingDialogCommand}">
-                        <Button.Styles>
-                            <Style Selector="Button:disabled /template/ ContentPresenter#PART_ContentPresenter">
-                                <Setter Property="Background" Value="Transparent" />
-                                <Setter Property="Foreground" Value="{DynamicResource Foreground3}" />
-                            </Style>
-                        </Button.Styles>
-                        <StackPanel
-                            Orientation="Horizontal"
-                            Spacing="16">
-                            <TextBlock
-                                FontFamily="{StaticResource IconFont}"
-                                FontSize="18"
-                                Text="{StaticResource Settings}" />
-                            <TextBlock Text="设置" />
-                        </StackPanel>
-                    </Button>
-                </Grid>
+                        <!--  设置  -->
+                        <Button
+                            Grid.Row="2"
+                            Padding="6"
+                            HorizontalAlignment="Stretch"
+                            HorizontalContentAlignment="Left"
+                            Background="Transparent"
+                            Command="{Binding OpenSettingDialogCommand}">
+                            <Button.Styles>
+                                <Style Selector="Button:disabled /template/ ContentPresenter#PART_ContentPresenter">
+                                    <Setter Property="Background" Value="Transparent" />
+                                    <Setter Property="Foreground" Value="{DynamicResource Foreground3}" />
+                                </Style>
+                            </Button.Styles>
+                            <StackPanel
+                                Orientation="Horizontal"
+                                Spacing="16">
+                                <TextBlock
+                                    FontFamily="{StaticResource IconFont}"
+                                    FontSize="18"
+                                    Text="{StaticResource Settings}" />
+                                <TextBlock Text="设置" />
+                            </StackPanel>
+                        </Button>
+
+                    </Grid>
+                </Border>
             </SplitView.Pane>
 
-            <ContentControl x:Name="mainContent">
-                <ContentControl.Styles>
-                    <Style Selector="ContentControl">
-                        <Setter Property="Opacity" Value="1" />
-                        <Setter Property="Transitions">
-                            <Transitions>
-                                <DoubleTransition
-                                    Easing="CubicEaseInOut"
-                                    Property="Opacity"
-                                    Duration="0:0:0.3" />
-                            </Transitions>
-                        </Setter>
-                    </Style>
-                </ContentControl.Styles>
-            </ContentControl>
+            <Panel>
+                <!--  背景图片  -->
+                <Grid
+                    ColumnDefinitions="*,*,*"
+                    RowDefinitions="*,*,*">
+                    <Image
+                        Grid.Row="1"
+                        Grid.Column="1"
+                        IsVisible="{Binding #mainContent.Content, Converter={x:Static cvt:Converters.IsNull}}"
+                        Opacity="0.3"
+                        Source="avares://ArchiveMaster.UI/Assets/icon_transparent.png" />
+                </Grid>
+
+                <!--  工具主界面  -->
+                <ContentControl x:Name="mainContent">
+                    <ContentControl.Styles>
+                        <Style Selector="ContentControl">
+                            <Setter Property="Opacity" Value="1" />
+                            <Setter Property="Transitions">
+                                <Transitions>
+                                    <DoubleTransition
+                                        Easing="CubicEaseInOut"
+                                        Property="Opacity"
+                                        Duration="0:0:0.3" />
+                                </Transitions>
+                            </Setter>
+                        </Style>
+                    </ContentControl.Styles>
+                </ContentControl>
+
+                <!--  折叠按钮  -->
+                <ToggleButton
+                    Grid.RowSpan="3"
+                    Width="6"
+                    Height="120"
+                    Margin="4,0"
+                    HorizontalAlignment="Left"
+                    CornerRadius="3"
+                    IsChecked="{Binding #spl.IsPaneOpen}">
+                    <ToggleButton.Styles>
+                        <Style Selector="ToggleButton">
+                            <Style Selector="^:unchecked">
+                                <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+                                    <Setter Property="Background" Value="{DynamicResource Foreground0}" />
+                                    <Setter Property="Opacity" Value="0.3" />
+                                </Style>
+                                <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                                    <Setter Property="Opacity" Value="0.2" />
+                                </Style>
+                            </Style>
+
+                            <Style Selector="^:checked">
+                                <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+                                    <Setter Property="Background" Value="{DynamicResource Foreground0}" />
+                                    <Setter Property="Opacity" Value="0.3" />
+                                </Style>
+                                <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                                    <Setter Property="Opacity" Value="0.2" />
+                                </Style>
+                            </Style>
+
+                            <Style Selector="^:disabled /template/ ContentPresenter#PART_ContentPresenter">
+                                <Setter Property="Background" Value="Transparent" />
+                            </Style>
+                        </Style>
+                    </ToggleButton.Styles>
+                </ToggleButton>
+
+
+            </Panel>
         </SplitView>
-
-
-
 
         <ctrl:ProgressRingOverlay
             Grid.ColumnSpan="3"

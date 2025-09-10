@@ -97,6 +97,40 @@ public partial class MainView : UserControl
     //     }
     // }
 
+    private void BeginChangingContent()
+    {
+        IsHitTestVisible = false;
+    }
+
+    private void EndChangingContent()
+    {
+        IsHitTestVisible = true;
+    }
+
+    private void PanelViewModelPropertyChanged(object sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(ViewModelBase.IsWorking))
+        {
+            Dispatcher.UIThread.Invoke(() => grdLeft.IsEnabled = !((ViewModelBase)sender).IsWorking);
+        }
+    }
+
+    private async void PanelViewModelRequestClosing(object sender, EventArgs e)
+    {
+        BeginChangingContent();
+        mainContent.Opacity = 0;
+        await Task.Delay(300);
+        mainContent.Content = null;
+        //清除其他ListBox的选中项
+        ListBox lbx = sender as ListBox;
+        foreach (var list in lstGroups.GetVisualDescendants()
+                     .OfType<ListBox>())
+        {
+            list.SelectedItem = null;
+        }
+        EndChangingContent();
+    }
+
     private async void SelectingItemsControl_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if (e.AddedItems is null or { Count: 0 }
@@ -116,6 +150,7 @@ public partial class MainView : UserControl
             }
 
             vm.PropertyChanged -= PanelViewModelPropertyChanged;
+            vm.RequestClosing -= PanelViewModelRequestClosing;
         }
 
         //清除其他ListBox的选中项
@@ -127,6 +162,7 @@ public partial class MainView : UserControl
             list.SelectedItem = null;
         }
 
+        BeginChangingContent();
         mainContent.Opacity = 0;
         await Task.Delay(300);
 
@@ -145,19 +181,13 @@ public partial class MainView : UserControl
             if (panelInfo.PanelInstance.DataContext is ViewModelBase vm)
             {
                 vm.PropertyChanged += PanelViewModelPropertyChanged;
+                vm.RequestClosing += PanelViewModelRequestClosing;
                 vm.OnEnter();
             }
 
             mainContent.Content = panelInfo.PanelInstance;
             mainContent.Opacity = 1;
+            EndChangingContent();
         });
-    }
-
-    private void PanelViewModelPropertyChanged(object sender, PropertyChangedEventArgs e)
-    {
-        if (e.PropertyName == nameof(ViewModelBase.IsWorking))
-        {
-            Dispatcher.UIThread.Invoke(() => grdLeft.IsEnabled = !((ViewModelBase)sender).IsWorking);
-        }
     }
 }
