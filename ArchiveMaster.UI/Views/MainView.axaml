@@ -31,11 +31,10 @@
         <sys:Boolean x:Key="ShowDescription">True</sys:Boolean>
     </UserControl.Resources>
 
-    <Grid Margin="8">
-        <Panel
-            x:Name="mainMenu"
-            Classes.hidden="{Binding IsToolOpened}"
-            IsVisible="{Binding !IsToolOpened}">
+    <Grid
+        Margin="8"
+        ColumnDefinitions="Auto,8,*">
+        <Panel x:Name="mainMenu">
             <Panel.Styles>
                 <Style Selector="Panel">
                     <Setter Property="Opacity" Value="1" />
@@ -56,6 +55,7 @@
             </Panel.Styles>
             <ScrollViewer
                 x:Name="scr"
+                Width="200"
                 b:SmoothScrollBehavior.IsEnabled="True"
                 BringIntoViewOnFocusChange="{Binding ScrollViewBringIntoViewOnFocusChange}"
                 HorizontalScrollBarVisibility="Disabled"
@@ -66,7 +66,9 @@
                     </RoutedEventTriggerBehavior>
                 </Interaction.Behaviors>
                 <Panel>
-                    <ItemsControl ItemsSource="{Binding PanelGroups}">
+                    <ItemsControl
+                        x:Name="lstGroups"
+                        ItemsSource="{Binding PanelGroups}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <StackPanel
@@ -82,7 +84,8 @@
                                             Grid.Column="1"
                                             FontSize="20"
                                             FontWeight="Bold"
-                                            Text="{Binding GroupName}" />
+                                            Text="{Binding GroupName}"
+                                            ToolTip.Tip="{Binding GroupDescription}" />
                                         <Button
                                             Grid.Column="2"
                                             Margin="8,0,0,0"
@@ -110,45 +113,31 @@
                                         </Button>
                                     </Grid>
 
-                                    <Border
-                                        MaxWidth="240"
-                                        BorderBrush="{DynamicResource Foreground3}"
-                                        BorderThickness="0,2,0,0" />   
-                                    <TextBlock
-                                        HorizontalAlignment="Center"
-                                        Opacity="0.7"
-                                        Text="{Binding GroupDescription}" />
-                                    <ItemsControl ItemsSource="{Binding Panels}">
-                                        <ItemsControl.ItemsPanel>
-                                            <ItemsPanelTemplate>
-                                                <local:ExtendedWrapPanel
-                                                    HorizontalAlignment="Center"
-                                                    HorizontalContentAlignment="Center" />
-                                            </ItemsPanelTemplate>
-                                        </ItemsControl.ItemsPanel>
-                                        <ItemsControl.ItemTemplate>
+                                    <ListBox
+                                        Background="Transparent"
+                                        ItemsSource="{Binding Panels}"
+                                        SelectionChanged="SelectingItemsControl_OnSelectionChanged">
+                                        <ListBox.Styles>
+                                            <Style Selector="ListBoxItem">
+                                                <Setter Property="IsSelected" Value="{Binding IsSelected}" />
+                                            </Style>
+                                        </ListBox.Styles>
+                                        <ListBox.ItemTemplate>
                                             <DataTemplate>
-                                                <local:ToolItemBox
-                                                    x:Name="tib"
-                                                    Title="{Binding Title}"
-                                                    Width="{DynamicResource BoxWidth}"
-                                                    Height="{DynamicResource BoxHeight}"
-                                                    Description="{Binding Description}"
-                                                    Focusable="{Binding !#root.((vm:MainViewModel)DataContext).IsToolOpened}"
-                                                    Icon="{Binding IconUri}"
-                                                    KeyDown="ToolItem_OnKeyDown"
-                                                    ShowDescription="{DynamicResource ShowDescription}">
-                                                    <Interaction.Behaviors>
-                                                        <RoutedEventTriggerBehavior RoutedEvent="{x:Static InputElement.TappedEvent}">
-                                                            <InvokeCommandAction
-                                                                Command="{Binding #root.((vm:MainViewModel)DataContext).EnterToolCommand}"
-                                                                CommandParameter="{Binding .}" />
-                                                        </RoutedEventTriggerBehavior>
-                                                    </Interaction.Behaviors>
-                                                </local:ToolItemBox>
+                                                <StackPanel
+                                                    Background="Transparent"
+                                                    Orientation="Horizontal"
+                                                    ToolTip.Tip="{Binding Description}">
+                                                    <Svg
+                                                        Width="24"
+                                                        Height="24"
+                                                        Css=".icon { fill: #FF0000; }"
+                                                        Path="{Binding IconUri}" />
+                                                    <TextBlock Text="{Binding Title}" />
+                                                </StackPanel>
                                             </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
+                                        </ListBox.ItemTemplate>
+                                    </ListBox>
                                 </StackPanel>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
@@ -168,9 +157,8 @@
 
         <ContentControl
             x:Name="mainContent"
-            Classes.hidden="{Binding !IsToolOpened}"
-            Content="{Binding MainContent}"
-            Focusable="{Binding IsToolOpened}">
+            Grid.Column="2"
+            Content="{Binding MainContent}">
             <ContentControl.Styles>
                 <Style Selector="ContentControl">
                     <Setter Property="Opacity" Value="1" />
@@ -182,14 +170,12 @@
                                 Duration="0:0:0.3" />
                         </Transitions>
                     </Setter>
-                    <Style Selector="^.hidden">
-                        <Setter Property="IsHitTestVisible" Value="False" />
-                        <Setter Property="Opacity" Value="0" />
-                    </Style>
                 </Style>
             </ContentControl.Styles>
         </ContentControl>
 
-        <ctrl:ProgressRingOverlay IsActive="{Binding IsProgressRingOverlayActive}" />
+        <ctrl:ProgressRingOverlay
+            Grid.ColumnSpan="3"
+            IsActive="{Binding IsProgressRingOverlayActive}" />
     </Grid>
 </UserControl>

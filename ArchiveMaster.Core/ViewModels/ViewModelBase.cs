@@ -20,13 +20,13 @@ public abstract partial class ViewModelBase(IDialogService dialogService) : Obse
     [ObservableProperty]
     private bool isWorking = false;
 
-    public event EventHandler RequestClosing;
-
-    [RelayCommand]
-    public void Exit()
-    {
-        RequestClosing?.Invoke(this, EventArgs.Empty);
-    }
+    // public event EventHandler RequestClosing;
+    //
+    // [RelayCommand]
+    // public void Exit()
+    // {
+    //     RequestClosing?.Invoke(this, EventArgs.Empty);
+    // }
 
     public virtual void OnEnter()
     {

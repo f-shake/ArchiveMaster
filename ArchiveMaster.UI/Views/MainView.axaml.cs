@@ -22,7 +22,9 @@ using ArchiveMaster.Platforms;
 using FzLib;
 using Microsoft.Extensions.DependencyInjection;
 using System.Diagnostics;
+using ArchiveMaster.Models;
 using Avalonia.Threading;
+using Avalonia.VisualTree;
 using Serilog;
 
 namespace ArchiveMaster.Views;
@@ -85,12 +87,50 @@ public partial class MainView : UserControl
         WeakReferenceMessenger.Default.Cleanup();
     }
 
-    private void ToolItem_OnKeyDown(object sender, KeyEventArgs e)
+    // private void ToolItem_OnKeyDown(object sender, KeyEventArgs e)
+    // {
+    //     if (e.Key == Key.Enter)
+    //     {
+    //         TopLevel.GetTopLevel(this).FocusManager.ClearFocus();
+    //         (DataContext as MainViewModel).EnterToolCommand.Execute((sender as ToolItemBox).DataContext);
+    //     }
+    // }
+
+    private async void SelectingItemsControl_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (e.Key == Key.Enter)
+        if (e.AddedItems is null or { Count: 0 })
         {
-            TopLevel.GetTopLevel(this).FocusManager.ClearFocus();
-            (DataContext as MainViewModel).EnterToolCommand.Execute((sender as ToolItemBox).DataContext);
+            return;
         }
+
+        var panelInfo = e.AddedItems[0] as ToolPanelInfo;
+        if (panelInfo == null)
+        {
+            return;
+        }
+
+        ListBox lbx = sender as ListBox;
+        foreach (var list in lstGroups.GetVisualDescendants()
+                     .OfType<ListBox>()
+                     .Where(p => p != lbx))
+        {
+            list.SelectedItem = null;
+        }
+
+        //避免页面的创建卡住UI，先让ListBox的选择响应起来
+        Dispatcher.UIThread.Post(() =>
+        {
+            if (panelInfo.PanelInstance == null)
+            {
+                panelInfo.PanelInstance = HostServices.GetService(panelInfo.ViewType) as PanelBase ??
+                                          throw new Exception($"无法找到{panelInfo.ViewType}服务");
+
+                panelInfo.PanelInstance.Title = panelInfo.Title;
+                panelInfo.PanelInstance.Description = panelInfo.Description;
+            }
+
+            (panelInfo.PanelInstance.DataContext as ViewModelBase)?.OnEnter();
+            (DataContext as MainViewModel).MainContent = panelInfo.PanelInstance;
+        });
     }
 }
