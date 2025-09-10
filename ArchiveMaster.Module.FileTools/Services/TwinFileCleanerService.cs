@@ -19,21 +19,21 @@ namespace ArchiveMaster.Services
     {
         public List<TwinFileInfo> DeletingFiles { get; set; }
 
-        public override Task ExecuteAsync(CancellationToken token)
+        public override Task ExecuteAsync(CancellationToken ct)
         {
             var files = DeletingFiles.CheckedOnly().ToList();
             return TryForFilesAsync(files, (file, s) =>
             {
                 NotifyMessage($"正在删除{s.GetFileNumberMessage()}：{file.Name}");
                 FileHelper.DeleteByConfig(file.Path);
-            }, token, FilesLoopOptions.Builder().AutoApplyStatus().AutoApplyFileNumberProgress().Build());
+            }, ct, FilesLoopOptions.Builder().AutoApplyStatus().AutoApplyFileNumberProgress().Build());
         }
 
         public override IEnumerable<SimpleFileInfo> GetInitializedFiles()
         {
             return DeletingFiles.Cast<SimpleFileInfo>();
         }
-        public override async Task InitializeAsync(CancellationToken token)
+        public override async Task InitializeAsync(CancellationToken ct)
         {
             DeletingFiles = new List<TwinFileInfo>();
             List<SimpleFileInfo> masterFiles = null;
@@ -42,7 +42,7 @@ namespace ArchiveMaster.Services
             {
                 masterFiles = Config.MasterExtensions.Select(e => new DirectoryInfo(Config.Dir)
                         .EnumerateFiles($"*.{e}", FileEnumerateExtension.GetEnumerationOptions())
-                        .ApplyFilter(token)
+                        .ApplyFilter(ct)
                         .Select(p => new SimpleFileInfo(p, Config.Dir)))
                     .SelectMany(p => p)
                     .ToList();
@@ -50,7 +50,7 @@ namespace ArchiveMaster.Services
                     new DirectoryInfo(Config.Dir).EnumerateFiles("*", FileEnumerateExtension.GetEnumerationOptions());
                 dir2AllFiles = allFiles.GroupBy(p => p.DirectoryName)
                     .ToDictionary(p => p.Key, p => p.ToList());
-            }, token);
+            }, ct);
             await TryForFilesAsync(masterFiles, (masterFile, s) =>
             {
                 NotifyMessage($"正在查找同名不同后缀的文件{s.GetFileNumberMessage()}");
@@ -63,7 +63,7 @@ namespace ArchiveMaster.Services
                     var auxiliaryFiles = dirFiles.Where(p => FileFilterHelper.IsMatchedByPattern(p.Name, tempPattern));
                     DeletingFiles.AddRange(auxiliaryFiles.Select(p => new TwinFileInfo(p, masterFile)));
                 }
-            }, token, FilesLoopOptions.Builder().AutoApplyFileNumberProgress().Build());
+            }, ct, FilesLoopOptions.Builder().AutoApplyFileNumberProgress().Build());
         }
     }
 }

@@ -26,7 +26,7 @@ public class RenameService(AppConfig appConfig)
     private StringComparison stringComparison;
     public IReadOnlyList<RenameFileInfo> Files { get; private set; }
 
-    public override async Task ExecuteAsync(CancellationToken token = default)
+    public override async Task ExecuteAsync(CancellationToken ct = default)
     {
         var processingFiles = Files.Where(p => p.IsMatched && p.IsChecked).ToList();
         var duplicates = processingFiles
@@ -54,7 +54,7 @@ public class RenameService(AppConfig appConfig)
             {
                 File.Move(file.Path, file.TempPath);
             }
-        }, token, FilesLoopOptions.Builder().AutoApplyFileNumberProgress().Build());
+        }, ct, FilesLoopOptions.Builder().AutoApplyFileNumberProgress().Build());
 
         //重命名为目标文件名
         await TryForFilesAsync(processingFiles, (file, s) =>
@@ -68,7 +68,7 @@ public class RenameService(AppConfig appConfig)
             {
                 File.Move(file.TempPath, file.GetNewPath());
             }
-        }, token, FilesLoopOptions.Builder().AutoApplyStatus().AutoApplyFileNumberProgress().Build());
+        }, ct, FilesLoopOptions.Builder().AutoApplyStatus().AutoApplyFileNumberProgress().Build());
     }
 
     public override IEnumerable<SimpleFileInfo> GetInitializedFiles()
@@ -76,7 +76,7 @@ public class RenameService(AppConfig appConfig)
         return Files.Cast<RenameFileInfo>();
     }
 
-    public override async Task InitializeAsync(CancellationToken token = default)
+    public override async Task InitializeAsync(CancellationToken ct = default)
     {
         regexOptions = Config.IgnoreCase ? RegexOptions.IgnoreCase : RegexOptions.None;
         stringComparison = Config.IgnoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
@@ -119,7 +119,7 @@ public class RenameService(AppConfig appConfig)
             }
 
             Files = renameFiles.AsReadOnly();
-        }, token);
+        }, ct);
     }
 
     private Regex GetRegex(string pattern)

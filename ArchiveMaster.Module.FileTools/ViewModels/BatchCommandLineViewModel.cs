@@ -37,7 +37,7 @@ public partial class BatchCommandLineViewModel(AppConfig appConfig, IDialogServi
         SetLevelsVisibility();
     }
 
-    protected override Task OnExecutingAsync(CancellationToken token)
+    protected override Task OnExecutingAsync(CancellationToken ct)
     {
         Service.ProcessDataReceived += (s, e) => { ProcessOutput = e.Data.Replace("\b", ""); };
         return Task.CompletedTask;

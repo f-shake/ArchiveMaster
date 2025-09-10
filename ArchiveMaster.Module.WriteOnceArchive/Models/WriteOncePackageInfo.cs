@@ -1,3 +1,10 @@
-﻿namespace ArchiveMaster.Models;
+﻿using FzLib.IO;
 
-public record WriteOncePackageInfo(List<WriteOnceFileInfo> AllFiles, long TotalLength, DateTime PackageTime, List<string> Hashes);
+namespace ArchiveMaster.Models;
+
+public record WriteOncePackageInfo(
+    List<WriteOnceFileInfo> AllFiles,
+    long TotalLength,
+    DateTime PackageTime,
+    List<string> Hashes,
+    FileFilterRule Filter);

@@ -28,7 +28,7 @@ namespace ArchiveMaster.Services
         public List<MatchingFileInfo> WrongPositionFiles { get; private set; }
 
 
-        public override Task ExecuteAsync(CancellationToken token)
+        public override Task ExecuteAsync(CancellationToken ct)
         {
             if (ExecutingFiles == null)
             {
@@ -63,7 +63,7 @@ namespace ArchiveMaster.Services
                 {
                     File.Move(Path.Combine(Config.SourceDir, file.RelativePath), destFile);
                 }
-            }, token, FilesLoopOptions.Builder().AutoApplyStatus().AutoApplyFileNumberProgress().Build());
+            }, ct, FilesLoopOptions.Builder().AutoApplyStatus().AutoApplyFileNumberProgress().Build());
         }
 
         public override IEnumerable<SimpleFileInfo> GetInitializedFiles()
@@ -71,7 +71,7 @@ namespace ArchiveMaster.Services
             return WrongPositionFiles.Concat(RightPositionFiles).Cast<SimpleFileInfo>();
         }
 
-        public override async Task InitializeAsync(CancellationToken token)
+        public override async Task InitializeAsync(CancellationToken ct)
         {
             List<MatchingFileInfo> rightPositionFiles = new List<MatchingFileInfo>();
             List<MatchingFileInfo> wrongPositionFiles = new List<MatchingFileInfo>();
@@ -83,14 +83,14 @@ namespace ArchiveMaster.Services
             await Task.Run(() =>
             {
                 //分析模板目录，创建由属性指向文件的字典
-                CreateDictionaries(Config.TemplateDir, Config.MaxTimeToleranceSecond, token);
+                CreateDictionaries(Config.TemplateDir, Config.MaxTimeToleranceSecond, ct);
 
                 NotifyMessage($"正在查找源文件");
 
                 //枚举源目录
                 var sourceFiles = new DirectoryInfo(Config.SourceDir)
                     .EnumerateFiles("*", FileEnumerateExtension.GetEnumerationOptions())
-                    .ApplyFilter(token, Config.Filter)
+                    .ApplyFilter(ct, Config.Filter)
                     .Select(p => new SimpleFileInfo(p, Config.SourceDir))
                     .ToList();
 
@@ -214,20 +214,20 @@ namespace ArchiveMaster.Services
                             }
                         }
                     }
-                }, token, FilesLoopOptions.Builder().AutoApplyFileNumberProgress().ThrowExceptions().Build());
-            }, token);
+                }, ct, FilesLoopOptions.Builder().AutoApplyFileNumberProgress().ThrowExceptions().Build());
+            }, ct);
             RightPositionFiles = rightPositionFiles;
             WrongPositionFiles = wrongPositionFiles;
         }
 
-        private void CreateDictionaries(string dir, int maxTimeTolerance, CancellationToken token)
+        private void CreateDictionaries(string dir, int maxTimeTolerance, CancellationToken ct)
         {
             name2Template.Clear();
             length2Template.Clear();
             modifiedTime2Template.Clear();
             var fileInfos = new DirectoryInfo(dir)
                 .EnumerateFiles("*", FileEnumerateExtension.GetEnumerationOptions())
-                .ApplyFilter(token)
+                .ApplyFilter(ct)
                 .Select(p => new SimpleFileInfo(p, dir))
                 .ToList();
 
@@ -235,7 +235,7 @@ namespace ArchiveMaster.Services
 
             foreach (var file in fileInfos)
             {
-                token.ThrowIfCancellationRequested();
+                ct.ThrowIfCancellationRequested();
 
                 NotifyMessage($"正在分析模板文件：{file.RelativePath}");
                 SetOrAdd(name2Template, file.Name);

@@ -123,7 +123,7 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
     /// </summary>
     /// <param name="token"></param>
     /// <returns></returns>
-    protected virtual Task OnExecutedAsync(CancellationToken token)
+    protected virtual Task OnExecutedAsync(CancellationToken ct)
     {
         return Task.CompletedTask;
     }
@@ -133,7 +133,7 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
     /// </summary>
     /// <param name="token"></param>
     /// <returns></returns>
-    protected virtual Task OnExecutingAsync(CancellationToken token)
+    protected virtual Task OnExecutingAsync(CancellationToken ct)
     {
         return Task.CompletedTask;
     }
@@ -210,7 +210,7 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
     /// </summary>
     /// <param name="token"></param>
     /// <returns>如果不存在需要处理的文件，返回true</returns>
-    private async Task CheckWarningFilesOnExecutedAsync(CancellationToken token)
+    private async Task CheckWarningFilesOnExecutedAsync(CancellationToken ct)
     {
         if (!CheckWarningFilesOnExecuted)
         {
@@ -231,7 +231,7 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
     /// </summary>
     /// <param name="token"></param>
     /// <returns>如果不存在需要处理的文件，返回true</returns>
-    private async Task<bool> CheckWarningFilesOnInitializedAsync(CancellationToken token)
+    private async Task<bool> CheckWarningFilesOnInitializedAsync(CancellationToken ct)
     {
         if (!CheckWarningFilesOnInitialized)
         {
@@ -273,10 +273,10 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
     /// <summary>
     /// 执行任务
     /// </summary>
-    /// <param name="token"></param>
+    /// <param name="ct"></param>
     /// <exception cref="NullReferenceException"></exception>
     [RelayCommand(IncludeCancelCommand = true, CanExecute = nameof(CanExecute))]
-    private async Task ExecuteAsync(CancellationToken token)
+    private async Task ExecuteAsync(CancellationToken ct)
     {
         if (!EnableInitialize)
         {
@@ -297,12 +297,12 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
 
         await TryRunServiceMethodAsync(async () =>
         {
-            await OnExecutingAsync(token);
+            await OnExecutingAsync(ct);
             Config.Check();
-            await Service.ExecuteAsync(token);
+            await Service.ExecuteAsync(ct);
             Service.Dispose();
-            await OnExecutedAsync(token);
-            await CheckWarningFilesOnExecutedAsync(token);
+            await OnExecutedAsync(ct);
+            await CheckWarningFilesOnExecutedAsync(ct);
         }, "执行失败");
 
         CanReset = true;
@@ -314,9 +314,9 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
     /// <summary>
     /// 初始化任务
     /// </summary>
-    /// <param name="token"></param>
+    /// <param name="ct"></param>
     [RelayCommand(IncludeCancelCommand = true, CanExecute = nameof(CanInitialize))]
-    private async Task InitializeAsync(CancellationToken token)
+    private async Task InitializeAsync(CancellationToken ct)
     {
         AppConfig.Save(false);
         CanInitialize = false;
@@ -331,10 +331,10 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
                 CreateService();
                 await OnInitializingAsync();
                 Config.Check();
-                await Service.InitializeAsync(token);
+                await Service.InitializeAsync(ct);
                 await OnInitializedAsync();
             }, "初始化失败") //初始化成功
-            && !await CheckWarningFilesOnInitializedAsync(token)) //有需要处理的文件
+            && !await CheckWarningFilesOnInitializedAsync(ct)) //有需要处理的文件
         {
             CanExecute = true;
             CanReset = true;

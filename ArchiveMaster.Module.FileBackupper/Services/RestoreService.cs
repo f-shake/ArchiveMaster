@@ -9,7 +9,7 @@ namespace ArchiveMaster.Services;
 
 public class RestoreService(BackupTask task)
 {
-    public async Task<TreeDirInfo> GetSnapshotFileTreeAsync(int snapshotId, CancellationToken token = default)
+    public async Task<TreeDirInfo> GetSnapshotFileTreeAsync(int snapshotId, CancellationToken ct = default)
     {
         await using var db = new DbService(task);
         TreeDirInfo tree = null;
@@ -23,7 +23,7 @@ public class RestoreService(BackupTask task)
             {
                 tree.AddFile(record);
             }
-        }, token);
+        }, ct);
         return tree;
     }
 }

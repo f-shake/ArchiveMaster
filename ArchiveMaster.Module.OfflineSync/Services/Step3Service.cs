@@ -97,7 +97,7 @@ namespace ArchiveMaster.Services
             });
         }
 
-        public override async Task ExecuteAsync(CancellationToken token = default)
+        public override async Task ExecuteAsync(CancellationToken ct = default)
         {
             if (!string.IsNullOrWhiteSpace(Config.Password))
             {
@@ -138,15 +138,12 @@ namespace ArchiveMaster.Services
 
                     Progress<FileProcessProgress> progress = null;
 
-                    async Task CopyThisFileAsync()
+                    Task CopyThisFileAsync()
                     {
-                        progress = new Progress<FileProcessProgress>(p =>
-                        {
-                            NotifyProgress(1.0 * (length + p.ProcessedBytes) / totalLength);
-                            NotifyMessage(
-                                $"正在复制（{numMsg}，本文件{1.0 * p.ProcessedBytes / 1024 / 1024:0}MB/{1.0 * p.TotalBytes / 1024 / 1024:0}MB）：{file.RelativePath}");
-                        });
-                        await CopyFileAsync(patch, target, file.Time, progress, token);
+                        return CopyFileAsync(patch, target, file.Time,
+                            s.CreateFileProgressReporter("正在复制", p => length + p.ProcessedBytes, () => totalLength,
+                                p => Path.GetFileName(p.DestinationFilePath)),
+                            ct);
                     }
 
                     switch (file.UpdateType)
@@ -191,7 +188,7 @@ namespace ArchiveMaster.Services
                         default:
                             throw new InvalidEnumArgumentException();
                     }
-                }, token, FilesLoopOptions.Builder().AutoApplyStatus().AutoApplyFileNumberProgress().Finally(file =>
+                }, ct, FilesLoopOptions.Builder().AutoApplyStatus().AutoApplyFileNumberProgress().Finally(file =>
                 {
                     var f = file as SyncFileInfo;
                     if (f.UpdateType is FileUpdateType.Add or FileUpdateType.Modify)
@@ -203,8 +200,8 @@ namespace ArchiveMaster.Services
                 }).Build());
 
                 NotifyMessage($"正在查找空目录");
-                AnalyzeEmptyDirectories(token);
-            }, token);
+                AnalyzeEmptyDirectories(ct);
+            }, ct);
         }
 
         public override IEnumerable<SimpleFileInfo> GetInitializedFiles()
@@ -212,7 +209,7 @@ namespace ArchiveMaster.Services
             return UpdateFiles.Cast<SimpleFileInfo>();
         }
 
-        public override async Task InitializeAsync(CancellationToken token = default)
+        public override async Task InitializeAsync(CancellationToken ct = default)
         {
             var patchFile = Path.Combine(Config.PatchDir, "file.os2");
             if (!File.Exists(patchFile))
@@ -293,8 +290,8 @@ namespace ArchiveMaster.Services
                                 throw new InvalidEnumArgumentException();
                         }
                     }
-                }, token, FilesLoopOptions.Builder().AutoApplyFileNumberProgress().Build());
-            }, token);
+                }, ct, FilesLoopOptions.Builder().AutoApplyFileNumberProgress().Build());
+            }, ct);
         }
 
         private static bool IsDirectory(string path)
@@ -303,7 +300,7 @@ namespace ArchiveMaster.Services
             return attr.HasFlag(FileAttributes.Directory);
         }
 
-        private void AnalyzeEmptyDirectories(CancellationToken token)
+        private void AnalyzeEmptyDirectories(CancellationToken ct)
         {
             DeletingDirectories = new List<SyncFileInfo>();
 
@@ -319,7 +316,7 @@ namespace ArchiveMaster.Services
                              .EnumerateDirectories(topDir, "*", SearchOption.AllDirectories)
                              .ToList())
                 {
-                    token.ThrowIfCancellationRequested();
+                    ct.ThrowIfCancellationRequested();
                     if (!LocalDirectories[topDir]
                             .Contains(Path.GetRelativePath(topDir, offsiteSubDir))) //本地已经没有远程的这个目录了
                     {
@@ -340,7 +337,7 @@ namespace ArchiveMaster.Services
                 //通过两层循环，删除位于空目录下的空目录
                 foreach (var dir1 in deletingDirsInThisTopDir.ToList()) //外层循环，dir1为内层空目录
                 {
-                    token.ThrowIfCancellationRequested();
+                    ct.ThrowIfCancellationRequested();
                     foreach (var dir2 in deletingDirsInThisTopDir) //内曾循环，dir2为外层空目录
                     {
                         if (dir1 == dir2)

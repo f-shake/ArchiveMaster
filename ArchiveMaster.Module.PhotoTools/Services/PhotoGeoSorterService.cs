@@ -32,7 +32,7 @@ namespace ArchiveMaster.Services
             return Files.Cast<SimpleFileInfo>();
         }
 
-        public override Task ExecuteAsync(CancellationToken token)
+        public override Task ExecuteAsync(CancellationToken ct)
         {
             return TryForFilesAsync(Files
                 .CheckedOnly()
@@ -44,10 +44,10 @@ namespace ArchiveMaster.Services
                 Directory.CreateDirectory(destDir);
                 var destPath = Path.Combine(destDir, file.Name);
                 File.Move(file.Path, destPath);
-            }, token, FilesLoopOptions.Builder().AutoApplyStatus().AutoApplyFileNumberProgress().Build());
+            }, ct, FilesLoopOptions.Builder().AutoApplyStatus().AutoApplyFileNumberProgress().Build());
         }
 
-        public override async Task InitializeAsync(CancellationToken token)
+        public override async Task InitializeAsync(CancellationToken ct)
         {
             NotifyMessage($"正在解析矢量文件");
             var tree = Path.GetExtension(Config.VectorFile).ToLower() switch
@@ -62,7 +62,7 @@ namespace ArchiveMaster.Services
                 NotifyMessage($"正在枚举文件");
                 var files = new DirectoryInfo(Config.Dir)
                     .EnumerateFiles("*", FileEnumerateExtension.GetEnumerationOptions())
-                    .ApplyFilter(token, Config.Filter)
+                    .ApplyFilter(ct, Config.Filter)
                     .Select(p => new GpsFileInfo(p, Config.Dir))
                     .ToList();
 
@@ -90,7 +90,7 @@ namespace ArchiveMaster.Services
                             }
                         }
                     }
-                }, token, FilesLoopOptions.Builder().AutoApplyFileNumberProgress().Build());
+                }, ct, FilesLoopOptions.Builder().AutoApplyFileNumberProgress().Build());
 
                 Files = files;
             });

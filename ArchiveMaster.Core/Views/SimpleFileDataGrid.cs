@@ -246,9 +246,11 @@ public class SimpleFileDataGrid : DataGrid
 
 
             foreach (var btn in new Button[]
-                     {
-                         btnSelectAll, btnSwitchSelection, btnSelectNone, btnProcessCheckedOnly, btnSearch, btnFilter
-                     })
+                         {
+                             btnSelectAll, btnSwitchSelection, btnSelectNone, btnProcessCheckedOnly, btnSearch,
+                             btnFilter
+                         }
+                         .Where(p => p != null))
             {
                 btn[!IsEnabledProperty] =
                     new Binding("IsWorking")
@@ -264,123 +266,137 @@ public class SimpleFileDataGrid : DataGrid
             }
 
             //全选
-            btnSelectAll.Click += (_, _) =>
+            if (btnSelectAll != null)
             {
-                foreach (var file in GetItems())
+                btnSelectAll.Click += (_, _) =>
                 {
-                    file.IsChecked = true;
-                }
-            };
+                    foreach (var file in GetItems())
+                    {
+                        file.IsChecked = true;
+                    }
+                };
+            }
 
             //全不选
-            btnSelectNone.Click += (_, _) =>
+            if (btnSelectNone != null)
             {
-                foreach (var file in GetItems())
+                btnSelectNone.Click += (_, _) =>
                 {
-                    file.IsChecked = false;
-                }
-            };
+                    foreach (var file in GetItems())
+                    {
+                        file.IsChecked = false;
+                    }
+                };
+            }
 
             //反选
-            btnSwitchSelection.Click += (_, _) =>
+            if (btnSwitchSelection != null)
             {
-                foreach (var file in GetItems())
+                btnSwitchSelection.Click += (_, _) =>
                 {
-                    file.IsChecked = !file.IsChecked;
-                }
-            };
+                    foreach (var file in GetItems())
+                    {
+                        file.IsChecked = !file.IsChecked;
+                    }
+                };
+            }
 
             //搜索
-            var searchGrid = (btnSearch.Flyout as Flyout)?.Content as Grid;
-            Debug.Assert(searchGrid != null);
-            var searchTextBox = searchGrid.Children[0] as TextBox;
-            Debug.Assert(searchTextBox != null);
-            var searchButton = searchGrid.Children[1] as Button;
-            Debug.Assert(searchButton != null);
-            searchButton.Click += (_, _) => Search();
-            searchTextBox.KeyDown += (_, e2) =>
+            if (btnSearch != null)
             {
-                if (e2.Key is Key.Enter or Key.Return)
+                var searchGrid = (btnSearch.Flyout as Flyout)?.Content as Grid;
+                Debug.Assert(searchGrid != null);
+                var searchTextBox = searchGrid.Children[0] as TextBox;
+                Debug.Assert(searchTextBox != null);
+                var searchButton = searchGrid.Children[1] as Button;
+                Debug.Assert(searchButton != null);
+                searchButton.Click += (_, _) => Search();
+                searchTextBox.KeyDown += (_, e2) =>
                 {
-                    Search();
-                }
-            };
+                    if (e2.Key is Key.Enter or Key.Return)
+                    {
+                        Search();
+                    }
+                };
 
-            async void Search()
-            {
-                var text = searchTextBox.Text;
-                if (string.IsNullOrWhiteSpace(text))
+                async void Search()
                 {
-                    return;
-                }
+                    var text = searchTextBox.Text;
+                    if (string.IsNullOrWhiteSpace(text))
+                    {
+                        return;
+                    }
 
-                var helper = new FileFilterHelper(new FileFilterRule
-                {
-                    IncludeFiles = $"*{text}*"
-                });
-                SelectedItems.Clear();
-                foreach (var file in ItemsSource.OfType<SimpleFileInfo>().Where(p => helper.IsMatched(p)))
-                {
-                    SelectedItems.Add(file);
-                }
+                    var helper = new FileFilterHelper(new FileFilterRule
+                    {
+                        IncludeFiles = $"*{text}*"
+                    });
+                    SelectedItems.Clear();
+                    foreach (var file in ItemsSource.OfType<SimpleFileInfo>().Where(p => helper.IsMatched(p)))
+                    {
+                        SelectedItems.Add(file);
+                    }
 
-                if (SelectedItems.Count > 0)
-                {
-                    ScrollIntoView(SelectedItems[0], Columns[0]);
-                    await HostServices.GetRequiredService<IDialogService>()
-                        .ShowOkDialogAsync("搜索", $"搜索到{SelectedItems.Count}条记录，已全部选中");
-                }
-                else
-                {
-                    await HostServices.GetRequiredService<IDialogService>().ShowWarningDialogAsync("搜索", $"没有搜索到任何记录");
+                    if (SelectedItems.Count > 0)
+                    {
+                        ScrollIntoView(SelectedItems[0], Columns[0]);
+                        await HostServices.GetRequiredService<IDialogService>()
+                            .ShowOkDialogAsync("搜索", $"搜索到{SelectedItems.Count}条记录，已全部选中");
+                    }
+                    else
+                    {
+                        await HostServices.GetRequiredService<IDialogService>()
+                            .ShowWarningDialogAsync("搜索", $"没有搜索到任何记录");
+                    }
                 }
             }
 
             //筛选
-            var filterGrid = (btnFilter.Flyout as Flyout)?.Content as Grid;
-            Debug.Assert(filterGrid != null);
-            var filterPanel = filterGrid.Children[0] as FileFilterPanel;
-            Debug.Assert(filterPanel != null);
-            filterPanel.Filter = new FileFilterRule();
-            var filterButton = filterGrid.Children[1] as Button;
-            Debug.Assert(filterButton != null);
-            filterButton.Click += (_, _) => Filter();
-
-            async void Filter()
+            if (btnFilter != null)
             {
-                var helper = new FileFilterHelper(filterPanel.Filter);
-                int count = 0;
-                foreach (var file in ItemsSource.OfType<SimpleFileInfo>())
+                var filterGrid = (btnFilter.Flyout as Flyout)?.Content as Grid;
+                Debug.Assert(filterGrid != null);
+                var filterPanel = filterGrid.Children[0] as FileFilterPanel;
+                Debug.Assert(filterPanel != null);
+                filterPanel.Filter = new FileFilterRule();
+                var filterButton = filterGrid.Children[1] as Button;
+                Debug.Assert(filterButton != null);
+                filterButton.Click += (_, _) => Filter();
+
+                async void Filter()
                 {
-                    if (helper.IsMatched(file))
+                    var helper = new FileFilterHelper(filterPanel.Filter);
+                    int count = 0;
+                    foreach (var file in ItemsSource.OfType<SimpleFileInfo>())
                     {
-                        file.IsChecked = true;
-                        count++;
+                        if (helper.IsMatched(file))
+                        {
+                            file.IsChecked = true;
+                            count++;
+                        }
+                        else
+                        {
+                            file.IsChecked = false;
+                        }
+                    }
+
+                    if (count > 0)
+                    {
+                        await HostServices.GetRequiredService<IDialogService>()
+                            .ShowOkDialogAsync("筛选", $"筛选到{count}条记录，已全部勾选");
                     }
                     else
                     {
-                        file.IsChecked = false;
+                        await HostServices.GetRequiredService<IDialogService>()
+                            .ShowWarningDialogAsync("筛选", $"没有筛选到任何记录");
                     }
-                }
-
-                if (count > 0)
-                {
-                    await HostServices.GetRequiredService<IDialogService>()
-                        .ShowOkDialogAsync("筛选", $"筛选到{count}条记录，已全部勾选");
-                }
-                else
-                {
-                    await HostServices.GetRequiredService<IDialogService>().ShowWarningDialogAsync("筛选", $"没有筛选到任何记录");
                 }
             }
         }
         else
         {
             //删除占位
-            var stk = this
-                .GetVisualDescendants()
-                .OfType<StackPanel>()
-                .FirstOrDefault(p => p.Name == "stkSelectionButtons");
+            var stk = e.NameScope.Find<StackPanel>("PART_DataGridButtons");
             if (stk != null)
             {
                 ((Grid)stk.Parent)?.Children.Remove(stk);

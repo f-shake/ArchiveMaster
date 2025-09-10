@@ -20,6 +20,12 @@
         <Setter Property="VerticalAlignment" Value="Bottom" />
     </Style>
 
+    <Style Selector="ctrl|FormItem.BoldLabel">
+        <Style Selector="^ /template/ TextBlock#PART_LabelText">
+            <Setter Property="FontWeight" Value="Bold" />
+        </Style>
+    </Style>
+
     <Style Selector="TextBlock">
         <Setter Property="VerticalAlignment" Value="Center" />
 

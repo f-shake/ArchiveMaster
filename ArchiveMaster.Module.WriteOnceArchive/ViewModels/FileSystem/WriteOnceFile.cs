@@ -16,6 +16,24 @@ namespace ArchiveMaster.ViewModels.FileSystem
         [ObservableProperty]
         private bool isEncrypted;
 
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(ReadSpeedBytePerSecond))]
+        private double? readTimeCostSecond;
+
+        [ObservableProperty]
+        private bool errorNoPhysicalFile;
+
+        [ObservableProperty]
+        private bool errorHashNotMatched;
+
+        [ObservableProperty]
+        private bool errorFileReadFailed;
+
+        [ObservableProperty]
+        private bool errorNotInFileList;
+
+        public double? ReadSpeedBytePerSecond => ReadTimeCostSecond.HasValue ? Length / ReadTimeCostSecond : null;
+
         public WriteOnceFile()
         {
         }

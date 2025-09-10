@@ -157,10 +157,11 @@ public class TreeFileDataGrid : SimpleFileDataGrid
         {
             var rootPanel = this.GetLogicalAncestors().OfType<TwoStepPanelBase>().FirstOrDefault();
 
-            return new CheckBox()
+            var chk = new CheckBox()
             {
                 HorizontalAlignment = HorizontalAlignment.Center,
-                [!ToggleButton.IsCheckedProperty] = new Binding(nameof(SimpleFileInfo.IsChecked)),
+                [!ToggleButton.IsCheckedProperty] = new Binding(nameof(TreeFileDirInfo.IsTreeItemChecked)),
+                IsThreeState = true,
                 [!IsVisibleProperty] = new Binding(".")
                 {
                     Converter = TreeFileCheckBoxVisibleConverter,
@@ -169,6 +170,9 @@ public class TreeFileDataGrid : SimpleFileDataGrid
                 [!IsEnabledProperty] = new Binding("DataContext.IsWorking") //执行命令时，这CheckBox不可以Enable
                     { Source = rootPanel, Converter = InverseBoolConverter },
             };
+            //在CheckBox上双击，不被识别为展开或折叠
+            chk.DoubleTapped += (s, e) => e.Handled = true;
+            return chk;
         });
 
         column.CellTemplate = cellTemplate;

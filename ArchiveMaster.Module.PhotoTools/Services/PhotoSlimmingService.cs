@@ -38,7 +38,7 @@ namespace ArchiveMaster.Services
 
         public IReadOnlyCollection<string> ErrorMessages => errorMessages;
 
-        public override Task ExecuteAsync(CancellationToken token)
+        public override Task ExecuteAsync(CancellationToken ct)
         {
             return Task.Run(() =>
             {
@@ -55,10 +55,10 @@ namespace ArchiveMaster.Services
                     Directory.CreateDirectory(Config.DistDir);
                 }
 
-                Clear(token);
-                Compress(token);
-                Copy(token);
-            }, token);
+                Clear(ct);
+                Compress(ct);
+                Copy(ct);
+            }, ct);
         }
 
         public override IEnumerable<SimpleFileInfo> GetInitializedFiles()
@@ -69,7 +69,7 @@ namespace ArchiveMaster.Services
                 .Cast<SimpleFileInfo>();
         }
 
-        public override Task InitializeAsync(CancellationToken token)
+        public override Task InitializeAsync(CancellationToken ct)
         {
             rCopy = new Regex(@$"\.({string.Join('|', Config.CopyDirectlyExtensions)})$", RegexOptions.IgnoreCase);
             rCompress = new Regex(@$"\.({string.Join('|', Config.CompressExtensions)})$", RegexOptions.IgnoreCase);
@@ -81,12 +81,12 @@ namespace ArchiveMaster.Services
 
             return Task.Run(() =>
             {
-                SearchCopyingAndCompressingFiles(token);
-                SearchDeletingFiles(token);
-            }, token);
+                SearchCopyingAndCompressingFiles(ct);
+                SearchDeletingFiles(ct);
+            }, ct);
         }
 
-        private void Clear(CancellationToken token)
+        private void Clear(CancellationToken ct)
         {
             TryForFiles(DeleteFiles.ProcessingFiles, (file, s) =>
             {
@@ -100,10 +100,10 @@ namespace ArchiveMaster.Services
                 {
                     FileHelper.DeleteByConfig(file.Path);
                 }
-            }, token, FilesLoopOptions.Builder().AutoApplyStatus().AutoApplyFileNumberProgress().Build());
+            }, ct, FilesLoopOptions.Builder().AutoApplyStatus().AutoApplyFileNumberProgress().Build());
         }
 
-        private void Compress(CancellationToken token)
+        private void Compress(CancellationToken ct)
         {
             TryForFiles(CompressFiles.ProcessingFiles, (file, s) =>
             {
@@ -152,14 +152,14 @@ namespace ArchiveMaster.Services
                 {
                     File.Copy(file.Path, distPath, true);
                 }
-            }, token, FilesLoopOptions.Builder().AutoApplyStatus().AutoApplyFileLengthProgress()
+            }, ct, FilesLoopOptions.Builder().AutoApplyStatus().AutoApplyFileLengthProgress()
                 .WithMultiThreads(Config.Thread).Catch((file, ex) =>
                 {
                     errorMessages.Add($"压缩 {Path.GetRelativePath(Config.SourceDir, file.Path)} 失败：{ex.Message}");
                 }).Build());
         }
 
-        private void Copy(CancellationToken token)
+        private void Copy(CancellationToken ct)
         {
             TryForFiles(CopyFiles.ProcessingFiles, (file, s) =>
             {
@@ -178,7 +178,7 @@ namespace ArchiveMaster.Services
                 }
 
                 File.Copy(file.Path, distPath, true);
-            }, token, FilesLoopOptions.Builder().AutoApplyStatus().AutoApplyFileLengthProgress()
+            }, ct, FilesLoopOptions.Builder().AutoApplyStatus().AutoApplyFileLengthProgress()
                 .WithMultiThreads(Config.Thread).Catch((file, ex) =>
                 {
                     errorMessages.Add($"压缩 {Path.GetRelativePath(Config.SourceDir, file.Path)} 失败：{ex.Message}");
@@ -256,13 +256,13 @@ namespace ArchiveMaster.Services
             return true;
         }
 
-        private void SearchCopyingAndCompressingFiles(CancellationToken token)
+        private void SearchCopyingAndCompressingFiles(CancellationToken ct)
         {
             NotifyProgressIndeterminate();
             NotifyMessage("正在搜索目录");
             var files = new DirectoryInfo(Config.SourceDir)
                 .EnumerateFiles("*", SearchOption.AllDirectories)
-                .ApplyFilter(token, Config.Filter)
+                .ApplyFilter(ct, Config.Filter)
                 .Select(p => new SimpleFileInfo(p, Config.SourceDir));
 
             TryForFiles(files, (file, s) =>
@@ -291,10 +291,10 @@ namespace ArchiveMaster.Services
                         CopyFiles.AddSkipped(file);
                     }
                 }
-            }, token, FilesLoopOptions.DoNothing());
+            }, ct, FilesLoopOptions.DoNothing());
         }
 
-        private void SearchDeletingFiles(CancellationToken token)
+        private void SearchDeletingFiles(CancellationToken ct)
         {
             if (!Directory.Exists(Config.DistDir))
             {
@@ -312,7 +312,7 @@ namespace ArchiveMaster.Services
             foreach (var file in Directory
                          .EnumerateFiles(Config.DistDir, "*", SearchOption.AllDirectories))
             {
-                token.ThrowIfCancellationRequested();
+                ct.ThrowIfCancellationRequested();
                 if (!desiredDistFiles.Contains(file))
                 {
                     DeleteFiles.Add(new SimpleFileInfo(new FileInfo(file), Config.DistDir));

@@ -9,7 +9,7 @@ namespace ArchiveMaster.Services
     public abstract class TwoStepServiceBase<TConfig>(AppConfig appConfig) : ServiceBase<TConfig>(appConfig)
         where TConfig : ConfigBase
     {
-        public abstract Task ExecuteAsync(CancellationToken token = default);
+        public abstract Task ExecuteAsync(CancellationToken ct = default);
 
         public abstract IEnumerable<SimpleFileInfo> GetInitializedFiles();
 
@@ -18,6 +18,6 @@ namespace ArchiveMaster.Services
             return GetInitializedFiles();
         }
 
-        public abstract Task InitializeAsync(CancellationToken token = default);
+        public abstract Task InitializeAsync(CancellationToken ct = default);
     }
 }

@@ -55,7 +55,7 @@ namespace ArchiveMaster.Services
                 .ToList();
         }
 
-        public override Task ExecuteAsync(CancellationToken token = default)
+        public override Task ExecuteAsync(CancellationToken ct = default)
         {
             var files = Files.Where(p => p.IsMatched && p.IsChecked).ToList();
             return TryForFilesAsync(files,
@@ -69,7 +69,7 @@ namespace ArchiveMaster.Services
                     ExifHelper.WriteGpsToImage(file.Path, file.Latitude.Value, file.Longitude.Value);
                     File.SetLastWriteTime(file.Path, file.ExifTime.Value);
                 },
-                token, FilesLoopOptions.Builder().AutoApplyFileLengthProgress().AutoApplyStatus().Build());
+                ct, FilesLoopOptions.Builder().AutoApplyFileLengthProgress().AutoApplyStatus().Build());
         }
 
 
@@ -78,7 +78,7 @@ namespace ArchiveMaster.Services
             return Files.Cast<SimpleFileInfo>();
         }
 
-        public override async Task InitializeAsync(CancellationToken token = default)
+        public override async Task InitializeAsync(CancellationToken ct = default)
         {
             NotifyProgressIndeterminate();
 
@@ -125,7 +125,7 @@ namespace ArchiveMaster.Services
 
                 // 按时间排序GPX点
                 gpxPoints = [.. gpxPoints.OrderBy(p => p.time)];
-            }, token);
+            }, ct);
 
             // 5. 处理照片文件
             NotifyMessage("正在查找文件");
@@ -134,10 +134,10 @@ namespace ArchiveMaster.Services
             {
                 files = new DirectoryInfo(Config.Dir)
                     .EnumerateFiles("*", FileEnumerateExtension.GetEnumerationOptions())
-                    .ApplyFilter(token, Config.Filter)
+                    .ApplyFilter(ct, Config.Filter)
                     .Select(f => new GpsFileInfo(f, Config.Dir))
                     .ToList();
-            }, token);
+            }, ct);
 
             NotifyMessage($"正在处理照片");
 
@@ -177,7 +177,7 @@ namespace ArchiveMaster.Services
                 {
                     file.IsMatched = false;
                 }
-            }, token, FilesLoopOptions.Builder().AutoApplyFileNumberProgress().Build());
+            }, ct, FilesLoopOptions.Builder().AutoApplyFileNumberProgress().Build());
 
             foreach (var file in files)
             {

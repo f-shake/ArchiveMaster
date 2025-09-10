@@ -31,7 +31,8 @@
                 <v:FilePickerTextBox
                     FileNames="{Binding Config.PackageInfoFile}"
                     StringFileTypeFilter="文件包信息;*.wpk;;"
-                    Type="OpenFile" />
+                    Type="OpenFile"
+                    Watermark="*.wpk文件；若置空，默认选取文件包中最新的package_info.wpk" />
             </ctrl:FormItem>
             <ctrl:FormItem Label="选项：">
                 <ctrl:WrapFormItemGroup>
@@ -69,9 +70,9 @@
                 Background="Transparent" />
             <g:GroupBox Header="目标结构树">
                 <v:WriteOnceTreeFileDataGrid
-                    ColumnIsCheckedIndex="-1"
                     ColumnStatusIndex="-1"
                     FileNameHalfTransparentBindingPath="HasPhysicalFile"
+                    IsDirCheckBoxVisible="True"
                     ItemsSource="{Binding FileTree}" />
             </g:GroupBox>
 
@@ -87,8 +88,7 @@
                     <v:SimpleFileDataGrid.Columns>
                         <DataGridTemplateColumn
                             CanUserResize="False"
-                            Header="已加密"
-                            SortMemberPath="AlreadyHasGps">
+                            Header="已加密">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <Ellipse
@@ -118,20 +118,20 @@
                 Margin="0,8,0,0"
                 IsVisible="{Binding Report, Converter={x:Static cvt:Converters.IsNotNull}}"
                 TextAlignment="Center">
-                <Run Text="匹配文件" />
-                <Run Text="{Binding Report.MatchedFileCount, Mode=OneWay}" />
-                <Run Text="个（" />
-                <Run Text="{Binding Report.MatchedFileLength, Mode=OneWay, Converter={x:Static cvt:Converters.FileLength}}" />
-                <Run Text="），共" />
-                <Run Text="{Binding Report.TotalFileCount, Mode=OneWay}" />
-                <Run Text="个（" />
-                <Run Text="{Binding Report.TotalFileLength, Mode=OneWay, Converter={x:Static cvt:Converters.FileLength}}" />
-                <Run Text="），占" />
-                <Run Text="{Binding Report.MatchCountPercent, StringFormat={}{0:P2}}" />
-                <Run Text="（" />
-                <Run Text="{Binding Report.MatchLengthPercent, StringFormat={}{0:P2}}" />
-                <Run Text="）" />
+                <TextBlock.Text>
+                    <MultiBinding StringFormat="找到备份文件 {0}个（{1}），共{2}个（{3}）">
+                        <Binding Path="Report.FoundPhysicalFiles.Count" />
+                        <Binding
+                            Converter="{x:Static cvt:Converters.FileLength}"
+                            Path="Report.FoundPhysicalFiles.TotalLength" />
+                        <Binding Path="Report.TotalFiles.Count" />
+                        <Binding
+                            Converter="{x:Static cvt:Converters.FileLength}"
+                            Path="Report.TotalFiles.TotalLength" />
+                    </MultiBinding>
+                </TextBlock.Text>
             </TextBlock>
+
         </Grid>
     </v:TwoStepPanelBase.ResultsContent>
 

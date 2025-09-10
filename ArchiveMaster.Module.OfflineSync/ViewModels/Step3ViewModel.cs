@@ -30,7 +30,7 @@ namespace ArchiveMaster.ViewModels
             return base.OnInitializedAsync();
         }
 
-        protected override async Task OnExecutedAsync(CancellationToken token)
+        protected override async Task OnExecutedAsync(CancellationToken ct)
         {
             if (Service.DeletingDirectories.Count != 0)
             {

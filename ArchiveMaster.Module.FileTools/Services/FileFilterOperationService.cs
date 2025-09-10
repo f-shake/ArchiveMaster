@@ -23,20 +23,12 @@ namespace ArchiveMaster.Services
     {
         public List<FileFilterOperationFileInfo> Files { get; set; }
 
-        public override IEnumerable<SimpleFileInfo> GetInitializedFiles()
+        public override Task ExecuteAsync(CancellationToken ct)
         {
-            return Files;
-        }
+            FilesLoopOptions loopOptions = IsProgressFileLengthBased()
+                ? FilesLoopOptions.Builder().AutoApplyStatus().AutoApplyFileLengthProgress().Build()
+                : FilesLoopOptions.Builder().AutoApplyStatus().AutoApplyFileNumberProgress().Build();
 
-        public override Task ExecuteAsync(CancellationToken token)
-        {
-            FilesLoopOptions loopOptions = Config.Type switch
-            {
-                FileFilterOperationType.Copy or FileFilterOperationType.Move or FileFilterOperationType.Hash =>
-                    FilesLoopOptions.Builder().AutoApplyStatus().AutoApplyFileLengthProgress().Build(),
-                _ =>
-                    FilesLoopOptions.Builder().AutoApplyStatus().AutoApplyFileNumberProgress().Build(),
-            };
             return Task.Run(() =>
             {
                 HashSet<string> usedPaths = new HashSet<string>();
@@ -55,16 +47,14 @@ namespace ArchiveMaster.Services
                         {
                             case FileFilterOperationType.Copy:
                                 await FileCopyHelper.CopyFileAsync(file.Path, targetPath,
-                                    progress: s.GetFileProcessProgress("正在复制文件", file.Name, NotifyProgress,
-                                        NotifyMessage),
-                                    cancellationToken: token);
+                                    progress: s.CreateFileProgressReporter("正在复制文件"),
+                                    cancellationToken: ct);
                                 File.SetLastWriteTime(targetPath, File.GetLastWriteTime(file.Path));
                                 break;
                             case FileFilterOperationType.Move:
                                 await FileCopyHelper.CopyFileAsync(file.Path, targetPath,
-                                    progress: s.GetFileProcessProgress("正在移动文件", file.Name, NotifyProgress,
-                                        NotifyMessage),
-                                    cancellationToken: token);
+                                    progress: s.CreateFileProgressReporter("正在移动文件"),
+                                    cancellationToken: ct);
                                 File.SetLastWriteTime(targetPath, File.GetLastWriteTime(file.Path));
                                 FileHelper.DeleteByConfig(file.Path);
                                 break;
@@ -79,19 +69,23 @@ namespace ArchiveMaster.Services
                                 break;
                             case FileFilterOperationType.Hash:
                                 file.Success(await FileHashHelper.ComputeHashStringAsync(file.Path, Config.HashType,
-                                    progress: s.GetFileProcessProgress("正在计算文件Hash", file.Name, NotifyProgress,
-                                        NotifyMessage),
-                                    cancellationToken: token));
+                                    progress: s.CreateFileProgressReporter("正在计算文件Hash"),
+                                    cancellationToken: ct));
                                 break;
                             default:
                                 throw new ArgumentOutOfRangeException();
                         }
                     },
-                    token, loopOptions);
-            }, token);
+                    ct, loopOptions);
+            }, ct);
         }
 
-        public override async Task InitializeAsync(CancellationToken token)
+        public override IEnumerable<SimpleFileInfo> GetInitializedFiles()
+        {
+            return Files;
+        }
+
+        public override async Task InitializeAsync(CancellationToken ct)
         {
             List<FileFilterOperationFileInfo> files = new List<FileFilterOperationFileInfo>();
             await Task.Run(() =>
@@ -101,18 +95,18 @@ namespace ArchiveMaster.Services
                     NotifyMessage($"正在搜索目录{sourceDir}下的文件");
                     var tempFiles = new DirectoryInfo(sourceDir)
                         .EnumerateFiles("*", FileEnumerateExtension.GetEnumerationOptions())
-                        .ApplyFilter(token, Config.Filter)
+                        .ApplyFilter(ct, Config.Filter)
                         .Select(p => GetTargetFile(sourceDir, p));
                     files.AddRange(tempFiles);
                 }
-            }, token);
+            }, ct);
             Files = files;
         }
 
         private FileFilterOperationFileInfo GetTargetFile(string sourceDir, FileInfo file)
         {
             var targetFile = new FileFilterOperationFileInfo(file, sourceDir);
-            if (Config.Type is FileFilterOperationType.Delete or FileFilterOperationType.Hash) //不需要目标文件
+            if (!IsTargetDirNeeded()) //不需要目标文件
             {
                 return targetFile;
             }
@@ -129,6 +123,18 @@ namespace ArchiveMaster.Services
             };
 
             return targetFile;
+        }
+
+        private bool IsProgressFileLengthBased()
+        {
+            return Config.Type is FileFilterOperationType.Copy or FileFilterOperationType.Move
+                or FileFilterOperationType.Hash;
+        }
+
+        private bool IsTargetDirNeeded()
+        {
+            return Config.Type is FileFilterOperationType.Copy or FileFilterOperationType.Move
+                or FileFilterOperationType.HardLink or FileFilterOperationType.SymbolLink;
         }
     }
 }

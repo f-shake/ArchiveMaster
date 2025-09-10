@@ -59,28 +59,25 @@
                     </ct:FormItem>
                 </ct:WrapFormItemGroup>
             </ct:FormItem>
-
-            <TextBlock
-                Margin="90,0,0,0"
-                Opacity="0.7"
-                TextTrimming="CharacterEllipsis">
-                <Run
-                    FontWeight="Bold"
-                    Text="保持原有目录结构，使用原文件名：" />
-                <Run Text="将文件复制/移动到目标目录时，完全保留原始目录层级结构，且文件名不变。" />
-                <LineBreak />
-                <Run
-                    FontWeight="Bold"
-                    Text="平铺到目标目录，使用原文件名：" />
-                <Run Text="将文件复制/移动到目标目录时，忽略原始目录结构（所有文件直接放在目标根目录），但保留原文件名。" />
-                <LineBreak />
-                <Run
-                    FontWeight="Bold"
-                    Text="平铺到目标目录，使用相对路径作为新文件名：" />
-                <Run Text="将文件复制/移动到目标目录时，忽略原始目录结构，但将原始相对路径信息编码到新文件名中，避免冲突。" />
-                <LineBreak />
-            </TextBlock>
-
+            <Border Opacity="0.7">
+                <ct:StackFormItemGroup Margin="90,0,0,0">
+                    <ct:FormItem
+                        Classes="BoldLabel"
+                        Label="保持原有目录结构，使用原文件名：">
+                        <TextBlock Text="将文件复制/移动到目标目录时，完全保留原始目录层级结构，且文件名不变" />
+                    </ct:FormItem>
+                    <ct:FormItem
+                        Classes="BoldLabel"
+                        Label="平铺到目标目录，使用原文件名：">
+                        <TextBlock Text="将文件复制/移动到目标目录时，忽略原始目录结构（所有文件直接放在目标根目录），但保留原文件名" />
+                    </ct:FormItem>
+                    <ct:FormItem
+                        Classes="BoldLabel"
+                        Label="平铺到目标目录，使用相对路径作为新文件名：">
+                        <TextBlock Text="将文件复制/移动到目标目录时，忽略原始目录结构，但将原始相对路径信息编码到新文件名中，避免冲突" />
+                    </ct:FormItem>
+                </ct:StackFormItemGroup>
+            </Border>
         </ct:StackFormItemGroup>
     </v:TwoStepPanelBase.ConfigsContent>
     <v:TwoStepPanelBase.ResultsContent>

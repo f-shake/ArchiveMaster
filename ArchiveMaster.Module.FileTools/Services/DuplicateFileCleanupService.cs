@@ -23,7 +23,7 @@ namespace ArchiveMaster.Services
 
         public TreeDirInfo DuplicateGroups { get; private set; }
 
-        public override async Task ExecuteAsync(CancellationToken token)
+        public override async Task ExecuteAsync(CancellationToken ct)
         {
             await Task.Run(() =>
             {
@@ -61,7 +61,7 @@ namespace ArchiveMaster.Services
 
                     NotifyProgress(1.0 * index++ / DuplicateGroups.SubFolderCount);
                 }
-            }, token);
+            }, ct);
         }
 
         public override IEnumerable<SimpleFileInfo> GetInitializedFiles()
@@ -69,44 +69,44 @@ namespace ArchiveMaster.Services
             return DuplicateGroups.Flatten();
         }
 
-        public override Task InitializeAsync(CancellationToken token)
+        public override Task InitializeAsync(CancellationToken ct)
         {
             List<DuplicateFileInfo> files = new List<DuplicateFileInfo>();
             Config.Check();
             return Task.Run(() =>
             {
                 NotifyMessage("正在构建待清理文件特征");
-                matcher = BuildFileFeatures(token);
+                matcher = BuildFileFeatures(ct);
 
                 NotifyMessage("正在枚举参考文件");
                 List<SimpleFileInfo> allReferenceFiles = new DirectoryInfo(Config.ReferenceDir)
-                    .EnumerateSimpleFileInfos(token)
+                    .EnumerateSimpleFileInfos(ct)
                     .OrderBy(file => file.Path.StartsWith(Config.CleaningDir, StringComparison.OrdinalIgnoreCase))
                     .ToList();
                 //由于ReferenceDir可能包含CleaningDir，因此需要优先考虑不在CleaningDir里的文件，尽可能删除CleaningDir内的重复文件
 
                 NotifyMessage("正在匹配文件");
-                MatchAndGroup(allReferenceFiles, token);
-            }, token);
+                MatchAndGroup(allReferenceFiles, ct);
+            }, ct);
         }
 
-        private FileMatchHelper BuildFileFeatures(CancellationToken token)
+        private FileMatchHelper BuildFileFeatures(CancellationToken ct)
         {
             matcher = new FileMatchHelper(Config.CompareName, Config.CompareLength, Config.CompareTime,
                 Config.TimeToleranceSecond);
-            matcher.AddReferenceDir(Config.CleaningDir, token);
+            matcher.AddReferenceDir(Config.CleaningDir, ct);
 
             return matcher;
         }
 
-        private void MatchAndGroup(IEnumerable<SimpleFileInfo> referenceFiles, CancellationToken token)
+        private void MatchAndGroup(IEnumerable<SimpleFileInfo> referenceFiles, CancellationToken ct)
         {
             HashSet<string> checkedFiles = new HashSet<string>();
 
             List<DuplicateFileInfo> duplicateFiles = new List<DuplicateFileInfo>();
             foreach (var file in referenceFiles)
             {
-                token.ThrowIfCancellationRequested();
+                ct.ThrowIfCancellationRequested();
                 if (!checkedFiles.Add(file.Path))
                 {
                     continue;
@@ -129,7 +129,7 @@ namespace ArchiveMaster.Services
             var tree = TreeDirInfo.CreateEmptyTree();
             foreach (var group in duplicateFiles.GroupBy(p => p.ExistedFile, SimpleFileInfo.EqualityComparer))
             {
-                token.ThrowIfCancellationRequested();
+                ct.ThrowIfCancellationRequested();
                 var refFile = new TreeDirInfo()
                 {
                     Name = group.Key.Name,

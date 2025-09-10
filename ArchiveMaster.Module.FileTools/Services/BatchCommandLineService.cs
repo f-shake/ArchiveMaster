@@ -28,7 +28,7 @@ namespace ArchiveMaster.Services
         {
             return Files.Cast<SimpleFileInfo>();
         }
-        public override Task ExecuteAsync(CancellationToken token)
+        public override Task ExecuteAsync(CancellationToken ct)
         {
             return TryForFilesAsync(Files.CheckedOnly().ToList(), async (file, s) =>
                 {
@@ -38,12 +38,12 @@ namespace ArchiveMaster.Services
                         Directory.CreateDirectory(file.AutoCreateDir);
                     }
 
-                    await RunProcessAsync(token, file, s);
+                    await RunProcessAsync(ct, file, s);
                 },
-                token, FilesLoopOptions.Builder().AutoApplyStatus().AutoApplyFileNumberProgress().Build());
+                ct, FilesLoopOptions.Builder().AutoApplyStatus().AutoApplyFileNumberProgress().Build());
         }
 
-        public override async Task InitializeAsync(CancellationToken token)
+        public override async Task InitializeAsync(CancellationToken ct)
         {
             FilePlaceholderReplacer argumentsReplacer = new FilePlaceholderReplacer(Config.Arguments);
             if (!argumentsReplacer.HasPattern)
@@ -84,7 +84,7 @@ namespace ArchiveMaster.Services
                         BatchTarget.SpecialLevelFiles => SearchSpecialLevelFiles(dir, Config.Level),
                         BatchTarget.SpecialLevelElements => SearchSpecialLevelFiles(dir, Config.Level),
                         _ => throw new ArgumentOutOfRangeException()
-                    }).ApplyFilter(token, Config.Filter)
+                    }).ApplyFilter(ct, Config.Filter)
 #if DEBUG
                     .Take(10)
 #endif
@@ -101,8 +101,8 @@ namespace ArchiveMaster.Services
                     {
                         file.AutoCreateDir = autoCreateDirReplacer.GetTargetName(file);
                     }
-                }, token, FilesLoopOptions.Builder().AutoApplyFileNumberProgress().Build());
-            }, token);
+                }, ct, FilesLoopOptions.Builder().AutoApplyFileNumberProgress().Build());
+            }, ct);
             Files = files;
         }
 
@@ -130,7 +130,7 @@ namespace ArchiveMaster.Services
             });
         }
 
-        private async Task RunProcessAsync(CancellationToken token, BatchCommandLineFileInfo file, FilesLoopStates s)
+        private async Task RunProcessAsync(CancellationToken ct, BatchCommandLineFileInfo file, FilesLoopStates s)
         {
             ProcessStartInfo startInfo = new ProcessStartInfo
             {
@@ -178,7 +178,7 @@ namespace ArchiveMaster.Services
             process.BeginErrorReadLine();
             try
             {
-                await process.WaitForExitAsync(token);
+                await process.WaitForExitAsync(ct);
             }
             catch (OperationCanceledException)
             {

@@ -24,13 +24,13 @@ public partial class DbService
     }
 
     public async Task<List<BackupSnapshotEntity>> GetSnapshotsAsync(SnapshotType? type = null,
-        bool includeEmptySnapshot = false, CancellationToken token = default)
+        bool includeEmptySnapshot = false, CancellationToken ct = default)
     {
-        await InitializeAsync(token);
+        await InitializeAsync(ct);
         var query = GetSnapshotQuery(type, includeEmptySnapshot);
 
         query = query.OrderBy(p => p.BeginTime);
-        var snapshots = await query.ToListAsync(token);
+        var snapshots = await query.ToListAsync(ct);
         return snapshots;
     }
 
@@ -69,9 +69,9 @@ public partial class DbService
     public async Task<int> GetSnapshotCountAsync(SnapshotType? type = null,
         bool includeEmptySnapshot = false,
         Func<IQueryable<BackupSnapshotEntity>, IQueryable<BackupSnapshotEntity>> otherQueryAction = null,
-        CancellationToken token = default)
+        CancellationToken ct = default)
     {
-        await InitializeAsync(token);
+        await InitializeAsync(ct);
         var query = GetSnapshotQuery(type, includeEmptySnapshot);
         query = query.OrderBy(p => p.BeginTime);
         if (otherQueryAction != null)
@@ -79,25 +79,25 @@ public partial class DbService
             query = otherQueryAction.Invoke(query);
         }
 
-        return await query.CountAsync(cancellationToken: token);
+        return await query.CountAsync(cancellationToken: ct);
     }
 
     public async Task<BackupSnapshotEntity> GetLastSnapshotAsync(SnapshotType? type = null,
-        CancellationToken token = default)
+        CancellationToken ct = default)
     {
-        await InitializeAsync(token);
+        await InitializeAsync(ct);
         var query = GetSnapshotQuery(type, true);
         query = query.OrderByDescending(p => p.BeginTime);
-        return await query.FirstOrDefaultAsync(token);
+        return await query.FirstOrDefaultAsync(ct);
     }
 
     public async Task<BackupSnapshotEntity> GetLastSnapshotAsync(SnapshotType[] types,
-        CancellationToken token = default)
+        CancellationToken ct = default)
     {
-        await InitializeAsync(token);
+        await InitializeAsync(ct);
         var query = GetSnapshotQuery(types, true);
         query = query.OrderByDescending(p => p.BeginTime);
-        return await query.FirstOrDefaultAsync(token);
+        return await query.FirstOrDefaultAsync(ct);
     }
 
     private IQueryable<BackupSnapshotEntity> GetValidSnapshots()

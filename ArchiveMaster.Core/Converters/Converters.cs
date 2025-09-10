@@ -24,6 +24,8 @@ public static class Converters
         FzLib.Avalonia.Converters.Converters.EqualWithParameter;
 
     public static readonly FileLengthConverter FileLength = FzLib.Avalonia.Converters.Converters.FileLength;
+    
+    public static readonly TransferSpeedConverter TransferSpeed = FzLib.Avalonia.Converters.Converters.TransferSpeed;
 
     public static readonly FilePickerFilterConverter FilePickerFilter =
         FzLib.Avalonia.Converters.Converters.FilePickerFilter;

@@ -6,21 +6,6 @@ namespace ArchiveMaster.ViewModels.FileSystem
     [DebuggerDisplay("Name = {Name}, Subs Count = {Subs.Count}")]
     public partial class TreeDirInfo : TreeFileDirInfo
     {
-        public enum TreeBuildType
-        {
-            /// <summary>
-            /// 手动添加子级
-            /// </summary>
-            Manual,
-
-            /// <summary>
-            /// 通过自动枚举目录或提供文件信息，自动添加子集
-            /// </summary>
-            Automatic
-        }
-
-        public TreeBuildType BuildType { get; private set; }
-
         /// <summary>
         /// 路径分隔符
         /// </summary>
@@ -63,6 +48,20 @@ namespace ArchiveMaster.ViewModels.FileSystem
             IsDir = true;
         }
 
+        public enum TreeBuildType
+        {
+            /// <summary>
+            /// 手动添加子级
+            /// </summary>
+            Manual,
+
+            /// <summary>
+            /// 通过自动枚举目录或提供文件信息，自动添加子集
+            /// </summary>
+            Automatic
+        }
+
+        public TreeBuildType BuildType { get; private set; }
         /// <summary>
         /// 是否已展开（UI）
         /// </summary>
@@ -137,8 +136,80 @@ namespace ArchiveMaster.ViewModels.FileSystem
             }
 
             item.Parent = this;
+
+            //不直接UpdateCheckedStateFromChildren，不然批量添加的时间复杂度为O(n2)
+            if (IsTreeItemChecked == null)
+            {
+                //已经是中间态了，不管加什么都是中间态
+            }
+            else if (IsTreeItemChecked == true)
+            {
+                if (item.IsTreeItemChecked == false)
+                {
+                    //如果新增项是未选中，且新增项为唯一一个项，那么变为未选中，否则为中间态
+                    SetTreeItemChecked(Subs.Count == 1 ? false : null); //如果只有一个，那么与新增项状态一致
+                    Parent?.UpdateCheckedStateFromChildren();
+                }
+            }
+            else //IsTreeItemChecked == false
+            {
+                if (item.IsTreeItemChecked == true)
+                {
+                    //如果新增项是选中，且新增项为唯一一个项，那么变为选中，否则为中间态
+                    SetTreeItemChecked(Subs.Count == 1 ? true : null); //如果只有一个，那么与新增项状态一致
+                    Parent?.UpdateCheckedStateFromChildren();
+                }
+            }
         }
 
+        /// <summary>
+        /// 将当前节点的选中状态传播到所有子节点，适用于手动更改当前节点选中状态后调用
+        /// </summary>
+        internal void PropagateCheckedStateToChildren()
+        {
+            if (IsTreeItemChecked == null)
+            {
+                return;
+            }
+
+            bool isChecked = IsTreeItemChecked.Value;
+            foreach (var item in Subs.Where(p => p.IsTreeItemChecked != isChecked))
+            {
+                //设置本身状态
+                item.SetTreeItemChecked(isChecked);
+                if (item is TreeDirInfo d)
+                {
+                    //如果是目录，继续向下传播
+                    d.PropagateCheckedStateToChildren();
+                }
+            }
+        }
+
+        /// <summary>
+        /// 更新当前节点的选中状态，并通知父节点更新状态，适用于子节点选中状态改变后调用
+        /// </summary>
+        internal void UpdateCheckedStateFromChildren()
+        {
+            bool hasHalf = Subs.Any(p => p.IsTreeItemChecked is null);
+            if (hasHalf)
+            {
+                //有中间态，当前节点也为中间态
+                SetTreeItemChecked(null);
+            }
+            else
+            {
+                bool hasChecked = Subs.Any(p => p.IsTreeItemChecked is true);
+                bool hasUnchecked = Subs.Any(p => p.IsTreeItemChecked is false);
+                SetTreeItemChecked(hasChecked switch
+                {
+                    true when hasUnchecked => null,
+                    true when !hasUnchecked => true,
+                    _ => false,
+                });
+            }
+
+            Parent?.UpdateCheckedStateFromChildren();
+        }
         #region 枚举已有文件创建
 
         public static TreeDirInfo BuildTree(string rootDir)

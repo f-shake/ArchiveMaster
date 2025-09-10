@@ -1,0 +1,33 @@
+<dialog:DialogHost
+    x:Class="ArchiveMaster.Views.FilterTestResultDialog"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ct="using:FzLib.Avalonia.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:dialog="using:FzLib.Avalonia.Dialogs"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:sys="using:System"
+    xmlns:v="using:ArchiveMaster.Views"
+    xmlns:vm="using:ArchiveMaster.ViewModels"
+    Title="文件筛选测试"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    PrimaryButtonContent="关闭"
+    mc:Ignorable="d">
+    <StackPanel Orientation="Vertical">
+        <ct:StackFormItemGroup>
+            <ct:FormItem Label="文件数量：">
+                <TextBlock x:Name="tbkCouut" />
+            </ct:FormItem>
+            <ct:FormItem Label="文件大小：">
+                <TextBlock x:Name="tbkLength" />
+            </ct:FormItem>
+        </ct:StackFormItemGroup>
+        <v:SimpleFileDataGrid
+            x:Name="dt"
+            MaxHeight="300"
+            ColumnIsCheckedIndex="-1"
+            ColumnMessageIndex="-1"
+            ColumnStatusIndex="-1" />
+    </StackPanel>
+</dialog:DialogHost>

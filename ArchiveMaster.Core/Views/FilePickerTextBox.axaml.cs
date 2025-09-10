@@ -13,6 +13,7 @@ using FzLib.Avalonia.Dialogs;
 using FzLib.IO;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using ArchiveMaster.ViewModels.FileSystem;
 
 namespace ArchiveMaster.Views;
 
@@ -51,9 +52,13 @@ public partial class FilePickerTextBox : UserControl
     public static readonly StyledProperty<string> TitleProperty =
         AvaloniaProperty.Register<FilePickerTextBox, string>(nameof(Title));
 
+    public static readonly StyledProperty<string> WatermarkProperty =
+        TextBox.WatermarkProperty.AddOwner<FilePickerTextBox>();
+
     private string saveFileDefaultExtension = default;
     private string saveFileSuggestedFileName = default;
     private string suggestedStartLocation = default;
+
     public FilePickerTextBox()
     {
         InitializeComponent();
@@ -69,6 +74,7 @@ public partial class FilePickerTextBox : UserControl
     }
 
     public static string AndroidExternalFilesDir { get; set; }
+
     public bool AllowMultiple
     {
         get => GetValue(AllowMultipleProperty);
@@ -100,6 +106,7 @@ public partial class FilePickerTextBox : UserControl
         get => GetValue(IsFilterBarVisibleProperty);
         set => SetValue(IsFilterBarVisibleProperty, value);
     }
+
     public string SaveFileDefaultExtension
     {
         get => saveFileDefaultExtension;
@@ -130,6 +137,12 @@ public partial class FilePickerTextBox : UserControl
     {
         get => this.GetValue(TitleProperty);
         set => SetValue(TitleProperty, value);
+    }
+
+    public string Watermark
+    {
+        get => GetValue(WatermarkProperty);
+        set => SetValue(WatermarkProperty, value);
     }
 
     public PickerType Type { get; set; } = PickerType.OpenFile;
@@ -308,7 +321,7 @@ public partial class FilePickerTextBox : UserControl
 
     private async void TestButton_Click(object sender, RoutedEventArgs e)
     {
-        var dialog = HostServices.GetRequiredService<IDialogService>();
+        var dialogService = HostServices.GetRequiredService<IDialogService>();
         WeakReferenceMessenger.Default.Send(new LoadingMessage(true));
         try
         {
@@ -316,10 +329,12 @@ public partial class FilePickerTextBox : UserControl
             {
                 throw new Exception("只有目录可供筛选测试");
             }
+
             if (Filter == null)
             {
                 throw new Exception("筛选器为空");
             }
+
             string[] dirs = null;
             if (AllowMultiple)
             {
@@ -329,6 +344,7 @@ public partial class FilePickerTextBox : UserControl
             {
                 dirs = [FileNames];
             }
+
             foreach (var dir in dirs)
             {
                 if (!Directory.Exists(dir))
@@ -337,32 +353,32 @@ public partial class FilePickerTextBox : UserControl
                 }
             }
 
-            var results = new List<FileInfo>();
+            var results = new List<SimpleFileInfo>();
+            long totalLength = 0;
             var filter = Filter;
+
             await Task.Run(() =>
             {
                 foreach (var dir in dirs)
                 {
                     results.AddRange(new DirectoryInfo(dir)
-                    .EnumerateFiles("*", FileEnumerateExtension.GetEnumerationOptions())
-                    .ApplyFilter(default, filter));
+                        .EnumerateFiles("*", FileEnumerateExtension.GetEnumerationOptions())
+                        .ApplyFilter(CancellationToken.None, filter)
+                        .Select(p => new SimpleFileInfo(p, dir)));
                 }
+
+                totalLength = results.Sum(p => p.Length);
             });
 
-            var fileNames = string.Join(Environment.NewLine, results.Select(p => p.FullName).Take(1000));
-            if (results.Count > 1000)
-            {
-                fileNames = "仅显示前1000个：" + Environment.NewLine + fileNames;
-            }
-            await dialog.ShowOkDialogAsync("筛选测试", $"共筛选到{results.Count}个文件", fileNames);
+            WeakReferenceMessenger.Default.Send(new LoadingMessage(false));
+            
+            var dialog = new FilterTestResultDialog(results.Count, totalLength, results);
+            await dialog.ShowDialog(dialogService.ContainerType, TopLevel.GetTopLevel(this));
         }
         catch (Exception ex)
         {
-            await dialog.ShowErrorDialogAsync("测试失败", ex);
-        }
-        finally
-        {
             WeakReferenceMessenger.Default.Send(new LoadingMessage(false));
+            await dialogService.ShowErrorDialogAsync("测试失败", ex);
         }
     }
 }

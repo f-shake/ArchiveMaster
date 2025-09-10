@@ -19,7 +19,7 @@ namespace ArchiveMaster.Services
     {
         public List<FilesTimeDirInfo> TargetDirs { get; set; }
 
-        public override Task ExecuteAsync(CancellationToken token)
+        public override Task ExecuteAsync(CancellationToken ct)
         {
             return TryForFilesAsync(TargetDirs, (dir, s) =>
             {
@@ -40,14 +40,14 @@ namespace ArchiveMaster.Services
                         File.Move(sub.Path, targetPath);
                     }
                 }
-            }, token, FilesLoopOptions.Builder().AutoApplyStatus().AutoApplyFileNumberProgress().Build());
+            }, ct, FilesLoopOptions.Builder().AutoApplyStatus().AutoApplyFileNumberProgress().Build());
         }
 
         public override IEnumerable<SimpleFileInfo> GetInitializedFiles()
         {
             return TargetDirs.Cast<SimpleFileInfo>();
         }
-        public override async Task InitializeAsync(CancellationToken token)
+        public override async Task InitializeAsync(CancellationToken ct)
         {
             List<SimpleFileInfo> files = null;
             List<FilesTimeDirInfo> subDirs = null;
@@ -60,7 +60,7 @@ namespace ArchiveMaster.Services
                     .Select(p => new SimpleFileInfo(p, Config.Dir))
                     .OrderBy((Func<SimpleFileInfo, DateTime>)(p => (DateTime)p.Time))
                     .ToList();
-                token.ThrowIfCancellationRequested();
+                ct.ThrowIfCancellationRequested();
                 subDirs = new DirectoryInfo(Config.Dir).EnumerateDirectories()
                     .Select(p => new FilesTimeDirInfo(p, Config.Dir))
                     .Where(p => p.FilesCount > 0)
@@ -71,7 +71,7 @@ namespace ArchiveMaster.Services
                     throw new Exception("目录为空");
                 }
 
-                token.ThrowIfCancellationRequested();
+                ct.ThrowIfCancellationRequested();
 
                 NotifyMessage("正在分配目录");
                 DateTime time = DateTime.MinValue;
@@ -79,7 +79,7 @@ namespace ArchiveMaster.Services
                 int dirsIndex = 0;
                 while (filesIndex < files.Count || dirsIndex < subDirs.Count)
                 {
-                    token.ThrowIfCancellationRequested();
+                    ct.ThrowIfCancellationRequested();
                     var file = filesIndex < files.Count ? files[filesIndex] : null;
                     var dir = dirsIndex < subDirs.Count ? subDirs[dirsIndex] : null;
                     //没有未处理目录，或文件的时间早于目录中最早文件的时间
@@ -113,11 +113,11 @@ namespace ArchiveMaster.Services
                         throw new NotImplementedException();
                     }
                 }
-            }, token);
+            }, ct);
 
             foreach (var dir in targetDirs)
             {
-                token.ThrowIfCancellationRequested();
+                ct.ThrowIfCancellationRequested();
                 dir.EarliestTime = dir.Subs.Select(p => p.IsDir ? (p as FilesTimeDirInfo).EarliestTime : p.Time)
                     .Min();
                 dir.LatestTime = dir.Subs.Select(p =>
