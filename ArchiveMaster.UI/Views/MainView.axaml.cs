@@ -24,6 +24,8 @@ using FzLib;
 using Microsoft.Extensions.DependencyInjection;
 using System.Diagnostics;
 using ArchiveMaster.Models;
+using Avalonia.Media;
+using Avalonia.Media.Transformation;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using Serilog;
@@ -99,12 +101,12 @@ public partial class MainView : UserControl
 
     private void BeginChangingContent()
     {
-        IsHitTestVisible = false;
+        Dispatcher.UIThread.Invoke(() => IsHitTestVisible = false);
     }
 
     private void EndChangingContent()
     {
-        IsHitTestVisible = true;
+        Dispatcher.UIThread.Invoke(() => IsHitTestVisible = true);
     }
 
     private void PanelViewModelPropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -128,6 +130,7 @@ public partial class MainView : UserControl
         {
             list.SelectedItem = null;
         }
+
         EndChangingContent();
     }
 
@@ -151,6 +154,14 @@ public partial class MainView : UserControl
 
             vm.PropertyChanged -= PanelViewModelPropertyChanged;
             vm.RequestClosing -= PanelViewModelRequestClosing;
+
+            //开始退出动画
+            
+            // mainContent.RenderTransform = TransformOperations.Parse($"translate(0, {Bounds.Height}px)");
+            mainContent.RenderTransform = TransformOperations.Parse("Scale(0.98)");
+            mainContent.Opacity = 0.2;
+            // mainContent.Classes.Remove("NoBlur");
+            // mainContent.Classes.Add("Blur");
         }
 
         //清除其他ListBox的选中项
@@ -162,13 +173,14 @@ public partial class MainView : UserControl
             list.SelectedItem = null;
         }
 
+        TimeSpan animationDuration = (TimeSpan)Resources["AnimationDuration"];
         BeginChangingContent();
-        mainContent.Opacity = 0;
-        await Task.Delay(300);
+        await Task.Delay(animationDuration);
 
         //避免页面的创建卡住UI，先让ListBox的选择响应起来
         Dispatcher.UIThread.Post(() =>
         {
+            //若为空，则新建页面对象
             if (panelInfo.PanelInstance == null)
             {
                 panelInfo.PanelInstance = HostServices.GetService(panelInfo.ViewType) as PanelBase ??
@@ -178,6 +190,7 @@ public partial class MainView : UserControl
                 panelInfo.PanelInstance.Description = panelInfo.Description;
             }
 
+            //注册ViewModel的事件，通知进入
             if (panelInfo.PanelInstance.DataContext is ViewModelBase vm)
             {
                 vm.PropertyChanged += PanelViewModelPropertyChanged;
@@ -185,9 +198,14 @@ public partial class MainView : UserControl
                 vm.OnEnter();
             }
 
+            //开始进入动画
             mainContent.Content = panelInfo.PanelInstance;
             mainContent.Opacity = 1;
-            EndChangingContent();
+            // mainContent.RenderTransform = TransformOperations.Parse("translate(0, 0)");
+            mainContent.RenderTransform = TransformOperations.Parse("Scale(1)");
+            // mainContent.Classes.Remove("Blur");
+            // mainContent.Classes.Add("NoBlur");
+            _ = Task.Delay(animationDuration).ContinueWith(t => EndChangingContent());
         });
     }
 }

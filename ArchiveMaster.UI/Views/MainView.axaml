@@ -21,6 +21,12 @@
     x:DataType="vm:MainViewModel"
     Background="{DynamicResource Background1}"
     mc:Ignorable="d">
+    <UserControl.Resources>
+        <sys:TimeSpan x:Key="AnimationDuration">0:0:0.3</sys:TimeSpan>
+    </UserControl.Resources>
+    <UserControl.Styles>
+        <StyleInclude Source="MainViewStyles.axaml" />
+    </UserControl.Styles>
     <Design.DataContext>
         <vm:MainViewModel />
     </Design.DataContext>
@@ -32,7 +38,7 @@
             IsPaneOpen="True"
             OpenPaneLength="200">
             <SplitView.Pane>
-                <Border Background="{DynamicResource Background2}">
+                <Border>
                     <Grid
                         x:Name="grdLeft"
                         RowDefinitions="*,8,Auto">
@@ -99,26 +105,25 @@
 
                                             <ListBox
                                                 Background="Transparent"
+                                                Classes="Menu"
                                                 ItemsSource="{Binding Panels}"
                                                 SelectionChanged="SelectingItemsControl_OnSelectionChanged">
-                                                <ListBox.Styles>
-                                                    <Style Selector="ListBoxItem">
-                                                        <Setter Property="IsSelected" Value="{Binding IsSelected}" />
-                                                    </Style>
-                                                </ListBox.Styles>
                                                 <ListBox.ItemTemplate>
                                                     <DataTemplate>
-                                                        <StackPanel
+                                                        <Grid
                                                             Background="Transparent"
-                                                            Orientation="Horizontal"
+                                                            ColumnDefinitions="0,0,Auto,12,*"
                                                             ToolTip.Tip="{Binding Description}">
                                                             <Svg
-                                                                Width="24"
-                                                                Height="24"
+                                                                Grid.Column="2"
+                                                                Width="20"
+                                                                Height="20"
                                                                 Css=".icon { fill: #FF0000; }"
                                                                 Path="{Binding IconUri}" />
-                                                            <TextBlock Text="{Binding Title}" />
-                                                        </StackPanel>
+                                                            <TextBlock
+                                                                Grid.Column="4"
+                                                                Text="{Binding Title}" />
+                                                        </Grid>
                                                     </DataTemplate>
                                                 </ListBox.ItemTemplate>
                                             </ListBox>
@@ -136,13 +141,8 @@
                             HorizontalAlignment="Stretch"
                             HorizontalContentAlignment="Left"
                             Background="Transparent"
+                            Classes="DisabledTransparent"
                             Command="{Binding OpenSettingDialogCommand}">
-                            <Button.Styles>
-                                <Style Selector="Button:disabled /template/ ContentPresenter#PART_ContentPresenter">
-                                    <Setter Property="Background" Value="Transparent" />
-                                    <Setter Property="Foreground" Value="{DynamicResource Foreground3}" />
-                                </Style>
-                            </Button.Styles>
                             <StackPanel
                                 Orientation="Horizontal"
                                 Spacing="16">
@@ -172,59 +172,19 @@
                 </Grid>
 
                 <!--  工具主界面  -->
-                <ContentControl x:Name="mainContent">
-                    <ContentControl.Styles>
-                        <Style Selector="ContentControl">
-                            <Setter Property="Opacity" Value="1" />
-                            <Setter Property="Transitions">
-                                <Transitions>
-                                    <DoubleTransition
-                                        Easing="CubicEaseInOut"
-                                        Property="Opacity"
-                                        Duration="0:0:0.3" />
-                                </Transitions>
-                            </Setter>
-                        </Style>
-                    </ContentControl.Styles>
-                </ContentControl>
+                <ContentControl
+                    x:Name="mainContent"
+                    Classes="Main" />
 
                 <!--  折叠按钮  -->
                 <ToggleButton
-                    Grid.RowSpan="3"
                     Width="6"
                     Height="120"
                     Margin="4,0"
                     HorizontalAlignment="Left"
+                    Classes="Split"
                     CornerRadius="3"
-                    IsChecked="{Binding #spl.IsPaneOpen}">
-                    <ToggleButton.Styles>
-                        <Style Selector="ToggleButton">
-                            <Style Selector="^:unchecked">
-                                <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
-                                    <Setter Property="Background" Value="{DynamicResource Foreground0}" />
-                                    <Setter Property="Opacity" Value="0.3" />
-                                </Style>
-                                <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-                                    <Setter Property="Opacity" Value="0.2" />
-                                </Style>
-                            </Style>
-
-                            <Style Selector="^:checked">
-                                <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
-                                    <Setter Property="Background" Value="{DynamicResource Foreground0}" />
-                                    <Setter Property="Opacity" Value="0.3" />
-                                </Style>
-                                <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-                                    <Setter Property="Opacity" Value="0.2" />
-                                </Style>
-                            </Style>
-
-                            <Style Selector="^:disabled /template/ ContentPresenter#PART_ContentPresenter">
-                                <Setter Property="Background" Value="Transparent" />
-                            </Style>
-                        </Style>
-                    </ToggleButton.Styles>
-                </ToggleButton>
+                    IsChecked="{Binding #spl.IsPaneOpen}" />
 
 
             </Panel>
