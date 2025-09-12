@@ -136,8 +136,6 @@ namespace ArchiveMaster.Services
                         Directory.CreateDirectory(Path.GetDirectoryName(target));
                     }
 
-                    Progress<FileProcessProgress> progress = null;
-
                     Task CopyThisFileAsync()
                     {
                         return CopyFileAsync(patch, target, file.Time,

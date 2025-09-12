@@ -62,27 +62,6 @@ namespace ArchiveMaster.Services
             Debug.WriteLine("{0:HH:m:s.fff}\t{1}", DateTime.Now, message);
 #endif
             MessageUpdate?.Invoke(this, new MessageUpdateEventArgs(message));
-            return;
-            if (isDisposed)
-            {
-                return;
-            }
-
-            lock (syncLock)
-            {
-                pendingMessage = message;
-
-                // 如果距离上次发送不足50ms，则重置计时器
-                var elapsedMs = (DateTime.Now - lastMessageTime).TotalMilliseconds;
-                if (elapsedMs < DebounceIntervalMs)
-                {
-                    debounceTimer?.Change(DebounceIntervalMs, Timeout.Infinite);
-                    return;
-                }
-
-                // 立即发送消息并记录时间
-                SendPendingMessage();
-            }
         }
 
         protected internal void NotifyProgress<T>(T current,T total) where T : struct, INumber<T>

@@ -4,14 +4,21 @@
         <AppVersion>2.1.0</AppVersion>
         <AvaloniaVersion>11.3.5</AvaloniaVersion>
         <FzLibVersion>3.0.14</FzLibVersion>
-        <UseLocalFzLib>true</UseLocalFzLib>
+        <UseLocalFzLib>T</UseLocalFzLib>
+        <TempDir>$(Temp)</TempDir>
+        <UseTempDir>F</UseTempDir>
     </PropertyGroup>
 
+    <PropertyGroup Condition="'$(UseTempDir)' == 'T'">
+        <OutputPath>$(TempDir)\$(SolutionName)\$(Configuration)\$(AssemblyName)</OutputPath>
+        <BaseIntermediateOutputPath>$(TempDir)\$(SolutionName)\obj\$(Configuration)\$(AssemblyName)</BaseIntermediateOutputPath>
+    </PropertyGroup>
+    
     <ItemGroup>
         <AvaloniaResource Include="Assets\**"/>
     </ItemGroup>
 
-    <ItemGroup Condition="'$(Configuration)' == 'Debug' and '$(UseLocalFzLib)' == 'true'">
+    <ItemGroup Condition="'$(Configuration)' == 'Debug' and '$(UseLocalFzLib)' == 'T'">
         <Reference Include="FzLib">
             <HintPath>..\..\FzLib\Publish\libs\FzLib.dll</HintPath>
         </Reference>
@@ -20,7 +27,7 @@
         </Reference>
     </ItemGroup>
 
-    <ItemGroup Condition="! ('$(Configuration)' == 'Debug' and '$(UseLocalFzLib)' == 'true')">
+    <ItemGroup Condition="! ('$(Configuration)' == 'Debug' and '$(UseLocalFzLib)' == 'T')">
         <PackageReference Include="FzLib"/>
         <PackageReference Include="FzLib.Avalonia"/>
     </ItemGroup>

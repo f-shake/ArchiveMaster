@@ -1,48 +1,50 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-    <PropertyGroup>
-        <TargetFramework>net8.0</TargetFramework>
-        <Nullable>disable</Nullable>
-        <LangVersion>latest</LangVersion>
-        <OutputPath>$(Temp)\$(SolutionName)\$(Configuration)\$(AssemblyName)</OutputPath>
-        <RootNamespace>ArchiveMaster</RootNamespace>
-        <BaseIntermediateOutputPath>$(Temp)\$(SolutionName)\obj\$(Configuration)\$(AssemblyName)</BaseIntermediateOutputPath>
-    </PropertyGroup>
-    <ItemGroup>
-        <AvaloniaXaml Remove="obj\**" />
-        <Compile Remove="obj\**" />
-        <EmbeddedResource Remove="obj\**" />
-        <None Remove="obj\**" />
-        <Compile Update="Views\SplashWindow.axaml.cs">
-          <DependentUpon>SplashWindow.axaml</DependentUpon>
-          <SubType>Code</SubType>
-        </Compile>
-        <Compile Update="Views\SettingDialog.axaml.cs">
-          <DependentUpon>ProgressDialog.axaml</DependentUpon>
-          <SubType>Code</SubType>
-        </Compile>
-    </ItemGroup>
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>disable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <RootNamespace>ArchiveMaster</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <AvaloniaXaml Remove="obj\**"/>
+    <Compile Remove="obj\**"/>
+    <EmbeddedResource Remove="obj\**"/>
+    <None Remove="obj\**"/>
+    <Compile Update="Views\SplashWindow.axaml.cs">
+      <DependentUpon>SplashWindow.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\SettingDialog.axaml.cs">
+      <DependentUpon>ProgressDialog.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Hosting"/>
+    <!--25年9月开始，不加下面这条，Linux下无法启动-->
+    <PackageReference Include="SkiaSharp"/>
+    <PackageReference Include="Svg.Controls.Skia.Avalonia"/>
+    <!--25年9月开始，不加下面这条，Linux下无法启动-->
+    <PackageReference Include="SkiaSharp.NativeAssets.Linux"/>
+  </ItemGroup>
 
-    <ItemGroup>
-        <PackageReference Include="Microsoft.Extensions.Hosting" />
-        <PackageReference Include="Svg.Controls.Skia.Avalonia" /> 
-    </ItemGroup>
 
-    <ItemGroup>
-        <Compile Update="Views\ToolItemBox.axaml.cs">
-            <DependentUpon>ToolItemBox.axaml</DependentUpon>
-        </Compile>
-        <Compile Update="Views\ToolItemBox.axaml.cs">
-            <DependentUpon>ToolItemBox.axaml</DependentUpon>
-        </Compile>
-    </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Views\ToolItemBox.axaml.cs">
+      <DependentUpon>ToolItemBox.axaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\ToolItemBox.axaml.cs">
+      <DependentUpon>ToolItemBox.axaml</DependentUpon>
+    </Compile>
+  </ItemGroup>
 
-    <ItemGroup>
-        <ProjectReference Include="..\ArchiveMaster.Core\ArchiveMaster.Core.csproj" />
-        <ProjectReference Include="..\ArchiveMaster.Module.FileBackupper\ArchiveMaster.Module.FileBackupper.csproj" />
-        <ProjectReference Include="..\ArchiveMaster.Module.FileTools\ArchiveMaster.Module.FileTools.csproj" />
-        <ProjectReference Include="..\ArchiveMaster.Module.PhotoTools\ArchiveMaster.Module.PhotoTools.csproj" />
-        <ProjectReference Include="..\ArchiveMaster.Module.OfflineSync\ArchiveMaster.Module.OfflineSync.csproj" />
-        <ProjectReference Include="..\ArchiveMaster.Module.WriteOnceArchive\ArchiveMaster.Module.WriteOnceArchive.csproj" />
-<!--        <ProjectReference Include="..\ArchiveMaster.Module.Test\ArchiveMaster.Module.Test.csproj" Condition="'$(Configuration)' == 'Debug'" />-->
-    </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ArchiveMaster.Core\ArchiveMaster.Core.csproj"/>
+    <ProjectReference Include="..\ArchiveMaster.Module.FileBackupper\ArchiveMaster.Module.FileBackupper.csproj"/>
+    <ProjectReference Include="..\ArchiveMaster.Module.FileTools\ArchiveMaster.Module.FileTools.csproj"/>
+    <ProjectReference Include="..\ArchiveMaster.Module.PhotoTools\ArchiveMaster.Module.PhotoTools.csproj"/>
+    <ProjectReference Include="..\ArchiveMaster.Module.OfflineSync\ArchiveMaster.Module.OfflineSync.csproj"/>
+    <ProjectReference Include="..\ArchiveMaster.Module.WriteOnceArchive\ArchiveMaster.Module.WriteOnceArchive.csproj"/>
+    <!--        <ProjectReference Include="..\ArchiveMaster.Module.Test\ArchiveMaster.Module.Test.csproj" Condition="'$(Configuration)' == 'Debug'" />-->
+  </ItemGroup>
 </Project>

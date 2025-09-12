@@ -40,6 +40,11 @@ public partial class MainView : UserControl
 
     private bool isFirstLoad = true;
 
+    public MainView()
+    {
+        throw new Exception("请调用带参数的构造函数");
+    }
+
     public MainView(MainViewModel viewModel,
         AppConfig appConfig,
         IDialogService dialogService,
