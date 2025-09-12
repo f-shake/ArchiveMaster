@@ -45,7 +45,7 @@
 
                         <!--  主菜单  -->
                         <ScrollViewer
-                            Margin="0,12,0,8"
+                            Margin="0,12,0,0"
                             b:SmoothScrollBehavior.IsEnabled="True"
                             BringIntoViewOnFocusChange="{Binding ScrollViewBringIntoViewOnFocusChange}"
                             HorizontalScrollBarVisibility="Disabled"
@@ -69,39 +69,30 @@
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
                                         <StackPanel Orientation="Vertical">
-                                            <Grid ColumnDefinitions="*,Auto,*">
+                                            <StackPanel Orientation="Horizontal">
                                                 <TextBlock
-                                                    Grid.Column="1"
-                                                    FontSize="20"
+                                                    Margin="16,0,4,0"
                                                     FontWeight="Bold"
+                                                    Foreground="{DynamicResource Foreground3}"
                                                     Text="{Binding GroupName}"
                                                     ToolTip.Tip="{Binding GroupDescription}" />
                                                 <Button
-                                                    Grid.Column="2"
-                                                    Margin="8,0,0,0"
                                                     Padding="4"
                                                     HorizontalAlignment="Left"
-                                                    Background="Transparent"
+                                                    Classes="Transparent"
                                                     IsVisible="{Binding MenuItems, Converter={x:Static cvt:Converters.CountGreaterThanZero}}">
                                                     <TextBlock
                                                         FontFamily="{StaticResource IconFont}"
                                                         FontSize="16"
                                                         Text="{StaticResource More}" />
                                                     <Button.Flyout>
-                                                        <MenuFlyout ItemsSource="{Binding MenuItems}">
-                                                            <MenuFlyout.ItemContainerTheme>
-                                                                <ControlTheme
-                                                                    x:DataType="cvm:ModuleMenuItemInfo"
-                                                                    BasedOn="{StaticResource {x:Type MenuItem}}"
-                                                                    TargetType="MenuItem">
-                                                                    <Setter Property="Header" Value="{Binding Header}" />
-                                                                    <Setter Property="Command" Value="{Binding Command}" />
-                                                                </ControlTheme>
-                                                            </MenuFlyout.ItemContainerTheme>
-                                                        </MenuFlyout>
+                                                        <MenuFlyout
+                                                            ItemContainerTheme="{StaticResource GroupMenuTheme}"
+                                                            ItemsSource="{Binding MenuItems}" />
                                                     </Button.Flyout>
                                                 </Button>
-                                            </Grid>
+
+                                            </StackPanel>
 
                                             <ListBox
                                                 Background="Transparent"
@@ -137,6 +128,7 @@
                         <!--  设置  -->
                         <Button
                             Grid.Row="2"
+                            Margin="8"
                             Padding="6"
                             HorizontalAlignment="Stretch"
                             HorizontalContentAlignment="Left"

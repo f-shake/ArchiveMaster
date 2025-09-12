@@ -108,7 +108,13 @@
                 <Setter Property="Foreground" Value="{DynamicResource Foreground2}" />
             </Style>
         </Style>
-
+        <Style Selector="^.Transparent">
+            <Setter Property="Background" Value="Transparent" />
+            <Style Selector="^:disabled /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="Foreground" Value="{DynamicResource Foreground3}" />
+            </Style>
+        </Style>
     </Style>
 
     <Style Selector=":is(ListBox), :is(DataGrid), :is(TreeView)">

@@ -37,7 +37,8 @@
     <PackageVersion Include="Serilog" Version="4.3.0" />
     <PackageVersion Include="Serilog.Sinks.File" Version="7.0.0" />
     <PackageVersion Include="SixLabors.ImageSharp" Version="3.1.8" />
-    <PackageVersion Include="Svg.Controls.Skia.Avalonia" Version="11.3.0.4" />
+    <!--谨慎升级Svg.Controls.Skia.Avalonia，会导致SkiSharp版本不一致报错-->
+    <PackageVersion Include="Svg.Controls.Skia.Avalonia" Version="11.3.0.1" />
     <PackageVersion Include="Xamarin.AndroidX.Core.SplashScreen" Version="1.0.1.1" />
     <PackageVersion Include="Swashbuckle.AspNetCore" Version="6.7.3" />
     <PackageVersion Include="HotAvalonia" Version="3.0.0" PrivateAssets="All" Publish="True" />

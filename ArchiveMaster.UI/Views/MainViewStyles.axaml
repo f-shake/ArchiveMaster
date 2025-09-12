@@ -1,6 +1,19 @@
 ﻿<Styles
     xmlns="https://github.com/avaloniaui"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:cvm="clr-namespace:ArchiveMaster.ViewModels;assembly=ArchiveMaster.Core">
+
+    <Styles.Resources>
+        <ControlTheme
+            x:Key="GroupMenuTheme"
+            x:DataType="cvm:ModuleMenuItemInfo"
+            BasedOn="{StaticResource {x:Type MenuItem}}"
+            TargetType="MenuItem">
+            <Setter Property="Header" Value="{Binding Header}" />
+            <Setter Property="Command" Value="{Binding Command}" />
+        </ControlTheme>
+    </Styles.Resources>
+
     <Style Selector="ContentControl.Main">
         <Setter Property="Opacity" Value="1" />
         <Setter Property="Transitions">
