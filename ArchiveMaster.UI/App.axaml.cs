@@ -59,6 +59,10 @@ public class App : Application
         {
             Resources.Add("ContentControlThemeFontFamily", new FontFamily("Microsoft YaHei UI"));
         }
+        else
+        {
+            Resources.Add("ContentControlThemeFontFamily", new FontFamily("$Default"));
+        }
     }
 
     static Task OnActivatedAsync()
