@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 using ArchiveMaster.Basic;
 using ArchiveMaster.Configs;
 using ArchiveMaster.Services;
@@ -23,6 +24,15 @@ public partial class
         return base.OnInitializedAsync();
     }
 
+    public override async void OnEnter()
+    {
+        base.OnEnter();
+        if (!OperatingSystem.IsWindows())
+        {
+            await DialogService.ShowErrorDialogAsync("不支持的操作系统", "该工具目前仅支持Windows系统");
+            Exit();
+        }
+    }
 
     protected override void OnReset()
     {

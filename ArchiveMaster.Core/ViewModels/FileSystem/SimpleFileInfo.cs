@@ -191,8 +191,6 @@ namespace ArchiveMaster.ViewModels.FileSystem
 
                 return hash;
             }
-
-            return HashCode.Combine(hash, Length, Time);
         }
 
     }

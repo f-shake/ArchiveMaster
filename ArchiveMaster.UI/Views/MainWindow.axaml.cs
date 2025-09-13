@@ -14,6 +14,11 @@ namespace ArchiveMaster.Views;
 
 public partial class MainWindow : ExtendedWindow
 {
+    public MainWindow()
+    {
+        throw new Exception("请调用带参数的构造函数");
+    }
+
     public MainWindow(MainViewModel viewModel, MainView view)
     {
         DataContext = viewModel;

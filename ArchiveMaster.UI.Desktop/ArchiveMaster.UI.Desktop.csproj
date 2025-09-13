@@ -10,9 +10,9 @@
     <AssemblyVersion>$(AppVersion)</AssemblyVersion>
     <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
     <ApplicationManifest>app.manifest</ApplicationManifest>
-    <OutputPath>$(Temp)\$(SolutionName)\$(Configuration)\$(AssemblyName)</OutputPath>
+    
     <ApplicationIcon>../ArchiveMaster.UI/Assets/icon_light.ico</ApplicationIcon>
-    <BaseIntermediateOutputPath>$(Temp)\$(SolutionName)\obj\$(Configuration)\$(AssemblyName)</BaseIntermediateOutputPath>
+    
   </PropertyGroup>
 
   <ItemGroup>

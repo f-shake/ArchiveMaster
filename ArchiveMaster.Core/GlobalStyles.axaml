@@ -108,15 +108,30 @@
                 <Setter Property="Foreground" Value="{DynamicResource Foreground2}" />
             </Style>
         </Style>
-
+        <Style Selector="^.Transparent">
+            <Setter Property="Background" Value="Transparent" />
+            <Style Selector="^:disabled /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="Foreground" Value="{DynamicResource Foreground3}" />
+            </Style>
+        </Style>
     </Style>
 
     <Style Selector=":is(ListBox), :is(DataGrid), :is(TreeView)">
         <Setter Property="Background" Value="{DynamicResource Background2}" />
     </Style>
 
-    <Style Selector="ToggleButton.Icon">
-        <Setter Property="Padding" Value="6" />
+    <Style Selector="ToggleButton">
+        <Style Selector="^.Icon">
+            <Setter Property="Padding" Value="6" />
+        </Style>
+        <Style Selector="^.Transparent">
+            <Setter Property="Background" Value="Transparent" />
+            <Style Selector="^:disabled /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="Foreground" Value="{DynamicResource Foreground3}" />
+            </Style>
+        </Style>
     </Style>
 
     <Style Selector="StackPanel">

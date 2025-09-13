@@ -1,0 +1,115 @@
+﻿<Styles
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:cvm="clr-namespace:ArchiveMaster.ViewModels;assembly=ArchiveMaster.Core">
+
+    <Styles.Resources>
+        <ControlTheme
+            x:Key="GroupMenuTheme"
+            x:DataType="cvm:ModuleMenuItemInfo"
+            BasedOn="{StaticResource {x:Type MenuItem}}"
+            TargetType="MenuItem">
+            <Setter Property="Header" Value="{Binding Header}" />
+            <Setter Property="Command" Value="{Binding Command}" />
+        </ControlTheme>
+    </Styles.Resources>
+
+    <Style Selector="ContentControl.Main">
+        <Setter Property="Opacity" Value="1" />
+        <Setter Property="Transitions">
+            <Transitions>
+                <DoubleTransition
+                    Easing="CubicEaseInOut"
+                    Property="Opacity"
+                    Duration="{StaticResource AnimationDuration}" />
+                <TransformOperationsTransition
+                    Easing="CubicEaseInOut"
+                    Property="RenderTransform"
+                    Duration="{StaticResource AnimationDuration}" />
+            </Transitions>
+        </Setter>
+        <Style Selector="^.Blur">
+            <Style.Animations>
+                <Animation
+                    FillMode="Forward"
+                    Duration="{StaticResource AnimationDuration}">
+                    <KeyFrame Cue="0%">
+                        <Setter Property="Effect" Value="blur(0)" />
+                    </KeyFrame>
+                    <KeyFrame Cue="100%">
+                        <Setter Property="Effect" Value="blur(5)" />
+                    </KeyFrame>
+                </Animation>
+            </Style.Animations>
+        </Style>
+        <Style Selector="^.NoBlur">
+            <Style.Animations>
+                <Animation
+                    FillMode="Forward"
+                    Duration="{StaticResource AnimationDuration}">
+                    <KeyFrame Cue="0%">
+                        <Setter Property="Effect" Value="blur(5)" />
+                    </KeyFrame>
+                    <KeyFrame Cue="100%">
+                        <Setter Property="Effect" Value="blur(0)" />
+                    </KeyFrame>
+                </Animation>
+            </Style.Animations>
+        </Style>
+    </Style>
+
+    <Style Selector="ToggleButton.Split">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource Foreground0}" />
+
+        <Style Selector="^:pointerover">
+            <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Opacity" Value="0.7" />
+            </Style>
+        </Style>
+        <Style Selector="^:unchecked">
+            <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Foreground" Value="{DynamicResource Foreground0}" />
+                <Setter Property="Background" Value="Transparent" />
+            </Style>
+        </Style>
+
+        <Style Selector="^:checked">
+            <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Foreground" Value="{DynamicResource Foreground0}" />
+                <Setter Property="Background" Value="Transparent" />
+            </Style>
+        </Style>
+
+        <Style Selector="^:disabled /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+    </Style>
+
+    <Style Selector="ListBox.Menu ListBoxItem">
+        <Setter Property="CornerRadius" Value="6" />
+        <Setter Property="Padding" Value="6" />
+        <Setter Property="Margin" Value="8,2" />
+        <Style Selector="^:selected">
+            <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Background" Value="{DynamicResource SystemControlHighlightListLowBrush}" />
+            </Style>
+
+            <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Background" Value="{DynamicResource SystemControlHighlightListLowBrush}" />
+            </Style>
+
+            <Style Selector="^:pressed /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Background" Value="{DynamicResource Background1}" />
+            </Style>
+
+            <Setter Property="FontWeight" Value="Bold" />
+
+
+            <!-- <Style Selector="^:pressed /template/ ContentPresenter#PART_ContentPresenter"> -->
+            <!--     <Setter Property="Background" Value="{DynamicResource SystemControlHighlightListAccentHighBrush}" /> -->
+            <!--     <Setter Property="Foreground" Value="{DynamicResource SystemControlHighlightAltBaseHighBrush}" /> -->
+            <!-- </Style> -->
+        </Style>
+    </Style>
+</Styles>

@@ -30,6 +30,10 @@ namespace ArchiveMaster.Services
                     TryForFiles(flatten, (file, s) =>
                     {
                         NotifyMessage($"正在创建{s.GetFileNumberMessage()}：{file.RelativePath}");
+                        if (!OperatingSystem.IsWindows())
+                        {
+                            throw new PlatformNotSupportedException("仅支持Windows系统");
+                        }
                         CreateSparseFile(file);
                     }, ct, FilesLoopOptions.Builder().AutoApplyFileNumberProgress().AutoApplyStatus().Build());
                 }

@@ -61,7 +61,7 @@ namespace ArchiveMaster.ViewModels
 
                 if (false.Equals(result))
                 {
-                    Exit();
+                    // Exit();
                     return;
                 }
             }

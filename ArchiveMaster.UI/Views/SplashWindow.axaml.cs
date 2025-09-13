@@ -19,7 +19,7 @@ public partial class SplashWindow : Window
 {
     private static SplashWindow splashWindow;
 
-    private SplashWindow()
+    public SplashWindow()
     {
         InitializeComponent();
     }

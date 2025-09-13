@@ -21,7 +21,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ArchiveMaster.Module.Offlin
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "#", "#", "{0F004A9D-6953-45C4-804E-31474873B19D}"
 	ProjectSection(SolutionItems) = preProject
-		build\build_android.ps1 = build\build_android.ps1
 		build\clean.ps1 = build\clean.ps1
 		Directory.Build.props = Directory.Build.props
 		Directory.Packages.props = Directory.Packages.props

@@ -1,41 +1,56 @@
 <Project>
-    <PropertyGroup>
-        <Nullable>disable</Nullable>
-        <AppVersion>2.1.0</AppVersion>
-        <AvaloniaVersion>11.3.2</AvaloniaVersion>
-        <FzLibVersion>3.0.8</FzLibVersion>
-        <UseLocalFzLib>true</UseLocalFzLib>
-    </PropertyGroup>
+  <PropertyGroup>
+    <Nullable>disable</Nullable>
+    <!--App版本-->
+    <AppVersion>2.0.0</AppVersion>
+    <!--Avalonia版本-->
+    <AvaloniaVersion>11.3.5</AvaloniaVersion>
+    <!--FzLib版本-->
+    <FzLibVersion>3.1.0</FzLibVersion>
+    <!--是否使用本地最新的FzLib。非开发者本人应当设置为T。-->
+    <UseLocalFzLib>true</UseLocalFzLib>
+    <!--是否指定调试时的输出目录，以及指定目录位置-->
+    <SpecialOutputDir>true</SpecialOutputDir>
+    <OutputDir>C:\CodeTemp</OutputDir>
+  </PropertyGroup>
 
-    <ItemGroup>
-        <AvaloniaResource Include="Assets\**"/>
-    </ItemGroup>
+  <!--指定bin目录和obj目录位置-->
+  <PropertyGroup Condition="'$(SpecialOutputDir)' == 'true'">
+    <OutputPath>$(OutputDir)\$(SolutionName)\bin\$(Configuration)\$(MSBuildProjectName)</OutputPath>
+    <BaseIntermediateOutputPath>$(OutputDir)\$(SolutionName)\obj\$(Configuration)\$(MSBuildProjectName)</BaseIntermediateOutputPath>
+  </PropertyGroup>
 
-    <ItemGroup Condition="'$(Configuration)' == 'Debug' and '$(UseLocalFzLib)' == 'true'">
-        <Reference Include="FzLib">
-            <HintPath>..\..\FzLib\Publish\libs\FzLib.dll</HintPath>
-        </Reference>
-        <Reference Include="FzLib.Avalonia">
-            <HintPath>..\..\FzLib\Publish\libs\FzLib.Avalonia.dll</HintPath>
-        </Reference>
-    </ItemGroup>
+  <!--包含所有Avalonia资产-->
+  <ItemGroup>
+    <AvaloniaResource Include="Assets\**"/>
+  </ItemGroup>
 
-    <ItemGroup Condition="! ('$(Configuration)' == 'Debug' and '$(UseLocalFzLib)' == 'true')">
-        <PackageReference Include="FzLib"/>
-        <PackageReference Include="FzLib.Avalonia"/>
-    </ItemGroup>
+  <!--使用本地FzLib-->
+  <ItemGroup Condition="'$(Configuration)' == 'Debug' and '$(UseLocalFzLib)' == 'true'">
+    <Reference Include="FzLib">
+      <HintPath>..\..\FzLib\Publish\libs\FzLib.dll</HintPath>
+    </Reference>
+    <Reference Include="FzLib.Avalonia">
+      <HintPath>..\..\FzLib\Publish\libs\FzLib.Avalonia.dll</HintPath>
+    </Reference>
+  </ItemGroup>
 
-    <ItemGroup>
-        <PackageReference Include="Avalonia"/>
-        <PackageReference Include="Avalonia.Controls.DataGrid"/>
-        <PackageReference Include="Avalonia.Themes.Fluent"/>
-        <PackageReference Include="Xaml.Behaviors.Avalonia"/>
-        <PackageReference Include="BinToss.GroupBox.Avalonia"/>
-        <PackageReference Include="CommunityToolkit.Mvvm"/>
-        <PackageReference Include="Serilog"/>
-        <PackageReference Include="Serilog.Sinks.File"/>
-        <PackageReference Include="Microsoft.Extensions.DependencyInjection"/>
-        <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics"/>
-        <!--<PackageReference Include="Mapster" />-->
-    </ItemGroup>
+  <!--使用Nuget中的FzLib-->
+  <ItemGroup Condition="! ('$(Configuration)' == 'Debug' and '$(UseLocalFzLib)' == 'true')">
+    <PackageReference Include="FzLib"/>
+    <PackageReference Include="FzLib.Avalonia"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia"/>
+    <PackageReference Include="Avalonia.Controls.DataGrid"/>
+    <PackageReference Include="Avalonia.Themes.Fluent"/>
+    <PackageReference Include="Xaml.Behaviors.Avalonia"/>
+    <PackageReference Include="BinToss.GroupBox.Avalonia"/>
+    <PackageReference Include="CommunityToolkit.Mvvm"/>
+    <PackageReference Include="Serilog"/>
+    <PackageReference Include="Serilog.Sinks.File"/>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection"/>
+    <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics"/>
+  </ItemGroup>
 </Project>

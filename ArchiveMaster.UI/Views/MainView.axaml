@@ -21,175 +21,199 @@
     x:DataType="vm:MainViewModel"
     Background="{DynamicResource Background1}"
     mc:Ignorable="d">
+    <UserControl.Resources>
+        <sys:TimeSpan x:Key="AnimationDuration">0:0:0.3</sys:TimeSpan>
+    </UserControl.Resources>
+    <UserControl.Styles>
+        <StyleInclude Source="MainViewStyles.axaml" />
+    </UserControl.Styles>
     <Design.DataContext>
         <vm:MainViewModel />
     </Design.DataContext>
 
-    <UserControl.Resources>
-        <sys:Double x:Key="BoxWidth">200</sys:Double>
-        <sys:Double x:Key="BoxHeight">280</sys:Double>
-        <sys:Boolean x:Key="ShowDescription">True</sys:Boolean>
-    </UserControl.Resources>
+    <Grid>
+        <SplitView
+            x:Name="spl"
+            CompactPaneLength="40"
+            DisplayMode="CompactInline"
+            IsPaneOpen="{Binding Source={x:Static cfg:GlobalConfigs.Instance}, Mode=TwoWay, Path=IsMainViewPlanOpen}"
+            OpenPaneLength="200">
+            <SplitView.Pane>
+                <Border>
+                    <Grid
+                        x:Name="grdLeft"
+                        Margin="0,12,0,0"
+                        RowDefinitions="*,4,Auto">
+                        <!--  主菜单  -->
+                        <ScrollViewer
+                            b:SmoothScrollBehavior.IsEnabled="True"
+                            AllowAutoHide="True"
+                            BringIntoViewOnFocusChange="{Binding ScrollViewBringIntoViewOnFocusChange}"
+                            HorizontalScrollBarVisibility="Disabled"
+                            VerticalScrollBarVisibility="Auto">
+                            <Interaction.Behaviors>
+                                <RoutedEventTriggerBehavior RoutedEvent="{x:Static InputElement.KeyDownEvent}">
+                                    <InvokeCommandAction Command="{Binding ScrollViewKeyDownCommand}" />
+                                </RoutedEventTriggerBehavior>
+                                <DataTriggerBehavior
+                                    Binding="{Binding #spl.IsPaneOpen}"
+                                    Value="False">
+                                    <ChangePropertyAction
+                                        PropertyName="VerticalScrollBarVisibility"
+                                        Value="Hidden" />
+                                </DataTriggerBehavior>
+                                <DataTriggerBehavior
+                                    Binding="{Binding #spl.IsPaneOpen}"
+                                    Value="True">
+                                    <ChangePropertyAction
+                                        PropertyName="VerticalScrollBarVisibility"
+                                        Value="Auto" />
+                                </DataTriggerBehavior>
+                            </Interaction.Behaviors>
 
-    <Grid Margin="8">
-        <Panel
-            x:Name="mainMenu"
-            Classes.hidden="{Binding IsToolOpened}"
-            IsVisible="{Binding !IsToolOpened}">
-            <Panel.Styles>
-                <Style Selector="Panel">
-                    <Setter Property="Opacity" Value="1" />
-                    <Setter Property="Transitions">
-                        <Transitions>
-                            <DoubleTransition
-                                Easing="CubicEaseInOut"
-                                Property="Opacity"
-                                Duration="0:0:0.3" />
-                        </Transitions>
-                    </Setter>
-                    <Style Selector="^.hidden">
-                        <Setter Property="IsHitTestVisible" Value="False" />
-                        <Setter Property="Opacity" Value="0" />
-                    </Style>
-                </Style>
+                            <ItemsControl
+                                x:Name="lstGroups"
+                                ItemsSource="{Binding PanelGroups}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel
+                                            Orientation="Vertical"
+                                            Spacing="16" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Vertical">
+                                            <StackPanel
+                                                IsVisible="{Binding #spl.IsPaneOpen}"
+                                                Orientation="Horizontal">
+                                                <TextBlock
+                                                    Margin="16,0,4,0"
+                                                    FontWeight="Bold"
+                                                    Foreground="{DynamicResource Foreground3}"
+                                                    Text="{Binding GroupName}"
+                                                    ToolTip.Tip="{Binding GroupDescription}" />
+                                                <Button
+                                                    Padding="4"
+                                                    HorizontalAlignment="Left"
+                                                    Classes="Transparent"
+                                                    IsVisible="{Binding MenuItems, Converter={x:Static cvt:Converters.CountGreaterThanZero}}">
+                                                    <TextBlock
+                                                        FontFamily="{StaticResource IconFont}"
+                                                        FontSize="16"
+                                                        Text="{StaticResource More}" />
+                                                    <Button.Flyout>
+                                                        <MenuFlyout
+                                                            ItemContainerTheme="{StaticResource GroupMenuTheme}"
+                                                            ItemsSource="{Binding MenuItems}" />
+                                                    </Button.Flyout>
+                                                </Button>
 
-            </Panel.Styles>
-            <ScrollViewer
-                x:Name="scr"
-                b:SmoothScrollBehavior.IsEnabled="True"
-                BringIntoViewOnFocusChange="{Binding ScrollViewBringIntoViewOnFocusChange}"
-                HorizontalScrollBarVisibility="Disabled"
-                VerticalScrollBarVisibility="Auto">
-                <Interaction.Behaviors>
-                    <RoutedEventTriggerBehavior RoutedEvent="{x:Static InputElement.KeyDownEvent}">
-                        <InvokeCommandAction Command="{Binding ScrollViewKeyDownCommand}" />
-                    </RoutedEventTriggerBehavior>
-                </Interaction.Behaviors>
-                <Panel>
-                    <ItemsControl ItemsSource="{Binding PanelGroups}">
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <StackPanel
-                                    Orientation="Vertical"
-                                    Spacing="16" />
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Vertical">
-                                    <Grid ColumnDefinitions="*,Auto,*">
-                                        <TextBlock
-                                            Grid.Column="1"
-                                            FontSize="20"
-                                            FontWeight="Bold"
-                                            Text="{Binding GroupName}" />
-                                        <Button
-                                            Grid.Column="2"
-                                            Margin="8,0,0,0"
-                                            Padding="4"
-                                            HorizontalAlignment="Left"
-                                            Background="Transparent"
-                                            IsVisible="{Binding MenuItems, Converter={x:Static cvt:Converters.CountGreaterThanZero}}">
-                                            <TextBlock
-                                                FontFamily="{StaticResource IconFont}"
-                                                FontSize="16"
-                                                Text="{StaticResource More}" />
-                                            <Button.Flyout>
-                                                <MenuFlyout ItemsSource="{Binding MenuItems}">
-                                                    <MenuFlyout.ItemContainerTheme>
-                                                        <ControlTheme
-                                                            x:DataType="cvm:ModuleMenuItemInfo"
-                                                            BasedOn="{StaticResource {x:Type MenuItem}}"
-                                                            TargetType="MenuItem">
-                                                            <Setter Property="Header" Value="{Binding Header}" />
-                                                            <Setter Property="Command" Value="{Binding Command}" />
-                                                        </ControlTheme>
-                                                    </MenuFlyout.ItemContainerTheme>
-                                                </MenuFlyout>
-                                            </Button.Flyout>
-                                        </Button>
-                                    </Grid>
+                                            </StackPanel>
 
-                                    <Border
-                                        MaxWidth="240"
-                                        BorderBrush="{DynamicResource Foreground3}"
-                                        BorderThickness="0,2,0,0" />   
-                                    <TextBlock
-                                        HorizontalAlignment="Center"
-                                        Opacity="0.7"
-                                        Text="{Binding GroupDescription}" />
-                                    <ItemsControl ItemsSource="{Binding Panels}">
-                                        <ItemsControl.ItemsPanel>
-                                            <ItemsPanelTemplate>
-                                                <local:ExtendedWrapPanel
-                                                    HorizontalAlignment="Center"
-                                                    HorizontalContentAlignment="Center" />
-                                            </ItemsPanelTemplate>
-                                        </ItemsControl.ItemsPanel>
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate>
-                                                <local:ToolItemBox
-                                                    x:Name="tib"
-                                                    Title="{Binding Title}"
-                                                    Width="{DynamicResource BoxWidth}"
-                                                    Height="{DynamicResource BoxHeight}"
-                                                    Description="{Binding Description}"
-                                                    Focusable="{Binding !#root.((vm:MainViewModel)DataContext).IsToolOpened}"
-                                                    Icon="{Binding IconUri}"
-                                                    KeyDown="ToolItem_OnKeyDown"
-                                                    ShowDescription="{DynamicResource ShowDescription}">
-                                                    <Interaction.Behaviors>
-                                                        <RoutedEventTriggerBehavior RoutedEvent="{x:Static InputElement.TappedEvent}">
-                                                            <InvokeCommandAction
-                                                                Command="{Binding #root.((vm:MainViewModel)DataContext).EnterToolCommand}"
-                                                                CommandParameter="{Binding .}" />
-                                                        </RoutedEventTriggerBehavior>
-                                                    </Interaction.Behaviors>
-                                                </local:ToolItemBox>
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
-                                </StackPanel>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </Panel>
-            </ScrollViewer>
-            <Button
-                Padding="6"
-                HorizontalAlignment="Left"
-                VerticalAlignment="Top"
-                Background="Transparent"
-                Command="{Binding OpenSettingDialogCommand}"
-                Content="{StaticResource Settings}"
-                FontFamily="{StaticResource IconFont}"
-                FontSize="18" />
-        </Panel>
+                                            <ListBox
+                                                Background="Transparent"
+                                                Classes="Menu"
+                                                ItemsSource="{Binding Panels}"
+                                                SelectionChanged="SelectingItemsControl_OnSelectionChanged">
+                                                <ListBox.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Grid
+                                                            Background="Transparent"
+                                                            ColumnDefinitions="0,0,Auto,12,*"
+                                                            ToolTip.Tip="{Binding Description}">
+                                                            <Svg
+                                                                Grid.Column="2"
+                                                                Width="20"
+                                                                Height="20"
+                                                                Css=".icon { fill: #FF0000; }"
+                                                                Path="{Binding IconUri}" />
+                                                            <TextBlock
+                                                                Grid.Column="4"
+                                                                Text="{Binding Title}" />
+                                                        </Grid>
+                                                    </DataTemplate>
+                                                </ListBox.ItemTemplate>
+                                            </ListBox>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
 
-        <ContentControl
-            x:Name="mainContent"
-            Classes.hidden="{Binding !IsToolOpened}"
-            Content="{Binding MainContent}"
-            Focusable="{Binding IsToolOpened}">
-            <ContentControl.Styles>
-                <Style Selector="ContentControl">
-                    <Setter Property="Opacity" Value="1" />
-                    <Setter Property="Transitions">
-                        <Transitions>
-                            <DoubleTransition
-                                Easing="CubicEaseInOut"
-                                Property="Opacity"
-                                Duration="0:0:0.3" />
-                        </Transitions>
-                    </Setter>
-                    <Style Selector="^.hidden">
-                        <Setter Property="IsHitTestVisible" Value="False" />
-                        <Setter Property="Opacity" Value="0" />
-                    </Style>
-                </Style>
-            </ContentControl.Styles>
-        </ContentControl>
+                        </ScrollViewer>
 
-        <ctrl:ProgressRingOverlay IsActive="{Binding IsProgressRingOverlayActive}" />
+                        <!--  设置按钮  -->
+                        <Button
+                            Grid.Row="2"
+                            Margin="10,8"
+                            Padding="6"
+                            HorizontalAlignment="Left"
+                            HorizontalContentAlignment="Center"
+                            Classes="Icon Transparent"
+                            Command="{Binding OpenSettingDialogCommand}"
+                            Content="{StaticResource Settings}"
+                            IsVisible="{Binding #spl.IsPaneOpen}"
+                            ToolTip.Tip="设置" />
+
+                        <!--  折叠按钮  -->
+                        <ToggleButton
+                            Grid.Row="2"
+                            Width="32"
+                            Margin="8"
+                            Padding="6"
+                            HorizontalAlignment="Right"
+                            HorizontalContentAlignment="Center"
+                            VerticalContentAlignment="Center"
+                            Classes="Split"
+                            Content="{StaticResource ArrowLeft8}"
+                            FontFamily="{StaticResource IconFont}"
+                            IsChecked="{Binding #spl.IsPaneOpen}"
+                            ToolTip.Tip="折叠">
+                            <Interaction.Behaviors>
+                                <DataTriggerBehavior
+                                    Binding="{Binding #spl.IsPaneOpen}"
+                                    Value="False">
+                                    <ChangePropertyAction
+                                        PropertyName="Content"
+                                        Value="{StaticResource GlobalNavButton}" />
+                                </DataTriggerBehavior>
+                                <DataTriggerBehavior
+                                    Binding="{Binding #spl.IsPaneOpen}"
+                                    Value="True">
+                                    <ChangePropertyAction
+                                        PropertyName="Content"
+                                        Value="{StaticResource ArrowLeft8}" />
+                                </DataTriggerBehavior>
+                            </Interaction.Behaviors>
+                        </ToggleButton>
+
+                    </Grid>
+                </Border>
+            </SplitView.Pane>
+
+            <Panel>
+                <!--  背景图片  -->
+                <Grid
+                    ColumnDefinitions="*,*,*"
+                    RowDefinitions="*,*,*">
+                    <Image
+                        Grid.Row="1"
+                        Grid.Column="1"
+                        IsVisible="{Binding #mainContent.Content, Converter={x:Static cvt:Converters.IsNull}}"
+                        Opacity="0.3"
+                        Source="avares://ArchiveMaster.UI/Assets/icon_transparent.png" />
+                </Grid>
+
+                <!--  工具主界面  -->
+                <ContentControl
+                    x:Name="mainContent"
+                    Classes="Main" />
+            </Panel>
+        </SplitView>
+
+
+        <ctrl:ProgressRingOverlay
+            Grid.ColumnSpan="3"
+            IsActive="{Binding IsProgressRingOverlayActive}" />
     </Grid>
 </UserControl>

@@ -30,15 +30,18 @@
                     <StackPanel
                         Grid.Column="2"
                         Orientation="Horizontal">
-                        <HyperlinkButton
+                        <Button
+                            Classes="Link"
                             Command="{Binding SetProcessCommand}"
                             CommandParameter="cmd /c "
                             Content="cmd" />
-                        <HyperlinkButton
+                        <Button
+                            Classes="Link"
                             Command="{Binding SetProcessCommand}"
                             CommandParameter="powershell -Command "
                             Content="powershell" />
-                        <HyperlinkButton
+                        <Button
+                            Classes="Link"
                             Command="{Binding SetProcessCommand}"
                             CommandParameter="/bin/bash -c"
                             Content="/bin/bash" />

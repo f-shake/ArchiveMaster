@@ -11,6 +11,11 @@ namespace ArchiveMaster.Views;
 
 public partial class FilterTestResultDialog : DialogHost
 {
+    public FilterTestResultDialog()
+    {
+        throw new Exception("请调用带参数的构造函数");
+    }
+
     public FilterTestResultDialog(int count, long length, IEnumerable<SimpleFileInfo> files)
     {
         InitializeComponent();

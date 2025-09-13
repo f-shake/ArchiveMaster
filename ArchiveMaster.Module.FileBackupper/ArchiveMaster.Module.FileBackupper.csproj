@@ -4,8 +4,6 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>ArchiveMaster</RootNamespace>
-    <OutputPath>$(Temp)\$(SolutionName)\$(Configuration)\$(AssemblyName)</OutputPath>
-    <BaseIntermediateOutputPath>$(Temp)\$(SolutionName)\obj\$(Configuration)\$(AssemblyName)</BaseIntermediateOutputPath>
   </PropertyGroup>
   <ItemGroup>
     <AvaloniaXaml Remove="obj\**" />

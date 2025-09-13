@@ -13,10 +13,12 @@ namespace ArchiveMaster.Converters
             {
                 return "未设置筛选";
             }
+
             if (value is not FileFilterRule rule)
             {
                 throw new ArgumentException($"值不是{nameof(FileFilterRule)}", nameof(value));
             }
+
             return GetDescription(rule);
         }
 
@@ -54,9 +56,7 @@ namespace ArchiveMaster.Converters
                 }
 
                 // 处理多行内容（只显示第一行）
-                string firstLine = value.Split(new[] { Environment.NewLine },
-                                             StringSplitOptions.RemoveEmptyEntries)
-                                      .FirstOrDefault();
+                string firstLine = value.Split(['\n', '\r'], StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
 
                 if (firstLine != value)
                 {
@@ -65,7 +65,7 @@ namespace ArchiveMaster.Converters
 
                 // 截断过长的内容
                 const int maxLength = 20;
-                return value.Length > maxLength ? value.Substring(0, maxLength) + "..." : value;
+                return value.Length > maxLength ? value[..maxLength] + "..." : value;
             }
 
             // 包含规则（白名单）
