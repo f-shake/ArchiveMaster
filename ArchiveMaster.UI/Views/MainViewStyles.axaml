@@ -69,12 +69,14 @@
         </Style>
         <Style Selector="^:unchecked">
             <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Foreground" Value="{DynamicResource Foreground0}" />
                 <Setter Property="Background" Value="Transparent" />
             </Style>
         </Style>
 
         <Style Selector="^:checked">
             <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Foreground" Value="{DynamicResource Foreground0}" />
                 <Setter Property="Background" Value="Transparent" />
             </Style>
         </Style>

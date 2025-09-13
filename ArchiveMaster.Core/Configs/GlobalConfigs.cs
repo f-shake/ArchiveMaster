@@ -14,4 +14,6 @@ public class GlobalConfigs
     public bool PreferDeleteToRecycleBin { get; set; } = true;
 
     public char FlattenPathSeparatorReplacement { get; set; } = '-';
+    
+    public bool IsMainViewPlanOpen { get; set; } = true;
 }

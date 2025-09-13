@@ -34,8 +34,9 @@
     <Grid>
         <SplitView
             x:Name="spl"
+            CompactPaneLength="40"
             DisplayMode="CompactInline"
-            IsPaneOpen="True"
+            IsPaneOpen="{Binding Source={x:Static cfg:GlobalConfigs.Instance}, Mode=TwoWay, Path=IsMainViewPlanOpen}"
             OpenPaneLength="200">
             <SplitView.Pane>
                 <Border>
@@ -46,6 +47,7 @@
                         <!--  主菜单  -->
                         <ScrollViewer
                             b:SmoothScrollBehavior.IsEnabled="True"
+                            AllowAutoHide="True"
                             BringIntoViewOnFocusChange="{Binding ScrollViewBringIntoViewOnFocusChange}"
                             HorizontalScrollBarVisibility="Disabled"
                             VerticalScrollBarVisibility="Auto">
@@ -53,6 +55,20 @@
                                 <RoutedEventTriggerBehavior RoutedEvent="{x:Static InputElement.KeyDownEvent}">
                                     <InvokeCommandAction Command="{Binding ScrollViewKeyDownCommand}" />
                                 </RoutedEventTriggerBehavior>
+                                <DataTriggerBehavior
+                                    Binding="{Binding #spl.IsPaneOpen}"
+                                    Value="False">
+                                    <ChangePropertyAction
+                                        PropertyName="VerticalScrollBarVisibility"
+                                        Value="Hidden" />
+                                </DataTriggerBehavior>
+                                <DataTriggerBehavior
+                                    Binding="{Binding #spl.IsPaneOpen}"
+                                    Value="True">
+                                    <ChangePropertyAction
+                                        PropertyName="VerticalScrollBarVisibility"
+                                        Value="Auto" />
+                                </DataTriggerBehavior>
                             </Interaction.Behaviors>
 
                             <ItemsControl
@@ -143,7 +159,7 @@
                         <ToggleButton
                             Grid.Row="2"
                             Width="32"
-                            Margin="10,8"
+                            Margin="8"
                             Padding="6"
                             HorizontalAlignment="Right"
                             HorizontalContentAlignment="Center"
