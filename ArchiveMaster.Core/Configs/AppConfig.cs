@@ -9,6 +9,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Unicode;
 using System.Threading.Tasks;
+using ArchiveMaster.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
@@ -40,6 +41,7 @@ namespace ArchiveMaster.Configs
         {
             Encoder = JavaScriptEncoder.Create(UnicodeRanges.All),
             WriteIndented = true,
+            Converters = {  new SecurePassword.JsonConverter()  }
         };
 
         /// <summary>
@@ -308,7 +310,7 @@ namespace ArchiveMaster.Configs
         private void ParseGroups(JsonObject jobj)
         {
             Debug.Assert(jobj != null);
-            currentPresets = jobj.Deserialize<Dictionary<string, string>>();
+            currentPresets = jobj.Deserialize<Dictionary<string, string>>(JsonOptions);
         }
 
         private void ParseModules(JsonArray jarray)
@@ -321,7 +323,7 @@ namespace ArchiveMaster.Configs
                 foreach (var j in configItemJsons)
                 {
                     var preset = j[nameof(ConfigItem.Preset)]?.GetValue<string>();
-                    var instance = j[nameof(ConfigItem.Config)]?.Deserialize(configMetadata[key].Type);
+                    var instance = j[nameof(ConfigItem.Config)]?.Deserialize(configMetadata[key].Type, JsonOptions);
                     configs.Add(new ConfigItem(key, instance, preset));
                 }
             }

@@ -33,13 +33,6 @@ public partial class EncryptorViewModel : TwoStepViewModelBase<EncryptorService,
         appConfig, dialogService)
     {
         Clipboard = clipboard;
-        appConfig.BeforeSaving += (s, e) =>
-        {
-            if (!Config.RememberPassword)
-            {
-                Config.Password = null;
-            }
-        };
     }
 
     [RelayCommand]

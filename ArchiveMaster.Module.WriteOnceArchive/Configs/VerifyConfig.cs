@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using ArchiveMaster.ViewModels;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace ArchiveMaster.Configs;
 
@@ -8,7 +9,7 @@ public partial class VerifyConfig : ConfigBase
     private string packageDir;
 
     [ObservableProperty]
-    private string password;
+    private SecurePassword password = new();
 
     public override void Check()
     {

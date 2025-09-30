@@ -71,12 +71,11 @@
                             Grid.Column="2"
                             IsVisible="{Binding Config.EnableEncryption}"
                             Text="密码：" />
-                        <TextBox
+                        <v:PasswordBox
                             Grid.Column="4"
-                            Classes="revealPasswordButton"
                             IsVisible="{Binding Config.EnableEncryption}"
-                            PasswordChar="*"
-                            Text="{Binding Config.EncryptionPassword}" />
+                            Password="{Binding Config.EncryptionPassword}" />
+
                     </Grid>
 
                 </ctrl:FormItem>

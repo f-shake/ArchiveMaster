@@ -1,4 +1,5 @@
 using ArchiveMaster.Enums;
+using ArchiveMaster.ViewModels;
 using CommunityToolkit.Mvvm.ComponentModel;
 using FzLib.IO;
 
@@ -25,7 +26,7 @@ public partial class PackingConfig : ConfigBase
     private string previousPackageInfoFiles;
 
     [ObservableProperty]
-    private string password;
+    private SecurePassword password = new();
 
     [ObservableProperty]
     private string hashCacheFile;
