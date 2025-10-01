@@ -18,6 +18,7 @@ public partial class SettingViewModel : ObservableObject
 
     public GlobalConfigs Configs => GlobalConfigs.Instance;
     public IStartupManager StartupManager { get; }
+    
     [RelayCommand]
     private void SetAutoStart(bool autoStart)
     {

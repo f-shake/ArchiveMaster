@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using ArchiveMaster.Configs;
 using ArchiveMaster.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -20,6 +21,7 @@ public partial class MasterPasswordViewModel(IDialogService dialogService, AppCo
 
     [ObservableProperty]
     private string oldPassword;
+
     [ObservableProperty]
     private string primaryButtonContent = "验证";
 
@@ -48,6 +50,7 @@ public partial class MasterPasswordViewModel(IDialogService dialogService, AppCo
         catch (Exception ex)
         {
             dialogService.ShowErrorDialogAsync("密码解析失败", "已存储的密码解析失败，请重新设置密码");
+            appConfig.ClearAllPassword();
             PassVerification();
         }
     }
@@ -68,14 +71,23 @@ public partial class MasterPasswordViewModel(IDialogService dialogService, AppCo
         }
         else //设置密码
         {
-            if (NewPassword1 == NewPassword2)
+            if (NewPassword1 != NewPassword2) //两次输入的密码不一致
             {
-                GlobalConfigs.Instance.MasterPassword = SecurePasswordStoreService.EncryptMasterPassword(NewPassword1);
-                Close?.Invoke(this, EventArgs.Empty);
+                dialogService.ShowErrorDialogAsync("密码不一致", "两次输入的密码不一致");
+                return;
+            }
+            else if (string.IsNullOrWhiteSpace(NewPassword1) //密码为空或强度不够
+                     || NewPassword1.Length < 8
+                     || !NewPassword1.Any(char.IsUpper)
+                     || !NewPassword1.Any(char.IsLower)
+                     || !NewPassword1.Any(char.IsNumber))
+            {
+                dialogService.ShowErrorDialogAsync("密码强度不足", "密码长度至少为8位，且包含大小写字母、数字");
             }
             else
             {
-                dialogService.ShowErrorDialogAsync("密码不一致", "两次输入的密码不一致");
+                GlobalConfigs.Instance.MasterPassword = SecurePasswordStoreService.EncryptMasterPassword(NewPassword1);
+                Close?.Invoke(this, EventArgs.Empty);
             }
         }
     }

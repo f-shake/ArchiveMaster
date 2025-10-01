@@ -191,10 +191,15 @@ namespace ArchiveMaster.Configs
                 ParseGroups(jg);
                 ProcessNullObject();
             }
+            catch (JsonException ex)
+            {
+                Log.Error(ex, "加载配置失败");
+                LoadError = new Exception($"加载配置文件失败（JSON解析错误），将使用默认配置", ex);
+            }
             catch (Exception ex)
             {
                 Log.Error(ex, "加载配置失败");
-                LoadError = new Exception($"加载配置文件失败：{ex.Message}", ex);
+                LoadError = new Exception($"加载配置文件失败，将使用默认配置", ex);
             }
         }
 
