@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using ArchiveMaster.Enums;
+using ArchiveMaster.Models;
 using ArchiveMaster.ViewModels;
 using CommunityToolkit.Mvvm.ComponentModel;
 

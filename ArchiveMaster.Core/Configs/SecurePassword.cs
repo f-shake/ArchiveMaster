@@ -1,11 +1,10 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
-using ArchiveMaster.Configs;
 using ArchiveMaster.Services;
 using Serilog;
 
-namespace ArchiveMaster.ViewModels;
+namespace ArchiveMaster.Configs;
 
 public class SecurePassword
 {
@@ -22,10 +21,9 @@ public class SecurePassword
 
     public bool Remember { get; set; }
 
-    public static implicit operator string(SecurePassword securePassword) => securePassword.Password;
     public static implicit operator SecurePassword(string password) => new SecurePassword(password);
 
-
+    public static implicit operator string(SecurePassword securePassword) => securePassword.Password;
     public class JsonConverter : JsonConverter<SecurePassword>
     {
         private static readonly Regex HexRegex = new Regex("^[0-9a-fA-F]+$", RegexOptions.Compiled);
@@ -36,14 +34,19 @@ public class SecurePassword
             if (reader.TokenType == JsonTokenType.String)
             {
                 string storedPassword = reader.GetString();
+                if (string.IsNullOrWhiteSpace(storedPassword))
+                {
+                    return new SecurePassword { Remember = false };
+                }
                 var sp = new SecurePassword();
                 try
                 {
                     if (HexRegex.IsMatch(storedPassword))
                     {
+                        var masterPassword = GlobalConfigs.Instance.MasterPassword;
+                        masterPassword = SecurePasswordStoreService.DecryptMasterPassword(masterPassword);
                         sp.Password =
-                            SecurePasswordStoreService.LoadPassword(storedPassword,
-                                GlobalConfigs.Instance.MajorPassword);
+                            SecurePasswordStoreService.LoadPassword(storedPassword, masterPassword);
                     }
                     else
                     {
@@ -65,7 +68,7 @@ public class SecurePassword
                 return new SecurePassword { Remember = false };
             }
 
-            throw new JsonException("Expected string or null for SecurePassword.");
+            throw new JsonException($"期望之外的类型{reader.TokenType}，无法转换为SecurePassword");
         }
 
         public override void Write(Utf8JsonWriter writer, SecurePassword value, JsonSerializerOptions options)
@@ -74,19 +77,21 @@ public class SecurePassword
             {
                 try
                 {
+                    var masterPassword = GlobalConfigs.Instance.MasterPassword;
+                    masterPassword = SecurePasswordStoreService.DecryptMasterPassword(masterPassword);
                     string pswd =
-                        SecurePasswordStoreService.SavePassword(value.Password, GlobalConfigs.Instance.MajorPassword);
+                        SecurePasswordStoreService.SavePassword(value.Password, masterPassword);
                     writer.WriteStringValue(pswd);
                 }
                 catch (Exception ex)
                 {
                     Log.Error(ex, "保存密码失败");
-                    writer.WriteNullValue();
+                    writer.WriteStringValue("");
                 }
             }
             else
             {
-                writer.WriteNullValue();
+                writer.WriteStringValue("");
             }
         }
     }

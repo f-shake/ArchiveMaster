@@ -7,8 +7,6 @@ namespace ArchiveMaster.ViewModels;
 
 public partial class SettingViewModel : ObservableObject
 {
-    public IStartupManager StartupManager { get; }
-
     [ObservableProperty]
     private bool isAutoStart;
 
@@ -19,8 +17,7 @@ public partial class SettingViewModel : ObservableObject
     }
 
     public GlobalConfigs Configs => GlobalConfigs.Instance;
-    
-    
+    public IStartupManager StartupManager { get; }
     [RelayCommand]
     private void SetAutoStart(bool autoStart)
     {
@@ -38,5 +35,4 @@ public partial class SettingViewModel : ObservableObject
             StartupManager.DisableStartup();
         }
     }
-
 }

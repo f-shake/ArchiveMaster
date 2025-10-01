@@ -3,13 +3,16 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Unicode;
 using System.Threading.Tasks;
+using ArchiveMaster.Models;
 using ArchiveMaster.ViewModels;
+using FzLib.IO;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
@@ -33,15 +36,14 @@ namespace ArchiveMaster.Configs
         public const string DEFAULT_PRESET = "默认";
 
         private const string CONFIG_FILE = "configs.json";
+        private const string JKEY_GLOBALS = "Globals";
         private const string JKEY_GROUPS = "Groups";
         private const string JKEY_MODULES = "Modules";
-        private const string JKEY_GLOBALS = "Globals";
-
         private static readonly JsonSerializerOptions JsonOptions = new JsonSerializerOptions()
         {
             Encoder = JavaScriptEncoder.Create(UnicodeRanges.All),
             WriteIndented = true,
-            Converters = {  new SecurePassword.JsonConverter()  }
+            Converters = { new SecurePassword.JsonConverter() }
         };
 
         /// <summary>
@@ -62,6 +64,14 @@ namespace ArchiveMaster.Configs
         public event EventHandler BeforeSaving;
 
         public Exception LoadError { get; private set; }
+
+        public void ClearAllPassword()
+        {
+            foreach (var (c, p) in EnumerateProperties<SecurePassword>())
+            {
+                p.SetValue(c.Config, new SecurePassword());
+            }
+        }
 
         public string GetCurrentPreset(string groupName)
         {
@@ -179,6 +189,7 @@ namespace ArchiveMaster.Configs
 
                 ParseModules(jm);
                 ParseGroups(jg);
+                ProcessNullObject();
             }
             catch (Exception ex)
             {
@@ -253,6 +264,28 @@ namespace ArchiveMaster.Configs
             currentPresets[groupName] = preset;
         }
 
+        private IEnumerable<(ConfigItem config, PropertyInfo property)> EnumerateProperties<T>()
+        {
+            var targetType = typeof(T);
+            foreach (var config in configs)
+            {
+                if (config.Config is null)
+                {
+                    continue;
+                }
+
+                var type = config.Config.GetType();
+                var properties = type.GetRuntimeProperties();
+                foreach (var p in properties)
+                {
+                    if (p.PropertyType == targetType)
+                    {
+                        yield return (config, p);
+                    }
+                }
+            }
+        }
+
         private JsonObject MigrateOldVersionConfigJson(JsonObject jobj)
         {
             var root = new JsonObject();
@@ -325,6 +358,28 @@ namespace ArchiveMaster.Configs
                     var preset = j[nameof(ConfigItem.Preset)]?.GetValue<string>();
                     var instance = j[nameof(ConfigItem.Config)]?.Deserialize(configMetadata[key].Type, JsonOptions);
                     configs.Add(new ConfigItem(key, instance, preset));
+                }
+            }
+        }
+
+        /// <summary>
+        /// 将一些由于配置升级等原因造成的配置属性为空的配置项，恢复为默认值
+        /// </summary>
+        private void ProcessNullObject()
+        {
+            foreach (var (c, p) in EnumerateProperties<SecurePassword>())
+            {
+                if (p.GetValue(c.Config) is null)
+                {
+                    p.SetValue(c.Config, new SecurePassword());
+                }
+            }
+
+            foreach (var (c, p) in EnumerateProperties<FileFilterRule>())
+            {
+                if (p.GetValue(c.Config) is null)
+                {
+                    p.SetValue(c.Config, new FileFilterRule());
                 }
             }
         }

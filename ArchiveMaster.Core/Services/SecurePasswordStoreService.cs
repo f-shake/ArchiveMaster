@@ -1,5 +1,9 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
+using ArchiveMaster.Helpers;
+using FzLib.Application;
+using FzLib.Cryptography;
+using Serilog;
 
 namespace ArchiveMaster.Services;
 
@@ -61,6 +65,36 @@ public class SecurePasswordStoreService
         using var pbkdf2 = new Rfc2898DeriveBytes(masterPassword, salt, 200_000, HashAlgorithmName.SHA256);
         return pbkdf2.GetBytes(32); // 256-bit AES key
     }
-    
-    
+
+    public static bool VerifyMasterPassword(string masterPassword, string hexString)
+    {
+        try
+        {
+            var decrypted = DecryptMasterPassword(hexString);
+            return decrypted == masterPassword;
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "验证主密码失败");
+            return false;
+        }
+    }
+
+    public static string DecryptMasterPassword(string hexString)
+    {
+        string pswd = IdentityProvider.GetCombinedId();
+        var aes = AesHelper.GetDefaultAes(pswd);
+        var bytes = Convert.FromHexString(hexString);
+        var decryptedBytes = aes.Decrypt(bytes);
+        return Encoding.UTF8.GetString(decryptedBytes);
+    }
+
+    public static string EncryptMasterPassword(string masterPassword)
+    {
+        string pswd = IdentityProvider.GetCombinedId();
+        var aes = AesHelper.GetDefaultAes(pswd);
+        var bytes = Encoding.UTF8.GetBytes(masterPassword);
+        var encryptedBytes = aes.Encrypt(bytes);
+        return Convert.ToHexString(encryptedBytes);
+    }
 }

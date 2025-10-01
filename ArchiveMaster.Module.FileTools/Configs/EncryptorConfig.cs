@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Security.Cryptography;
 using ArchiveMaster.Enums;
+using ArchiveMaster.Models;
 using ArchiveMaster.ViewModels;
 using CommunityToolkit.Mvvm.ComponentModel;
 

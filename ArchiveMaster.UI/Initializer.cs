@@ -17,6 +17,7 @@ using ArchiveMaster.Views;
 using Avalonia;
 using Avalonia.Controls;
 using FzLib.Application.Startup;
+using FzLib.Avalonia.DependencyInjection;
 using FzLib.Avalonia.Dialogs;
 using FzLib.Avalonia.Services;
 using FzLib.Programming;
@@ -46,13 +47,12 @@ public static class Initializer
         // new TestModuleInfo(),
 #else
 #endif
-      new FileToolsModuleInfo(),
+        new FileToolsModuleInfo(),
         new PhotoToolsModuleInfo(),
         new OfflineSyncModuleInfo(),
         // new DiscArchiveModuleInfo(),
         new WriteOnceArchiveModuleInfo(),
         new FileBackupperModuleInfo(),
-
     ];
 #endif
 
@@ -94,11 +94,8 @@ public static class Initializer
         builder.Services.AddTransient<MainWindow>();
         builder.Services.AddTransient<MainView>();
         builder.Services.AddTransient<MainViewModel>();
-        builder.Services.AddTransient<SettingViewModel>();
-        builder.Services.AddTransient(s => new SettingDialog()
-        {
-            DataContext = s.GetRequiredService<SettingViewModel>()
-        });
+        builder.Services.AddViewAndViewModel<SettingDialog, SettingViewModel>();
+        builder.Services.AddViewAndViewModel<MasterPasswordDialog, MasterPasswordViewModel>();
         builder.Services.AddHostedService<AppLifetime>();
         builder.Services.TryAddStartupManager();
         builder.Services.AddDialogService();
