@@ -87,6 +87,7 @@ public partial class MasterPasswordViewModel(IDialogService dialogService, AppCo
             else
             {
                 GlobalConfigs.Instance.MasterPassword = SecurePasswordStoreService.EncryptMasterPassword(NewPassword1);
+                appConfig.Save();
                 Close?.Invoke(this, EventArgs.Empty);
             }
         }

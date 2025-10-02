@@ -61,8 +61,6 @@ namespace ArchiveMaster.Configs
         /// </summary>
         private Dictionary<string, string> currentPresets = new Dictionary<string, string>();
 
-        public event EventHandler BeforeSaving;
-
         public Exception LoadError { get; private set; }
 
         public void ClearAllPassword()
@@ -239,13 +237,8 @@ namespace ArchiveMaster.Configs
             }
         }
 
-        public void Save(bool raiseEvent = true)
+        public void Save()
         {
-            if (raiseEvent)
-            {
-                BeforeSaving?.Invoke(this, EventArgs.Empty);
-            }
-
             try
             {
                 var json = JsonSerializer.Serialize(new Dictionary<string, object>
