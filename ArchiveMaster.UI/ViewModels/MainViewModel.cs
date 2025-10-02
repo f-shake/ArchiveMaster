@@ -32,16 +32,15 @@ public partial class MainViewModel : ObservableObject
     private readonly IDialogService dialogService;
 
     [ObservableProperty]
-    private bool isProgressRingOverlayActive;
-    [ObservableProperty]
-    private bool scrollViewBringIntoViewOnFocusChange;
+    private AppConfig appConfig;
 
+    [ObservableProperty]
+    private bool isProgressRingOverlayActive;
     [ObservableProperty]
     private ObservableCollection<ToolPanelGroupInfo> panelGroups = new ObservableCollection<ToolPanelGroupInfo>();
 
     [ObservableProperty]
-    private AppConfig appConfig;
-
+    private bool scrollViewBringIntoViewOnFocusChange;
     public MainViewModel(AppConfig appConfig,IDialogService dialogService, IBackCommandService backCommandService = null)
     {
         this.dialogService = dialogService;
@@ -69,10 +68,10 @@ public partial class MainViewModel : ObservableObject
     public IBackCommandService BackCommandService { get; }
 
     [RelayCommand]
-    private void ScrollViewKeyDown()
+    private async Task OpenMasterPasswordDialogAsync()
     {
-        //按Tab时，需要按钮自动进入视野；平常的话，会导致鼠标多点一下
-        ScrollViewBringIntoViewOnFocusChange = true;
+        var dialog = HostServices.GetRequiredService<MasterPasswordDialog>();
+        await dialogService.ShowCustomDialogAsync(dialog);
     }
 
     [RelayCommand]
@@ -80,5 +79,12 @@ public partial class MainViewModel : ObservableObject
     {
         var dialog = HostServices.GetRequiredService<SettingDialog>();
         await dialogService.ShowCustomDialogAsync(dialog);
+    }
+
+    [RelayCommand]
+    private void ScrollViewKeyDown()
+    {
+        //按Tab时，需要按钮自动进入视野；平常的话，会导致鼠标多点一下
+        ScrollViewBringIntoViewOnFocusChange = true;
     }
 }

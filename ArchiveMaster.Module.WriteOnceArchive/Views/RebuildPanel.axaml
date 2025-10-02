@@ -37,11 +37,9 @@
             <ctrl:FormItem Label="选项：">
                 <ctrl:WrapFormItemGroup>
                     <ctrl:FormItem Header="密码">
-                        <TextBox
+                        <v:PasswordBox
                             Width="240"
-                            Classes="revealPasswordButton"
-                            PasswordChar="*"
-                            Text="{Binding Config.Password}"
+                            Password="{Binding Config.Password}"
                             Watermark="若备份时未设置密码，此处可留空" />
                     </ctrl:FormItem>
 

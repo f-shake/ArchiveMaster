@@ -65,7 +65,7 @@ namespace ArchiveMaster
                     baseUrl + "rename.svg"),
                 new ToolPanelInfo(typeof(DuplicateFileCleanupPanel), typeof(DuplicateFileCleanupViewModel), "重复文件清理",
                     "清理一个目录内的重复文件，或已包含在另一个目录中的相同文件", baseUrl + "cleanup.svg"),
-                new ToolPanelInfo(typeof(TimeClassifyPanel), typeof(TimeClassifyViewModel), "根据时间段归档",
+                new ToolPanelInfo(typeof(TimeClassifyPanel), typeof(TimeClassifyViewModel), "按时间段分类",
                     "识别目录中相同时间段的文件，将它们移动到相同的新目录中",
                     baseUrl + "archive.svg"),
                 new ToolPanelInfo(typeof(TwinFileCleanerPanel), typeof(TwinFileCleanerViewModel), "附属文件清理",

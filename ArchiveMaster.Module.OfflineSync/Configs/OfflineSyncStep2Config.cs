@@ -1,6 +1,8 @@
 ﻿using System.Collections.ObjectModel;
 using System.Text.Json.Serialization;
 using ArchiveMaster.Enums;
+using ArchiveMaster.Models;
+using ArchiveMaster.ViewModels;
 using CommunityToolkit.Mvvm.ComponentModel;
 using FzLib.IO;
 using LocalAndOffsiteDir = ArchiveMaster.ViewModels.FileSystem.LocalAndOffsiteDir;
@@ -34,7 +36,7 @@ namespace ArchiveMaster.Configs
         private bool enableEncryption;
 
         [ObservableProperty]
-        private string encryptionPassword;
+        private SecurePassword encryptionPassword = new();
 
         [ObservableProperty]
         [property: JsonIgnore]

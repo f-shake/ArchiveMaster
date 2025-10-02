@@ -47,6 +47,7 @@ namespace ArchiveMaster.Services
         {
             return TargetDirs.Cast<SimpleFileInfo>();
         }
+
         public override async Task InitializeAsync(CancellationToken ct)
         {
             List<SimpleFileInfo> files = null;
@@ -92,6 +93,7 @@ namespace ArchiveMaster.Services
                             targetDirs.Add(newDir);
                         }
 
+                        Debug.Assert(targetDirs.Count > 0);
                         targetDirs[^1].Subs.Add(file);
                         time = time < file.Time ? file.Time : time; //存在dir.LatestTime>file.Time的可能
                         filesIndex++;
@@ -104,8 +106,9 @@ namespace ArchiveMaster.Services
                             targetDirs.Add(newDir);
                         }
 
+                        Debug.Assert(targetDirs.Count > 0);
                         targetDirs[^1].Subs.Add(dir);
-                        time = dir.LatestTime;
+                        time = time < dir.LatestTime ? dir.LatestTime : time;
                         dirsIndex++;
                     }
                     else
@@ -124,7 +127,7 @@ namespace ArchiveMaster.Services
                 {
                     return p switch
                     {
-                        FilesTimeDirInfo d => d.EarliestTime,
+                        FilesTimeDirInfo d => d.LatestTime,
                         SimpleFileInfo f => f.Time,
                         _ => throw new NotImplementedException()
                     };

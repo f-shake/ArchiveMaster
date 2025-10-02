@@ -1,4 +1,7 @@
-﻿using ArchiveMaster.Enums;
+﻿using System.Diagnostics;
+using ArchiveMaster.Enums;
+using ArchiveMaster.Models;
+using ArchiveMaster.ViewModels;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace ArchiveMaster.Configs
@@ -15,14 +18,14 @@ namespace ArchiveMaster.Configs
         private string patchDir;
 
         [ObservableProperty]
-        private string password;
+        private SecurePassword password = new();
 
         public override void Check()
         {
-            CheckDir(PatchDir,"补丁目录");
+            CheckDir(PatchDir, "补丁目录");
             if (DeleteMode == DeleteMode.MoveToDeletedFolder)
             {
-                CheckEmpty(DeleteDir,"回收站目录名");
+                CheckEmpty(DeleteDir, "回收站目录名");
             }
         }
     }

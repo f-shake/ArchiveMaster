@@ -39,13 +39,6 @@
                                 Minimum="0"
                                 Value="{Binding Config.DeepestLevel}" />
                         </ct:FormItem>
-                        <ct:FormItem Header="跳过已存在的文件">
-                            <ToggleSwitch
-                                VerticalAlignment="Center"
-                                IsChecked="{Binding Config.SkipIfExist}"
-                                OffContent="覆盖"
-                                OnContent="跳过" />
-                        </ct:FormItem>
 
                         <ct:FormItem
                             Description="{}{FileName}表示原文件名"
@@ -54,12 +47,17 @@
                                 Width="200"
                                 Text="{Binding Config.FileNameTemplate}" />
                         </ct:FormItem>
+
                         <ct:FormItem
                             Width="200"
                             Description="{}{FileName}表示原文文件夹名"
                             Header="目标文件夹名">
                             <TextBox Text="{Binding Config.FolderNameTemplate}" />
                         </ct:FormItem>
+                        <CheckBox
+                            VerticalAlignment="Center"
+                            Content="跳过已存在的文件"
+                            IsChecked="{Binding Config.SkipIfExist}" />
                     </ct:WrapFormItemGroup>
                 </ct:FormItem>
                 <ct:FormItem Label="压缩和复制：">

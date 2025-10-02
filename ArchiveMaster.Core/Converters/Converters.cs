@@ -84,4 +84,6 @@ public static class Converters
     public static readonly TupleConverter Tuple = new();
 
     public static readonly FileFilterDescriptionConverter FileFilter = new();
+    
+    // public static readonly  PasswordConverter Password = new();
 }

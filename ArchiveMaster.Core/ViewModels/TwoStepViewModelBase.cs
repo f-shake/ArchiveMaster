@@ -280,7 +280,7 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
     {
         if (!EnableInitialize)
         {
-            AppConfig.Save(false);
+            AppConfig.Save();
             CreateService();
         }
 
@@ -318,7 +318,7 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
     [RelayCommand(IncludeCancelCommand = true, CanExecute = nameof(CanInitialize))]
     private async Task InitializeAsync(CancellationToken ct)
     {
-        AppConfig.Save(false);
+        AppConfig.Save();
         CanInitialize = false;
         InitializeCommand.NotifyCanExecuteChanged();
         CanReset = false;

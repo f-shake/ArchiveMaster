@@ -112,11 +112,9 @@
                     <ctrl:FormItem
                         Header="密码"
                         IsVisible="{Binding Config.PackingType, Converter={x:Static cvt:Converters.EqualWithParameter}, ConverterParameter=Copy}">
-                        <TextBox
+                        <v:PasswordBox
                             Width="200"
-                            Classes="revealPasswordButton"
-                            PasswordChar="*"
-                            Text="{Binding Config.Password}"
+                            Password="{Binding Config.Password}"
                             Watermark="若为空，则不进行加密" />
                     </ctrl:FormItem>
 

@@ -36,16 +36,7 @@
                     Type="OpenFolder" />
             </ct:FormItem>
             <ct:FormItem Label="密码：">
-                <Grid ColumnDefinitions="*,8,Auto">
-                    <TextBox
-                        Classes="revealPasswordButton"
-                        PasswordChar="*"
-                        Text="{Binding Config.Password}" />
-                    <CheckBox
-                        Grid.Column="2"
-                        Content="记住密码"
-                        IsChecked="{Binding Config.RememberPassword}" />
-                </Grid>
+                <v:PasswordBox Password="{Binding Config.Password}" />
             </ct:FormItem>
 
             <ct:FormItem Label="算法参数：">
