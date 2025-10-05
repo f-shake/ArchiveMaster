@@ -78,7 +78,9 @@
                             Grid.Row="1"
                             Grid.Column="2"
                             Margin="0,4,0,0"
+                            MaxLines="2"
                             Text="{TemplateBinding Description}"
+                            TextTrimming="CharacterEllipsis"
                             TextWrapping="Wrap" />
 
                         <!--  <Button  -->
@@ -129,11 +131,13 @@
                             FontSize="16"
                             FontWeight="Bold"
                             Text="{TemplateBinding Title}" />
-                        <TextBlock
+                    <TextBlock
                             Grid.Row="1"
                             Grid.Column="2"
                             Margin="0,4,0,0"
+                            MaxLines="2"
                             Text="{TemplateBinding Description}"
+                            TextTrimming="CharacterEllipsis"
                             TextWrapping="Wrap" />
                         <!--  <Button  -->
                         <!--  Grid.RowSpan="2"  -->

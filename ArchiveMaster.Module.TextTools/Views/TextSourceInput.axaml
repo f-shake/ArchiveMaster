@@ -1,0 +1,102 @@
+<UserControl
+    x:Class="ArchiveMaster.Views.TextSourceInput"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ct="using:FzLib.Avalonia.Controls"
+    xmlns:cvt="clr-namespace:ArchiveMaster.Converters;assembly=ArchiveMaster.Core"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:gb="using:GroupBox.Avalonia.Controls"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:v="using:ArchiveMaster.Views"
+    xmlns:vm="clr-namespace:ArchiveMaster.ViewModels"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
+    <Grid RowDefinitions="Auto,8,Auto">
+        <!--  来自文件  -->
+        <Grid
+            ColumnDefinitions="*,8,Auto"
+            IsVisible="{Binding $parent[UserControl].Source.FromFile}">
+            <ScrollViewer
+                MaxHeight="68"
+                HorizontalScrollBarVisibility="Disabled"
+                VerticalScrollBarVisibility="Auto">
+                <ItemsControl
+                    Background="Transparent"
+                    ItemsSource="{Binding $parent[UserControl].Source.Files}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel
+                                ItemSpacing="8"
+                                LineSpacing="8"
+                                Orientation="Horizontal" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Button
+                                Padding="8,4"
+                                CornerRadius="16">
+                                <Grid ColumnDefinitions="Auto,8,Auto">
+                                    <TextBlock Text="{Binding File, Converter={x:Static cvt:Converters.FileName}}" />
+                                </Grid>
+                            </Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+            <Button
+                Grid.Column="2"
+                Click="AddFilesButton_Click"
+                Content="追加.." />
+        </Grid>
+        <!--  来自文本  -->
+        <Grid
+            ColumnDefinitions="*,8,Auto"
+            IsVisible="{Binding !$parent[UserControl].Source.FromFile}"
+            RowDefinitions="Auto,8,Auto">
+            <TextBox
+                Grid.RowSpan="3"
+                AcceptsReturn="True"
+                MaxLines="3"
+                MinLines="2"
+                Text="{Binding $parent[UserControl].Source.Text}"
+                TextWrapping="Wrap"
+                Watermark="将需要处理的文本输入或粘贴至此">
+                <Interaction.Behaviors>
+                    <DataTriggerBehavior
+                        Binding="{Binding #tbtnMore.IsChecked}"
+                        Value="True">
+                        <ChangePropertyAction
+                            PropertyName="MaxLines"
+                            Value="10" />
+                    </DataTriggerBehavior>
+                    <DataTriggerBehavior
+                        Binding="{Binding #tbtnMore.IsChecked}"
+                        Value="False">
+                        <ChangePropertyAction
+                            PropertyName="MaxLines"
+                            Value="3" />
+                    </DataTriggerBehavior>
+                </Interaction.Behaviors>
+            </TextBox>
+            <Button
+                Grid.Column="2"
+                Classes="Icon"
+                Click="PasteButton_Click"
+                Content="{StaticResource Paste}" />
+            <ToggleButton
+                x:Name="tbtnMore"
+                Grid.Row="2"
+                Grid.Column="2"
+                Classes="Icon"
+                Content="{StaticResource More}" />
+        </Grid>
+        <!--  底栏  -->
+        <ToggleSwitch
+            Grid.Row="2"
+            IsChecked="{Binding $parent[UserControl].Source.FromFile}"
+            OffContent="来自文件"
+            OnContent="来自文件" />
+    </Grid>
+</UserControl>

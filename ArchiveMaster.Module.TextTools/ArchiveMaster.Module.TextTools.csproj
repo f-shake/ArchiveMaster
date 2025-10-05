@@ -14,6 +14,10 @@
       <DependentUpon>RepairModifiedTimePanel.axaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Views\TextSourceInput.axaml.cs">
+      <DependentUpon>TextSourceInput.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>

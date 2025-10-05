@@ -14,9 +14,9 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace ArchiveMaster
 {
-    public class AiModuleInfo : IModuleInfo
+    public class TextToolsModuleInfo : IModuleInfo
     {
-        private readonly string baseUrl = "avares://ArchiveMaster.Module.AI/Assets/";
+        private readonly string baseUrl = "avares://ArchiveMaster.Module.TextTools/Assets/";
         public IList<Type> BackgroundServices { get; }
 
         public IList<ConfigMetadata> Configs =>
@@ -24,8 +24,8 @@ namespace ArchiveMaster
             new ConfigMetadata(typeof(SmartDocSearchConfig)),
         ];
 
-        public string ModuleName => "AI赋能";
-        public string ModuleDescription => "解决通过AI智能辅助文本文件管理的需求";
+        public string ModuleName => "文本工具";
+        public string ModuleDescription => "对文本或文本文件进行相关处理";
 
 #if DEBUG
         public int Order => -1;

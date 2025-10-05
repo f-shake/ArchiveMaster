@@ -84,6 +84,9 @@ public static class Converters
     public static readonly TupleConverter Tuple = new();
 
     public static readonly FileFilterDescriptionConverter FileFilter = new();
-    
+
+    public static readonly FilePropertyConverter FileName = new()
+        { PropertyType = FilePropertyConverter.FilePropertyType.Name };
+
     // public static readonly  PasswordConverter Password = new();
 }

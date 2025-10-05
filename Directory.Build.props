@@ -4,7 +4,7 @@
     <!--App版本-->
     <AppVersion>2.0.0</AppVersion>
     <!--Avalonia版本-->
-    <AvaloniaVersion>11.3.5</AvaloniaVersion>
+    <AvaloniaVersion>11.3.7</AvaloniaVersion>
     <!--FzLib版本-->
     <FzLibVersion>3.1.3</FzLibVersion>
     <!--是否使用本地最新的FzLib。非开发者本人应当设置为T。-->

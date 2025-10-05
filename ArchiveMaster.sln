@@ -39,7 +39,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArchiveMaster.Module.PhotoT
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArchiveMaster.Module.WriteOnceArchive", "ArchiveMaster.Module.WriteOnceArchive\ArchiveMaster.Module.WriteOnceArchive.csproj", "{63C94058-33B8-431A-8C6F-E78E9A12A531}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArchiveMaster.Module.AI", "ArchiveMaster.Module.AI\ArchiveMaster.Module.AI.csproj", "{DE26E5FD-6F38-4E45-9C2A-E039E69F7278}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArchiveMaster.Module.TextTools", "ArchiveMaster.Module.TextTools\ArchiveMaster.Module.TextTools.csproj", "{DE26E5FD-6F38-4E45-9C2A-E039E69F7278}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

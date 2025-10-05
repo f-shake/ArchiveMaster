@@ -16,17 +16,13 @@ namespace ArchiveMaster.ViewModels;
 public partial class SmartDocSearchViewModel(AppConfig appConfig, IDialogService dialogService)
     : TwoStepViewModelBase<SmartDocSearchService, SmartDocSearchConfig>(appConfig, dialogService)
 {
-    [ObservableProperty]
-    private List<ExifTimeFileInfo> files = new List<ExifTimeFileInfo>();
 
     protected override Task OnInitializedAsync()
     {
-        Files = Service.Files.ToList();
         return base.OnInitializedAsync();
     }
 
     protected override void OnReset()
     {
-        Files = new List<ExifTimeFileInfo>();
     }
 }

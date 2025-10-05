@@ -49,7 +49,7 @@ public static class Initializer
 #endif
         new FileToolsModuleInfo(),
         new PhotoToolsModuleInfo(),
-        new AiModuleInfo(),
+        new TextToolsModuleInfo(),
         new OfflineSyncModuleInfo(),
         // new DiscArchiveModuleInfo(),
         new WriteOnceArchiveModuleInfo(),
