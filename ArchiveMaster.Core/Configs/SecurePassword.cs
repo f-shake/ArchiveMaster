@@ -1,12 +1,14 @@
-﻿using System.Text.Json;
+﻿using System.Collections.ObjectModel;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using ArchiveMaster.Services;
+using CommunityToolkit.Mvvm.ComponentModel;
 using Serilog;
 
 namespace ArchiveMaster.Configs;
 
-public class SecurePassword
+public partial class SecurePassword:ObservableObject
 {
     public SecurePassword()
     {
@@ -17,9 +19,11 @@ public class SecurePassword
         Password = password;
     }
 
-    public string Password { get; set; }
+    [ObservableProperty]
+    private string password;
 
-    public bool Remember { get; set; }
+    [ObservableProperty]
+    private bool remember;
 
     public static implicit operator SecurePassword(string password) => new SecurePassword(password);
 

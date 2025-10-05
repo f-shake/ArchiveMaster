@@ -14,12 +14,15 @@
     mc:Ignorable="d">
     <Grid RowDefinitions="Auto,8,Auto">
         <!--  来自文件  -->
-        <Grid
-            ColumnDefinitions="*,8,Auto"
-            IsVisible="{Binding $parent[UserControl].Source.FromFile}">
+        <Panel IsVisible="{Binding $parent[UserControl].Source.FromFile}">
+            <TextBlock
+                IsVisible="{Binding $parent[UserControl].Source.Files.Count, Converter={x:Static cvt:Converters.CountIsZero}}"
+                Opacity="0.7"
+                Text="当前没有选择任何文件" />
             <ScrollViewer
                 MaxHeight="68"
                 HorizontalScrollBarVisibility="Disabled"
+                IsVisible="{Binding $parent[UserControl].Source.Files.Count, Converter={x:Static cvt:Converters.CountGreaterThanZero}}"
                 VerticalScrollBarVisibility="Auto">
                 <ItemsControl
                     Background="Transparent"
@@ -39,64 +42,108 @@
                                 CornerRadius="16">
                                 <Grid ColumnDefinitions="Auto,8,Auto">
                                     <TextBlock Text="{Binding File, Converter={x:Static cvt:Converters.FileName}}" />
+                                    <TextBlock
+                                        Grid.Column="2"
+                                        IsVisible="{Binding Password.Password, Converter={x:Static cvt:Converters.IsNotNull}}"
+                                        Text="*" />
                                 </Grid>
+                                <Button.Flyout>
+                                    <Flyout>
+                                        <StackPanel
+                                            Width="320"
+                                            Orientation="Vertical"
+                                            Spacing="16">
+                                            <TextBlock
+                                                FontWeight="Bold"
+                                                Text="{Binding File}"
+                                                TextWrapping="Wrap" />
+                                            <ct:FormItem Header="文档密码（若有）">
+                                                <TextBox
+                                                    Classes="revealPasswordButton"
+                                                    PasswordChar="*"
+                                                    Text="{Binding Password.Password}" />
+                                            </ct:FormItem>
+                                            <Button
+                                                HorizontalAlignment="Right"
+                                                Classes="Link"
+                                                Click="RemoveFileButton_Click"
+                                                Content="移除" />
+                                        </StackPanel>
+                                    </Flyout>
+                                </Button.Flyout>
                             </Button>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
             </ScrollViewer>
-            <Button
-                Grid.Column="2"
-                Click="AddFilesButton_Click"
-                Content="追加.." />
-        </Grid>
+        </Panel>
+
         <!--  来自文本  -->
-        <Grid
-            ColumnDefinitions="*,8,Auto"
+        <TextBox
+            AcceptsReturn="True"
             IsVisible="{Binding !$parent[UserControl].Source.FromFile}"
-            RowDefinitions="Auto,8,Auto">
-            <TextBox
-                Grid.RowSpan="3"
-                AcceptsReturn="True"
-                MaxLines="3"
-                MinLines="2"
-                Text="{Binding $parent[UserControl].Source.Text}"
-                TextWrapping="Wrap"
-                Watermark="将需要处理的文本输入或粘贴至此">
-                <Interaction.Behaviors>
-                    <DataTriggerBehavior
-                        Binding="{Binding #tbtnMore.IsChecked}"
-                        Value="True">
-                        <ChangePropertyAction
-                            PropertyName="MaxLines"
-                            Value="10" />
-                    </DataTriggerBehavior>
-                    <DataTriggerBehavior
-                        Binding="{Binding #tbtnMore.IsChecked}"
-                        Value="False">
-                        <ChangePropertyAction
-                            PropertyName="MaxLines"
-                            Value="3" />
-                    </DataTriggerBehavior>
-                </Interaction.Behaviors>
-            </TextBox>
-            <Button
-                Grid.Column="2"
-                Classes="Icon"
-                Click="PasteButton_Click"
-                Content="{StaticResource Paste}" />
-            <ToggleButton
-                x:Name="tbtnMore"
-                Grid.Row="2"
-                Grid.Column="2"
-                Classes="Icon"
-                Content="{StaticResource More}" />
-        </Grid>
+            MaxLines="3"
+            MinLines="2"
+            Text="{Binding $parent[UserControl].Source.Text}"
+            TextWrapping="Wrap"
+            Watermark="将需要处理的文本输入或粘贴至此">
+            <Interaction.Behaviors>
+                <DataTriggerBehavior
+                    Binding="{Binding #tbtnMore.IsChecked}"
+                    Value="True">
+                    <ChangePropertyAction
+                        PropertyName="MinLines"
+                        Value="10" />
+                    <ChangePropertyAction
+                        PropertyName="MaxLines"
+                        Value="10" />
+                </DataTriggerBehavior>
+                <DataTriggerBehavior
+                    Binding="{Binding #tbtnMore.IsChecked}"
+                    Value="False">
+                    <ChangePropertyAction
+                        PropertyName="MinLines"
+                        Value="2" />
+                    <ChangePropertyAction
+                        PropertyName="MaxLines"
+                        Value="3" />
+                </DataTriggerBehavior>
+            </Interaction.Behaviors>
+        </TextBox>
+
+
         <!--  底栏  -->
-        <ToggleSwitch
+        <Grid
             Grid.Row="2"
-            IsChecked="{Binding $parent[UserControl].Source.FromFile}"
-            OffContent="来自文件"
-            OnContent="来自文件" />
+            ColumnDefinitions="Auto,*,Auto">
+            <ToggleSwitch
+                IsChecked="{Binding $parent[UserControl].Source.FromFile}"
+                OffContent="来自文件"
+                OnContent="来自文件" />
+
+            <StackPanel
+                Grid.Column="2"
+                IsVisible="{Binding $parent[UserControl].Source.FromFile}"
+                Orientation="Horizontal">
+                <Button
+                    Click="AddFilesButton_Click"
+                    Content="追加.." />
+                <Button
+                    Click="ClearFilesButton_Click"
+                    Content="清空" />
+            </StackPanel>
+
+            <StackPanel
+                Grid.Column="2"
+                IsVisible="{Binding !$parent[UserControl].Source.FromFile}"
+                Orientation="Horizontal">
+                <Button
+                    Click="PasteButton_Click"
+                    Content="粘贴" />
+                <ToggleButton
+                    x:Name="tbtnMore"
+                    Content="展开" />
+            </StackPanel>
+        </Grid>
     </Grid>
 </UserControl>

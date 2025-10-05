@@ -9,8 +9,8 @@ public partial class TextSource : ObservableObject
     private bool fromFile = true;
     
     [ObservableProperty]
-    public string text;
+    private string text;
     
     [ObservableProperty]
-    public ObservableCollection<DocFileConfig> files = new ObservableCollection<DocFileConfig>();
+    private ObservableCollection<DocFile> files = new ObservableCollection<DocFile>();
 }

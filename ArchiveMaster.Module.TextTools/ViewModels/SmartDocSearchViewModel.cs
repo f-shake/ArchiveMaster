@@ -16,10 +16,10 @@ namespace ArchiveMaster.ViewModels;
 public partial class SmartDocSearchViewModel(AppConfig appConfig, IDialogService dialogService)
     : TwoStepViewModelBase<SmartDocSearchService, SmartDocSearchConfig>(appConfig, dialogService)
 {
-
-    protected override Task OnInitializedAsync()
+    protected override async Task OnInitializingAsync()
     {
-        return base.OnInitializedAsync();
+        //Test
+        var text = await Config.Source.GetTextAsync();
     }
 
     protected override void OnReset()

@@ -3,14 +3,14 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace ArchiveMaster.ViewModels;
 
-public partial class DocFileConfig  :ObservableObject
+public partial class DocFile  :ObservableObject
 {
-    public DocFileConfig()
+    public DocFile()
     {
         
     }
 
-    public DocFileConfig(string file)
+    public DocFile(string file)
     {
         File = file;
     }

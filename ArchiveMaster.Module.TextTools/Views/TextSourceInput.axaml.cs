@@ -60,8 +60,21 @@ namespace ArchiveMaster.Views
             {
                 foreach (var file in files)
                 {
-                    Source.Files.Add(new DocFileConfig(file.GetPath()));
+                    Source.Files.Add(new DocFile(file.GetPath()));
                 }
+            }
+        }
+
+        private void ClearFilesButton_Click(object sender, RoutedEventArgs e)
+        {
+            Source.Files.Clear();
+        }
+        private void RemoveFileButton_Click(object sender, RoutedEventArgs e)
+        {
+            var button = sender as Button;
+            if (button?.DataContext is DocFile file)
+            {
+                Source.Files.Remove(file);
             }
         }
     }
