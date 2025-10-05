@@ -1,0 +1,59 @@
+<v:TwoStepPanelBase
+    x:Class="ArchiveMaster.Views.SmartDocSearchPanel"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ct="using:FzLib.Avalonia.Controls"
+    xmlns:cvt="clr-namespace:ArchiveMaster.Converters;assembly=ArchiveMaster.Core"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:gb="using:GroupBox.Avalonia.Controls"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:v="using:ArchiveMaster.Views"
+    xmlns:vm="clr-namespace:ArchiveMaster.ViewModels"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    x:DataType="vm:SmartDocSearchViewModel"
+    mc:Ignorable="d">
+    <v:TwoStepPanelBase.ConfigsContent>
+        <ct:StackFormItemGroup>
+            <ct:FormItem Label="目录：">
+                <v:FilePickerTextBox
+                    FileNames="{Binding Config.Dir}"
+                    Filter="{Binding Config.Filter}"
+                    IsFilterBarVisible="True"
+                    Type="OpenFolder" />
+            </ct:FormItem>
+            <ct:FormItem Label="选项：">
+                <ct:WrapFormItemGroup>
+                    <ct:FormItem Header="线程数">
+                        <NumericUpDown
+                            Width="120"
+                            FormatString="0"
+                            Maximum="16"
+                            Minimum="1"
+                            Value="{Binding Config.ThreadCount}" />
+                    </ct:FormItem>
+                    <ct:FormItem Header="允许最长差异时间（秒）">
+                        <NumericUpDown
+                            Width="120"
+                            Maximum="86400"
+                            Minimum="1"
+                            Value="{Binding Config.MaxDurationTolerance, Converter={x:Static cvt:Converters.TimeSpanNumber}, ConverterParameter=s}" />
+                    </ct:FormItem>
+                </ct:WrapFormItemGroup>
+            </ct:FormItem>
+
+        </ct:StackFormItemGroup>
+    </v:TwoStepPanelBase.ConfigsContent>
+    <v:TwoStepPanelBase.ResultsContent>
+        <v:SimpleFileDataGrid
+            ColumnIsCheckedIndex="-1"
+            ItemsSource="{Binding Files}">
+            <DataGrid.Columns>
+                <DataGridTextColumn
+                    Binding="{Binding ExifTime}"
+                    Header="Exif时间"
+                    IsReadOnly="True" />
+            </DataGrid.Columns>
+        </v:SimpleFileDataGrid>
+    </v:TwoStepPanelBase.ResultsContent>
+</v:TwoStepPanelBase>

@@ -1,50 +1,54 @@
 <Project>
-    <PropertyGroup>
-        <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
-    </PropertyGroup>
-    <ItemGroup>
-        <PackageVersion Include="Avalonia" Version="$(AvaloniaVersion)"/>
-        <PackageVersion Include="Avalonia.Android" Version="$(AvaloniaVersion)"/>
-        <PackageVersion Include="Avalonia.Controls.DataGrid" Version="$(AvaloniaVersion)"/>
-        <PackageVersion Include="Avalonia.Themes.Fluent" Version="$(AvaloniaVersion)"/>
-        <PackageVersion Include="DiscUtils.Iso9660" Version="0.16.13"/>
-        <PackageVersion Include="SkiaSharp" Version="3.119.0"/>
-        <PackageVersion Include="SkiaSharp.NativeAssets.Linux" Version="3.119.0"/>
-        <PackageVersion Include="SkiaSharp.NativeAssets.Win32" Version="3.119.0"/>
-        <PackageVersion Include="SkiaSharp.NativeAssets.macOS" Version="3.119.0"/>
-        <PackageVersion Include="System.Reactive" Version="6.0.2"/>
-        <PackageVersion Include="Xaml.Behaviors.Avalonia" Version="11.3.2"/>
-        <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.0"/>
-        <PackageVersion Include="ExifLibNet.Updated" Version="2.1.5"/>
-        <PackageVersion Include="ExifLibrary" Version="1.0.13"/>
-        <PackageVersion Include="FzLib.Avalonia" Version="$(FzLibVersion)"/>
-        <PackageVersion Include="FzLib" Version="$(FzLibVersion)"/>
-        <PackageVersion Include="Irihi.Ursa" Version="1.6.0"/>
-        <PackageVersion Include="Irihi.Ursa.Themes.Semi" Version="1.6.0.2"/>
-        <PackageVersion Include="Magick.NET-Q16-AnyCPU" Version="14.8.2"/>
-        <PackageVersion Include="MetadataExtractor" Version="2.8.1"/>
-        <PackageVersion Include="BinToss.GroupBox.Avalonia" Version="1.0.0"/>
-        <PackageVersion Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="$(AvaloniaVersion)"/>
-        <PackageVersion Include="Mapster" Version="7.4.0"/>
-        <PackageVersion Include="Avalonia.Svg.Skia" Version="11.1.0"/>
-        <PackageVersion Include="Avalonia.Desktop" Version="$(AvaloniaVersion)"/>
-        <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="4.14.0"/>
-        <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.9"/>
-        <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="9.0.9"/>
-        <PackageVersion Include="Microsoft.Extensions.Hosting" Version="9.0.9"/>
-        <PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="9.0.9"/>
-        <PackageVersion Include="Microsoft.Extensions.Hosting.WindowsServices" Version="9.0.1"/>
-        <PackageVersion Include="NetTopologySuite" Version="2.6.0"/>
-        <PackageVersion Include="NetTopologySuite.IO.Esri.Shapefile" Version="1.2.0"/>
-        <PackageVersion Include="NetTopologySuite.IO.GeoJSON4STJ" Version="4.0.0"/>
-        <PackageVersion Include="Semi.Avalonia" Version="11.2.1"/>
-        <PackageVersion Include="Serilog" Version="4.3.0"/>
-        <PackageVersion Include="Serilog.Sinks.File" Version="7.0.0"/>
-        <PackageVersion Include="SixLabors.ImageSharp" Version="3.1.8"/>
-        <!--谨慎升级Svg.Controls.Skia.Avalonia，会导致SkiSharp版本不一致报错-->
-        <PackageVersion Include="Svg.Controls.Skia.Avalonia" Version="11.3.0.1"/>
-        <PackageVersion Include="Xamarin.AndroidX.Core.SplashScreen" Version="1.0.1.1"/>
-        <PackageVersion Include="Swashbuckle.AspNetCore" Version="6.7.3"/>
-        <PackageVersion Include="HotAvalonia" Version="3.0.0" PrivateAssets="All" Publish="True"/>
-    </ItemGroup>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageVersion Include="Avalonia" Version="$(AvaloniaVersion)" />
+    <PackageVersion Include="Avalonia.Android" Version="$(AvaloniaVersion)" />
+    <PackageVersion Include="Avalonia.Controls.DataGrid" Version="$(AvaloniaVersion)" />
+    <PackageVersion Include="Avalonia.Themes.Fluent" Version="$(AvaloniaVersion)" />
+    <PackageVersion Include="DiscUtils.Iso9660" Version="0.16.13" />
+    <PackageVersion Include="Microsoft.Extensions.AI" Version="9.9.1" />
+    <PackageVersion Include="Microsoft.Extensions.AI.OpenAI" Version="9.9.1-preview.1.25474.6" />
+    <PackageVersion Include="OllamaSharp" Version="5.4.7" />
+    <PackageVersion Include="OpenAI" Version="2.5.0" />
+    <PackageVersion Include="SkiaSharp" Version="3.119.0" />
+    <PackageVersion Include="SkiaSharp.NativeAssets.Linux" Version="3.119.0" />
+    <PackageVersion Include="SkiaSharp.NativeAssets.Win32" Version="3.119.0" />
+    <PackageVersion Include="SkiaSharp.NativeAssets.macOS" Version="3.119.0" />
+    <PackageVersion Include="System.Reactive" Version="6.0.2" />
+    <PackageVersion Include="Xaml.Behaviors.Avalonia" Version="11.3.2" />
+    <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+    <PackageVersion Include="ExifLibNet.Updated" Version="2.1.5" />
+    <PackageVersion Include="ExifLibrary" Version="1.0.13" />
+    <PackageVersion Include="FzLib.Avalonia" Version="$(FzLibVersion)" />
+    <PackageVersion Include="FzLib" Version="$(FzLibVersion)" />
+    <PackageVersion Include="Irihi.Ursa" Version="1.6.0" />
+    <PackageVersion Include="Irihi.Ursa.Themes.Semi" Version="1.6.0.2" />
+    <PackageVersion Include="Magick.NET-Q16-AnyCPU" Version="14.8.2" />
+    <PackageVersion Include="MetadataExtractor" Version="2.8.1" />
+    <PackageVersion Include="BinToss.GroupBox.Avalonia" Version="1.0.0" />
+    <PackageVersion Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="$(AvaloniaVersion)" />
+    <PackageVersion Include="Mapster" Version="7.4.0" />
+    <PackageVersion Include="Avalonia.Svg.Skia" Version="11.1.0" />
+    <PackageVersion Include="Avalonia.Desktop" Version="$(AvaloniaVersion)" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="4.14.0" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.9" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="9.0.9" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="9.0.9" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="9.0.9" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting.WindowsServices" Version="9.0.1" />
+    <PackageVersion Include="NetTopologySuite" Version="2.6.0" />
+    <PackageVersion Include="NetTopologySuite.IO.Esri.Shapefile" Version="1.2.0" />
+    <PackageVersion Include="NetTopologySuite.IO.GeoJSON4STJ" Version="4.0.0" />
+    <PackageVersion Include="Semi.Avalonia" Version="11.2.1" />
+    <PackageVersion Include="Serilog" Version="4.3.0" />
+    <PackageVersion Include="Serilog.Sinks.File" Version="7.0.0" />
+    <PackageVersion Include="SixLabors.ImageSharp" Version="3.1.8" />
+    <!--谨慎升级Svg.Controls.Skia.Avalonia，会导致SkiSharp版本不一致报错-->
+    <PackageVersion Include="Svg.Controls.Skia.Avalonia" Version="11.3.0.1" />
+    <PackageVersion Include="Xamarin.AndroidX.Core.SplashScreen" Version="1.0.1.1" />
+    <PackageVersion Include="Swashbuckle.AspNetCore" Version="6.7.3" />
+    <PackageVersion Include="HotAvalonia" Version="3.0.0" PrivateAssets="All" Publish="True" />
+  </ItemGroup>
 </Project>

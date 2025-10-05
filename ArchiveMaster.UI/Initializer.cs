@@ -44,11 +44,12 @@ public static class Initializer
     public static IModuleInfo[] ModuleInitializers { get; } =
     [
 #if DEBUG
-        // new TestModuleInfo(),
+      
 #else
 #endif
         new FileToolsModuleInfo(),
         new PhotoToolsModuleInfo(),
+        new AiModuleInfo(),
         new OfflineSyncModuleInfo(),
         // new DiscArchiveModuleInfo(),
         new WriteOnceArchiveModuleInfo(),
