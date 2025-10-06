@@ -22,6 +22,12 @@ namespace ArchiveMaster.Configs
 
         [ObservableProperty]
         private List<string> keywords = new List<string>();
+        
+        [ObservableProperty]
+        private int expectedAiConcludeLength = 300;
+
+        [ObservableProperty]
+        private string extraAiPrompt;
 
         public override void Check()
         {

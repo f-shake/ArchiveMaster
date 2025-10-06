@@ -1,4 +1,4 @@
-﻿namespace ArchiveMaster.Services;
+﻿namespace ArchiveMaster.Events;
 
 public class ChatStreamUpdateEventArgs(string text) : EventArgs
 {

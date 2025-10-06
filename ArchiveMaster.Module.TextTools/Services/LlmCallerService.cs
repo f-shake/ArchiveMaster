@@ -1,5 +1,6 @@
 ﻿using System.ClientModel;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
 using ArchiveMaster.Configs;
@@ -15,25 +16,28 @@ public class LlmCallerService(AiProviderConfig config)
 {
     public AiProviderConfig Config { get; } = config;
 
-    public async Task<string> CallAsync(string systemPrompt, string userPrompt)
+    public async Task<string> CallAsync(string systemPrompt, string userPrompt,
+        [EnumeratorCancellation] CancellationToken ct = default)
     {
         var chatClient = GetChatClient();
 
         var sys = new ChatMessage(ChatRole.System, systemPrompt);
         var user = new ChatMessage(ChatRole.User, userPrompt);
-        var response = await chatClient.GetResponseAsync([sys, user]);
+        var response = await chatClient.GetResponseAsync([sys, user], cancellationToken: ct);
         return response.Text;
     }
 
-    public async IAsyncEnumerable<string> CallStreamAsync(string systemPrompt, string userPrompt)
+    public async IAsyncEnumerable<string> CallStreamAsync(string systemPrompt, string userPrompt,
+        [EnumeratorCancellation] CancellationToken ct = default)
     {
         var chatClient = GetChatClient();
 
         var sys = new ChatMessage(ChatRole.System, systemPrompt);
         var user = new ChatMessage(ChatRole.User, userPrompt);
         await foreach (ChatResponseUpdate item in
-                       chatClient.GetStreamingResponseAsync([sys, user]))
+                       chatClient.GetStreamingResponseAsync([sys, user], cancellationToken: ct))
         {
+            ct.ThrowIfCancellationRequested();
             yield return item.Text;
         }
     }

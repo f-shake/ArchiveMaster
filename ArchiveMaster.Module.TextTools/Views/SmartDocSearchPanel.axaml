@@ -16,20 +16,24 @@
     mc:Ignorable="d">
     <v:TwoStepPanelBase.ResultsContent>
         <Grid RowDefinitions="Auto,8,*,8,Auto">
-            <ct:StackFormItemGroup>
+            <ct:StackFormItemGroup IsEnabled="{Binding !IsWorking}">
                 <ct:FormItem Label="文本源：">
                     <v:TextSourceInput Source="{Binding Config.Source}" />
                 </ct:FormItem>
-                <ct:FormItem Label="关键词：">
-                    <TextBox
-                        Text="{Binding Config.Keywords, Converter={x:Static cvt:Converters.StringList}}"
-                        Watermark="使用逗号分隔多个关键词" />
-                </ct:FormItem>
-                <ct:FormItem Label="选项：">
+
+                <ct:FormItem Label="搜索选项：">
                     <ct:WrapFormItemGroup>
-                        <ct:FormItem Header="上下文长度：">
+                        <ct:FormItem Header="关键词">
+                            <TextBox
+                                Width="200"
+                                Text="{Binding Config.Keywords, Converter={x:Static cvt:Converters.StringList}}"
+                                Watermark="使用逗号分隔多个关键词" />
+                        </ct:FormItem>
+                        <ct:FormItem Header="搜索结果上下文长度：">
                             <NumericUpDown
                                 Width="200"
+                                FormatString="0"
+                                Increment="10"
                                 Maximum="1000"
                                 Minimum="50"
                                 Value="{Binding Config.ContextLength}" />
@@ -37,19 +41,41 @@
                         <CheckBox
                             Content="使用正则表达式进行搜索"
                             IsChecked="{Binding Config.UseRegex}" />
-                        <CheckBox
-                            Content="使用AI进行归纳总结"
-                            IsChecked="{Binding Config.UseAiConclude}" />
+
                     </ct:WrapFormItemGroup>
                 </ct:FormItem>
 
+                <ct:FormItem Label="AI选项：">
+                    <ct:WrapFormItemGroup>
+                        <CheckBox
+                            Content="使用AI进行归纳总结"
+                            IsChecked="{Binding Config.UseAiConclude}" />
+                        <ct:FormItem Label="额外提示词：">
+                            <TextBox
+                                Width="200"
+                                Text="{Binding Config.ExtraAiPrompt}"
+                                Watermark="若不提供额外提示词，将对搜索结果进行归纳总结" />
+                        </ct:FormItem>
+                        <ct:FormItem Label="期望回答长度（字数）：">
+                            <NumericUpDown
+                                Width="200"
+                                FormatString="0"
+                                Increment="10"
+                                Maximum="2000"
+                                Minimum="50"
+                                Value="{Binding Config.ExpectedAiConcludeLength}" />
+                        </ct:FormItem>
+                    </ct:WrapFormItemGroup>
+                </ct:FormItem>
             </ct:StackFormItemGroup>
             <Grid
                 Grid.Row="2"
                 ColumnDefinitions="2*,8,*">
                 <gb:GroupBox Header="搜索结果">
                     <ScrollViewer>
-                        <ItemsControl ItemsSource="{Binding SearchResults}">
+                        <ItemsControl
+                            Margin="0,0,20,0"
+                            ItemsSource="{Binding SearchResults}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
                                     <Border
@@ -57,9 +83,30 @@
                                         BorderBrush="{DynamicResource Background3}"
                                         BorderThickness="1"
                                         CornerRadius="4">
-                                        <SelectableTextBlock
-                                            b:TextBlockInlinesBehavior.ItemsSource="{Binding Inlines}"
-                                            TextWrapping="Wrap" />
+                                        <Panel>
+                                            <SelectableTextBlock
+                                                b:TextBlockInlinesBehavior.ItemsSource="{Binding Inlines}"
+                                                TextWrapping="Wrap" />
+                                            <Button
+                                                Padding="4"
+                                                HorizontalAlignment="Right"
+                                                VerticalAlignment="Bottom"
+                                                Classes="Icon Transparent"
+                                                Content="{StaticResource More}">
+                                                <Button.Flyout>
+                                                    <Flyout>
+                                                        <ct:StackFormItemGroup>
+                                                            <ct:FormItem
+                                                                Content="{Binding Source}"
+                                                                Label="源：" />
+                                                            <ct:FormItem
+                                                                Content="{Binding Keywords, Converter={x:Static cvt:Converters.StringList}}"
+                                                                Label="关键词：" />
+                                                        </ct:StackFormItemGroup>
+                                                    </Flyout>
+                                                </Button.Flyout>
+                                            </Button>
+                                        </Panel>
                                     </Border>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>

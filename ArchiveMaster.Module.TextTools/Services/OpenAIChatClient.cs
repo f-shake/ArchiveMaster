@@ -1,4 +1,5 @@
 ﻿using System.ClientModel;
+using System.Runtime.CompilerServices;
 using Microsoft.Extensions.AI;
 using OpenAI;
 using OpenAI.Chat;
@@ -81,7 +82,7 @@ public class OpenAIChatClient : IChatClient
     public async IAsyncEnumerable<ChatResponseUpdate> GetStreamingResponseAsync(
         IEnumerable<MChatMessage> messages,
         ChatOptions options = null,
-        [System.Runtime.CompilerServices.EnumeratorCancellation]
+        [EnumeratorCancellation]
         CancellationToken cancellationToken = default)
     {
         var (oMessages, cco) = GetMessagesAndOptions(messages, options);

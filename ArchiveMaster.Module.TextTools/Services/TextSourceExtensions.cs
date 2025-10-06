@@ -10,7 +10,8 @@ namespace ArchiveMaster.Services;
 
 public static class TextSourceExtensions
 {
-    public static async IAsyncEnumerable<string> GetPlainTextAsync(this TextSource source, bool combinePerFile = true,
+    public static async IAsyncEnumerable<DocFileLine> GetPlainTextAsync(this TextSource source,
+        bool combinePerFile = true,
         CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(source);
@@ -21,16 +22,16 @@ public static class TextSourceExtensions
             {
                 var lines = Path.GetExtension(file.File) switch
                 {
-                    ".docx" => file.ReadDocxAsync(),
-                    ".doc" => file.ReadDocAsync(),
-                    ".md" => file.ReadMarkdownAsync(),
-                    _ => file.ReadTxtAsync()
+                    ".docx" => file.ReadDocxAsync(ct: ct),
+                    ".doc" => file.ReadDocAsync(ct: ct),
+                    ".md" => file.ReadMarkdownAsync(ct: ct),
+                    _ => file.ReadTxtAsync(ct: ct)
                 };
 
                 if (combinePerFile)
                 {
                     StringBuilder str = new StringBuilder();
-                    await foreach (var line in lines)
+                    await foreach (var line in lines.WithCancellation(ct))
                     {
                         if (source.IgnoreLineBreak)
                         {
@@ -42,20 +43,20 @@ public static class TextSourceExtensions
                         }
                     }
 
-                    yield return str.ToString();
+                    yield return new DocFileLine(file.File, str.ToString());
                 }
                 else
                 {
                     await foreach (var line in lines)
                     {
-                        yield return line;
+                        yield return new DocFileLine(file.File, line);
                     }
                 }
             }
         }
         else
         {
-            yield return source.Text;
+            yield return new DocFileLine(null, source.Text);
         }
     }
 

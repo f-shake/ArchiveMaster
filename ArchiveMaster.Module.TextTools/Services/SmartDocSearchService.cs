@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using ArchiveMaster.Events;
 using ArchiveMaster.Helpers;
 using ArchiveMaster.ViewModels;
 using ArchiveMaster.ViewModels.FileSystem;
@@ -53,6 +54,8 @@ namespace ArchiveMaster.Services
             string prompt = $"""
                              搜索关键词：{string.Join(" ", Config.Keywords)}
                              搜索结果：{string.Join("\n", SearchResults.Select(p => p.Context))}
+                             期望输出长度（字数）：{Config.ExpectedAiConcludeLength}
+                             额外要求：{(string.IsNullOrWhiteSpace(Config.ExtraAiPrompt) ? "无" : Config.ExtraAiPrompt)}
                              """;
             List<string> result = new List<string>();
             await foreach (var part in s.CallStreamAsync(sys, prompt).WithCancellation(ct))
@@ -66,19 +69,22 @@ namespace ArchiveMaster.Services
 
         public event EventHandler<ChatStreamUpdateEventArgs> AitStreamUpdate;
 
+        public event EventHandler<SearchUpdateEventArgs> SearchResultsUpdate;
+
         private async Task<List<TextSearchResult>> GetSearchResultAsync(CancellationToken ct)
         {
             var results = new List<TextSearchResult>();
-            await foreach (var line in Config.Source.GetPlainTextAsync(ct: ct))
+            await foreach (var docFileLine in Config.Source.GetPlainTextAsync(ct: ct))
             {
                 List<(string keyword, int index)> indexes = new List<(string, int)>();
+
 
                 //对每个关键词进行搜索
                 foreach (var keyword in Config.Keywords)
                 {
                     var tempIndexes = Config.UseRegex
-                        ? FindAllIndexesRegex(line, keyword)
-                        : FindAllIndexes(line, keyword, StringComparison.OrdinalIgnoreCase);
+                        ? FindAllIndexesRegex(docFileLine.Text, keyword)
+                        : FindAllIndexes(docFileLine.Text, keyword, StringComparison.OrdinalIgnoreCase);
                     indexes.AddRange(tempIndexes.Select(p => (keyword, p)));
                 }
 
@@ -87,11 +93,12 @@ namespace ArchiveMaster.Services
                     .OrderBy(p => p.index)
                     .Select(p => new TextSearchResult()
                     {
+                        Source = docFileLine.Source,
                         Keywords = [p.keyword],
                         Indexes = [p.index],
                         ContextStartIndex = p.index - Config.ContextLength / 2,
                         ContextEndIndex = p.index + Config.ContextLength / 2,
-                        SourceParagraph = line
+                        SourceParagraph = docFileLine.Text
                     })
                     .ToList();
 
@@ -125,6 +132,7 @@ namespace ArchiveMaster.Services
             foreach (var searchResult in results)
             {
                 searchResult.GenerateContext();
+                SearchResultsUpdate?.Invoke(this, new SearchUpdateEventArgs(searchResult));
             }
 
             return results;

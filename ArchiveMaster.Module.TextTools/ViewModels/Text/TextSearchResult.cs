@@ -6,6 +6,9 @@ namespace ArchiveMaster.ViewModels;
 public partial class TextSearchResult : ObservableObject
 {
     [ObservableProperty]
+    private string source;
+    
+    [ObservableProperty]
     private HashSet<string> keywords = new HashSet<string>();
 
     [ObservableProperty]
