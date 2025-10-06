@@ -40,13 +40,13 @@
                             <Button
                                 Padding="8,4"
                                 CornerRadius="16">
-                                <Grid ColumnDefinitions="Auto,8,Auto">
-                                    <TextBlock Text="{Binding File, Converter={x:Static cvt:Converters.FileName}}" />
-                                    <TextBlock
-                                        Grid.Column="2"
-                                        IsVisible="{Binding Password.Password, Converter={x:Static cvt:Converters.IsNotNull}}"
-                                        Text="*" />
-                                </Grid>
+                                <!-- <Grid ColumnDefinitions="Auto,8,Auto"> -->
+                                <TextBlock Text="{Binding File, Converter={x:Static cvt:Converters.FileName}}" />
+                                <!--  <TextBlock  -->
+                                <!--  Grid.Column="2"  -->
+                                <!--  IsVisible="{Binding Password.Password, Converter={x:Static cvt:Converters.IsNotNull}}"  -->
+                                <!--  Text="*" />  -->
+                                <!-- </Grid> -->
                                 <Button.Flyout>
                                     <Flyout>
                                         <StackPanel

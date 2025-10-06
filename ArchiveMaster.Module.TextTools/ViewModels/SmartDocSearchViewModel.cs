@@ -20,15 +20,27 @@ public partial class SmartDocSearchViewModel(AppConfig appConfig, IDialogService
     public override bool EnableInitialize => false;
 
     [ObservableProperty]
-    private ObservableCollection<TextPartResult> searchResults = new ObservableCollection<TextPartResult>();
+    private ObservableCollection<TextSearchResult> searchResults = new ObservableCollection<TextSearchResult>();
 
-    protected override Task OnInitializedAsync()
+    [ObservableProperty]
+    private string aiConclude = "";
+
+    protected override Task OnExecutingAsync(CancellationToken ct)
+    {
+        Service.AitStreamUpdate += (sender, e) => { AiConclude += e.Text; };
+        return base.OnExecutingAsync(ct);
+    }
+
+    protected override Task OnExecutedAsync(CancellationToken ct)
     {
         SearchResults = [..Service.SearchResults];
-        return base.OnInitializedAsync();
+        AiConclude = Service.AiConclude;
+        return base.OnExecutedAsync(ct);
     }
 
     protected override void OnReset()
     {
+        SearchResults.Clear();
+        AiConclude = "";
     }
 }

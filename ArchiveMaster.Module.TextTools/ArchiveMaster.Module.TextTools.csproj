@@ -10,14 +10,6 @@
     <Compile Remove="obj\**" />
     <EmbeddedResource Remove="obj\**" />
     <None Remove="obj\**" />
-    <Compile Update="Views\SmartDocSearchPanel.axaml.cs">
-      <DependentUpon>RepairModifiedTimePanel.axaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="Views\TextSourceInput.axaml.cs">
-      <DependentUpon>TextSourceInput.axaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
   </ItemGroup>
 
   <ItemGroup>
@@ -38,9 +30,5 @@
     <PackageReference Include="NPOI" />
     <PackageReference Include="OllamaSharp" />
     <PackageReference Include="OpenAI" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Helpers\" />
   </ItemGroup>
 </Project>

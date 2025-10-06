@@ -2,6 +2,7 @@
     x:Class="ArchiveMaster.Views.SmartDocSearchPanel"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:b="using:ArchiveMaster.Behaviors"
     xmlns:ct="using:FzLib.Avalonia.Controls"
     xmlns:cvt="clr-namespace:ArchiveMaster.Converters;assembly=ArchiveMaster.Core"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -13,14 +14,69 @@
     d:DesignWidth="800"
     x:DataType="vm:SmartDocSearchViewModel"
     mc:Ignorable="d">
-    <v:TwoStepPanelBase.ConfigsContent>
-        <ct:StackFormItemGroup>
-            <ct:FormItem Label="文本源：">
-                <v:TextSourceInput Source="{Binding Config.Source}" />
-            </ct:FormItem>
+    <v:TwoStepPanelBase.ResultsContent>
+        <Grid RowDefinitions="Auto,8,*,8,Auto">
+            <ct:StackFormItemGroup>
+                <ct:FormItem Label="文本源：">
+                    <v:TextSourceInput Source="{Binding Config.Source}" />
+                </ct:FormItem>
+                <ct:FormItem Label="关键词：">
+                    <TextBox
+                        Text="{Binding Config.Keywords, Converter={x:Static cvt:Converters.StringList}}"
+                        Watermark="使用逗号分隔多个关键词" />
+                </ct:FormItem>
+                <ct:FormItem Label="选项：">
+                    <ct:WrapFormItemGroup>
+                        <ct:FormItem Header="上下文长度：">
+                            <NumericUpDown
+                                Width="200"
+                                Maximum="1000"
+                                Minimum="50"
+                                Value="{Binding Config.ContextLength}" />
+                        </ct:FormItem>
+                        <CheckBox
+                            Content="使用正则表达式进行搜索"
+                            IsChecked="{Binding Config.UseRegex}" />
+                        <CheckBox
+                            Content="使用AI进行归纳总结"
+                            IsChecked="{Binding Config.UseAiConclude}" />
+                    </ct:WrapFormItemGroup>
+                </ct:FormItem>
 
+            </ct:StackFormItemGroup>
+            <Grid
+                Grid.Row="2"
+                ColumnDefinitions="2*,8,*">
+                <gb:GroupBox Header="搜索结果">
+                    <ScrollViewer>
+                        <ItemsControl ItemsSource="{Binding SearchResults}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border
+                                        Padding="4"
+                                        BorderBrush="{DynamicResource Background3}"
+                                        BorderThickness="1"
+                                        CornerRadius="4">
+                                        <SelectableTextBlock
+                                            b:TextBlockInlinesBehavior.ItemsSource="{Binding Inlines}"
+                                            TextWrapping="Wrap" />
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </gb:GroupBox>
 
-        </ct:StackFormItemGroup>
-    </v:TwoStepPanelBase.ConfigsContent>
-    <v:TwoStepPanelBase.ResultsContent />
+                <gb:GroupBox
+                    Grid.Column="2"
+                    Header="AI分析结果">
+                    <ScrollViewer>
+                        <SelectableTextBlock
+                            Text="{Binding AiConclude}"
+                            TextWrapping="Wrap" />
+                    </ScrollViewer>
+                </gb:GroupBox>
+            </Grid>
+        </Grid>
+    </v:TwoStepPanelBase.ResultsContent>
 </v:TwoStepPanelBase>
