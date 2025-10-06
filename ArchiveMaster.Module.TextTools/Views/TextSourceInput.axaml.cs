@@ -10,34 +10,18 @@ namespace ArchiveMaster.Views
 {
     public partial class TextSourceInput : UserControl
     {
-        public TextSourceInput()
-        {
-            InitializeComponent();
-        }
-
         public static readonly StyledProperty<TextSource> SourceProperty =
             AvaloniaProperty.Register<TextSourceInput, TextSource>(
                 nameof(Source));
 
+        public TextSourceInput()
+        {
+            InitializeComponent();
+        }
         public TextSource Source
         {
             get => GetValue(SourceProperty);
             set => SetValue(SourceProperty, value);
-        }
-
-        private async void PasteButton_Click(object sender, RoutedEventArgs e)
-        {
-            var topLevel = TopLevel.GetTopLevel(this);
-            if (topLevel == null)
-            {
-                return;
-            }
-
-            var text = await (topLevel.Clipboard?.GetTextAsync()??Task.FromResult(""));
-            if (!string.IsNullOrWhiteSpace(text))
-            {
-                Source.Text= text;
-            }
         }
 
         private async void AddFilesButton_Click(object sender, RoutedEventArgs e)
@@ -49,13 +33,14 @@ namespace ArchiveMaster.Views
             }
 
             var pickerOptions = FilePickerOptionsBuilder.Create()
-                .AddFilter("文本文件", "txt", "doc", "docx")
+                .AddFilter("文本文档", "txt", "doc", "docx", "md", "txt")
                 .AddFilter("Word文档", "doc", "docx")
+                .AddFilter("Markdown文档", "md")
                 .AddFilter("纯文本", "txt")
-                .AddFilter("所有文件", "*")
+                .AddFilter("所有文件（作为纯文本读取）", "*")
                 .AllowMultiple()
                 .BuildOpenOptions();
-            var files =await storageProvider.OpenFilePickerAsync(pickerOptions);
+            var files = await storageProvider.OpenFilePickerAsync(pickerOptions);
             if (files.Count > 0)
             {
                 foreach (var file in files)
@@ -68,6 +53,21 @@ namespace ArchiveMaster.Views
         private void ClearFilesButton_Click(object sender, RoutedEventArgs e)
         {
             Source.Files.Clear();
+        }
+
+        private async void PasteButton_Click(object sender, RoutedEventArgs e)
+        {
+            var topLevel = TopLevel.GetTopLevel(this);
+            if (topLevel == null)
+            {
+                return;
+            }
+
+            var text = await (topLevel.Clipboard?.GetTextAsync() ?? Task.FromResult(""));
+            if (!string.IsNullOrWhiteSpace(text))
+            {
+                Source.Text = text;
+            }
         }
         private void RemoveFileButton_Click(object sender, RoutedEventArgs e)
         {

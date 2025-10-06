@@ -8,11 +8,15 @@
     <PackageVersion Include="Avalonia.Controls.DataGrid" Version="$(AvaloniaVersion)" />
     <PackageVersion Include="Avalonia.Themes.Fluent" Version="$(AvaloniaVersion)" />
     <PackageVersion Include="DiscUtils.Iso9660" Version="0.16.13" />
+    <PackageVersion Include="DocumentFormat.OpenXml" Version="3.3.0" />
+    <PackageVersion Include="HtmlAgilityPack" Version="1.12.4" />
+    <PackageVersion Include="Markdig" Version="0.42.0" />
     <PackageVersion Include="Microsoft.Extensions.AI" Version="9.9.1" />
     <PackageVersion Include="Microsoft.Extensions.AI.OpenAI" Version="9.9.1-preview.1.25474.6" />
     <PackageVersion Include="NPOI" Version="2.7.5" />
     <PackageVersion Include="OllamaSharp" Version="5.4.7" />
     <PackageVersion Include="OpenAI" Version="2.5.0" />
+    <PackageVersion Include="RtfPipe" Version="2.0.7677.4303" />
     <PackageVersion Include="SkiaSharp" Version="3.119.0" />
     <PackageVersion Include="SkiaSharp.NativeAssets.Linux" Version="3.119.0" />
     <PackageVersion Include="SkiaSharp.NativeAssets.Win32" Version="3.119.0" />

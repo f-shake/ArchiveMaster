@@ -2,11 +2,33 @@
 
 namespace ArchiveMaster.ViewModels;
 
-public class TextPartResult
+public partial class TextPartResult : ObservableObject
 {
-    public string Pattern { get; set; }
+    [ObservableProperty]
+    private string pattern;
 
-    public string Text { get; set; }
+    [ObservableProperty]
+    private string sourceParagraph;
 
-    public string Source { get; set; }
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(Context))]
+    private int index;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(Context))]
+    private int contextStartIndex;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(Context))]
+    private int contextEndIndex;
+
+    public string Context
+    {
+        get
+        {
+            int start = Math.Max(0, ContextStartIndex);
+            int end = Math.Min(ContextEndIndex, SourceParagraph.Length);
+            return SourceParagraph.Substring(start, end - start);
+        }
+    }
 }

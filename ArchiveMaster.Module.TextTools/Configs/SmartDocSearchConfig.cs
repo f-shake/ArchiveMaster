@@ -10,6 +10,15 @@ namespace ArchiveMaster.Configs
     {
         [ObservableProperty]
         private TextSource source = new TextSource();
+        
+        [ObservableProperty]
+        private int contextLength = 1000;
+        
+        [ObservableProperty]
+        private bool useRegex = false;
+        
+        [ObservableProperty]
+        private List<string> keywords = new List<string>();
 
         public override void Check()
         {

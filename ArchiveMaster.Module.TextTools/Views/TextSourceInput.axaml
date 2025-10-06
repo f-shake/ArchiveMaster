@@ -57,12 +57,12 @@
                                                 FontWeight="Bold"
                                                 Text="{Binding File}"
                                                 TextWrapping="Wrap" />
-                                            <ct:FormItem Header="文档密码（若有）">
-                                                <TextBox
-                                                    Classes="revealPasswordButton"
-                                                    PasswordChar="*"
-                                                    Text="{Binding Password.Password}" />
-                                            </ct:FormItem>
+                                            <!-- <ct:FormItem Header="文档密码（若有）"> -->
+                                            <!--  <TextBox  -->
+                                            <!--  Classes="revealPasswordButton"  -->
+                                            <!--  PasswordChar="*"  -->
+                                            <!--  Text="{Binding Password.Password}" />  -->
+                                            <!-- </ct:FormItem> -->
                                             <Button
                                                 HorizontalAlignment="Right"
                                                 Classes="Link"

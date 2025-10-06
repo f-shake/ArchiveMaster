@@ -13,4 +13,7 @@ public partial class TextSource : ObservableObject
     
     [ObservableProperty]
     private ObservableCollection<DocFile> files = new ObservableCollection<DocFile>();
+    
+    [ObservableProperty]
+    private bool ignoreLineBreak = false;
 }

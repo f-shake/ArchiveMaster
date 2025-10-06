@@ -6,6 +6,7 @@ using ArchiveMaster.Configs;
 using ArchiveMaster.Services;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Threading;
 using System.Threading.Tasks;
 using ArchiveMaster.ViewModels.FileSystem;
@@ -16,10 +17,15 @@ namespace ArchiveMaster.ViewModels;
 public partial class SmartDocSearchViewModel(AppConfig appConfig, IDialogService dialogService)
     : TwoStepViewModelBase<SmartDocSearchService, SmartDocSearchConfig>(appConfig, dialogService)
 {
-    protected override async Task OnInitializingAsync()
+    public override bool EnableInitialize => false;
+
+    [ObservableProperty]
+    private ObservableCollection<TextPartResult> searchResults = new ObservableCollection<TextPartResult>();
+
+    protected override Task OnInitializedAsync()
     {
-        //Test
-        var text = await Config.Source.GetTextAsync();
+        SearchResults = [..Service.SearchResults];
+        return base.OnInitializedAsync();
     }
 
     protected override void OnReset()
