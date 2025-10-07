@@ -1,0 +1,117 @@
+<UserControl
+    x:Class="ArchiveMaster.Views.StringListEditor"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ct="using:FzLib.Avalonia.Controls"
+    xmlns:cvt="clr-namespace:ArchiveMaster.Converters;assembly=ArchiveMaster.Core"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:gb="using:GroupBox.Avalonia.Controls"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:system="clr-namespace:System;assembly=System.Runtime"
+    xmlns:v="using:ArchiveMaster.Views"
+    xmlns:vm="clr-namespace:ArchiveMaster.ViewModels"
+    x:Name="root"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
+    <UserControl.Resources>
+        <SolidColorBrush
+            x:Key="TagTextBoxSelectionBrush"
+            Opacity=".3"
+            Color="White" />
+        <system:Double x:Key="TagHeight">28</system:Double>
+        <system:Double x:Key="ScrollBarSize">6</system:Double>
+        <CornerRadius x:Key="TagCornerRadius">16</CornerRadius>
+    </UserControl.Resources>
+
+    <UserControl.Styles>
+        <Style Selector="Button.Circle">
+            <Setter Property="FontSize" Value="18" />
+            <Setter Property="Width" Value="{StaticResource TagHeight}" />
+            <Setter Property="Height" Value="{StaticResource TagHeight}" />
+            <!--  按钮里的字，默认有点靠下，通过设置Padding来向上移动  -->
+            <Setter Property="Padding" Value="0,0,0,3" />
+            <Setter Property="CornerRadius" Value="{StaticResource TagCornerRadius}" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+        </Style>
+
+        <Style Selector="TextBox.Tag">
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Height" Value="{StaticResource TagHeight}" />
+            <Setter Property="MinHeight" Value="{StaticResource TagHeight}" />
+            <Setter Property="TextAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Background" Value="Transparent" />
+            <Style Selector="^:pointerover">
+                <Style Selector="^ /template/ Border#PART_BorderElement">
+                    <Setter Property="Background" Value="Transparent" />
+                </Style>
+            </Style>
+            <Style Selector="^:disabled">
+                <Style Selector="^ /template/ Border#PART_BorderElement">
+                    <Setter Property="Background" Value="Transparent" />
+                </Style>
+            </Style>
+            <Style Selector="^:focus">
+                <Style Selector="^ /template/ Border#PART_BorderElement">
+                    <Setter Property="Background" Value="Transparent" />
+                </Style>
+            </Style>
+        </Style>
+
+    </UserControl.Styles>
+    <Grid>
+        <ScrollViewer
+            HorizontalScrollBarVisibility="Auto"
+            PointerWheelChanged="ScrollViewer_OnPointerWheelChanged"
+            VerticalScrollBarVisibility="Disabled">
+            <StackPanel
+                Margin="0,0,0,6"
+                Orientation="Horizontal"
+                Spacing="0">
+                <!--  通过设置StackPanel的Spacing=0和ItemsControl的Margin及IsVisible，保证在0项目时，新增按钮居中  -->
+                <ItemsControl
+                    x:Name="items"
+                    Margin="0,0,8,0"
+                    IsVisible="{Binding $parent[UserControl].ItemsSource, Converter={x:Static cvt:Converters.CountGreaterThanZero}}"
+                    ItemsSource="{Binding $parent[UserControl].ItemsSource}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel
+                                Orientation="Horizontal"
+                                Spacing="8" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border
+                                Padding="5,0,0,0"
+                                Background="{DynamicResource ButtonBackground}"
+                                CornerRadius="{StaticResource TagCornerRadius}">
+                                <StackPanel
+                                    Orientation="Horizontal"
+                                    Spacing="4">
+                                    <TextBox
+                                        Classes="Tag"
+                                        Text="{Binding Value}" />
+                                    <Button
+                                        Classes="Transparent Circle"
+                                        Click="RemoveButton_Click"
+                                        Content="×" />
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <Button
+                    Background="{DynamicResource ButtonBackground}"
+                    Classes="Transparent Circle"
+                    Click="AddButton_Click"
+                    Content="+" />
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

@@ -26,6 +26,7 @@ public partial class SmartDocSearchViewModel(AppConfig appConfig, IDialogService
     private ObservableCollection<TextSearchResult> searchResults = new ObservableCollection<TextSearchResult>();
 
     public override bool EnableRepeatExecute => true;
+
     protected override Task OnExecutedAsync(CancellationToken ct)
     {
         AiConclude = Service.AiConclude;

@@ -28,6 +28,7 @@ public partial class SecurePassword:ObservableObject
     public static implicit operator SecurePassword(string password) => new SecurePassword(password);
 
     public static implicit operator string(SecurePassword securePassword) => securePassword.Password;
+    
     public class JsonConverter : JsonConverter<SecurePassword>
     {
         private static readonly Regex HexRegex = new Regex("^[0-9a-fA-F]+$", RegexOptions.Compiled);

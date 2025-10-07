@@ -26,10 +26,9 @@
             <ct:FormItem Label="搜索选项：">
                 <ct:WrapFormItemGroup>
                     <ct:FormItem Header="关键词">
-                        <TextBox
-                            Width="200"
-                            Text="{Binding Config.Keywords, Converter={x:Static cvt:Converters.StringList}}"
-                            Watermark="使用逗号分隔多个关键词" />
+                        <v:StringListEditor
+                            MaxWidth="280"
+                            ItemsSource="{Binding Config.Keywords}" />
                     </ct:FormItem>
                     <ct:FormItem Header="搜索结果上下文长度">
                         <NumericUpDown

@@ -43,7 +43,11 @@ namespace ArchiveMaster.Configs
         {
             Encoder = JavaScriptEncoder.Create(UnicodeRanges.All),
             WriteIndented = true,
-            Converters = { new SecurePassword.JsonConverter() }
+            Converters =
+            {
+                new SecurePassword.JsonConverter(),
+                new EditableString.JsonConverter()
+            }
         };
 
         /// <summary>

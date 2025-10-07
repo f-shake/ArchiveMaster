@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.ObjectModel;
 using ArchiveMaster.Helpers;
 using ArchiveMaster.ViewModels;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -21,7 +22,7 @@ namespace ArchiveMaster.Configs
         private string extraAiPrompt;
 
         [ObservableProperty]
-        private List<string> keywords = new List<string>();
+        private ObservableStringList keywords = new ObservableStringList();
 
         [ObservableProperty]
         private TextSource source = new TextSource();
