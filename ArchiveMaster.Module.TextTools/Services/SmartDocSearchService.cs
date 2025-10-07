@@ -90,16 +90,15 @@ namespace ArchiveMaster.Services
         {
             LlmCallerService s = new LlmCallerService(AI);
             string sys = $"""
-                         你是一个归纳总结机器人，用户对一些文段进行了搜索，得到了一系列的结果。
-                         你需要根据这些结果，进行归纳总结。
-                         期望输出长度（字数）：{Config.ExpectedAiConcludeLength}，请严格遵守输出字数要求。
-                         搜索关键词：“{string.Join(" ", Config.Keywords)}”
+                         你是一个归纳总结机器人。当前，用户以“{string.Join(" ", Config.Keywords)}”为关键词，对一些文段进行了搜索，得到了一系列的结果，这些结果将在下面给出。
+                         你需要根据这些结果，进行归纳总结。期望输出长度（字数）：{Config.ExpectedAiConcludeLength}，请严格遵守输出字数要求。
+                         回复的时候，你只需要回复结果，不要参杂其他内容。不要使用MarkDown，使用纯文本进行回复，在必要时，可以使用编号或者列表，但需要以纯文本的形式提供。
                          {(string.IsNullOrWhiteSpace(Config.ExtraAiPrompt) ? "" : "额外要求："+Config.ExtraAiPrompt)}
                          """;
             var prompt = new StringBuilder();
             foreach (var (item, index) in RandomSelect(SearchResults,Config.AiConcludeMaxCount).Select((item, index) => (item, index)))
             {
-                prompt.AppendLine($"第{index + 1}条搜索结果（涉及关键词包括“{item.KeyWordsString}”）：");
+                prompt.AppendLine($"第{index + 1}条搜索结果：");
                 prompt.AppendLine(item.Context);
             }
             

@@ -99,10 +99,12 @@
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <Border
-                                    Padding="4"
+                                    Margin="2,4"
+                                    Padding="8"
+                                    Background="{DynamicResource Background2}"
                                     BorderBrush="{DynamicResource Background3}"
                                     BorderThickness="1"
-                                    CornerRadius="4">
+                                    CornerRadius="8">
                                     <Grid
                                         ColumnDefinitions="Auto,8,*"
                                         RowDefinitions="*,8,Auto">

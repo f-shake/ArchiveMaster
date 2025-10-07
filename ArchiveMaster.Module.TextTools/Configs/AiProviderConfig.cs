@@ -6,7 +6,7 @@ namespace ArchiveMaster.Configs
     public partial class AiProviderConfig :ObservableObject
     {
         [ObservableProperty]
-        private string key = "";
+        private SecurePassword key = new SecurePassword();
 
         [ObservableProperty]
         private string model = "";

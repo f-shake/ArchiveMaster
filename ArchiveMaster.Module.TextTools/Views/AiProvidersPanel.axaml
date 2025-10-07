@@ -68,7 +68,10 @@
                         <TextBox Text="{Binding SelectedProvider.Url}" />
                     </ct:FormItem>
                     <ct:FormItem Label="密钥：">
-                        <TextBox Text="{Binding SelectedProvider.Key}" />
+                        <TextBox
+                            Classes="revealPasswordButton"
+                            PasswordChar="*"
+                            Text="{Binding SelectedProvider.Key.Password}" />
                     </ct:FormItem>
                     <ct:FormItem Label="模型：">
                         <TextBox Text="{Binding SelectedProvider.Model}" />
