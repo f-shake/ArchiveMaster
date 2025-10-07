@@ -25,7 +25,20 @@ namespace ArchiveMaster.Services
         public string AiConclude { get; private set; }
         
         public List<TextSearchResult> SearchResults { get; private set; }
-        
+
+        public static List<T> RandomSelect<T>(List<T> source, int m)
+        {
+            if (m > source.Count)
+            {
+                return source;
+            }
+
+            var indices = Enumerable.Range(0, source.Count).ToArray();
+            Random.Shared.Shuffle(indices);
+            var selected = indices.Take(m).OrderBy(i => i);
+            return selected.Select(i => source[i]).ToList();
+        }
+
         public override async Task ExecuteAsync(CancellationToken ct)
         {
             await Task.Run(async () =>
@@ -73,30 +86,25 @@ namespace ArchiveMaster.Services
 
             return indexes;
         }
-
         private async Task<string> GetAiConcludeAsync(CancellationToken ct)
         {
             LlmCallerService s = new LlmCallerService(AI);
-            string sys = """
+            string sys = $"""
                          你是一个归纳总结机器人，用户对一些文段进行了搜索，得到了一系列的结果。
                          你需要根据这些结果，进行归纳总结。
+                         期望输出长度（字数）：{Config.ExpectedAiConcludeLength}，请严格遵守输出字数要求。
+                         搜索关键词：“{string.Join(" ", Config.Keywords)}”
+                         {(string.IsNullOrWhiteSpace(Config.ExtraAiPrompt) ? "" : "额外要求："+Config.ExtraAiPrompt)}
                          """;
-            var searchResult = new StringBuilder();
-            foreach (var (item, index) in SearchResults.Select((item, index) => (item, index)))
+            var prompt = new StringBuilder();
+            foreach (var (item, index) in RandomSelect(SearchResults,Config.AiConcludeMaxCount).Select((item, index) => (item, index)))
             {
-                searchResult.AppendLine($"第{index + 1}条搜索结果（涉及关键词包括“{item.KeyWordsString}”）：");
-                searchResult.AppendLine(item.Context);
+                prompt.AppendLine($"第{index + 1}条搜索结果（涉及关键词包括“{item.KeyWordsString}”）：");
+                prompt.AppendLine(item.Context);
             }
-
-            string prompt = $"""
-                             搜索关键词：“{string.Join(" ", Config.Keywords)}”，供参考
-                             期望输出长度（字数）：{Config.ExpectedAiConcludeLength}，请严格遵守输出字数要求
-                             额外要求：{(string.IsNullOrWhiteSpace(Config.ExtraAiPrompt) ? "无" : Config.ExtraAiPrompt)}
-                             搜索结果：
-                             {searchResult}
-                             """;
+            
             List<string> result = new List<string>();
-            await foreach (var part in s.CallStreamAsync(sys, prompt, ct))
+            await foreach (var part in s.CallStreamAsync(sys, prompt.ToString(), ct))
             {
                 AitStreamUpdate?.Invoke(this, new ChatStreamUpdateEventArgs(part));
                 result.Add(part);

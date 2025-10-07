@@ -9,26 +9,28 @@ namespace ArchiveMaster.Configs
     public partial class SmartDocSearchConfig : ConfigBase
     {
         [ObservableProperty]
-        private TextSource source = new TextSource();
+        private int aiConcludeMaxCount = 100;
 
         [ObservableProperty]
         private int contextLength = 200;
 
-        [ObservableProperty]
-        private bool useRegex = false;
-
-        [ObservableProperty]
-        private bool useAiConclude = true;
-
-        [ObservableProperty]
-        private List<string> keywords = new List<string>();
-        
         [ObservableProperty]
         private int expectedAiConcludeLength = 300;
 
         [ObservableProperty]
         private string extraAiPrompt;
 
+        [ObservableProperty]
+        private List<string> keywords = new List<string>();
+
+        [ObservableProperty]
+        private TextSource source = new TextSource();
+
+        [ObservableProperty]
+        private bool useAiConclude = true;
+
+        [ObservableProperty]
+        private bool useRegex = false;
         public override void Check()
         {
             if (Source.FromFile)

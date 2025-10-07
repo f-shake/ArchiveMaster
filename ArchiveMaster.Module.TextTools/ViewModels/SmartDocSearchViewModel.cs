@@ -24,6 +24,8 @@ public partial class SmartDocSearchViewModel(AppConfig appConfig, IDialogService
 
     [ObservableProperty]
     private ObservableCollection<TextSearchResult> searchResults = new ObservableCollection<TextSearchResult>();
+
+    public override bool EnableRepeatExecute => true;
     protected override Task OnExecutedAsync(CancellationToken ct)
     {
         AiConclude = Service.AiConclude;
@@ -32,6 +34,7 @@ public partial class SmartDocSearchViewModel(AppConfig appConfig, IDialogService
 
     protected override Task OnExecutingAsync(CancellationToken ct)
     {
+        AiConclude = "";
         Service.AitStreamUpdate += (sender, e) => AiConclude += e.Text;
         return base.OnExecutingAsync(ct);
     }

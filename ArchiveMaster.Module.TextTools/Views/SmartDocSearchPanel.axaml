@@ -31,7 +31,7 @@
                             Text="{Binding Config.Keywords, Converter={x:Static cvt:Converters.StringList}}"
                             Watermark="使用逗号分隔多个关键词" />
                     </ct:FormItem>
-                    <ct:FormItem Header="搜索结果上下文长度：">
+                    <ct:FormItem Header="搜索结果上下文长度">
                         <NumericUpDown
                             Width="140"
                             FormatString="0"
@@ -53,16 +53,16 @@
                         Content="使用AI进行归纳总结"
                         IsChecked="{Binding Config.UseAiConclude}" />
                     <ct:FormItem
-                        IsVisible="{Binding Config.UseAiConclude}"
-                        Label="额外提示词：">
+                        Header="额外提示词"
+                        IsVisible="{Binding Config.UseAiConclude}">
                         <TextBox
                             Width="240"
                             Text="{Binding Config.ExtraAiPrompt}"
                             Watermark="默认对搜索结果进行归纳总结" />
                     </ct:FormItem>
                     <ct:FormItem
-                        IsVisible="{Binding Config.UseAiConclude}"
-                        Label="期望回答长度（字数）：">
+                        Header="期望回答长度（字数）"
+                        IsVisible="{Binding Config.UseAiConclude}">
                         <NumericUpDown
                             Width="140"
                             FormatString="0"
@@ -70,6 +70,17 @@
                             Maximum="2000"
                             Minimum="50"
                             Value="{Binding Config.ExpectedAiConcludeLength}" />
+                    </ct:FormItem>
+                    <ct:FormItem
+                        Header="上传条目数量限制"
+                        IsVisible="{Binding Config.UseAiConclude}">
+                        <NumericUpDown
+                            Width="140"
+                            FormatString="0"
+                            Increment="10"
+                            Maximum="200"
+                            Minimum="10"
+                            Value="{Binding Config.AiConcludeMaxCount}" />
                     </ct:FormItem>
                 </ct:WrapFormItemGroup>
             </ct:FormItem>
@@ -137,33 +148,6 @@
                                                 </DataTemplate>
                                             </ItemsControl.ItemTemplate>
                                         </ItemsControl>
-                                        <!--  <Button  -->
-                                        <!--  Padding="4"  -->
-                                        <!--  HorizontalAlignment="Right"  -->
-                                        <!--  VerticalAlignment="Bottom"  -->
-                                        <!--  Classes="Icon Transparent"  -->
-                                        <!--  Content="{StaticResource More}">  -->
-                                        <!--     <Button.Flyout> -->
-                                        <!--         <Flyout> -->
-                                        <!--             <ct:StackFormItemGroup> -->
-                                        <!--  <ct:FormItem  -->
-                                        <!--  Content="{Binding Source}"  -->
-                                        <!--  IsVisible="{Binding Source, Converter={x:Static cvt:Converters.IsNotNull}}"  -->
-                                        <!--  Label="文本源：" />  -->
-                                        <!--  <Button  -->
-                                        <!--  HorizontalAlignment="Right"  -->
-                                        <!--  Classes="Link"  -->
-                                        <!--  Command="{Binding #root.DataContext.OpenFileCommand}"  -->
-                                        <!--  CommandParameter="{Binding .}"  -->
-                                        <!--  Content="打开文档"  -->
-                                        <!--  IsVisible="{Binding Source, Converter={x:Static cvt:Converters.IsNotNull}}" />  -->
-                                        <!--  <ct:FormItem  -->
-                                        <!--  Content="{Binding KeyWordsString, Converter={x:Static cvt:Converters.StringList}}"  -->
-                                        <!--  Label="关键词：" />  -->
-                                        <!--             </ct:StackFormItemGroup> -->
-                                        <!--         </Flyout> -->
-                                        <!--     </Button.Flyout> -->
-                                        <!-- </Button> -->
                                     </Grid>
                                 </Border>
                             </DataTemplate>
@@ -182,6 +166,17 @@
                 </ScrollViewer>
             </gb:GroupBox>
 
+            <GridSplitter
+                Grid.Column="1"
+                Background="Transparent" />
+
+            <TextBlock
+                Grid.Row="2"
+                Grid.Column="0">
+                <Run Text="共" />
+                <Run Text="{Binding SearchResults.Count}" />
+                <Run Text="条搜索结果" />
+            </TextBlock>
             <TextBlock
                 Grid.Row="2"
                 Grid.Column="2">
