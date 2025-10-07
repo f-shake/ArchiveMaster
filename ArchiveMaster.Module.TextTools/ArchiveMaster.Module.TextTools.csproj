@@ -34,5 +34,6 @@
     <PackageReference Include="NPOI" />
     <PackageReference Include="OllamaSharp" />
     <PackageReference Include="OpenAI" />
+    <PackageReference Include="UTF.Unknown" />
   </ItemGroup>
 </Project>

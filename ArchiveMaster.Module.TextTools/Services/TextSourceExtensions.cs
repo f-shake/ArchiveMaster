@@ -5,6 +5,7 @@ using DocumentFormat.OpenXml.Packaging;
 using NPOI.XWPF.UserModel;
 using DocumentFormat.OpenXml.Wordprocessing;
 using Markdig;
+using UtfUnknown;
 
 namespace ArchiveMaster.Services;
 
@@ -96,7 +97,8 @@ public static class TextSourceExtensions
 
     private static async IAsyncEnumerable<string> ReadMarkdownAsync(this DocFile file, CancellationToken ct = default)
     {
-        var markdown = await File.ReadAllTextAsync(file.File, ct);
+        var encoding = await DetectEncoding(file, ct);
+        var markdown = await File.ReadAllTextAsync(file.File, encoding, ct);
         ct.ThrowIfCancellationRequested();
         var text = Markdown.ToPlainText(markdown);
         yield return text;
@@ -104,11 +106,19 @@ public static class TextSourceExtensions
 
     private static async IAsyncEnumerable<string> ReadTxtAsync(this DocFile file, CancellationToken ct = default)
     {
-        var lines = await File.ReadAllLinesAsync(file.File, ct);
+        var encoding = await DetectEncoding(file, ct);
+        var lines = await File.ReadAllLinesAsync(file.File, encoding, ct);
         foreach (var line in lines)
         {
             ct.ThrowIfCancellationRequested();
             yield return line;
         }
+    }
+
+    private static async Task<Encoding> DetectEncoding(DocFile file, CancellationToken ct)
+    {
+        var result = await CharsetDetector.DetectFromFileAsync(file.File, ct);
+        var encoding = result.Detected?.Encoding ?? Encoding.UTF8;
+        return encoding;
     }
 }

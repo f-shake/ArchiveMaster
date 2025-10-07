@@ -22,6 +22,7 @@
     <PackageVersion Include="SkiaSharp.NativeAssets.Win32" Version="3.119.0" />
     <PackageVersion Include="SkiaSharp.NativeAssets.macOS" Version="3.119.0" />
     <PackageVersion Include="System.Reactive" Version="6.0.2" />
+    <PackageVersion Include="UTF.Unknown" Version="2.6.0" />
     <PackageVersion Include="Xaml.Behaviors.Avalonia" Version="11.3.2" />
     <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.0" />
     <PackageVersion Include="ExifLibNet.Updated" Version="2.1.5" />
