@@ -6,21 +6,18 @@ namespace ArchiveMaster.Configs
     public partial class AiProviderConfig :ObservableObject
     {
         [ObservableProperty]
-        private ProviderType type = ProviderType.OpenAI;
+        private string key = "";
 
         [ObservableProperty]
         private string model = "";
 
         [ObservableProperty]
-        private string url = "";
+        private string name = "";
 
         [ObservableProperty]
-        private string key = "";
+        private AiProviderType type = AiProviderType.OpenAI;
 
-        public enum ProviderType
-        {
-            OpenAI,
-            Ollama
-        }
+        [ObservableProperty]
+        private string url = "";
     }
 }

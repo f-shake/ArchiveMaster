@@ -16,8 +16,7 @@ public class LlmCallerService(AiProviderConfig config)
 {
     public AiProviderConfig Config { get; } = config;
 
-    public async Task<string> CallAsync(string systemPrompt, string userPrompt,
-        [EnumeratorCancellation] CancellationToken ct = default)
+    public async Task<string> CallAsync(string systemPrompt, string userPrompt, CancellationToken ct = default)
     {
         var chatClient = GetChatClient();
 
@@ -47,10 +46,10 @@ public class LlmCallerService(AiProviderConfig config)
         IChatClient chatClient = null;
         switch (Config.Type)
         {
-            case AiProviderConfig.ProviderType.OpenAI:
+            case AiProviderType.OpenAI:
                 chatClient = new OpenAIChatClient(Config.Url, Config.Model, Config.Key);
                 break;
-            case AiProviderConfig.ProviderType.Ollama:
+            case AiProviderType.Ollama:
                 chatClient = new OllamaApiClient(new Uri(Config.Url), Config.Model);
                 break;
             default:

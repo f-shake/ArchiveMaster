@@ -4,14 +4,14 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace ArchiveMaster.ViewModels;
 
-public partial class FullSnapshotItem:ObservableObject
+public partial class FullSnapshotItem : ObservableObject
 {
     public FullSnapshotItem(BackupSnapshotEntity fullSnapshot)
     {
         FullSnapshot = fullSnapshot;
         Snapshots = [fullSnapshot];
     }
-    
+
     [ObservableProperty]
     private BackupSnapshotEntity fullSnapshot;
 

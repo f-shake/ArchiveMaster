@@ -5,24 +5,34 @@ namespace ArchiveMaster.ViewModels;
 
 public partial class TextSearchResult : ObservableObject
 {
-    [ObservableProperty]
-    private string source;
-    
-    [ObservableProperty]
-    private HashSet<string> keywords = new HashSet<string>();
+    private string context;
 
     [ObservableProperty]
-    private string sourceParagraph;
-
-    [ObservableProperty]
-    private List<int> indexes;
+    private int contextEndIndex;
 
     [ObservableProperty]
     private int contextStartIndex;
 
     [ObservableProperty]
-    private int contextEndIndex;
+    private List<int> indexes;
 
+    private IEnumerable<InlineItem> inlines;
+
+    [ObservableProperty]
+    private HashSet<string> keywords = new HashSet<string>();
+
+    [ObservableProperty]
+    private string source;
+    [ObservableProperty]
+    private string sourceParagraph;
+
+    public string Context =>
+        context ?? throw new InvalidOperationException($"请先调用{nameof(GenerateContext)}方法");
+
+    public IEnumerable<InlineItem> Inlines =>
+        inlines ?? throw new InvalidOperationException($"请先调用{nameof(GenerateContext)}方法");
+
+    public string KeyWordsString => string.Join("、", Keywords);
     public void GenerateContext()
     {
         int start = Math.Max(0, ContextStartIndex);
@@ -82,14 +92,4 @@ public partial class TextSearchResult : ObservableObject
             inlines = result;
         }
     }
-
-    private string context;
-
-    private IEnumerable<InlineItem> inlines;
-
-    public string Context =>
-        context ?? throw new InvalidOperationException($"请先调用{nameof(GenerateContext)}方法");
-
-    public IEnumerable<InlineItem> Inlines =>
-        inlines ?? throw new InvalidOperationException($"请先调用{nameof(GenerateContext)}方法");
 }

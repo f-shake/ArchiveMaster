@@ -10,6 +10,10 @@
     <Compile Remove="obj\**" />
     <EmbeddedResource Remove="obj\**" />
     <None Remove="obj\**" />
+    <Compile Update="Views\AiProvidersPanel.axaml.cs">
+      <DependentUpon>AiProvidersPanel.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>

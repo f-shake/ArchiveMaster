@@ -7,41 +7,64 @@ using ArchiveMaster.Services;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using ArchiveMaster.ViewModels.FileSystem;
 using FzLib.Avalonia.Dialogs;
+using Serilog;
 
 namespace ArchiveMaster.ViewModels;
 
 public partial class SmartDocSearchViewModel(AppConfig appConfig, IDialogService dialogService)
-    : TwoStepViewModelBase<SmartDocSearchService, SmartDocSearchConfig>(appConfig, dialogService)
+    : AiTwoStepViewModelBase<SmartDocSearchService, SmartDocSearchConfig>(appConfig, dialogService)
 {
-    public override bool EnableInitialize => false;
-
-    [ObservableProperty]
-    private ObservableCollection<TextSearchResult> searchResults = new ObservableCollection<TextSearchResult>();
-
     [ObservableProperty]
     private string aiConclude = "";
 
-    protected override Task OnExecutingAsync(CancellationToken ct)
-    {
-        Service.AitStreamUpdate += (sender, e) => AiConclude += e.Text;
-        Service.SearchResultsUpdate += (sender, e) => SearchResults.Add(e.SearchResult);
-        return base.OnExecutingAsync(ct);
-    }
-
+    [ObservableProperty]
+    private ObservableCollection<TextSearchResult> searchResults = new ObservableCollection<TextSearchResult>();
     protected override Task OnExecutedAsync(CancellationToken ct)
     {
-        SearchResults = [..Service.SearchResults];
         AiConclude = Service.AiConclude;
         return base.OnExecutedAsync(ct);
     }
 
+    protected override Task OnExecutingAsync(CancellationToken ct)
+    {
+        Service.AitStreamUpdate += (sender, e) => AiConclude += e.Text;
+        return base.OnExecutingAsync(ct);
+    }
+
+    protected override Task OnInitializedAsync()
+    {
+        SearchResults = [..Service.SearchResults];
+        return base.OnInitializedAsync();
+    }
     protected override void OnReset()
     {
         SearchResults.Clear();
         AiConclude = "";
+    }
+
+    [RelayCommand]
+    private void OpenFile(string path)
+    {
+        if (path == null || !File.Exists(path))
+        {
+            return;
+        }
+
+        try
+        {
+            Process.Start(new ProcessStartInfo(path)
+            {
+                UseShellExecute = true
+            });
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "打开文件失败");
+        }
     }
 }

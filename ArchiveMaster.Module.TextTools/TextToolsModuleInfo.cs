@@ -22,6 +22,7 @@ namespace ArchiveMaster
         public IList<ConfigMetadata> Configs =>
         [
             new ConfigMetadata(typeof(SmartDocSearchConfig)),
+            new ConfigMetadata(typeof(AiProvidersConfig)),
         ];
 
         public string ModuleName => "文本工具";
@@ -45,6 +46,8 @@ namespace ArchiveMaster
             {
                 new ToolPanelInfo(typeof(SmartDocSearchPanel), typeof(SmartDocSearchViewModel), "文档智能搜索",
                     "从多个文档中搜索关键词，并通过AI进行总结归纳", baseUrl + "docSearch.svg"),
+                new ToolPanelInfo(typeof(AiProvidersPanel), typeof(AiProvidersViewModel), "AI服务提供商",
+                    "配置AI服务提供商", baseUrl + "ai.svg"),
             },
             GroupName = ModuleName,
             GroupDescription = ModuleDescription
