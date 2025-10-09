@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Text.Json.Serialization;
 using ArchiveMaster.Helpers;
 using CommunityToolkit.Mvvm.ComponentModel;
 using FzLib.IO;
@@ -7,10 +8,11 @@ namespace ArchiveMaster.Configs;
 
 public partial class AiProvidersConfig : ConfigBase
 {
-    [ObservableProperty]
+    [ObservableProperty] 
     [NotifyPropertyChangedFor(nameof(CurrentProvider))]
     private int currentProviderIndex = 0;
 
+    [JsonIgnore]
     public AiProviderConfig CurrentProvider
     {
         get
@@ -42,6 +44,7 @@ public partial class AiProvidersConfig : ConfigBase
         Model = "qwen3:4b",
         Url = "http://localhost:11434/api",
     };
+
     public override void Check()
     {
     }

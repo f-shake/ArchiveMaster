@@ -3,8 +3,9 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace ArchiveMaster.Configs
 {
-    public partial class AiProviderConfig :ObservableObject
+    public partial class AiProviderConfig : ObservableObject
     {
+        [property: SecurePassword.SecurePasswordAlwaysRemember]
         [ObservableProperty]
         private SecurePassword key = new SecurePassword();
 
