@@ -12,8 +12,9 @@ namespace ArchiveMaster.Views
 {
     public partial class StringListEditor : UserControl
     {
-        public static readonly StyledProperty<ObservableStringList> ItemsSourceProperty = AvaloniaProperty.Register<StringListEditor, ObservableStringList>(
-            nameof(ItemsSource));
+        public static readonly StyledProperty<ObservableStringList> ItemsSourceProperty =
+            AvaloniaProperty.Register<StringListEditor, ObservableStringList>(
+                nameof(ItemsSource));
 
         public ObservableStringList ItemsSource
         {
@@ -30,6 +31,7 @@ namespace ArchiveMaster.Views
         {
             var list = GetItemsSourceList();
             list.Add("新项目");
+            scr.Offset = new Vector(int.MaxValue, 0); //滚动到最右侧
         }
 
         private ObservableStringList GetItemsSourceList()
@@ -61,6 +63,7 @@ namespace ArchiveMaster.Views
             {
                 throw new InvalidOperationException("DataContext为空");
             }
+
             var list = GetItemsSourceList();
             list.Remove(editableString);
         }

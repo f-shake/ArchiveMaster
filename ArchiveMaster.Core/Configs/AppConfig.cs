@@ -39,6 +39,7 @@ namespace ArchiveMaster.Configs
         private const string JKEY_GLOBALS = "Globals";
         private const string JKEY_GROUPS = "Groups";
         private const string JKEY_MODULES = "Modules";
+
         private static readonly JsonSerializerOptions JsonOptions = new JsonSerializerOptions()
         {
             Encoder = JavaScriptEncoder.Create(UnicodeRanges.All),
@@ -191,7 +192,7 @@ namespace ArchiveMaster.Configs
 
                 ParseModules(jm);
                 ParseGroups(jg);
-                ProcessNullObject();
+                ProcessAllNullObjects();
             }
             catch (JsonException ex)
             {
@@ -367,21 +368,20 @@ namespace ArchiveMaster.Configs
         /// <summary>
         /// 将一些由于配置升级等原因造成的配置属性为空的配置项，恢复为默认值
         /// </summary>
-        private void ProcessNullObject()
+        private void ProcessAllNullObjects()
         {
-            foreach (var (c, p) in EnumerateProperties<SecurePassword>())
-            {
-                if (p.GetValue(c.Config) is null)
-                {
-                    p.SetValue(c.Config, new SecurePassword());
-                }
-            }
+            ProcessNullObjects<SecurePassword>();
+            ProcessNullObjects<FileFilterRule>();
+            ProcessNullObjects<ObservableStringList>();
+        }
 
-            foreach (var (c, p) in EnumerateProperties<FileFilterRule>())
+        private void ProcessNullObjects<T>() where T : new()
+        {
+            foreach (var (c, p) in EnumerateProperties<T>())
             {
                 if (p.GetValue(c.Config) is null)
                 {
-                    p.SetValue(c.Config, new FileFilterRule());
+                    p.SetValue(c.Config, new T());
                 }
             }
         }

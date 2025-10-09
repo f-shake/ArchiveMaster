@@ -62,56 +62,51 @@
         </Style>
 
     </UserControl.Styles>
-    <Grid>
+    <DockPanel LastChildFill="True">
+        <Button
+            Margin="8,0,0,6"
+            Background="{DynamicResource ButtonBackground}"
+            Classes="Transparent Circle"
+            Click="AddButton_Click"
+            Content="+"
+            DockPanel.Dock="Right" />
+
         <ScrollViewer
+            x:Name="scr"
             HorizontalScrollBarVisibility="Auto"
-            PointerWheelChanged="ScrollViewer_OnPointerWheelChanged"
             VerticalScrollBarVisibility="Disabled">
-            <StackPanel
+            <ItemsControl
+                x:Name="items"
                 Margin="0,0,0,6"
-                Orientation="Horizontal"
-                Spacing="0">
-                <!--  通过设置StackPanel的Spacing=0和ItemsControl的Margin及IsVisible，保证在0项目时，新增按钮居中  -->
-                <ItemsControl
-                    x:Name="items"
-                    Margin="0,0,8,0"
-                    IsVisible="{Binding $parent[UserControl].ItemsSource, Converter={x:Static cvt:Converters.CountGreaterThanZero}}"
-                    ItemsSource="{Binding $parent[UserControl].ItemsSource}">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
+                ItemsSource="{Binding $parent[UserControl].ItemsSource}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel
+                            Orientation="Horizontal"
+                            Spacing="8" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border
+                            Padding="5,0,0,0"
+                            Background="{DynamicResource ButtonBackground}"
+                            CornerRadius="{StaticResource TagCornerRadius}">
                             <StackPanel
                                 Orientation="Horizontal"
-                                Spacing="8" />
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <Border
-                                Padding="5,0,0,0"
-                                Background="{DynamicResource ButtonBackground}"
-                                CornerRadius="{StaticResource TagCornerRadius}">
-                                <StackPanel
-                                    Orientation="Horizontal"
-                                    Spacing="4">
-                                    <TextBox
-                                        Classes="Tag"
-                                        Text="{Binding Value}" />
-                                    <Button
-                                        Classes="Transparent Circle"
-                                        Click="RemoveButton_Click"
-                                        Content="×" />
-                                </StackPanel>
-                            </Border>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-
-                <Button
-                    Background="{DynamicResource ButtonBackground}"
-                    Classes="Transparent Circle"
-                    Click="AddButton_Click"
-                    Content="+" />
-            </StackPanel>
+                                Spacing="4">
+                                <TextBox
+                                    Classes="Tag"
+                                    Text="{Binding Value}" />
+                                <Button
+                                    Classes="Transparent Circle"
+                                    Click="RemoveButton_Click"
+                                    Content="×" />
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
         </ScrollViewer>
-    </Grid>
+    </DockPanel>
 </UserControl>

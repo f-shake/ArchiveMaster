@@ -45,6 +45,7 @@ public partial class SmartDocSearchViewModel(AppConfig appConfig, IDialogService
         SearchResults = [..Service.SearchResults];
         return base.OnInitializedAsync();
     }
+
     protected override void OnReset()
     {
         SearchResults.Clear();
