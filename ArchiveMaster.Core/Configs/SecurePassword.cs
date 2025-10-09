@@ -8,7 +8,7 @@ using Serilog;
 
 namespace ArchiveMaster.Configs;
 
-public partial class SecurePassword:ObservableObject
+public partial class SecurePassword : ObservableObject
 {
     public SecurePassword()
     {
@@ -23,12 +23,12 @@ public partial class SecurePassword:ObservableObject
     private string password;
 
     [ObservableProperty]
-    private bool remember;
+    private bool remember = true;
 
     public static implicit operator SecurePassword(string password) => new SecurePassword(password);
 
     public static implicit operator string(SecurePassword securePassword) => securePassword.Password;
-    
+
     public class JsonConverter : JsonConverter<SecurePassword>
     {
         private static readonly Regex HexRegex = new Regex("^[0-9a-fA-F]+$", RegexOptions.Compiled);
@@ -43,6 +43,7 @@ public partial class SecurePassword:ObservableObject
                 {
                     return new SecurePassword { Remember = false };
                 }
+
                 var sp = new SecurePassword();
                 try
                 {

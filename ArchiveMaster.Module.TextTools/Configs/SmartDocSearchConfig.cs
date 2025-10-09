@@ -48,8 +48,11 @@ namespace ArchiveMaster.Configs
                     throw new ArgumentException("请输入文本");
                 }
             }
-            
-            CheckEmpty(Keywords, "关键词");
+
+            if (!Keywords.Trimmed.Any())
+            {
+                throw new ArgumentException("请添加至少一个关键词");
+            }
         }
     }
 }

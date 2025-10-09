@@ -11,14 +11,32 @@
     xmlns:v="using:ArchiveMaster.Views"
     xmlns:vm="clr-namespace:ArchiveMaster.ViewModels"
     x:Name="root"
+    HorizontalAlignment="Center"
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
+    <!--  无数据时，新增按钮无边距，居中；否则，提供左边和下面的边距  -->
+    <Interaction.Behaviors>
+        <DataTriggerBehavior
+            Binding="{Binding $parent[UserControl].ItemsSource.Count}"
+            Value="0">
+            <ChangePropertyAction
+                PropertyName="Margin"
+                TargetObject="btnAdd"
+                Value="0" />
+        </DataTriggerBehavior>
+        <DataTriggerBehavior
+            Binding="{Binding $parent[UserControl].ItemsSource.Count}"
+            ComparisonCondition="NotEqual"
+            Value="0">
+            <ChangePropertyAction
+                PropertyName="Margin"
+                TargetObject="btnAdd"
+                Value="8,0,0,6" />
+        </DataTriggerBehavior>
+    </Interaction.Behaviors>
+
     <UserControl.Resources>
-        <SolidColorBrush
-            x:Key="TagTextBoxSelectionBrush"
-            Opacity=".3"
-            Color="White" />
         <system:Double x:Key="TagHeight">28</system:Double>
         <system:Double x:Key="ScrollBarSize">6</system:Double>
         <CornerRadius x:Key="TagCornerRadius">16</CornerRadius>
@@ -34,6 +52,9 @@
             <Setter Property="CornerRadius" Value="{StaticResource TagCornerRadius}" />
             <Setter Property="HorizontalContentAlignment" Value="Center" />
             <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Style Selector="^:disabled">
+                <Setter Property="IsVisible" Value="False" />
+            </Style>
         </Style>
 
         <Style Selector="TextBox.Tag">
@@ -64,7 +85,7 @@
     </UserControl.Styles>
     <DockPanel LastChildFill="True">
         <Button
-            Margin="8,0,0,6"
+            x:Name="btnAdd"
             Background="{DynamicResource ButtonBackground}"
             Classes="Transparent Circle"
             Click="AddButton_Click"
@@ -75,6 +96,7 @@
             x:Name="scr"
             HorizontalScrollBarVisibility="Auto"
             VerticalScrollBarVisibility="Disabled">
+
             <ItemsControl
                 x:Name="items"
                 Margin="0,0,0,6"
@@ -83,7 +105,7 @@
                     <ItemsPanelTemplate>
                         <StackPanel
                             Orientation="Horizontal"
-                            Spacing="8" />
+                            Spacing="2" />
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
@@ -97,6 +119,7 @@
                                 Spacing="4">
                                 <TextBox
                                     Classes="Tag"
+                                    KeyDown="TextBox_KeyDown"
                                     Text="{Binding Value}" />
                                 <Button
                                     Classes="Transparent Circle"
