@@ -11,7 +11,6 @@
     xmlns:v="using:ArchiveMaster.Views"
     xmlns:vm="clr-namespace:ArchiveMaster.ViewModels"
     x:Name="root"
-    HorizontalAlignment="Center"
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
@@ -59,7 +58,7 @@
 
         <Style Selector="TextBox.Tag">
             <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="Padding" Value="0" />
+            <Setter Property="Padding" Value="2" />
             <Setter Property="Height" Value="{StaticResource TagHeight}" />
             <Setter Property="MinHeight" Value="{StaticResource TagHeight}" />
             <Setter Property="TextAlignment" Value="Center" />
@@ -79,6 +78,9 @@
                 <Style Selector="^ /template/ Border#PART_BorderElement">
                     <Setter Property="Background" Value="Transparent" />
                 </Style>
+            </Style>
+            <Style Selector="^ /template/ Border">
+                <Setter Property="Padding" Value="2,0" />
             </Style>
         </Style>
 
@@ -111,17 +113,26 @@
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <Border
-                            Padding="5,0,0,0"
                             Background="{DynamicResource ButtonBackground}"
                             CornerRadius="{StaticResource TagCornerRadius}">
+                            <Border.Styles>
+                                <Style Selector="Border">
+                                    <Setter Property="Padding" Value="5,0,0,0" />
+                                    <Style Selector="^:disabled">
+                                        <Setter Property="Padding" Value="5,0,5,0" />
+                                    </Style>
+                                </Style>
+                            </Border.Styles>
+
                             <StackPanel
                                 Orientation="Horizontal"
-                                Spacing="4">
+                                Spacing="0">
                                 <TextBox
                                     Classes="Tag"
                                     KeyDown="TextBox_KeyDown"
                                     Text="{Binding Value}" />
                                 <Button
+                                    Margin="0"
                                     Classes="Transparent Circle"
                                     Click="RemoveButton_Click"
                                     Content="×" />

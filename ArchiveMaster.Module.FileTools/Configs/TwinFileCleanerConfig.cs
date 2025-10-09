@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using ArchiveMaster.ViewModels;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace ArchiveMaster.Configs
 {
@@ -8,10 +9,10 @@ namespace ArchiveMaster.Configs
         private string dir;
 
         [ObservableProperty]
-        private List<string> masterExtensions = ["DNG","ARW","RW2"];
+        private ObservableStringList masterExtensions = ["DNG","ARW","RW2"];
         
         [ObservableProperty]
-        private List<string> deletingPatterns = ["{Name}.JPG","{Name}(*).JPG"];
+        private ObservableStringList deletingPatterns = ["{Name}.JPG","{Name}(*).JPG"];
         
         public override void Check()
         {
@@ -25,7 +26,7 @@ namespace ArchiveMaster.Configs
                 throw new Exception("待删除的附属文件模式列表为空");
             }
 
-            foreach (var pattern in DeletingPatterns)
+            foreach (var pattern in DeletingPatterns.Trimmed)
             {
                 if (!pattern.Contains("{Name}"))
                 {

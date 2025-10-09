@@ -28,6 +28,7 @@
                     <ct:FormItem Header="关键词">
                         <v:StringListEditor
                             MaxWidth="280"
+                            HorizontalAlignment="Center"
                             ItemsSource="{Binding Config.Keywords}" />
                     </ct:FormItem>
                     <ct:FormItem Header="搜索结果上下文长度">

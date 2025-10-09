@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ArchiveMaster.ViewModels;
 using CommunityToolkit.Mvvm.ComponentModel;
 using FzLib.IO;
 
@@ -20,14 +21,14 @@ namespace ArchiveMaster.Configs
         /// 需要压缩的文件的后缀名
         /// </summary>
         [ObservableProperty]
-        private List<string> compressExtensions = new() { "heic", "heif", "jpg", "jpeg" };
+        private ObservableStringList compressExtensions = [];
 
         /// <summary>
         /// 直接复制的文件的后缀名
         /// </summary>
         [ObservableProperty]
-        private List<string> copyDirectlyExtensions =
-            new() { "png", "gpx", "doc", "docx", "ppt", "pptx", "xls", "xlsx", "pdf" };
+        private ObservableStringList copyDirectlyExtensions =
+            ["png", "gpx", "doc", "docx", "ppt", "pptx", "xls", "xlsx", "pdf"];
 
         /// <summary>
         /// 源目录

@@ -21,10 +21,10 @@
             </ct:FormItem>
 
             <ct:FormItem Label="主文件后缀：">
-                <TextBox Text="{Binding Config.MasterExtensions, Converter={x:Static cvt:Converters.StringList}}" />
+                <v:StringListEditor ItemsSource="{Binding Config.MasterExtensions}" />
             </ct:FormItem>
             <ct:FormItem Label="附属文件模式：">
-                <TextBox Text="{Binding Config.DeletingPatterns, Converter={x:Static cvt:Converters.StringList}}" />
+                <v:StringListEditor ItemsSource="{Binding Config.DeletingPatterns}" />
             </ct:FormItem>
 
         </ct:StackFormItemGroup>
