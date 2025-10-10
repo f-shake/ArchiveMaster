@@ -173,4 +173,7 @@
         </Style>
     </Style>
 
+    <Style Selector="ctrl|RadioButtonGroup">
+        <Setter Property="Background" Value="{DynamicResource Background3}" />
+    </Style>
 </Styles>

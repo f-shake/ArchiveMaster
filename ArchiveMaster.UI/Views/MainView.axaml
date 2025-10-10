@@ -34,10 +34,12 @@
     <Grid>
         <SplitView
             x:Name="spl"
+            Background="Transparent"
             CompactPaneLength="40"
             DisplayMode="CompactInline"
             IsPaneOpen="{Binding Source={x:Static cfg:GlobalConfigs.Instance}, Mode=TwoWay, Path=IsMainViewPlanOpen}"
-            OpenPaneLength="200">
+            OpenPaneLength="200"
+            PaneBackground="Transparent">
             <SplitView.Pane>
                 <Border>
                     <Grid

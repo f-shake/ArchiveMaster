@@ -1,7 +1,7 @@
 <ResourceDictionary
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:c="using:ArchiveMaster.Converters">
+    xmlns:ctrl="using:FzLib.Avalonia.Controls">
     <ResourceDictionary.MergedDictionaries>
         <ResourceInclude Source="FontIcons.axaml" />
         <ResourceInclude Source="Views/FileDataGridStyle.axaml" />

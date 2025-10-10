@@ -116,10 +116,10 @@
         <Grid
             Grid.Row="2"
             ColumnDefinitions="Auto,*,Auto">
-            <ToggleSwitch
-                IsChecked="{Binding $parent[UserControl].Source.FromFile}"
-                OffContent="来自文件"
-                OnContent="来自文件" />
+            <ct:RadioButtonGroup SelectedIndex="{Binding $parent[UserControl].Source.FromFile, Converter={x:Static cvt:Converters.BoolZeroOne}}">
+                <ListBoxItem Content="来自文本" />
+                <ListBoxItem Content="来自文件" />
+            </ct:RadioButtonGroup>
 
             <StackPanel
                 Grid.Column="2"
