@@ -88,17 +88,10 @@
                         </ctrl:FormItem>
 
                         <ctrl:FormItem Header="导出方式">
-                            <ComboBox
-                                Width="128"
+                            <ctrl:RadioButtonGroup
+                                DisplayMemberBinding="{Binding ., Converter={x:Static cvt:Converters.Description}}"
                                 ItemsSource="{me:EnumValues e:ExportMode}"
                                 SelectedItem="{Binding Config.ExportMode}">
-                                <ComboBox.ItemTemplate>
-                                    <DataTemplate>
-                                        <TextBlock
-                                            VerticalAlignment="Center"
-                                            Text="{Binding ., Converter={x:Static cvt:Converters.Description}}" />
-                                    </DataTemplate>
-                                </ComboBox.ItemTemplate>
                                 <ToolTip.Tip>
                                     <TextBlock>
                                         <Run FontWeight="Bold">复制：</Run>
@@ -114,7 +107,7 @@
                                         <Run>将会在导出目录生成.bat和.ps1脚本，将执行脚本可以将需要的文件复制到脚本所在目录</Run>
                                     </TextBlock>
                                 </ToolTip.Tip>
-                            </ComboBox>
+                            </ctrl:RadioButtonGroup>
                         </ctrl:FormItem>
 
                         <ctrl:FormItem

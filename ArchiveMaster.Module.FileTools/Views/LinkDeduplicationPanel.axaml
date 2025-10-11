@@ -31,7 +31,7 @@
             <ct:FormItem Label="选项：">
                 <ct:WrapFormItemGroup>
                     <ct:FormItem Header="Hash类型">
-                        <ComboBox
+                        <ct:RadioButtonGroup
                             ItemsSource="{me:EnumValues io:HashAlgorithmType}"
                             SelectedItem="{Binding Config.HashType}" />
                     </ct:FormItem>

@@ -47,11 +47,15 @@
                 </ct:WrapFormItemGroup>
             </ct:FormItem>
 
-            <ct:FormItem Label="AI选项：">
+            <ct:FormItem Label="{Binding .}">
+                <ct:FormItem.LabelTemplate>
+                    <DataTemplate>
+                        <CheckBox
+                            Content="AI总结："
+                            IsChecked="{Binding Config.UseAiConclude}" />
+                    </DataTemplate>
+                </ct:FormItem.LabelTemplate>
                 <ct:WrapFormItemGroup>
-                    <CheckBox
-                        Content="使用AI进行归纳总结"
-                        IsChecked="{Binding Config.UseAiConclude}" />
                     <ct:FormItem
                         Header="额外提示词"
                         IsVisible="{Binding Config.UseAiConclude}">

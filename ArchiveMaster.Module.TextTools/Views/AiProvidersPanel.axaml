@@ -59,8 +59,7 @@
                         <TextBox Text="{Binding SelectedProvider.Name}" />
                     </ct:FormItem>
                     <ct:FormItem Label="类型：">
-                        <ComboBox
-                            HorizontalAlignment="Stretch"
+                        <ct:RadioButtonGroup
                             ItemsSource="{me:EnumValues c:AiProviderType}"
                             SelectedItem="{Binding SelectedProvider.Type}" />
                     </ct:FormItem>

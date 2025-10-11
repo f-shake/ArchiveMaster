@@ -149,9 +149,10 @@
 
             <ctrl:FormItem Label="操作选项：">
                 <ctrl:WrapFormItemGroup>
-                    <CheckBox
-                        Content="建立副本"
-                        IsChecked="{Binding Config.Copy}" />
+                    <ctrl:RadioButtonGroup SelectedIndex="{Binding Config.Copy, Converter={x:Static cvt:Converters.BoolZeroOne}}">
+                        <ListBoxItem Content="移动" />
+                        <ListBoxItem Content="复制" />
+                    </ctrl:RadioButtonGroup>
                 </ctrl:WrapFormItemGroup>
             </ctrl:FormItem>
         </ctrl:StackFormItemGroup>

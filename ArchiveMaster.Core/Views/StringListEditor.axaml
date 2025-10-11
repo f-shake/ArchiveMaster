@@ -113,6 +113,7 @@
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <Border
+                            Margin="4,0,0,0"
                             Background="{DynamicResource ButtonBackground}"
                             CornerRadius="{StaticResource TagCornerRadius}">
                             <Border.Styles>

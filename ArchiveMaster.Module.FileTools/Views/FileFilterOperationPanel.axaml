@@ -35,49 +35,46 @@
             <ct:FormItem Label="选项：">
                 <ct:WrapFormItemGroup>
                     <ct:FormItem Header="文件操作类型">
-                        <ComboBox
-                            Width="120"
+                        <ct:RadioButtonGroup
                             DisplayMemberBinding="{Binding ., Converter={x:Static cvt:Converters.Description}}"
                             ItemsSource="{me:EnumValues e:FileFilterOperationType}"
                             SelectedItem="{Binding Config.Type}" />
                     </ct:FormItem>
-                    <ct:FormItem Header="目标文件">
-                        <ComboBox
-                            Width="330"
-                            DisplayMemberBinding="{Binding ., Converter={x:Static cvt:Converters.Description}}"
-                            ItemsSource="{me:EnumValues e:FileFilterOperationTargetFileNameMode}"
-                            SelectedItem="{Binding Config.TargetFileNameMode}" />
-                    </ct:FormItem>
                     <ct:FormItem
                         Header="Hash类型"
                         IsVisible="{Binding Config.Type, Converter={x:Static cvt:Converters.EqualWithParameter}, ConverterParameter=Hash}">
-                        <ComboBox
-                            Width="100"
+                        <ct:RadioButtonGroup
                             DisplayMemberBinding="{Binding ., Converter={x:Static cvt:Converters.Description}}"
                             ItemsSource="{me:EnumValues io:HashAlgorithmType}"
                             SelectedItem="{Binding Config.HashType}" />
                     </ct:FormItem>
+                    <ct:FormItem Header="目标文件">
+                        <ComboBox
+                            x:Name="ccbTarget"
+                            Width="330"
+                            DisplayMemberBinding="{Binding ., Converter={x:Static cvt:Converters.Description}}"
+                            ItemsSource="{me:EnumValues e:FileFilterOperationTargetFileNameMode}"
+                            SelectedItem="{Binding Config.TargetFileNameMode}" />
+                        <ct:FormItem.Description>
+                            <Panel>
+                                <TextBlock
+                                    IsVisible="{Binding #ccbTarget.SelectedIndex, Converter={x:Static cvt:Converters.EqualWithParameter}, ConverterParameter=0}"
+                                    Text="将文件复制/移动到目标目录时，完全保留原始目录层级结构，且文件名不变"
+                                    TextWrapping="Wrap" />
+                                <TextBlock
+                                    IsVisible="{Binding #ccbTarget.SelectedIndex, Converter={x:Static cvt:Converters.EqualWithParameter}, ConverterParameter=1}"
+                                    Text="将文件复制/移动到目标目录时，忽略原始目录结构（所有文件直接放在目标根目录），但保留原文件名"
+                                    TextWrapping="Wrap" />
+                                <TextBlock
+                                    IsVisible="{Binding #ccbTarget.SelectedIndex, Converter={x:Static cvt:Converters.EqualWithParameter}, ConverterParameter=2}"
+                                    Text="将文件复制/移动到目标目录时，忽略原始目录结构，但将原始相对路径信息编码到新文件名中，避免冲突"
+                                    TextWrapping="Wrap" />
+                            </Panel>
+                        </ct:FormItem.Description>
+                    </ct:FormItem>
+
                 </ct:WrapFormItemGroup>
             </ct:FormItem>
-            <Border Opacity="0.7">
-                <ct:StackFormItemGroup Margin="90,0,0,0">
-                    <ct:FormItem
-                        Classes="BoldLabel"
-                        Label="保持原有目录结构，使用原文件名：">
-                        <TextBlock Text="将文件复制/移动到目标目录时，完全保留原始目录层级结构，且文件名不变" />
-                    </ct:FormItem>
-                    <ct:FormItem
-                        Classes="BoldLabel"
-                        Label="平铺到目标目录，使用原文件名：">
-                        <TextBlock Text="将文件复制/移动到目标目录时，忽略原始目录结构（所有文件直接放在目标根目录），但保留原文件名" />
-                    </ct:FormItem>
-                    <ct:FormItem
-                        Classes="BoldLabel"
-                        Label="平铺到目标目录，使用相对路径作为新文件名：">
-                        <TextBlock Text="将文件复制/移动到目标目录时，忽略原始目录结构，但将原始相对路径信息编码到新文件名中，避免冲突" />
-                    </ct:FormItem>
-                </ct:StackFormItemGroup>
-            </Border>
         </ct:StackFormItemGroup>
     </v:TwoStepPanelBase.ConfigsContent>
     <v:TwoStepPanelBase.ResultsContent>

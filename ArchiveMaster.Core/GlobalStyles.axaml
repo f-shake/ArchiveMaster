@@ -21,7 +21,7 @@
     </Style>
 
     <Style Selector="ctrl|FormItem.BoldLabel">
-        <Style Selector="^ /template/ TextBlock#PART_LabelText">
+        <Style Selector="^ /template/ ContentPresenter#PART_Label">
             <Setter Property="FontWeight" Value="Bold" />
         </Style>
     </Style>
@@ -175,5 +175,12 @@
 
     <Style Selector="ctrl|RadioButtonGroup">
         <Setter Property="Background" Value="{DynamicResource Background3}" />
+        <Setter Property="ItemsPanel">
+            <Setter.Value>
+                <ItemsPanelTemplate>
+                    <WrapPanel />
+                </ItemsPanelTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
 </Styles>

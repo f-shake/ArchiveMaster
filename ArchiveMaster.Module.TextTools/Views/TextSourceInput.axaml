@@ -12,7 +12,7 @@
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
-    <Grid RowDefinitions="Auto,8,Auto">
+    <Grid ColumnDefinitions="*,8,Auto">
         <!--  来自文件  -->
         <Panel IsVisible="{Binding $parent[UserControl].Source.FromFile}">
             <TextBlock
@@ -114,15 +114,25 @@
 
         <!--  底栏  -->
         <Grid
-            Grid.Row="2"
-            ColumnDefinitions="Auto,*,Auto">
-            <ct:RadioButtonGroup SelectedIndex="{Binding $parent[UserControl].Source.FromFile, Converter={x:Static cvt:Converters.BoolZeroOne}}">
-                <ListBoxItem Content="来自文本" />
+            Grid.Column="2"
+            VerticalAlignment="Center"
+            RowDefinitions="Auto,8,Auto">
+            <Grid.Styles>
+                <Style Selector="Button, ToggleButton">
+                    <Setter Property="Width" Value="84" />
+                    <Setter Property="HorizontalContentAlignment" Value="Center" />
+                </Style>
+            </Grid.Styles>
+
+            <ct:RadioButtonGroup
+                HorizontalAlignment="Center"
+                SelectedIndex="{Binding $parent[UserControl].Source.FromFile, Converter={x:Static cvt:Converters.BoolZeroOne}}">
+                <ListBoxItem Content="输入文本" />
                 <ListBoxItem Content="来自文件" />
             </ct:RadioButtonGroup>
 
             <StackPanel
-                Grid.Column="2"
+                Grid.Row="2"
                 IsVisible="{Binding $parent[UserControl].Source.FromFile}"
                 Orientation="Horizontal">
                 <Button
@@ -134,7 +144,7 @@
             </StackPanel>
 
             <StackPanel
-                Grid.Column="2"
+                Grid.Row="2"
                 IsVisible="{Binding !$parent[UserControl].Source.FromFile}"
                 Orientation="Horizontal">
                 <Button

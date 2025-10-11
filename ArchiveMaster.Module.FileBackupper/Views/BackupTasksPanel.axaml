@@ -17,9 +17,7 @@
     x:DataType="vm:BackupTasksViewModel"
     mc:Ignorable="d">
     <v:PanelBase.PanelContent>
-        <Grid
-            ColumnDefinitions="*,16,*"
-            RowDefinitions="*,8,Auto">
+        <Grid RowDefinitions="*,8,2*,8,Auto">
 
             <Grid RowDefinitions="*,8,Auto">
                 <v:BackupTaskDataGrid
@@ -49,7 +47,7 @@
             </Grid>
 
             <ScrollViewer
-                Grid.Column="2"
+                Grid.Row="2"
                 HorizontalScrollBarVisibility="Disabled">
                 <ctrl:StackFormItemGroup IsEnabled="{Binding SelectedTask, Converter={x:Static cvt:Converters.IsNotNull}}">
                     <ctrl:StackFormItemGroup.Styles>
@@ -123,8 +121,7 @@
             </ScrollViewer>
 
             <Button
-                Grid.Row="2"
-                Grid.ColumnSpan="99"
+                Grid.Row="4"
                 HorizontalAlignment="Center"
                 Command="{Binding SaveCommand}"
                 Content="保存" />

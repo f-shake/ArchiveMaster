@@ -42,35 +42,29 @@
             <ct:FormItem Label="算法参数：">
                 <ctrl:WrapFormItemGroup>
                     <ct:FormItem Header="加密算法">
-                        <ComboBox
-                            Width="128"
+                        <ct:RadioButtonGroup
                             ItemsSource="{Binding CipherModes}"
                             SelectedItem="{Binding Config.CipherMode}" />
                     </ct:FormItem>
                     <ct:FormItem Header="填充模式">
-                        <ComboBox
-                            Width="128"
+                        <ct:RadioButtonGroup
                             ItemsSource="{Binding PaddingModes}"
                             SelectedItem="{Binding Config.PaddingMode}" />
                     </ct:FormItem>
 
                     <ct:FormItem Header="密钥长度">
-                        <ComboBox
-                            Width="128"
-                            SelectedItem="{Binding Config.KeySize}">
+                        <ct:RadioButtonGroup SelectedItem="{Binding Config.KeySize}">
                             <sys:Int32>128</sys:Int32>
                             <sys:Int32>192</sys:Int32>
                             <sys:Int32>256</sys:Int32>
-                        </ComboBox>
+                        </ct:RadioButtonGroup>
                     </ct:FormItem>
                 </ctrl:WrapFormItemGroup>
             </ct:FormItem>
             <ct:FormItem Label="选项：">
                 <ctrl:WrapFormItemGroup>
-
                     <ct:FormItem Header="当目标文件存在时">
-                        <ComboBox
-                            Width="128"
+                        <ct:RadioButtonGroup
                             DisplayMemberBinding="{Binding ., Converter={x:Static c:Converters.Description}}"
                             ItemsSource="{me:EnumValues e:FilenameDuplicationPolicy}"
                             SelectedItem="{Binding Config.FilenameDuplicationPolicy}" />
@@ -90,12 +84,10 @@
 
 
             <ct:FormItem Label="操作：">
-                <StackPanel Orientation="Horizontal">
-                    <RadioButton
-                        Content="加密"
-                        IsChecked="{Binding IsEncrypting}" />
-                    <RadioButton Content="解密" />
-                </StackPanel>
+                <ct:RadioButtonGroup SelectedIndex="{Binding IsEncrypting, Converter={x:Static c:Converters.BoolZeroOne}}">
+                    <ListBoxItem Content="解密" />
+                    <ListBoxItem Content="解密" />
+                </ct:RadioButtonGroup>
             </ct:FormItem>
         </ct:StackFormItemGroup>
     </v:TwoStepPanelBase.ConfigsContent>
