@@ -8,53 +8,6 @@
     xmlns:sys="clr-namespace:System;assembly=System.Runtime"
     xmlns:v="using:ArchiveMaster.Views"
     xmlns:vm="clr-namespace:ArchiveMaster.ViewModels">
-    <sys:Boolean x:Key="ShowSingleLine">True</sys:Boolean>
-    <sys:Boolean x:Key="ShowTwoLines">False</sys:Boolean>
-    <sys:Double x:Key="ConfigMaxHeight">300</sys:Double>
-
-    <!--  <ControlTheme  -->
-    <!--  x:Key="PanelBackButton"  -->
-    <!--  TargetType="Button">  -->
-    <!--     <Setter Property="Template"> -->
-    <!--         <ControlTemplate> -->
-    <!--  <Border  -->
-    <!--  x:Name="PART_Border"  -->
-    <!--  Width="36"  -->
-    <!--  Height="36"  -->
-    <!--  Background="Transparent"  -->
-    <!--  CornerRadius="4">  -->
-    <!--  <TextBlock  -->
-    <!--  HorizontalAlignment="Center"  -->
-    <!--  VerticalAlignment="Center"  -->
-    <!--  FontFamily="{StaticResource IconFont}"  -->
-    <!--  FontSize="16"  -->
-    <!--  Text="{StaticResource ChromeBack}" />  -->
-    <!--             </Border> -->
-    <!--    -->
-    <!--         </ControlTemplate> -->
-    <!--    -->
-    <!--     </Setter> -->
-    <!--    -->
-    <!--    -->
-    <!--     <Style Selector="^:pointerover /template/ Border#PART_Border"> -->
-    <!--         <Setter Property="Background" Value="{DynamicResource ButtonBackgroundPointerOver}" /> -->
-    <!--         <Setter Property="TextBlock.Foreground" Value="{DynamicResource ButtonForegroundPointerOver}" /> -->
-    <!--     </Style> -->
-    <!--    -->
-    <!--     <Style Selector="^:pressed"> -->
-    <!--         <Setter Property="RenderTransform" Value="scale(0.98)" /> -->
-    <!--     </Style> -->
-    <!--    -->
-    <!--     <Style Selector="^:pressed  /template/ Border#PART_Border"> -->
-    <!--         <Setter Property="Background" Value="{DynamicResource ButtonBackgroundPressed}" /> -->
-    <!--         <Setter Property="TextBlock.Foreground" Value="{DynamicResource ButtonForegroundPressed}" /> -->
-    <!--     </Style> -->
-    <!--    -->
-    <!--     <Style Selector="^:disabled /template/ Border#PART_Border"> -->
-    <!--         <Setter Property="TextBlock.Foreground" Value="{DynamicResource ButtonForegroundDisabled}" /> -->
-    <!--     </Style> -->
-    <!-- </ControlTheme> -->
-
 
     <ControlTheme
         x:Key="{x:Type v:PanelBase}"
@@ -62,9 +15,7 @@
         <Setter Property="Background" Value="{DynamicResource Background1}" />
         <Setter Property="Template">
             <ControlTemplate>
-                <Grid
-                    Margin="8"
-                    RowDefinitions="Auto,8,*">
+                <Grid RowDefinitions="Auto,8,*">
                     <Grid
                         ColumnDefinitions="Auto,8,*,8,Auto"
                         RowDefinitions="*,*">
@@ -82,12 +33,6 @@
                             Text="{TemplateBinding Description}"
                             TextTrimming="CharacterEllipsis"
                             TextWrapping="Wrap" />
-
-                        <!--  <Button  -->
-                        <!--  Grid.RowSpan="2"  -->
-                        <!--  Command="{Binding ExitCommand}"  -->
-                        <!--  IsEnabled="{Binding !IsWorking}"  -->
-                        <!--  Theme="{StaticResource PanelBackButton}" />  -->
 
                         <ContentControl
                             Grid.Row="0"
@@ -119,10 +64,9 @@
         TargetType="v:TwoStepPanelBase">
         <Setter Property="Template">
             <ControlTemplate>
-                <Grid
-                    Margin="8"
-                    RowDefinitions="Auto,8,*">
+                <Grid RowDefinitions="Auto,*">
                     <Grid
+                        Margin="8"
                         ColumnDefinitions="Auto,8,*,8,Auto"
                         RowDefinitions="*,*">
 
@@ -131,7 +75,7 @@
                             FontSize="16"
                             FontWeight="Bold"
                             Text="{TemplateBinding Title}" />
-                    <TextBlock
+                        <TextBlock
                             Grid.Row="1"
                             Grid.Column="2"
                             Margin="0,4,0,0"
@@ -139,11 +83,6 @@
                             Text="{TemplateBinding Description}"
                             TextTrimming="CharacterEllipsis"
                             TextWrapping="Wrap" />
-                        <!--  <Button  -->
-                        <!--  Grid.RowSpan="2"  -->
-                        <!--  Command="{Binding ExitCommand}"  -->
-                        <!--  IsEnabled="{Binding !IsWorking}"  -->
-                        <!--  Theme="{StaticResource PanelBackButton}" />  -->
 
 
                         <StackPanel
@@ -191,40 +130,51 @@
                                 Content="{StaticResource Copy}"
                                 ToolTip.Tip="建立当前预设的副本" />
                         </StackPanel>
-
                     </Grid>
 
                     <Grid
-                        Grid.Row="2"
-                        Margin="8"
-                        RowDefinitions="Auto,8,Auto,8,*,24,Auto">
+                        x:Name="PART_ContentContainer"
+                        Grid.Row="1"
+                        RowDefinitions="Auto,Auto,*,8,Auto">
 
+                        <!--  配置区  -->
                         <ScrollViewer
-                            MaxHeight="{DynamicResource ConfigMaxHeight}"
+                            x:Name="PART_Configs"
+                            MaxHeight="300"
+                            Margin="8,8,0,8"
+                            Padding="0,0,20,0"
                             b:SmoothScrollBehavior.IsEnabled="True"
                             HorizontalScrollBarVisibility="Disabled"
                             IsEnabled="{Binding CanInitialize}"
+                            IsVisible="{Binding EnableInitialize}"
                             VerticalScrollBarVisibility="Auto">
-                            <ContentControl Content="{TemplateBinding ConfigsContent}" />
+                            <ContentPresenter Content="{TemplateBinding ConfigsContent}" />
                         </ScrollViewer>
 
-                        <Border
-                            Grid.Row="2"
+                        <GridSplitter
+                            x:Name="PART_GridSplitter"
+                            Grid.Row="1"
+                            Height="3"
+                            MinHeight="3"
                             Margin="32,16"
-                            BorderBrush="{DynamicResource Background3}"
-                            BorderThickness="0,2,0,0"
+                            Background="{DynamicResource Background3}"
+                            CornerRadius="1.5"
                             IsVisible="{Binding EnableInitialize}" />
 
-
-                        <ContentControl
-                            Grid.Row="4"
+                        <!--  结果区  -->
+                        <ContentPresenter
+                            x:Name="PART_Results"
+                            Grid.Row="2"
+                            Margin="8"
                             Content="{TemplateBinding ResultsContent}" />
 
+                        <!--  信息、进度、按钮  -->
                         <Grid
-                            Grid.Row="6"
+                            x:Name="PART_BottomOneLine"
+                            Grid.Row="4"
+                            Margin="16"
                             ColumnDefinitions="4*,8,*,16,Auto,8,Auto,8,Auto,8,Auto"
-                            IsEnabled="{Binding Config, Converter={x:Static cvt:Converters.IsNotNull}}"
-                            IsVisible="{DynamicResource ShowSingleLine}">
+                            IsEnabled="{Binding Config, Converter={x:Static cvt:Converters.IsNotNull}}">
 
 
                             <TextBlock
@@ -272,10 +222,11 @@
                         </Grid>
 
                         <Grid
-                            Grid.Row="6"
+                            x:Name="PART_BottomTwoLine"
+                            Grid.Row="4"
+                            Margin="16"
                             ColumnDefinitions="*,16,Auto,8,Auto"
                             IsEnabled="{Binding Config, Converter={x:Static cvt:Converters.IsNotNull}}"
-                            IsVisible="{DynamicResource ShowTwoLines}"
                             RowDefinitions="Auto,8,Auto">
 
 

@@ -18,7 +18,9 @@
     x:DataType="vm:AiProvidersViewModel"
     mc:Ignorable="d">
     <v:PanelBase.PanelContent>
-        <Grid ColumnDefinitions="*,8,*">
+        <Grid
+            Margin="8"
+            ColumnDefinitions="*,8,*">
             <Grid RowDefinitions="Auto,8,*,8,Auto">
                 <ct:FormItem Label="当前使用的AI服务：">
                     <ComboBox

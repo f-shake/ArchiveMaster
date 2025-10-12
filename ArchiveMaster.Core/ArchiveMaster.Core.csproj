@@ -29,10 +29,6 @@
       <DependentUpon>SettingDialog.axaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="Views\StringListEditor.axaml.cs">
-      <DependentUpon>StringListEditor.axaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
   </ItemGroup>
 
 

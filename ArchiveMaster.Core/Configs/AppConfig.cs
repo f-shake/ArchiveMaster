@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using ArchiveMaster.Models;
 using ArchiveMaster.ViewModels;
 using FzLib.IO;
+using FzLib.Text;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;

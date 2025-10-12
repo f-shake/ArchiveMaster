@@ -63,14 +63,14 @@
                 <ct:FormItem Label="压缩和复制：">
                     <ct:WrapFormItemGroup>
                         <ct:FormItem Header="复制后缀名">
-                            <v:StringListEditor
+                            <ct:StringListEditor
                                 MaxWidth="400"
                                 HorizontalAlignment="Center"
                                 ItemsSource="{Binding Config.CopyDirectlyExtensions}" />
                         </ct:FormItem>
 
                         <ct:FormItem Header="压缩后缀名">
-                            <v:StringListEditor
+                            <ct:StringListEditor
                                 MaxWidth="400"
                                 HorizontalAlignment="Center"
                                 ItemsSource="{Binding Config.CompressExtensions}" />

@@ -26,7 +26,7 @@
             <ct:FormItem Label="搜索选项：">
                 <ct:WrapFormItemGroup>
                     <ct:FormItem Header="关键词">
-                        <v:StringListEditor
+                        <ct:StringListEditor
                             MaxWidth="280"
                             HorizontalAlignment="Center"
                             ItemsSource="{Binding Config.Keywords}" />

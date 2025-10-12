@@ -1,19 +1,19 @@
 ﻿using ArchiveMaster.ViewModels;
 using CommunityToolkit.Mvvm.ComponentModel;
+using FzLib.Text;
 
 namespace ArchiveMaster.Configs
 {
     public partial class TwinFileCleanerConfig : ConfigBase
     {
         [ObservableProperty]
+        private ObservableStringList deletingPatterns = ["{Name}.JPG", "{Name}(*).JPG"];
+
+        [ObservableProperty]
         private string dir;
 
         [ObservableProperty]
         private ObservableStringList masterExtensions = ["DNG","ARW","RW2"];
-        
-        [ObservableProperty]
-        private ObservableStringList deletingPatterns = ["{Name}.JPG","{Name}(*).JPG"];
-        
         public override void Check()
         {
             CheckDir(Dir,"目录");

@@ -19,7 +19,9 @@
     <v:PanelBase.PanelContent>
         <Grid RowDefinitions="*,8,2*,8,Auto">
 
-            <Grid RowDefinitions="*,8,Auto">
+            <Grid
+                Margin="8"
+                RowDefinitions="*,8,Auto">
                 <v:BackupTaskDataGrid
                     ItemsSource="{Binding Tasks}"
                     SelectedItem="{Binding SelectedTask}" />
@@ -48,6 +50,8 @@
 
             <ScrollViewer
                 Grid.Row="2"
+                Margin="8,0,0,0"
+                Padding="0,0,20,0"
                 HorizontalScrollBarVisibility="Disabled">
                 <ctrl:StackFormItemGroup IsEnabled="{Binding SelectedTask, Converter={x:Static cvt:Converters.IsNotNull}}">
                     <ctrl:StackFormItemGroup.Styles>

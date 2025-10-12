@@ -21,10 +21,10 @@
             </ct:FormItem>
 
             <ct:FormItem Label="主文件后缀：">
-                <v:StringListEditor ItemsSource="{Binding Config.MasterExtensions}" />
+                <ct:StringListEditor ItemsSource="{Binding Config.MasterExtensions}" />
             </ct:FormItem>
-            <ct:FormItem Label="附属文件模式：">
-                <v:StringListEditor ItemsSource="{Binding Config.DeletingPatterns}" />
+            <ct:FormItem Label="附属文件通配：">
+                <ct:StringListEditor ItemsSource="{Binding Config.DeletingPatterns}" />
             </ct:FormItem>
 
         </ct:StackFormItemGroup>

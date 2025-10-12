@@ -4,6 +4,7 @@ using ArchiveMaster.Helpers;
 using ArchiveMaster.ViewModels;
 using CommunityToolkit.Mvvm.ComponentModel;
 using FzLib.IO;
+using FzLib.Text;
 
 namespace ArchiveMaster.Configs
 {

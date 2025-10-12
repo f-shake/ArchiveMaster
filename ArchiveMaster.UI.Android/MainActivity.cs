@@ -23,6 +23,8 @@ using static Android.Views.View;
 using Environment = Android.OS.Environment;
 using Uri = Android.Net.Uri;
 using ArchiveMaster.Views;
+using NPOI.OpenXml4Net.OPC.Internal;
+using FileHelper = ArchiveMaster.Helpers.FileHelper;
 
 namespace ArchiveMaster.UI.Android;
 
@@ -63,10 +65,38 @@ public class MainActivity : AvaloniaMainActivity<App>, IPermissionService, IBack
         }
     }
 
-    private string GetExternalFilesDir()
+    public double GetBottom()
     {
-        var dir = GetExternalFilesDir(string.Empty);
-        return dir.AbsolutePath.Split(["Android"], StringSplitOptions.None)[0];
+        var density = Resources.DisplayMetrics.ScaledDensity;
+        return WindowManager.CurrentWindowMetrics.WindowInsets.GetInsets(WindowInsets.Type.NavigationBars()).Bottom /
+               density;
+    }
+
+    public double GetNavBarHeight()
+    {
+        if (Build.VERSION.SdkInt >= (BuildVersionCodes)30)
+        {
+            return WindowManager.CurrentWindowMetrics.WindowInsets.GetInsets(WindowInsets.Type.NavigationBars()).Bottom;
+        }
+
+        var orientation = Resources.Configuration.Orientation;
+        int resourceId =
+            Resources.GetIdentifier(
+                orientation == global::Android.Content.Res.Orientation.Portrait
+                    ? "navigation_bar_height"
+                    : "navigation_bar_height_landscape", "dimen", "android");
+        if (resourceId > 0)
+        {
+            return Resources.GetDimensionPixelSize(resourceId);
+        }
+
+        return 0;
+    }
+
+    public double GetTop()
+    {
+        var density = Resources.DisplayMetrics.ScaledDensity;
+        return WindowManager.CurrentWindowMetrics.WindowInsets.GetInsets(WindowInsets.Type.StatusBars()).Top / density;
     }
 
     public override void OnBackPressed()
@@ -98,7 +128,7 @@ public class MainActivity : AvaloniaMainActivity<App>, IPermissionService, IBack
             e.Services.AddSingleton<IViewPadding>(this);
         };
 
-        FilePickerTextBox.AndroidExternalFilesDir = GetExternalFilesDir();
+        FileHelper.AndroidExternalFilesDir = GetExternalFilesDir();
 
         return base.CustomizeAppBuilder(builder);
     }
@@ -135,38 +165,9 @@ public class MainActivity : AvaloniaMainActivity<App>, IPermissionService, IBack
         Window.SetStatusBarColor(Color.Transparent);
     }
 
-
-    public double GetNavBarHeight()
+    private string GetExternalFilesDir()
     {
-        if (Build.VERSION.SdkInt >= (BuildVersionCodes)30)
-        {
-            return WindowManager.CurrentWindowMetrics.WindowInsets.GetInsets(WindowInsets.Type.NavigationBars()).Bottom;
-        }
-
-        var orientation = Resources.Configuration.Orientation;
-        int resourceId =
-            Resources.GetIdentifier(
-                orientation == global::Android.Content.Res.Orientation.Portrait
-                    ? "navigation_bar_height"
-                    : "navigation_bar_height_landscape", "dimen", "android");
-        if (resourceId > 0)
-        {
-            return Resources.GetDimensionPixelSize(resourceId);
-        }
-
-        return 0;
-    }
-
-    public double GetTop()
-    {
-        var density = Resources.DisplayMetrics.ScaledDensity;
-        return WindowManager.CurrentWindowMetrics.WindowInsets.GetInsets(WindowInsets.Type.StatusBars()).Top / density;
-    }
-
-    public double GetBottom()
-    {
-        var density = Resources.DisplayMetrics.ScaledDensity;
-        return WindowManager.CurrentWindowMetrics.WindowInsets.GetInsets(WindowInsets.Type.NavigationBars()).Bottom /
-               density;
+        var dir = GetExternalFilesDir(string.Empty);
+        return dir.AbsolutePath.Split(["Android"], StringSplitOptions.None)[0];
     }
 }

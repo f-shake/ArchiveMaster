@@ -67,7 +67,7 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
     }
 
     /// <summary>
-    /// 是否启用Two-Step中的初始化。若禁用，将不显示初始化按钮
+    /// 是否启用Two-Step中的初始化。若禁用，将不显示初始化按钮和配置面板
     /// </summary>
     public virtual bool EnableInitialize => true;
     

@@ -20,12 +20,15 @@
     mc:Ignorable="d">
     <v:PanelBase.RightTopContent>
         <ToggleSwitch
+            Margin="8"
             IsChecked="{Binding Config.EnableBackgroundBackup}"
             OffContent="自动备份总开关"
             OnContent="自动备份总开关" />
     </v:PanelBase.RightTopContent>
     <v:PanelBase.PanelContent>
-        <Grid RowDefinitions="*,8,*">
+        <Grid
+            Margin="8"
+            RowDefinitions="*,8,*">
             <Grid
                 Grid.RowSpan="3"
                 IsVisible="{Binding SelectedTask, Converter={x:Static cvt:Converters.IsNull}}"
