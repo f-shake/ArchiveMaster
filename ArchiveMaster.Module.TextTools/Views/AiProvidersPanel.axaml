@@ -1,0 +1,84 @@
+<v:PanelBase
+    x:Class="ArchiveMaster.Views.AiProvidersPanel"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:b="using:ArchiveMaster.Behaviors"
+    xmlns:c="using:ArchiveMaster.Configs"
+    xmlns:ct="using:FzLib.Avalonia.Controls"
+    xmlns:cvt="clr-namespace:ArchiveMaster.Converters;assembly=ArchiveMaster.Core"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:gb="using:GroupBox.Avalonia.Controls"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:me="using:FzLib.Avalonia.MarkupExtensions"
+    xmlns:v="using:ArchiveMaster.Views"
+    xmlns:vm="clr-namespace:ArchiveMaster.ViewModels"
+    x:Name="root"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    x:DataType="vm:AiProvidersViewModel"
+    mc:Ignorable="d">
+    <v:PanelBase.PanelContent>
+        <Grid
+            Margin="8"
+            ColumnDefinitions="*,8,*">
+            <Grid RowDefinitions="Auto,8,*,8,Auto">
+                <ct:FormItem Label="当前使用的AI服务：">
+                    <ComboBox
+                        HorizontalAlignment="Stretch"
+                        DisplayMemberBinding="{Binding Name}"
+                        ItemsSource="{Binding Config.Providers}"
+                        SelectedIndex="{Binding Config.CurrentProviderIndex}" />
+                </ct:FormItem>
+                <ListBox
+                    Grid.Row="2"
+                    DisplayMemberBinding="{Binding Name}"
+                    ItemsSource="{Binding Config.Providers}"
+                    SelectedItem="{Binding SelectedProvider}" />
+                <StackPanel
+                    Grid.Row="4"
+                    Margin="0,0,8,0"
+                    Orientation="Horizontal"
+                    Spacing="8">
+                    <Button
+                        Classes="Icon"
+                        Command="{Binding AddProviderCommand}"
+                        Content="{StaticResource Add}"
+                        ToolTip.Tip="新增" />
+                    <Button
+                        Classes="Icon"
+                        Command="{Binding DeleteSelectedProviderCommand}"
+                        Content="{StaticResource Delete}"
+                        IsEnabled="{Binding SelectedProvider, Converter={x:Static cvt:Converters.IsNotNull}}"
+                        ToolTip.Tip="删除" />
+                </StackPanel>
+            </Grid>
+            <gb:GroupBox
+                Grid.Column="2"
+                Header="AI服务提供商配置"
+                IsEnabled="{Binding SelectedProvider, Converter={x:Static cvt:Converters.IsNotNull}}">
+                <ct:StackFormItemGroup>
+                    <ct:FormItem Label="名称：">
+                        <TextBox Text="{Binding SelectedProvider.Name}" />
+                    </ct:FormItem>
+                    <ct:FormItem Label="类型：">
+                        <ct:RadioButtonGroup
+                            ItemsSource="{me:EnumValues c:AiProviderType}"
+                            SelectedItem="{Binding SelectedProvider.Type}" />
+                    </ct:FormItem>
+                    <ct:FormItem Label="地址：">
+                        <TextBox Text="{Binding SelectedProvider.Url}" />
+                    </ct:FormItem>
+                    <ct:FormItem Label="密钥：">
+                        <TextBox
+                            Classes="revealPasswordButton"
+                            PasswordChar="*"
+                            Text="{Binding SelectedProvider.Key.Password}" />
+                    </ct:FormItem>
+                    <ct:FormItem Label="模型：">
+                        <TextBox Text="{Binding SelectedProvider.Model}" />
+                    </ct:FormItem>
+                </ct:StackFormItemGroup>
+            </gb:GroupBox>
+        </Grid>
+    </v:PanelBase.PanelContent>
+</v:PanelBase>

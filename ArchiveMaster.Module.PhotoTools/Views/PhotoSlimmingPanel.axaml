@@ -63,19 +63,17 @@
                 <ct:FormItem Label="压缩和复制：">
                     <ct:WrapFormItemGroup>
                         <ct:FormItem Header="复制后缀名">
-                            <TextBox
-                                MinWidth="200"
+                            <ct:StringListEditor
                                 MaxWidth="400"
-                                Text="{Binding Config.CopyDirectlyExtensions, Converter={x:Static cvt:Converters.StringList}}"
-                                TextWrapping="Wrap" />
+                                HorizontalAlignment="Center"
+                                ItemsSource="{Binding Config.CopyDirectlyExtensions}" />
                         </ct:FormItem>
 
                         <ct:FormItem Header="压缩后缀名">
-                            <TextBox
-                                MinWidth="200"
+                            <ct:StringListEditor
                                 MaxWidth="400"
-                                Text="{Binding Config.CompressExtensions, Converter={x:Static cvt:Converters.StringList}}"
-                                TextWrapping="Wrap" />
+                                HorizontalAlignment="Center"
+                                ItemsSource="{Binding Config.CompressExtensions}" />
                         </ct:FormItem>
                     </ct:WrapFormItemGroup>
                 </ct:FormItem>

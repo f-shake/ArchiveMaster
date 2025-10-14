@@ -33,6 +33,7 @@ namespace ArchiveMaster.Services
         {
             return DeletingFiles.Cast<SimpleFileInfo>();
         }
+
         public override async Task InitializeAsync(CancellationToken ct)
         {
             DeletingFiles = new List<TwinFileInfo>();
@@ -40,7 +41,8 @@ namespace ArchiveMaster.Services
             Dictionary<string, List<FileInfo>> dir2AllFiles = new Dictionary<string, List<FileInfo>>();
             await Task.Run(() =>
             {
-                masterFiles = Config.MasterExtensions.Select(e => new DirectoryInfo(Config.Dir)
+                masterFiles = Config.MasterExtensions.Trimmed
+                    .Select(e => new DirectoryInfo(Config.Dir)
                         .EnumerateFiles($"*.{e}", FileEnumerateExtension.GetEnumerationOptions())
                         .ApplyFilter(ct)
                         .Select(p => new SimpleFileInfo(p, Config.Dir)))
@@ -57,7 +59,7 @@ namespace ArchiveMaster.Services
                 var dir = Path.GetDirectoryName(masterFile.Path);
                 Debug.Assert(dir2AllFiles.ContainsKey(dir));
                 var dirFiles = dir2AllFiles[dir];
-                foreach (var pattern in Config.DeletingPatterns)
+                foreach (var pattern in Config.DeletingPatterns.Trimmed)
                 {
                     var tempPattern = pattern.Replace("{Name}", Path.GetFileNameWithoutExtension(masterFile.Path));
                     var auxiliaryFiles = dirFiles.Where(p => FileFilterHelper.IsMatchedByPattern(p.Name, tempPattern));

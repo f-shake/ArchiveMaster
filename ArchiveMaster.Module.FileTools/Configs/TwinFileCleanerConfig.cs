@@ -1,18 +1,19 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using ArchiveMaster.ViewModels;
+using CommunityToolkit.Mvvm.ComponentModel;
+using FzLib.Text;
 
 namespace ArchiveMaster.Configs
 {
     public partial class TwinFileCleanerConfig : ConfigBase
     {
         [ObservableProperty]
+        private ObservableStringList deletingPatterns = ["{Name}.JPG", "{Name}(*).JPG"];
+
+        [ObservableProperty]
         private string dir;
 
         [ObservableProperty]
-        private List<string> masterExtensions = ["DNG","ARW","RW2"];
-        
-        [ObservableProperty]
-        private List<string> deletingPatterns = ["{Name}.JPG","{Name}(*).JPG"];
-        
+        private ObservableStringList masterExtensions = ["DNG","ARW","RW2"];
         public override void Check()
         {
             CheckDir(Dir,"目录");
@@ -25,7 +26,7 @@ namespace ArchiveMaster.Configs
                 throw new Exception("待删除的附属文件模式列表为空");
             }
 
-            foreach (var pattern in DeletingPatterns)
+            foreach (var pattern in DeletingPatterns.Trimmed)
             {
                 if (!pattern.Contains("{Name}"))
                 {

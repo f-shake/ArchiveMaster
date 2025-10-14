@@ -71,8 +71,8 @@ namespace ArchiveMaster.Services
 
         public override Task InitializeAsync(CancellationToken ct)
         {
-            rCopy = new Regex(@$"\.({string.Join('|', Config.CopyDirectlyExtensions)})$", RegexOptions.IgnoreCase);
-            rCompress = new Regex(@$"\.({string.Join('|', Config.CompressExtensions)})$", RegexOptions.IgnoreCase);
+            rCopy = new Regex(@$"\.({string.Join('|', Config.CopyDirectlyExtensions.Trimmed)})$", RegexOptions.IgnoreCase);
+            rCompress = new Regex(@$"\.({string.Join('|', Config.CompressExtensions.Trimmed)})$", RegexOptions.IgnoreCase);
 
             CompressFiles = new SlimmingFilesInfo(Config.SourceDir);
             CopyFiles = new SlimmingFilesInfo(Config.SourceDir);

@@ -39,6 +39,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArchiveMaster.Module.PhotoT
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArchiveMaster.Module.WriteOnceArchive", "ArchiveMaster.Module.WriteOnceArchive\ArchiveMaster.Module.WriteOnceArchive.csproj", "{63C94058-33B8-431A-8C6F-E78E9A12A531}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArchiveMaster.Module.TextTools", "ArchiveMaster.Module.TextTools\ArchiveMaster.Module.TextTools.csproj", "{DE26E5FD-6F38-4E45-9C2A-E039E69F7278}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -87,6 +89,10 @@ Global
 		{63C94058-33B8-431A-8C6F-E78E9A12A531}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{63C94058-33B8-431A-8C6F-E78E9A12A531}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{63C94058-33B8-431A-8C6F-E78E9A12A531}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DE26E5FD-6F38-4E45-9C2A-E039E69F7278}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DE26E5FD-6F38-4E45-9C2A-E039E69F7278}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DE26E5FD-6F38-4E45-9C2A-E039E69F7278}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DE26E5FD-6F38-4E45-9C2A-E039E69F7278}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -98,6 +104,7 @@ Global
 		{CF761932-19A0-4E5C-8980-0CEB36492457} = {C4072B96-4E0F-46D1-8C0A-85E327F35C40}
 		{E0D6AC3D-EA05-BA4C-90F3-3ACA137611BB} = {C4072B96-4E0F-46D1-8C0A-85E327F35C40}
 		{63C94058-33B8-431A-8C6F-E78E9A12A531} = {C4072B96-4E0F-46D1-8C0A-85E327F35C40}
+		{DE26E5FD-6F38-4E45-9C2A-E039E69F7278} = {C4072B96-4E0F-46D1-8C0A-85E327F35C40}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {1FDF463E-CFE7-477B-94E8-5D38744ECC9A}

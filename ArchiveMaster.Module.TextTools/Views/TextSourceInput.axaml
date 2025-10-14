@@ -1,0 +1,153 @@
+<UserControl
+    x:Class="ArchiveMaster.Views.TextSourceInput"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ct="using:FzLib.Avalonia.Controls"
+    xmlns:cvt="clr-namespace:ArchiveMaster.Converters;assembly=ArchiveMaster.Core"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:gb="using:GroupBox.Avalonia.Controls"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:v="using:ArchiveMaster.Views"
+    xmlns:vm="clr-namespace:ArchiveMaster.ViewModels"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
+    <Grid ColumnDefinitions="*,8,Auto">
+        <!--  来自文件  -->
+        <Panel IsVisible="{Binding $parent[UserControl].Source.FromFile}">
+            <TextBlock
+                IsVisible="{Binding $parent[UserControl].Source.Files.Count, Converter={x:Static cvt:Converters.CountIsZero}}"
+                Opacity="0.7"
+                Text="当前没有选择任何文件" />
+            <ScrollViewer
+                MaxHeight="68"
+                HorizontalScrollBarVisibility="Disabled"
+                IsVisible="{Binding $parent[UserControl].Source.Files.Count, Converter={x:Static cvt:Converters.CountGreaterThanZero}}"
+                VerticalScrollBarVisibility="Auto">
+                <ItemsControl
+                    Background="Transparent"
+                    ItemsSource="{Binding $parent[UserControl].Source.Files}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel
+                                ItemSpacing="8"
+                                LineSpacing="8"
+                                Orientation="Horizontal" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Button
+                                Padding="8,4"
+                                CornerRadius="16">
+                                <TextBlock Text="{Binding File, Converter={x:Static cvt:Converters.FileName}}" />
+                                <Button.Flyout>
+                                    <Flyout>
+                                        <StackPanel
+                                            Width="320"
+                                            Orientation="Vertical"
+                                            Spacing="16">
+                                            <TextBlock
+                                                FontWeight="Bold"
+                                                Text="{Binding File}"
+                                                TextWrapping="Wrap" />
+                                            <!-- <ct:FormItem Header="文档密码（若有）"> -->
+                                            <!--  <TextBox  -->
+                                            <!--  Classes="revealPasswordButton"  -->
+                                            <!--  PasswordChar="*"  -->
+                                            <!--  Text="{Binding Password.Password}" />  -->
+                                            <!-- </ct:FormItem> -->
+                                            <Button
+                                                HorizontalAlignment="Right"
+                                                Classes="Link"
+                                                Click="RemoveFileButton_Click"
+                                                Content="移除" />
+                                        </StackPanel>
+                                    </Flyout>
+                                </Button.Flyout>
+                            </Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Panel>
+
+        <!--  来自文本  -->
+        <TextBox
+            AcceptsReturn="True"
+            IsVisible="{Binding !$parent[UserControl].Source.FromFile}"
+            MaxLines="3"
+            MinLines="2"
+            Text="{Binding $parent[UserControl].Source.Text}"
+            TextWrapping="Wrap"
+            Watermark="将需要处理的文本输入或粘贴至此">
+            <Interaction.Behaviors>
+                <DataTriggerBehavior
+                    Binding="{Binding #tbtnMore.IsChecked}"
+                    Value="True">
+                    <ChangePropertyAction
+                        PropertyName="MinLines"
+                        Value="10" />
+                    <ChangePropertyAction
+                        PropertyName="MaxLines"
+                        Value="10" />
+                </DataTriggerBehavior>
+                <DataTriggerBehavior
+                    Binding="{Binding #tbtnMore.IsChecked}"
+                    Value="False">
+                    <ChangePropertyAction
+                        PropertyName="MinLines"
+                        Value="2" />
+                    <ChangePropertyAction
+                        PropertyName="MaxLines"
+                        Value="3" />
+                </DataTriggerBehavior>
+            </Interaction.Behaviors>
+        </TextBox>
+
+
+        <!--  底栏  -->
+        <Grid
+            Grid.Column="2"
+            VerticalAlignment="Center"
+            RowDefinitions="Auto,8,Auto">
+            <Grid.Styles>
+                <Style Selector="Button, ToggleButton">
+                    <Setter Property="Width" Value="84" />
+                    <Setter Property="HorizontalContentAlignment" Value="Center" />
+                </Style>
+            </Grid.Styles>
+
+            <ct:RadioButtonGroup
+                HorizontalAlignment="Center"
+                SelectedIndex="{Binding $parent[UserControl].Source.FromFile, Converter={x:Static cvt:Converters.BoolZeroOne}}">
+                <ListBoxItem Content="输入文本" />
+                <ListBoxItem Content="来自文件" />
+            </ct:RadioButtonGroup>
+
+            <StackPanel
+                Grid.Row="2"
+                IsVisible="{Binding $parent[UserControl].Source.FromFile}"
+                Orientation="Horizontal">
+                <Button
+                    Click="AddFilesButton_Click"
+                    Content="追加.." />
+                <Button
+                    Click="ClearFilesButton_Click"
+                    Content="清空" />
+            </StackPanel>
+
+            <StackPanel
+                Grid.Row="2"
+                IsVisible="{Binding !$parent[UserControl].Source.FromFile}"
+                Orientation="Horizontal">
+                <Button
+                    Click="PasteButton_Click"
+                    Content="粘贴" />
+                <ToggleButton
+                    x:Name="tbtnMore"
+                    Content="展开" />
+            </StackPanel>
+        </Grid>
+    </Grid>
+</UserControl>

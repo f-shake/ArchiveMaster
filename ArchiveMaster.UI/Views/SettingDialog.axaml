@@ -32,7 +32,9 @@
         <ct:FormItem
             Description="将多级目录路径按指定层级转换为扁平化格式时，使用分隔符代替斜杠"
             Header="目录编码分隔符">
-            <ComboBox SelectedItem="{Binding Path=Configs.FlattenPathSeparatorReplacement}">
+            <ComboBox
+                HorizontalAlignment="Stretch"
+                SelectedItem="{Binding Path=Configs.FlattenPathSeparatorReplacement}">
                 <sys:Char>-</sys:Char>
                 <sys:Char>_</sys:Char>
                 <sys:Char>%</sys:Char>

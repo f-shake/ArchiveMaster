@@ -96,21 +96,14 @@
 
                     </ctrl:FormItem>
                     <ctrl:FormItem Header="导出方式">
-                        <ComboBox
-                            Width="140"
-                            HorizontalAlignment="Stretch"
+                        <ctrl:RadioButtonGroup
+                            DisplayMemberBinding="{Binding ., Converter={x:Static cvt:Converters.Description}}"
                             ItemsSource="{me:EnumValues enums:PackingType}"
-                            SelectedItem="{Binding Config.PackingType}">
-                            <ComboBox.ItemTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding ., Converter={x:Static cvt:Converters.Description}}" />
-                                </DataTemplate>
-                            </ComboBox.ItemTemplate>
-                        </ComboBox>
+                            SelectedItem="{Binding Config.PackingType}" />
                     </ctrl:FormItem>
 
                     <ctrl:FormItem
-                        Header="密码"
+                        Header="密码（可选）"
                         IsVisible="{Binding Config.PackingType, Converter={x:Static cvt:Converters.EqualWithParameter}, ConverterParameter=Copy}">
                         <v:PasswordBox
                             Width="200"

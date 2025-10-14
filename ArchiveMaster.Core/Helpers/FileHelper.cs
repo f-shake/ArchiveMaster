@@ -1,6 +1,7 @@
 ﻿using ArchiveMaster.Configs;
 using ArchiveMaster.Enums;
 using ArchiveMaster.ViewModels.FileSystem;
+using Avalonia.Platform.Storage;
 using FzLib.Cryptography;
 using FzLib.IO;
 
@@ -8,6 +9,9 @@ namespace ArchiveMaster.Helpers;
 
 public static class FileHelper
 {
+
+    public static string AndroidExternalFilesDir { get; set; }
+    
     public static FileFilterRule ImageFileFilterRule => new FileFilterRule()
     {
         IncludeFiles = """
@@ -87,5 +91,24 @@ public static class FileHelper
             < 32 * 1024 * 1024 => 1 * 1024 * 1024, // 中等文件（1MB~32MB）：1MB
             _ => 4 * 1024 * 1024 // 大文件（>32MB）：4MB
         };
+    }
+    
+    public static string GetPath(this  IStorageItem file)
+    {
+        if (OperatingSystem.IsAndroid())
+        {
+            if (AndroidExternalFilesDir == null)
+            {
+                throw new ArgumentException(
+                    "在Android中使用时，应当设置AndroidExternalFilesDir。" +
+                    "值可以从Android项目中使用GetExternalFilesDir(string.Empty)" +
+                    ".AbsolutePath.Split([\"Android\"], StringSplitOptions.None)[0]赋值");
+            }
+
+            var path = file.Path.LocalPath;
+            return Path.Combine(AndroidExternalFilesDir, path.Split(':')[^1]);
+        }
+
+        return file.TryGetLocalPath();
     }
 }

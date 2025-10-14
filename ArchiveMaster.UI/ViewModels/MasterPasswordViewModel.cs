@@ -49,7 +49,7 @@ public partial class MasterPasswordViewModel(IDialogService dialogService, AppCo
         }
         catch (Exception ex)
         {
-            dialogService.ShowErrorDialogAsync("密码解析失败", "已存储的密码解析失败，请重新设置密码");
+            dialogService.ShowErrorDialogAsync("密码解析失败", "已存储的密码解析失败，请重新设置密码", ex.ToString());
             appConfig.ClearAllPassword();
             PassVerification();
         }

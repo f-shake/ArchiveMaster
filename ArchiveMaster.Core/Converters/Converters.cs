@@ -18,13 +18,15 @@ public static class Converters
 
     public static readonly CountToBoolConverter CountIsZero = FzLib.Avalonia.Converters.Converters.CountIsZero;
 
+    public static readonly BoolToIntegerConverter BoolZeroOne = FzLib.Avalonia.Converters.Converters.BoolZeroOne;
+
     public static readonly DescriptionConverter Description = FzLib.Avalonia.Converters.Converters.Description;
 
     public static readonly EqualToBoolConverter EqualWithParameter =
         FzLib.Avalonia.Converters.Converters.EqualWithParameter;
 
     public static readonly FileLengthConverter FileLength = FzLib.Avalonia.Converters.Converters.FileLength;
-    
+
     public static readonly TransferSpeedConverter TransferSpeed = FzLib.Avalonia.Converters.Converters.TransferSpeed;
 
     public static readonly FilePickerFilterConverter FilePickerFilter =
@@ -84,6 +86,9 @@ public static class Converters
     public static readonly TupleConverter Tuple = new();
 
     public static readonly FileFilterDescriptionConverter FileFilter = new();
-    
+
+    public static readonly FilePropertyConverter FileName = new()
+        { PropertyType = FilePropertyConverter.FilePropertyType.Name };
+
     // public static readonly  PasswordConverter Password = new();
 }

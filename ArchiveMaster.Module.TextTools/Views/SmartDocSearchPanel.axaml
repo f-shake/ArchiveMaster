@@ -1,0 +1,194 @@
+<v:TwoStepPanelBase
+    x:Class="ArchiveMaster.Views.SmartDocSearchPanel"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:b="using:ArchiveMaster.Behaviors"
+    xmlns:ct="using:FzLib.Avalonia.Controls"
+    xmlns:cvt="clr-namespace:ArchiveMaster.Converters;assembly=ArchiveMaster.Core"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:gb="using:GroupBox.Avalonia.Controls"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:v="using:ArchiveMaster.Views"
+    xmlns:vm="clr-namespace:ArchiveMaster.ViewModels"
+    x:Name="root"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    x:DataType="vm:SmartDocSearchViewModel"
+    ExecuteButtonContent="AI归纳"
+    InitializeButtonContent="搜索"
+    mc:Ignorable="d">
+    <v:TwoStepPanelBase.ConfigsContent>
+        <ct:StackFormItemGroup>
+            <ct:FormItem Label="文本源：">
+                <v:TextSourceInput Source="{Binding Config.Source}" />
+            </ct:FormItem>
+
+            <ct:FormItem Label="搜索选项：">
+                <ct:WrapFormItemGroup>
+                    <ct:FormItem Header="关键词">
+                        <ct:StringListEditor
+                            MaxWidth="280"
+                            HorizontalAlignment="Center"
+                            ItemsSource="{Binding Config.Keywords}" />
+                    </ct:FormItem>
+                    <ct:FormItem Header="搜索结果上下文长度">
+                        <NumericUpDown
+                            Width="140"
+                            FormatString="0"
+                            Increment="10"
+                            Maximum="1000"
+                            Minimum="50"
+                            Value="{Binding Config.ContextLength}" />
+                    </ct:FormItem>
+                    <CheckBox
+                        Content="使用正则表达式进行搜索"
+                        IsChecked="{Binding Config.UseRegex}" />
+
+                </ct:WrapFormItemGroup>
+            </ct:FormItem>
+
+            <ct:FormItem Label="{Binding .}">
+                <ct:FormItem.LabelTemplate>
+                    <DataTemplate>
+                        <CheckBox
+                            Content="AI总结："
+                            IsChecked="{Binding Config.UseAiConclude}" />
+                    </DataTemplate>
+                </ct:FormItem.LabelTemplate>
+                <ct:WrapFormItemGroup>
+                    <ct:FormItem
+                        Header="额外提示词"
+                        IsVisible="{Binding Config.UseAiConclude}">
+                        <TextBox
+                            Width="240"
+                            Text="{Binding Config.ExtraAiPrompt}"
+                            Watermark="默认对搜索结果进行归纳总结" />
+                    </ct:FormItem>
+                    <ct:FormItem
+                        Header="期望回答长度（字数）"
+                        IsVisible="{Binding Config.UseAiConclude}">
+                        <NumericUpDown
+                            Width="140"
+                            FormatString="0"
+                            Increment="10"
+                            Maximum="2000"
+                            Minimum="50"
+                            Value="{Binding Config.ExpectedAiConcludeLength}" />
+                    </ct:FormItem>
+                    <ct:FormItem
+                        Header="上传条目数量限制"
+                        IsVisible="{Binding Config.UseAiConclude}">
+                        <NumericUpDown
+                            Width="140"
+                            FormatString="0"
+                            Increment="10"
+                            Maximum="200"
+                            Minimum="10"
+                            Value="{Binding Config.AiConcludeMaxCount}" />
+                    </ct:FormItem>
+                </ct:WrapFormItemGroup>
+            </ct:FormItem>
+        </ct:StackFormItemGroup>
+    </v:TwoStepPanelBase.ConfigsContent>
+
+    <v:TwoStepPanelBase.ResultsContent>
+        <Grid
+            ColumnDefinitions="2*,8,*"
+            RowDefinitions="*,8,Auto">
+            <gb:GroupBox Header="搜索结果">
+                <ScrollViewer>
+                    <ItemsControl
+                        Margin="0,0,20,0"
+                        ItemsSource="{Binding SearchResults}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border
+                                    Margin="2,4"
+                                    Padding="8"
+                                    Background="{DynamicResource Background2}"
+                                    BorderBrush="{DynamicResource Background3}"
+                                    BorderThickness="1"
+                                    CornerRadius="8">
+                                    <Grid
+                                        ColumnDefinitions="Auto,8,*"
+                                        RowDefinitions="*,8,Auto">
+                                        <SelectableTextBlock
+                                            Grid.ColumnSpan="3"
+                                            b:TextBlockInlinesBehavior.ItemsSource="{Binding Inlines}"
+                                            TextWrapping="Wrap" />
+
+                                        <Button
+                                            Grid.Row="2"
+                                            Padding="8,4"
+                                            Command="{Binding #root.DataContext.OpenFileCommand}"
+                                            CommandParameter="{Binding Source}"
+                                            Content="{Binding Source, Converter={x:Static cvt:Converters.FileName}}"
+                                            CornerRadius="16"
+                                            IsVisible="{Binding Source, Converter={x:Static cvt:Converters.IsNotNull}}"
+                                            ToolTip.Tip="{Binding Source}" />
+
+                                        <ItemsControl
+                                            Grid.Row="2"
+                                            Grid.Column="2"
+                                            HorizontalAlignment="Right"
+                                            ItemsSource="{Binding Keywords}">
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <WrapPanel
+                                                        ItemSpacing="8"
+                                                        LineSpacing="8"
+                                                        Orientation="Horizontal" />
+                                                </ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Border
+                                                        Padding="8,4"
+                                                        Background="{DynamicResource Accent0}"
+                                                        CornerRadius="16"
+                                                        IsHitTestVisible="False">
+                                                        <TextBlock
+                                                            Foreground="White"
+                                                            Text="{Binding .}" />
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </gb:GroupBox>
+
+            <gb:GroupBox
+                Grid.Column="2"
+                Header="AI分析结果">
+                <ScrollViewer>
+                    <SelectableTextBlock
+                        Text="{Binding AiConclude}"
+                        TextWrapping="Wrap" />
+                </ScrollViewer>
+            </gb:GroupBox>
+
+            <GridSplitter
+                Grid.Column="1"
+                Background="Transparent" />
+
+            <TextBlock
+                Grid.Row="2"
+                Grid.Column="0">
+                <Run Text="共" />
+                <Run Text="{Binding SearchResults.Count}" />
+                <Run Text="条搜索结果" />
+            </TextBlock>
+            <TextBlock
+                Grid.Row="2"
+                Grid.Column="2">
+                <Run Text="AI服务提供商：" />
+                <Run Text="{Binding AI.Name}" />
+            </TextBlock>
+        </Grid>
+    </v:TwoStepPanelBase.ResultsContent>
+</v:TwoStepPanelBase>

@@ -21,7 +21,7 @@
     </Style>
 
     <Style Selector="ctrl|FormItem.BoldLabel">
-        <Style Selector="^ /template/ TextBlock#PART_LabelText">
+        <Style Selector="^ /template/ ContentPresenter#PART_Label">
             <Setter Property="FontWeight" Value="Bold" />
         </Style>
     </Style>
@@ -122,8 +122,12 @@
     </Style>
 
     <Style Selector="ToggleButton">
+        <Setter Property="Padding" Value="24,6" />
         <Style Selector="^.Icon">
             <Setter Property="Padding" Value="6" />
+            <Setter Property="FontFamily">
+                <StaticResource ResourceKey="IconFont" />
+            </Setter>
         </Style>
         <Style Selector="^.Transparent">
             <Setter Property="Background" Value="Transparent" />
@@ -169,4 +173,8 @@
         </Style>
     </Style>
 
+    <Style Selector="ctrl|RadioButtonGroup">
+        <Setter Property="Background" Value="{DynamicResource Background3}" />
+        <Setter Property="Layout" Value="HorizontalWrap" />
+    </Style>
 </Styles>

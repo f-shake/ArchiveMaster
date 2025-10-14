@@ -42,10 +42,10 @@
                     <TimePicker
                         SelectedTime="{Binding Config.TimeOffset}"
                         UseSeconds="True" />
-                    <ToggleSwitch
-                        IsChecked="{Binding Config.InverseTimeOffset}"
-                        OffContent="相机时间更快"
-                        OnContent="GPX时间更快" />
+                    <ct:RadioButtonGroup SelectedIndex="{Binding Config.InverseTimeOffset, Converter={x:Static cvt:Converters.BoolZeroOne}}">
+                        <ListBoxItem Content="相机时间更快" />
+                        <ListBoxItem Content="GPX时间更快" />
+                    </ct:RadioButtonGroup>
                 </StackPanel>
 
             </ct:FormItem>

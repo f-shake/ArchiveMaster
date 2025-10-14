@@ -67,9 +67,14 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
     }
 
     /// <summary>
-    /// 是否启用Two-Step中的初始化。若禁用，将不显示初始化按钮
+    /// 是否启用Two-Step中的初始化。若禁用，将不显示初始化按钮和配置面板
     /// </summary>
     public virtual bool EnableInitialize => true;
+    
+    /// <summary>
+    /// 是否允许重复执行
+    /// </summary>
+    public virtual bool EnableRepeatExecute => false;
 
     /// <summary>
     /// 当进度为double.NaN时，认为进度为非确定模式
@@ -309,6 +314,12 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
         ResetCommand.NotifyCanExecuteChanged();
         CanCancel = false;
         CancelCommand.NotifyCanExecuteChanged();
+
+        if (EnableRepeatExecute)
+        {
+            CanExecute = true;
+            ExecuteCommand.NotifyCanExecuteChanged();
+        }
     }
 
     /// <summary>

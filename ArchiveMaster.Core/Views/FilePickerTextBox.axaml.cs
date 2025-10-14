@@ -73,8 +73,6 @@ public partial class FilePickerTextBox : UserControl
         SaveFile
     }
 
-    public static string AndroidExternalFilesDir { get; set; }
-
     public bool AllowMultiple
     {
         get => GetValue(AllowMultipleProperty);
@@ -209,7 +207,7 @@ public partial class FilePickerTextBox : UserControl
                 });
                 if (openFiles != null && openFiles.Count > 0)
                 {
-                    FileNames = string.Join(Environment.NewLine, openFiles.Select(p => GetPath(p)));
+                    FileNames = string.Join(Environment.NewLine, openFiles.Select(p => p.GetPath()));
                     var a = openFiles[0].TryGetLocalPath();
                 }
 
@@ -223,7 +221,7 @@ public partial class FilePickerTextBox : UserControl
                 });
                 if (folders != null && folders.Count > 0)
                 {
-                    FileNames = string.Join(Environment.NewLine, folders.Select(p => GetPath(p)));
+                    FileNames = string.Join(Environment.NewLine, folders.Select(p => p.GetPath()));
                 }
 
                 break;
@@ -239,7 +237,7 @@ public partial class FilePickerTextBox : UserControl
                 });
                 if (saveFiles != null)
                 {
-                    FileNames = GetPath(saveFiles);
+                    FileNames = saveFiles.GetPath();
                 }
 
                 break;
@@ -298,25 +296,6 @@ public partial class FilePickerTextBox : UserControl
     {
         var binding = BindingOperations.GetBindingExpressionBase(tbkFilterDescription, TextBlock.TextProperty);
         binding?.UpdateTarget();
-    }
-
-    private string GetPath(IStorageItem file)
-    {
-        if (OperatingSystem.IsAndroid())
-        {
-            if (AndroidExternalFilesDir == null)
-            {
-                throw new ArgumentException(
-                    "在Android中使用时，应当设置AndroidExternalFilesDir。" +
-                    "值可以从Android项目中使用GetExternalFilesDir(string.Empty)" +
-                    ".AbsolutePath.Split([\"Android\"], StringSplitOptions.None)[0]赋值");
-            }
-
-            var path = file.Path.LocalPath;
-            return Path.Combine(AndroidExternalFilesDir, path.Split(':')[^1]);
-        }
-
-        return file.TryGetLocalPath();
     }
 
     private async void TestButton_Click(object sender, RoutedEventArgs e)
