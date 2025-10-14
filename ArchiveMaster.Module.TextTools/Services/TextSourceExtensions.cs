@@ -1,5 +1,5 @@
-﻿using System.Text;
-using System.Text.RegularExpressions;
+﻿using System.Runtime.CompilerServices;
+using System.Text;
 using ArchiveMaster.ViewModels;
 using DocumentFormat.OpenXml.Packaging;
 using NPOI.XWPF.UserModel;
@@ -13,6 +13,7 @@ public static class TextSourceExtensions
 {
     public static async IAsyncEnumerable<DocFileLine> GetPlainTextAsync(this TextSource source,
         bool combinePerFile = true,
+        [EnumeratorCancellation]
         CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(source);
@@ -48,7 +49,7 @@ public static class TextSourceExtensions
                 }
                 else
                 {
-                    await foreach (var line in lines)
+                    await foreach (var line in lines.WithCancellation(ct))
                     {
                         yield return new DocFileLine(file.File, line);
                     }
@@ -61,7 +62,8 @@ public static class TextSourceExtensions
         }
     }
 
-    private static async IAsyncEnumerable<string> ReadDocAsync(this DocFile file, CancellationToken ct = default)
+    private static async IAsyncEnumerable<string> ReadDocAsync(this DocFile file,
+        [EnumeratorCancellation] CancellationToken ct = default)
     {
         await using var stream = File.OpenRead(file.File);
         XWPFDocument doc = new XWPFDocument(stream);
@@ -76,12 +78,13 @@ public static class TextSourceExtensions
         }
     }
 
-    private static async IAsyncEnumerable<string> ReadDocxAsync(this DocFile file, CancellationToken ct = default)
+    private static async IAsyncEnumerable<string> ReadDocxAsync(this DocFile file,
+        [EnumeratorCancellation] CancellationToken ct = default)
     {
         await using var stream = File.OpenRead(file.File);
 
         using WordprocessingDocument wordDoc = WordprocessingDocument.Open(stream, false);
-        var body = wordDoc.MainDocumentPart?.Document?.Body;
+        var body = wordDoc.MainDocumentPart?.Document.Body;
 
         if (body == null)
         {
@@ -95,7 +98,8 @@ public static class TextSourceExtensions
         }
     }
 
-    private static async IAsyncEnumerable<string> ReadMarkdownAsync(this DocFile file, CancellationToken ct = default)
+    private static async IAsyncEnumerable<string> ReadMarkdownAsync(this DocFile file,
+        [EnumeratorCancellation] CancellationToken ct = default)
     {
         var encoding = await DetectEncoding(file, ct);
         var markdown = await File.ReadAllTextAsync(file.File, encoding, ct);
@@ -104,7 +108,8 @@ public static class TextSourceExtensions
         yield return text;
     }
 
-    private static async IAsyncEnumerable<string> ReadTxtAsync(this DocFile file, CancellationToken ct = default)
+    private static async IAsyncEnumerable<string> ReadTxtAsync(this DocFile file,
+        [EnumeratorCancellation] CancellationToken ct = default)
     {
         var encoding = await DetectEncoding(file, ct);
         var lines = await File.ReadAllLinesAsync(file.File, encoding, ct);

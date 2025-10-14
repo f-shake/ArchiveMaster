@@ -95,7 +95,7 @@ public class OpenAIChatClient : IChatClient
         }
     }
 
-    public object? GetService(Type serviceType, object? serviceKey = null) => null;
+    public object GetService(Type serviceType, object serviceKey = null) => null;
 
     public void Dispose()
     {

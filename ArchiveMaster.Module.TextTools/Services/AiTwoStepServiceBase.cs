@@ -6,5 +6,6 @@ public abstract class AiTwoStepServiceBase<TConfig>(AppConfig appConfig)
     : TwoStepServiceBase<TConfig>(appConfig) 
     where TConfig : ConfigBase
 {
-    public AiProviderConfig AI => appConfig.GetOrCreateConfigWithDefaultKey<AiProvidersConfig>().CurrentProvider;
+    protected AppConfig AppConfig { get; } = appConfig;
+    public AiProviderConfig AI => AppConfig.GetOrCreateConfigWithDefaultKey<AiProvidersConfig>().CurrentProvider;
 }

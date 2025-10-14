@@ -2,6 +2,7 @@ using ArchiveMaster.Helpers;
 using Avalonia.Controls;
 using ArchiveMaster.ViewModels;
 using Avalonia;
+using Avalonia.Input.Platform;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using FzLib.Avalonia.Dialogs.Pickers;
@@ -63,7 +64,7 @@ namespace ArchiveMaster.Views
                 return;
             }
 
-            var text = await (topLevel.Clipboard?.GetTextAsync() ?? Task.FromResult(""));
+            var text = await (topLevel.Clipboard?.TryGetTextAsync() ?? Task.FromResult(""));
             if (!string.IsNullOrWhiteSpace(text))
             {
                 Source.Text = text;
