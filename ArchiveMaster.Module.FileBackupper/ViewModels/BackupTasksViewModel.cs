@@ -16,9 +16,6 @@ namespace ArchiveMaster.ViewModels
         private readonly BackupService backupService;
 
         [ObservableProperty]
-        private bool canSaveConfig = false;
-
-        [ObservableProperty]
         private BackupTask selectedTask;
 
         [ObservableProperty]
@@ -68,16 +65,10 @@ namespace ArchiveMaster.ViewModels
 
             Tasks = new ObservableCollection<BackupTask>(Config.Tasks);
             await Tasks.UpdateStatusAsync();
-            NotifyCanSaveConfig(false);
         }
 
         public override async Task OnExitAsync(CancelEventArgs args)
         {
-            if (!CanSaveConfig)
-            {
-                return;
-            }
-
             var result = await DialogService.ShowYesNoDialogAsync("保存配置", "有未保存的配置，是否保存？");
             if (true.Equals(result))
             {
@@ -93,7 +84,6 @@ namespace ArchiveMaster.ViewModels
             var task = new BackupTask();
             Tasks.Add(task);
             SelectedTask = task;
-            NotifyCanSaveConfig();
         }
 
         [RelayCommand]
@@ -101,39 +91,13 @@ namespace ArchiveMaster.ViewModels
         {
             Debug.Assert(SelectedTask != null);
             Tasks.Remove(SelectedTask);
-            NotifyCanSaveConfig();
         }
 
-        private void NotifyCanSaveConfig(bool canSave = true)
-        {
-            CanSaveConfig = canSave;
-            SaveCommand.NotifyCanExecuteChanged();
-        }
-
-        partial void OnSelectedTaskChanged(BackupTask oldValue, BackupTask newValue)
-        {
-            if (newValue != null)
-            {
-                newValue.PropertyChanged += SelectedBackupTaskPropertyChanged;
-            }
-
-            if (oldValue != null)
-            {
-                oldValue.PropertyChanged -= SelectedBackupTaskPropertyChanged;
-            }
-        }
-
-        [RelayCommand(CanExecute = nameof(CanSaveConfig))]
+        [RelayCommand]
         private void Save()
         {
             Config.Tasks = Tasks.Select(p => p.Clone() as BackupTask).ToList();
             AppConfig.Save();
-            NotifyCanSaveConfig(false);
-        }
-
-        private void SelectedBackupTaskPropertyChanged(object sender, PropertyChangedEventArgs e)
-        {
-            NotifyCanSaveConfig();
         }
     }
 }

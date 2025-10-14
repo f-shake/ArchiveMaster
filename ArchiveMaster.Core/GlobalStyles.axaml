@@ -175,12 +175,6 @@
 
     <Style Selector="ctrl|RadioButtonGroup">
         <Setter Property="Background" Value="{DynamicResource Background3}" />
-        <Setter Property="ItemsPanel">
-            <Setter.Value>
-                <ItemsPanelTemplate>
-                    <WrapPanel />
-                </ItemsPanelTemplate>
-            </Setter.Value>
-        </Setter>
+        <Setter Property="Layout" Value="HorizontalWrap" />
     </Style>
 </Styles>

@@ -126,6 +126,7 @@
 
             <Button
                 Grid.Row="4"
+                Margin="8"
                 HorizontalAlignment="Center"
                 Command="{Binding SaveCommand}"
                 Content="保存" />
