@@ -1,0 +1,80 @@
+<v:PanelBase
+    x:Class="ArchiveMaster.Views.TextEncryptionPanel"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:b="using:ArchiveMaster.Behaviors"
+    xmlns:ct="using:FzLib.Avalonia.Controls"
+    xmlns:cvt="clr-namespace:ArchiveMaster.Converters;assembly=ArchiveMaster.Core"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:gb="using:GroupBox.Avalonia.Controls"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:system="clr-namespace:System;assembly=System.Runtime"
+    xmlns:v="using:ArchiveMaster.Views"
+    xmlns:vm="clr-namespace:ArchiveMaster.ViewModels"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    x:DataType="vm:SmartDocSearchViewModel"
+    mc:Ignorable="d">
+    <v:PanelBase.PanelContent>
+        <Grid
+            Margin="8"
+            RowDefinitions="Auto,8,*,8,Auto">
+            <ct:StackFormItemGroup>
+                <ct:FormItem Label="文本源：">
+                    <v:TextSourceInput Source="{Binding Source}" />
+                </ct:FormItem>
+                <ct:FormItem Label="密文前后缀：">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBox
+                            Width="128"
+                            Text="{Binding Config.Prefix}"
+                            Watermark="前缀" />
+                        <TextBlock Text="——" />
+                        <TextBox
+                            Width="128"
+                            Text="{Binding Config.Suffix}"
+                            TextAlignment="Right"
+                            Watermark="后缀" />
+                    </StackPanel>
+                </ct:FormItem>
+
+                <ct:FormItem Label="密码：">
+                    <v:PasswordBox Password="{Binding Config.Password}" />
+                </ct:FormItem>
+            </ct:StackFormItemGroup>
+
+            <TextBox
+                Grid.Row="2"
+                IsReadOnly="True"
+                Text="{Binding Result}"
+                TextWrapping="Wrap" />
+
+            <StackPanel
+                Grid.Row="4"
+                Margin="8"
+                HorizontalAlignment="Right"
+                Orientation="Horizontal">
+                <Button
+                    Command="{Binding EncryptCommand}"
+                    Content="加密" />
+                <Button
+                    Command="{Binding DecryptCommand}"
+                    Content="解密" />
+                <CheckBox
+                    Content="自动"
+                    IsChecked="True">
+                    <CheckBox.IsEnabled>
+                        <MultiBinding Converter="{x:Static cvt:Converters.AndLogic}">
+                            <Binding
+                                Converter="{x:Static cvt:Converters.IsNotNull}"
+                                Path="Config.LastOperation" />
+                            <Binding
+                                Converter="{x:Static cvt:Converters.InverseBool}"
+                                Path="Source.FromFile" />
+                        </MultiBinding>
+                    </CheckBox.IsEnabled>
+                </CheckBox>
+            </StackPanel>
+        </Grid>
+    </v:PanelBase.PanelContent>
+</v:PanelBase>

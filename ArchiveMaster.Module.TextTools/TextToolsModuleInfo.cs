@@ -23,6 +23,7 @@ namespace ArchiveMaster
         [
             new ConfigMetadata(typeof(SmartDocSearchConfig)),
             new ConfigMetadata(typeof(AiProvidersConfig)),
+            new ConfigMetadata(typeof(TextEncryptionConfig)),
         ];
 
         public string ModuleName => "文本工具";
@@ -38,13 +39,16 @@ namespace ArchiveMaster
         public IList<Type> TransientServices { get; } =
         [
             typeof(SmartDocSearchService),
+            typeof(TextEncryptionService),
         ];
 
         public ToolPanelGroupInfo Views => new ToolPanelGroupInfo()
         {
             Panels =
             {
-                new ToolPanelInfo(typeof(SmartDocSearchPanel), typeof(SmartDocSearchViewModel), "文档智能搜索",
+                new ToolPanelInfo(typeof(TextEncryptionPanel), typeof(TextEncryptionViewModel), "文本混淆",
+                    "将文本转换为难以直接阅读的形式，用于简单的内容隐藏或防止误读", baseUrl + "encrypt.svg"),
+              new ToolPanelInfo(typeof(SmartDocSearchPanel), typeof(SmartDocSearchViewModel), "文档智能搜索",
                     "从多个文档中搜索关键词，并通过AI进行总结归纳", baseUrl + "docSearch.svg"),
                 new ToolPanelInfo(typeof(AiProvidersPanel), typeof(AiProvidersViewModel), "AI服务提供商",
                     "配置AI服务提供商", baseUrl + "ai.svg"),

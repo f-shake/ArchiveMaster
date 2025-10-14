@@ -52,7 +52,7 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
     [ObservableProperty]
     private string message = "就绪";
 
-    [ObservableProperty]
+    [ObservableProperty] 
     [NotifyPropertyChangedFor(nameof(ProgressIndeterminate))]
     private double progress;
 
@@ -70,7 +70,7 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
     /// 是否启用Two-Step中的初始化。若禁用，将不显示初始化按钮和配置面板
     /// </summary>
     public virtual bool EnableInitialize => true;
-    
+
     /// <summary>
     /// 是否允许重复执行
     /// </summary>
@@ -204,6 +204,7 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
                 {
                     return p.RelativePath;
                 }
+
                 return $"{p.RelativePath}（{p.Message}）";
             }));
             await DialogService.ShowWarningDialogAsync("存在警告", message, details);
@@ -285,7 +286,7 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
     {
         if (!EnableInitialize)
         {
-            AppConfig.Save();
+            AppConfig.SaveBackground();
             CreateService();
         }
 
@@ -329,7 +330,7 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
     [RelayCommand(IncludeCancelCommand = true, CanExecute = nameof(CanInitialize))]
     private async Task InitializeAsync(CancellationToken ct)
     {
-        AppConfig.Save();
+        AppConfig.SaveBackground();
         CanInitialize = false;
         InitializeCommand.NotifyCanExecuteChanged();
         CanReset = false;

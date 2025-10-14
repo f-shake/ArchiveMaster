@@ -243,6 +243,18 @@ namespace ArchiveMaster.Configs
             }
         }
 
+        public void SaveBackground()
+        {
+            try
+            {
+                Task.Run(Save);
+            }
+            catch (Exception ex)
+            {
+                Log.Logger.Error(ex, "后台保存配置失败");
+            }
+        }
+        
         public void Save()
         {
             try

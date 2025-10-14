@@ -14,6 +14,10 @@
       <DependentUpon>AiProvidersPanel.axaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Views\TextEncryptionPanel.axaml.cs">
+      <DependentUpon>TextEncryptionPanel.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>
