@@ -1,0 +1,53 @@
+<v:TwoStepPanelBase
+    x:Class="ArchiveMaster.Views.TypoCheckerPanel"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:b="using:ArchiveMaster.Behaviors"
+    xmlns:ct="using:FzLib.Avalonia.Controls"
+    xmlns:cvt="clr-namespace:ArchiveMaster.Converters;assembly=ArchiveMaster.Core"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:gb="using:GroupBox.Avalonia.Controls"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:v="using:ArchiveMaster.Views"
+    xmlns:vm="clr-namespace:ArchiveMaster.ViewModels"
+    x:Name="root"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    x:DataType="vm:TypoCheckerViewModel"
+    ExecuteButtonContent="AI归纳"
+    InitializeButtonContent="搜索"
+    mc:Ignorable="d">
+    <v:TwoStepPanelBase.ConfigsContent>
+        <ct:StackFormItemGroup>
+            <ct:FormItem Label="文本源：">
+                <v:TextSourceInput Source="{Binding Config.Source}" />
+            </ct:FormItem>
+
+            <ct:FormItem Label="最短分段字数：">
+                <Slider
+                    Maximum="2000"
+                    Minimum="100"
+                    Value="{Binding Config.MinSegmentLength}" />
+            </ct:FormItem>
+        </ct:StackFormItemGroup>
+    </v:TwoStepPanelBase.ConfigsContent>
+
+    <v:TwoStepPanelBase.ResultsContent>
+        <DataGrid ItemsSource="{Binding Typos}">
+            <DataGrid.Columns>
+                <DataGridTextColumn
+                    Binding="{Binding Context}"
+                    Header="上下文" />
+                <DataGridTextColumn
+                    Binding="{Binding Original}"
+                    Header="原词" />
+                <DataGridTextColumn
+                    Binding="{Binding Corrected}"
+                    Header="改正词" />
+                <DataGridTextColumn
+                    Binding="{Binding Explanation}"
+                    Header="描述" />
+            </DataGrid.Columns>
+        </DataGrid>
+    </v:TwoStepPanelBase.ResultsContent>
+</v:TwoStepPanelBase>

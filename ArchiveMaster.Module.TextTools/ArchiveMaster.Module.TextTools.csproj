@@ -22,6 +22,10 @@
       <DependentUpon>ResultTextBox.axaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Views\TypoCheckerPanel.axaml.cs">
+      <DependentUpon>TypoCheckerPanel.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>

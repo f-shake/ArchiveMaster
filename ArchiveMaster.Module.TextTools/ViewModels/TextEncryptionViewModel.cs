@@ -21,8 +21,6 @@ namespace ArchiveMaster.ViewModels;
 
 public partial class TextEncryptionViewModel : ViewModelBase
 {
-    public IClipboardService ClipboardService { get; }
-
     [ObservableProperty]
     private string result;
 
@@ -31,10 +29,8 @@ public partial class TextEncryptionViewModel : ViewModelBase
 
     private readonly ConcurrentQueue<Func<Task>> taskQueue = new ConcurrentQueue<Func<Task>>();
 
-    public TextEncryptionViewModel(AppConfig appConfig, IDialogService dialogService,
-        IClipboardService clipboardService) : base(dialogService)
+    public TextEncryptionViewModel(AppConfig appConfig, IDialogService dialogService) : base(dialogService)
     {
-        ClipboardService = clipboardService;
         Config = appConfig.GetOrCreateConfigWithDefaultKey<TextEncryptionConfig>();
         Service = new TextEncryptionService(Config, appConfig);
         Source.PropertyChanged += ConfigOnPropertyChanged;
@@ -55,12 +51,6 @@ public partial class TextEncryptionViewModel : ViewModelBase
         {
             ExecuteLastAsync();
         }
-    }
-
-    [RelayCommand]
-    private Task CopyResultAsync()
-    {
-        return ClipboardService.SetTextAsync(Result);
     }
 
     [RelayCommand]
