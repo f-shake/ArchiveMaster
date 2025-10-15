@@ -47,7 +47,7 @@ namespace ArchiveMaster
             Panels =
             {
                 new ToolPanelInfo(typeof(TextEncryptionPanel), typeof(TextEncryptionViewModel), "文本混淆",
-                    "将文本进行混淆，实现防君子不防小人的文本加密", baseUrl + "encrypt.svg"),
+                    "使用替换式密码的方式混淆文本，实现防君子不防小人的文本加密", baseUrl + "encrypt.svg"),
               new ToolPanelInfo(typeof(SmartDocSearchPanel), typeof(SmartDocSearchViewModel), "文档智能搜索",
                     "从多个文档中搜索关键词，并通过AI进行总结归纳", baseUrl + "docSearch.svg"),
                 new ToolPanelInfo(typeof(AiProvidersPanel), typeof(AiProvidersViewModel), "AI服务提供商",

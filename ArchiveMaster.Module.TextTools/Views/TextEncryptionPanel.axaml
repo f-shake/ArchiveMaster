@@ -35,6 +35,20 @@
                             Text="{Binding Config.Suffix}"
                             TextAlignment="Right"
                             Watermark="后缀" />
+                        <TextBlock
+                            Foreground="Red"
+                            Text="前缀和后缀应当同时提供或均不提供">
+                            <TextBlock.IsVisible>
+                                <MultiBinding Converter="{x:Static cvt:Converters.XorLogic}">
+                                    <Binding
+                                        Converter="{x:Static cvt:Converters.IsNotNull}"
+                                        Path="Config.Prefix" />
+                                    <Binding
+                                        Converter="{x:Static cvt:Converters.IsNotNull}"
+                                        Path="Config.Suffix" />
+                                </MultiBinding>
+                            </TextBlock.IsVisible>
+                        </TextBlock>
                     </StackPanel>
                 </ct:FormItem>
 
@@ -48,38 +62,44 @@
                 IsReadOnly="True"
                 Text="{Binding Result}"
                 TextWrapping="Wrap" />
-
-            <StackPanel
+            <Grid
                 Grid.Row="4"
-                Margin="8"
-                HorizontalAlignment="Right"
-                IsEnabled="{Binding !IsWorking}"
-                Orientation="Horizontal">
-                <ct:ProgressRing
-                    Width="20"
-                    Height="20"
-                    IsActive="{Binding IsWorking}" />
+                Margin="0,0,8,8"
+                ColumnDefinitions="Auto,*,Auto"
+                IsEnabled="{Binding !IsWorking}">
                 <Button
-                    Command="{Binding EncryptCommand}"
-                    Content="加密" />
-                <Button
-                    Command="{Binding DecryptCommand}"
-                    Content="解密" />
-                <CheckBox
-                    Content="自动"
-                    IsChecked="True">
-                    <CheckBox.IsEnabled>
-                        <MultiBinding Converter="{x:Static cvt:Converters.AndLogic}">
-                            <Binding
-                                Converter="{x:Static cvt:Converters.IsNotNull}"
-                                Path="Config.LastOperation" />
-                            <Binding
-                                Converter="{x:Static cvt:Converters.InverseBool}"
-                                Path="Source.FromFile" />
-                        </MultiBinding>
-                    </CheckBox.IsEnabled>
-                </CheckBox>
-            </StackPanel>
+                    Classes="Icon"
+                    Command="{Binding CopyResultCommand}"
+                    Content="{StaticResource Copy}" />
+                <StackPanel
+                    Grid.Column="2"
+                    Orientation="Horizontal">
+                    <ct:ProgressRing
+                        Width="20"
+                        Height="20"
+                        IsActive="{Binding IsWorking}" />
+                    <Button
+                        Command="{Binding EncryptCommand}"
+                        Content="加密" />
+                    <Button
+                        Command="{Binding DecryptCommand}"
+                        Content="解密" />
+                    <CheckBox
+                        Content="自动"
+                        IsChecked="True">
+                        <CheckBox.IsEnabled>
+                            <MultiBinding Converter="{x:Static cvt:Converters.AndLogic}">
+                                <Binding
+                                    Converter="{x:Static cvt:Converters.IsNotNull}"
+                                    Path="Config.LastOperation" />
+                                <Binding
+                                    Converter="{x:Static cvt:Converters.InverseBool}"
+                                    Path="Source.FromFile" />
+                            </MultiBinding>
+                        </CheckBox.IsEnabled>
+                    </CheckBox>
+                </StackPanel>
+            </Grid>
         </Grid>
     </v:PanelBase.PanelContent>
 </v:PanelBase>

@@ -7,6 +7,11 @@ public static class Converters
     public static readonly NumberToAlignmentConverter Alignment = FzLib.Avalonia.Converters.Converters.Alignment;
 
     public static readonly BoolLogicConverter AndLogic = FzLib.Avalonia.Converters.Converters.AndLogic;
+    public static readonly BoolLogicConverter OrLogic = FzLib.Avalonia.Converters.Converters.OrLogic;
+    public static readonly BoolLogicConverter NorLogic = FzLib.Avalonia.Converters.Converters.NorLogic;
+    public static readonly BoolLogicConverter XorLogic = FzLib.Avalonia.Converters.Converters.XorLogic;
+    public static readonly BoolLogicConverter NandLogic = FzLib.Avalonia.Converters.Converters.NandLogic;
+    public static readonly BoolLogicConverter XnorLogic = FzLib.Avalonia.Converters.Converters.XnorLogic;
 
     public static readonly BoolToFontWeightConverter
         BoldFontWeight = FzLib.Avalonia.Converters.Converters.BoldFontWeight;
@@ -47,7 +52,6 @@ public static class Converters
     public static readonly EqualToBoolConverter NotEqualWithParameter =
         FzLib.Avalonia.Converters.Converters.NotEqualWithParameter;
 
-    public static readonly BoolLogicConverter OrLogic = FzLib.Avalonia.Converters.Converters.OrLogic;
 
     public static readonly StringListConverter StringList = FzLib.Avalonia.Converters.Converters.StringList;
 
