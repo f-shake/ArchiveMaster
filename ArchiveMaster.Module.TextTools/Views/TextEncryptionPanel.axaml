@@ -57,20 +57,15 @@
                 </ct:FormItem>
             </ct:StackFormItemGroup>
 
-            <TextBox
+            <v:ResultTextBox
                 Grid.Row="2"
-                IsReadOnly="True"
-                Text="{Binding Result}"
-                TextWrapping="Wrap" />
+                Result="{Binding Result}" />
+
             <Grid
                 Grid.Row="4"
                 Margin="0,0,8,8"
                 ColumnDefinitions="Auto,*,Auto"
                 IsEnabled="{Binding !IsWorking}">
-                <Button
-                    Classes="Icon"
-                    Command="{Binding CopyResultCommand}"
-                    Content="{StaticResource Copy}" />
                 <StackPanel
                     Grid.Column="2"
                     Orientation="Horizontal">

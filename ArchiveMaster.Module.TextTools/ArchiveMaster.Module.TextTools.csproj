@@ -18,6 +18,10 @@
       <DependentUpon>TextEncryptionPanel.axaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Views\ResultTextBox.axaml.cs">
+      <DependentUpon>ResultTextBox.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>

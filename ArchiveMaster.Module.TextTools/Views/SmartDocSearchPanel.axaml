@@ -92,103 +92,92 @@
     </v:TwoStepPanelBase.ConfigsContent>
 
     <v:TwoStepPanelBase.ResultsContent>
-        <Grid
-            ColumnDefinitions="2*,8,*"
-            RowDefinitions="*,8,Auto">
+        <Grid ColumnDefinitions="2*,8,*">
             <gb:GroupBox Header="搜索结果">
-                <ScrollViewer>
-                    <ItemsControl
-                        Margin="0,0,20,0"
-                        ItemsSource="{Binding SearchResults}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <Border
-                                    Margin="2,4"
-                                    Padding="8"
-                                    Background="{DynamicResource Background2}"
-                                    BorderBrush="{DynamicResource Background3}"
-                                    BorderThickness="1"
-                                    CornerRadius="8">
-                                    <Grid
-                                        ColumnDefinitions="Auto,8,*"
-                                        RowDefinitions="*,8,Auto">
-                                        <SelectableTextBlock
-                                            Grid.ColumnSpan="3"
-                                            b:TextBlockInlinesBehavior.ItemsSource="{Binding Inlines}"
-                                            TextWrapping="Wrap" />
+                <Grid Grid.RowDefinitions="*,8,Auto">
+                    <ScrollViewer>
+                        <ItemsControl
+                            Margin="0,0,20,0"
+                            ItemsSource="{Binding SearchResults}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border
+                                        Margin="2,4"
+                                        Padding="8"
+                                        Background="{DynamicResource Background2}"
+                                        BorderBrush="{DynamicResource Background3}"
+                                        BorderThickness="1"
+                                        CornerRadius="8">
+                                        <Grid
+                                            ColumnDefinitions="Auto,8,*"
+                                            RowDefinitions="*,8,Auto">
+                                            <SelectableTextBlock
+                                                Grid.ColumnSpan="3"
+                                                b:TextBlockInlinesBehavior.ItemsSource="{Binding Inlines}"
+                                                TextWrapping="Wrap" />
 
-                                        <Button
-                                            Grid.Row="2"
-                                            Padding="8,4"
-                                            Command="{Binding #root.DataContext.OpenFileCommand}"
-                                            CommandParameter="{Binding Source}"
-                                            Content="{Binding Source, Converter={x:Static cvt:Converters.FileName}}"
-                                            CornerRadius="16"
-                                            IsVisible="{Binding Source, Converter={x:Static cvt:Converters.IsNotNull}}"
-                                            ToolTip.Tip="{Binding Source}" />
+                                            <Button
+                                                Grid.Row="2"
+                                                Padding="8,4"
+                                                Command="{Binding #root.DataContext.OpenFileCommand}"
+                                                CommandParameter="{Binding Source}"
+                                                Content="{Binding Source, Converter={x:Static cvt:Converters.FileName}}"
+                                                CornerRadius="16"
+                                                IsVisible="{Binding Source, Converter={x:Static cvt:Converters.IsNotNull}}"
+                                                ToolTip.Tip="{Binding Source}" />
 
-                                        <ItemsControl
-                                            Grid.Row="2"
-                                            Grid.Column="2"
-                                            HorizontalAlignment="Right"
-                                            ItemsSource="{Binding Keywords}">
-                                            <ItemsControl.ItemsPanel>
-                                                <ItemsPanelTemplate>
-                                                    <WrapPanel
-                                                        ItemSpacing="8"
-                                                        LineSpacing="8"
-                                                        Orientation="Horizontal" />
-                                                </ItemsPanelTemplate>
-                                            </ItemsControl.ItemsPanel>
-                                            <ItemsControl.ItemTemplate>
-                                                <DataTemplate>
-                                                    <Border
-                                                        Padding="8,4"
-                                                        Background="{DynamicResource Accent0}"
-                                                        CornerRadius="16"
-                                                        IsHitTestVisible="False">
-                                                        <TextBlock
-                                                            Foreground="White"
-                                                            Text="{Binding .}" />
-                                                    </Border>
-                                                </DataTemplate>
-                                            </ItemsControl.ItemTemplate>
-                                        </ItemsControl>
-                                    </Grid>
-                                </Border>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </ScrollViewer>
+                                            <ItemsControl
+                                                Grid.Row="2"
+                                                Grid.Column="2"
+                                                HorizontalAlignment="Right"
+                                                ItemsSource="{Binding Keywords}">
+                                                <ItemsControl.ItemsPanel>
+                                                    <ItemsPanelTemplate>
+                                                        <WrapPanel
+                                                            ItemSpacing="8"
+                                                            LineSpacing="8"
+                                                            Orientation="Horizontal" />
+                                                    </ItemsPanelTemplate>
+                                                </ItemsControl.ItemsPanel>
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Border
+                                                            Padding="8,4"
+                                                            Background="{DynamicResource Accent0}"
+                                                            CornerRadius="16"
+                                                            IsHitTestVisible="False">
+                                                            <TextBlock
+                                                                Foreground="White"
+                                                                Text="{Binding .}" />
+                                                        </Border>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                    <TextBlock Grid.Row="2">
+                        <Run Text="共" />
+                        <Run Text="{Binding SearchResults.Count}" />
+                        <Run Text="条搜索结果" />
+                    </TextBlock>
+                </Grid>
             </gb:GroupBox>
 
             <gb:GroupBox
                 Grid.Column="2"
                 Header="AI分析结果">
-                <ScrollViewer>
-                    <SelectableTextBlock
-                        Text="{Binding AiConclude}"
-                        TextWrapping="Wrap" />
-                </ScrollViewer>
+                <v:ResultTextBox
+                    Message="{Binding AI.Name, StringFormat='{}AI服务提供商：{0}'}"
+                    Result="{Binding AiConclude}" />
             </gb:GroupBox>
 
             <GridSplitter
                 Grid.Column="1"
                 Background="Transparent" />
-
-            <TextBlock
-                Grid.Row="2"
-                Grid.Column="0">
-                <Run Text="共" />
-                <Run Text="{Binding SearchResults.Count}" />
-                <Run Text="条搜索结果" />
-            </TextBlock>
-            <TextBlock
-                Grid.Row="2"
-                Grid.Column="2">
-                <Run Text="AI服务提供商：" />
-                <Run Text="{Binding AI.Name}" />
-            </TextBlock>
         </Grid>
     </v:TwoStepPanelBase.ResultsContent>
 </v:TwoStepPanelBase>

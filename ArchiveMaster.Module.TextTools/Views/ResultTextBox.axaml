@@ -1,0 +1,59 @@
+<UserControl
+    x:Class="ArchiveMaster.Views.ResultTextBox"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:cvt="clr-namespace:ArchiveMaster.Converters;assembly=ArchiveMaster.Core"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
+    <Grid
+        ColumnDefinitions="*,8,Auto"
+        RowDefinitions="*,4,Auto">
+
+        <TextBox
+            x:Name="result"
+            Grid.ColumnSpan="3"
+            Text="{Binding $parent[UserControl].Result}">
+            <TextBox.Styles>
+                <Style Selector="TextBox">
+                    <Setter Property="Background" Value="{DynamicResource Background2}" />
+                    <Setter Property="CornerRadius" Value="4" />
+                    <Setter Property="TextWrapping" Value="Wrap" />
+                    <Setter Property="BorderThickness" Value="0" />
+                    <Setter Property="ClearSelectionOnLostFocus" Value="True" />
+                    <Setter Property="IsReadOnly" Value="True" />
+                    <Style Selector="^:focus">
+                        <Style Selector="^ /template/ Border#PART_BorderElement">
+                            <Setter Property="BorderThickness" Value="0" />
+                            <Setter Property="Background" Value="{DynamicResource Background2}" />
+                        </Style>
+                    </Style>
+                    <Style Selector="^:pointerover">
+                        <Style Selector="^ /template/ Border#PART_BorderElement">
+                            <Setter Property="BorderThickness" Value="0" />
+                            <Setter Property="Background" Value="{DynamicResource Background2}" />
+                        </Style>
+                    </Style>
+                    <Style Selector="^:disabled">
+                        <Style Selector="^ /template/ Border#PART_BorderElement">
+                            <Setter Property="BorderThickness" Value="0" />
+                            <Setter Property="Background" Value="{DynamicResource Background2}" />
+                        </Style>
+                    </Style>
+                </Style>
+            </TextBox.Styles>
+        </TextBox>
+        <TextBlock
+            Grid.Row="2"
+            Text="{Binding $parent[UserControl].Message}" />
+        <Button
+            Grid.Row="2"
+            Grid.Column="2"
+            Classes="Icon"
+            Click="CopyButton_OnClick"
+            Content="{StaticResource Copy}"
+            IsEnabled="{Binding $parent[UserControl].Result, Converter={x:Static cvt:Converters.IsNotNull}}" />
+    </Grid>
+</UserControl>
