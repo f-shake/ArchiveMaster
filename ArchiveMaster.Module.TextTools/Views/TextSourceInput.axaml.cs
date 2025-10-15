@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using ArchiveMaster.Helpers;
 using Avalonia.Controls;
 using ArchiveMaster.ViewModels;
@@ -6,6 +7,7 @@ using Avalonia.Input.Platform;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using FzLib.Avalonia.Dialogs.Pickers;
+using Serilog;
 
 namespace ArchiveMaster.Views
 {
@@ -70,6 +72,25 @@ namespace ArchiveMaster.Views
                 Source.Text = text;
             }
         }
+        private void OpenFileButton_Click(object sender, RoutedEventArgs e)
+        {
+            var button = sender as Button;
+            if (button?.DataContext is DocFile file)
+            {
+                try
+                {
+                    Process.Start(new ProcessStartInfo(file.File)
+                    {
+                        UseShellExecute = true
+                    });
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "打开文件失败");
+                }
+            }
+        }
+        
         private void RemoveFileButton_Click(object sender, RoutedEventArgs e)
         {
             var button = sender as Button;

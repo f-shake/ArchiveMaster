@@ -51,17 +51,18 @@
                                                 FontWeight="Bold"
                                                 Text="{Binding File}"
                                                 TextWrapping="Wrap" />
-                                            <!-- <ct:FormItem Header="文档密码（若有）"> -->
-                                            <!--  <TextBox  -->
-                                            <!--  Classes="revealPasswordButton"  -->
-                                            <!--  PasswordChar="*"  -->
-                                            <!--  Text="{Binding Password.Password}" />  -->
-                                            <!-- </ct:FormItem> -->
-                                            <Button
+                                            <StackPanel
                                                 HorizontalAlignment="Right"
-                                                Classes="Link"
-                                                Click="RemoveFileButton_Click"
-                                                Content="移除" />
+                                                Orientation="Horizontal">
+                                                <Button
+                                                    Classes="Link"
+                                                    Click="OpenFileButton_Click"
+                                                    Content="打开" />
+                                                <Button
+                                                    Classes="Link"
+                                                    Click="RemoveFileButton_Click"
+                                                    Content="移除" />
+                                            </StackPanel>
                                         </StackPanel>
                                     </Flyout>
                                 </Button.Flyout>
