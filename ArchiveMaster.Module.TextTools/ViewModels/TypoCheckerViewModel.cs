@@ -14,28 +14,33 @@ using System.Threading;
 using System.Threading.Tasks;
 using ArchiveMaster.Models;
 using ArchiveMaster.ViewModels.FileSystem;
+using Avalonia.Threading;
 using FzLib.Avalonia.Dialogs;
 using FzLib.Avalonia.Services;
 using Serilog;
 
 namespace ArchiveMaster.ViewModels;
 
-public partial class TypoCheckerViewModel(AppConfig appConfig, IDialogService dialogService)
+public partial class TypoCheckerViewModel(
+    AppConfig appConfig,
+    IDialogService dialogService,
+    IClipboardService clipboardService)
     : TwoStepViewModelBase<TypoCheckerService, TypoCheckerConfig>(appConfig, dialogService)
 {
-    public IClipboardService ClipboardService { get; }
-
-    public ObservableCollection<TypoItem> Typos { get; } = new ObservableCollection<TypoItem>();
-
-    private readonly ConcurrentQueue<Func<Task>> taskQueue = new ConcurrentQueue<Func<Task>>();
+    public IClipboardService ClipboardService { get; } = clipboardService;
 
     public override bool EnableInitialize { get; } = false;
-
     public override bool EnableRepeatExecute { get; } = true;
-
+    public ObservableCollection<TypoItem> Typos { get; } = new ObservableCollection<TypoItem>();
     protected override Task OnExecutingAsync(CancellationToken ct)
     {
-        Service.TypoItemGenerated += (s, e) => { Typos.Add(e.Value); };
+        Typos.Clear();
+        Service.TypoItemGenerated += (_, e) => Dispatcher.UIThread.Invoke(() => Typos.Add(e.Value));
         return base.OnExecutingAsync(ct);
+    }
+
+    protected override void OnReset()
+    {
+        Typos.Clear();
     }
 }

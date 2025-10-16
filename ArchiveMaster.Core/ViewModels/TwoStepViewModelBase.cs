@@ -372,7 +372,7 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
     private void Reset()
     {
         CanReset = false;
-        CanInitialize = EnableInitialize;
+        CanInitialize = true;
         CanExecute = !EnableInitialize;
 
         ResetCommand.NotifyCanExecuteChanged();

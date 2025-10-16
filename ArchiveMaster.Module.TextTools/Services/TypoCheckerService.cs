@@ -11,9 +11,11 @@ using DocumentFormat.OpenXml.InkML;
 
 namespace ArchiveMaster.Services;
 
-public class TypoCheckerService(TypoCheckerConfig config, AppConfig appConfig)
+public class TypoCheckerService(AppConfig appConfig)
     : AiTwoStepServiceBase<TypoCheckerConfig>(appConfig)
 {
+    public const int MAX_LENGTH = 300_000;
+
     public const string SYSTEM_PROMPT = """
                                         你是一个错别字检查机器人，检查用户输入的语段是否存在错误。需要检查的内容包括：
                                         1.错别字（包括中文和英文等）；
@@ -74,21 +76,7 @@ public class TypoCheckerService(TypoCheckerConfig config, AppConfig appConfig)
                                         请严格按上述JSON格式输出结果，不要包含任何额外的解释或说明。
                                         输出的格式应该严格遵从JSON格式，该转义的地方记得转义。
                                         """;
-
-    public const int MAX_LENGTH = 300_000;
-
-    public TypoCheckerConfig Config { get; } = config;
-
     public event GenericEventHandler<TypoItem> TypoItemGenerated;
-
-    private void CheckStringLength(StringBuilder str)
-    {
-        if (str.Length > MAX_LENGTH)
-        {
-            throw new Exception($"文本长度超过限制（{MAX_LENGTH}）");
-        }
-    }
-
 
     public static List<TypoSegment> SegmentTypos(string rawText, IList<TypoItem> typos)
     {
@@ -207,21 +195,30 @@ public class TypoCheckerService(TypoCheckerConfig config, AppConfig appConfig)
         return segments;
     }
 
-    public async IAsyncEnumerable<ICheckItem> CheckAsync(string text,
+    public async IAsyncEnumerable<ICheckItem> CheckAsync(IList<DocFilePart> parts,
         IProgress<double> progress,
         [EnumeratorCancellation]
         CancellationToken ct)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(text);
+        ArgumentNullException.ThrowIfNull(parts);
+        if (parts.Count == 0)
+        {
+            yield break;
+        }
 
         LlmCallerService llm = new LlmCallerService(AI);
+        List<(string text, string source)> segments = [];
+        foreach (var part in parts)
+        {
+            ct.ThrowIfCancellationRequested();
+            segments.AddRange(SplitText(part.Text, Config.MinSegmentLength).Select(t => (t, part.Source)));
+        }
 
-        var segments = SplitText(text, config.MinSegmentLength);
         for (int index = 0; index < segments.Count; index++)
         {
             ct.ThrowIfCancellationRequested();
 
-            string segment = segments[index];
+            string segment = segments[index].text;
             progress?.Report((double)(0 + index) / segments.Count);
 
             yield return new PromptItem(segment);
@@ -248,7 +245,7 @@ public class TypoCheckerService(TypoCheckerConfig config, AppConfig appConfig)
             IEnumerable<TypoItem> results = [];
             try
             {
-                results = Parse(result).ToList();
+                results = Parse(result, segments[index].source).ToList();
             }
             catch (FormatException ex)
             {
@@ -262,7 +259,61 @@ public class TypoCheckerService(TypoCheckerConfig config, AppConfig appConfig)
         }
     }
 
-    private IEnumerable<TypoItem> Parse(string text)
+    public override async Task ExecuteAsync(CancellationToken ct = default)
+    {
+        StringBuilder str = new StringBuilder();
+
+        Progress<double> progress = new Progress<double>(NotifyProgress);
+
+        await Task.Run(async () =>
+        {
+            List<DocFilePart> parts = new List<DocFilePart>();
+
+            NotifyMessage("正在读取文本源");
+            await foreach (var part in Config.Source.GetPlainTextAsync(TextSourceReadMode.PerFile, ct))
+            {
+                parts.Add(part);
+            }
+
+            NotifyMessage("正在检查错别字");
+            await foreach (var item in CheckAsync(parts, progress, ct))
+            {
+                switch (item)
+                {
+                    case TypoItem t:
+                        TypoItemGenerated?.Invoke(this, new GenericEventArgs<TypoItem>(t));
+                        break;
+                    case OutputItem f:
+                        // Outputs.Add(f);
+                        break;
+                    case PromptItem p:
+                        // Prompts.Add(p);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }, ct);
+    }
+
+    public override IEnumerable<SimpleFileInfo> GetInitializedFiles()
+    {
+        return null;
+    }
+
+    public override Task InitializeAsync(CancellationToken ct = default)
+    {
+        throw new NotImplementedException();
+    }
+
+    private void CheckStringLength(StringBuilder str)
+    {
+        if (str.Length > MAX_LENGTH)
+        {
+            throw new Exception($"文本长度超过限制（{MAX_LENGTH}）");
+        }
+    }
+    private IEnumerable<TypoItem> Parse(string text, string source)
     {
         if (!JsonNode.Parse(text).AsObject().TryGetPropertyValue("errors", out var errors))
         {
@@ -284,7 +335,7 @@ public class TypoCheckerService(TypoCheckerConfig config, AppConfig appConfig)
             if (!errorObj.TryGetPropertyValue("context", out var context) ||
                 !errorObj.TryGetPropertyValue("original", out var original) ||
                 !errorObj.TryGetPropertyValue("corrected", out var corrected) ||
-                !errorObj.TryGetPropertyValue("fixed_segment", out var fixedSegment) ||
+                // !errorObj.TryGetPropertyValue("fixed_segment", out var fixedSegment) ||
                 !errorObj.TryGetPropertyValue("explanation", out var explanation))
             {
                 throw new FormatException("输出内容中的errors对象缺少必要字段");
@@ -295,8 +346,9 @@ public class TypoCheckerService(TypoCheckerConfig config, AppConfig appConfig)
                 Context = context.ToString(),
                 Original = original.ToString(),
                 Corrected = corrected.ToString(),
-                FixedSegment = fixedSegment.ToString(),
-                Explanation = explanation.ToString()
+                // FixedSegment = fixedSegment.ToString(),
+                Explanation = explanation.ToString(),
+                Source = source
             };
         }
     }
@@ -368,46 +420,5 @@ public class TypoCheckerService(TypoCheckerConfig config, AppConfig appConfig)
 
         // 过滤空段落
         return finalSegments.Where(s => !string.IsNullOrWhiteSpace(s)).ToList();
-    }
-
-    public override async Task ExecuteAsync(CancellationToken ct = default)
-    {
-        StringBuilder str = new StringBuilder();
-
-        Progress<double> progress = new Progress<double>(NotifyProgress);
-
-        await Task.Run(async () =>
-        {
-            await foreach (var line in Config.Source.GetPlainTextAsync(true, ct))
-            {
-                await foreach (var item in CheckAsync(line.Text, progress, ct))
-                {
-                    switch (item)
-                    {
-                        case TypoItem t:
-                            TypoItemGenerated?.Invoke(this, new GenericEventArgs<TypoItem>(t));
-                            break;
-                        case OutputItem f:
-                            // Outputs.Add(f);
-                            break;
-                        case PromptItem p:
-                            // Prompts.Add(p);
-                            break;
-                        default:
-                            break;
-                    }
-                }
-            }
-        }, ct);
-    }
-
-    public override IEnumerable<SimpleFileInfo> GetInitializedFiles()
-    {
-        return null;
-    }
-
-    public override Task InitializeAsync(CancellationToken ct = default)
-    {
-        throw new NotImplementedException();
     }
 }

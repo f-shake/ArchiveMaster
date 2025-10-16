@@ -21,10 +21,10 @@ namespace ArchiveMaster
 
         public IList<ConfigMetadata> Configs =>
         [
-            new ConfigMetadata(typeof(SmartDocSearchConfig)),
-            new ConfigMetadata(typeof(AiProvidersConfig)),
             new ConfigMetadata(typeof(TextEncryptionConfig)),
+            new ConfigMetadata(typeof(SmartDocSearchConfig)),
             new ConfigMetadata(typeof(TypoCheckerConfig)),
+            new ConfigMetadata(typeof(AiProvidersConfig)),
         ];
 
         public string ModuleName => "文本工具";

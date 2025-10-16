@@ -34,7 +34,7 @@ namespace ArchiveMaster.Views
         private ScrollViewer configGrid;
 
         private Grid container;
-
+        
         public object ConfigsContent
         {
             get => GetValue(ConfigsContentProperty);

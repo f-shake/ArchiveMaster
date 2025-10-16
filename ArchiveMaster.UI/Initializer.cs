@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using ArchiveMaster.Configs;
+using ArchiveMaster.Helpers;
 using ArchiveMaster.Models;
 using ArchiveMaster.Platforms;
 using ArchiveMaster.Services;
@@ -95,6 +96,7 @@ public static class Initializer
         builder.Services.AddTransient<MainWindow>();
         builder.Services.AddTransient<MainView>();
         builder.Services.AddTransient<MainViewModel>();
+        builder.Services.AddSingleton<TextHelper>();
         builder.Services.AddViewAndViewModel<SettingDialog, SettingViewModel>();
         builder.Services.AddViewAndViewModel<MasterPasswordDialog, MasterPasswordViewModel>();
         builder.Services.AddHostedService<AppLifetime>();

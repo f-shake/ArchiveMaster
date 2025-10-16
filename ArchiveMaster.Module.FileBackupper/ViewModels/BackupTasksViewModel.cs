@@ -67,17 +67,6 @@ namespace ArchiveMaster.ViewModels
             await Tasks.UpdateStatusAsync();
         }
 
-        public override async Task OnExitAsync(CancelEventArgs args)
-        {
-            var result = await DialogService.ShowYesNoDialogAsync("保存配置", "有未保存的配置，是否保存？");
-            if (true.Equals(result))
-            {
-                Save();
-            }
-
-            await base.OnExitAsync(args);
-        }
-
         [RelayCommand]
         private void AddTask()
         {

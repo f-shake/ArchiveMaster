@@ -7,6 +7,7 @@
     xmlns:cvt="clr-namespace:ArchiveMaster.Converters;assembly=ArchiveMaster.Core"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:gb="using:GroupBox.Avalonia.Controls"
+    xmlns:h="using:ArchiveMaster.Helpers"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:v="using:ArchiveMaster.Views"
     xmlns:vm="clr-namespace:ArchiveMaster.ViewModels"
@@ -14,8 +15,6 @@
     d:DesignHeight="450"
     d:DesignWidth="800"
     x:DataType="vm:TypoCheckerViewModel"
-    ExecuteButtonContent="AI归纳"
-    InitializeButtonContent="搜索"
     mc:Ignorable="d">
     <v:TwoStepPanelBase.ConfigsContent>
         <ct:StackFormItemGroup>
@@ -24,30 +23,93 @@
             </ct:FormItem>
 
             <ct:FormItem Label="最短分段字数：">
-                <Slider
-                    Maximum="2000"
-                    Minimum="100"
-                    Value="{Binding Config.MinSegmentLength}" />
+                <DockPanel HorizontalSpacing="8">
+                    <TextBlock
+                        Width="72"
+                        DockPanel.Dock="Right"
+                        Text="{Binding Config.MinSegmentLength, StringFormat='{}{0}字'}"
+                        TextAlignment="Right" />
+                    <Slider
+                        IsSnapToTickEnabled="True"
+                        Maximum="2000"
+                        Minimum="100"
+                        TickFrequency="10"
+                        Value="{Binding Config.MinSegmentLength}" />
+                </DockPanel>
             </ct:FormItem>
         </ct:StackFormItemGroup>
     </v:TwoStepPanelBase.ConfigsContent>
-
     <v:TwoStepPanelBase.ResultsContent>
-        <DataGrid ItemsSource="{Binding Typos}">
-            <DataGrid.Columns>
-                <DataGridTextColumn
-                    Binding="{Binding Context}"
-                    Header="上下文" />
-                <DataGridTextColumn
-                    Binding="{Binding Original}"
-                    Header="原词" />
-                <DataGridTextColumn
-                    Binding="{Binding Corrected}"
-                    Header="改正词" />
-                <DataGridTextColumn
-                    Binding="{Binding Explanation}"
-                    Header="描述" />
-            </DataGrid.Columns>
-        </DataGrid>
+        <ScrollViewer Padding="0,0,20,0">
+            <ItemsControl ItemsSource="{Binding Typos}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border
+                            Margin="2,4"
+                            Padding="8"
+                            Background="{DynamicResource Background2}"
+                            BorderBrush="{DynamicResource Background3}"
+                            BorderThickness="1"
+                            CornerRadius="8">
+                            <Grid RowDefinitions="Auto,8,Auto">
+                                <Grid ColumnDefinitions="*,8,Auto">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding Context}" />
+                                        <Button
+                                            Classes="Icon Transparent"
+                                            Command="{Binding CopyTextCommand, Source={x:Static h:TextHelper.Instance}}"
+                                            CommandParameter="{Binding Context}"
+                                            Content="{StaticResource Copy}" />
+                                    </StackPanel>
+                                    <TextBlock
+                                        Grid.Column="2"
+                                        HorizontalAlignment="Right"
+                                        Opacity="0.7"
+                                        Text="{Binding Explanation}"
+                                        TextTrimming="CharacterEllipsis" />
+                                </Grid>
+
+                                <Grid
+                                    Grid.Row="2"
+                                    ColumnDefinitions="Auto,8,*">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock
+                                            VerticalAlignment="Center"
+                                            Text="{Binding Original}" />
+                                        <Button
+                                            Classes="Icon Transparent"
+                                            Command="{Binding CopyTextCommand, Source={x:Static h:TextHelper.Instance}}"
+                                            CommandParameter="{Binding Original}"
+                                            Content="{StaticResource Copy}" />
+                                        <TextBlock
+                                            Margin="8,0"
+                                            VerticalAlignment="Center"
+                                            Text="→" />
+                                        <TextBlock
+                                            VerticalAlignment="Center"
+                                            Text="{Binding Corrected}" />
+                                        <Button
+                                            Classes="Icon Transparent"
+                                            Command="{Binding CopyTextCommand, Source={x:Static h:TextHelper.Instance}}"
+                                            CommandParameter="{Binding Corrected}"
+                                            Content="{StaticResource Copy}" />
+                                    </StackPanel>
+
+                                    <Border
+                                        Grid.Column="2"
+                                        Padding="8,4"
+                                        HorizontalAlignment="Right"
+                                        Background="{DynamicResource Background3}"
+                                        CornerRadius="16"
+                                        IsVisible="{Binding Source, Converter={x:Static cvt:Converters.IsNotNull}}">
+                                        <TextBlock Text="{Binding Source, Converter={x:Static cvt:Converters.FileName}}" />
+                                    </Border>
+                                </Grid>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
     </v:TwoStepPanelBase.ResultsContent>
 </v:TwoStepPanelBase>

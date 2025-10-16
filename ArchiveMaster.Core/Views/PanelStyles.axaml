@@ -146,7 +146,7 @@
                             b:SmoothScrollBehavior.IsEnabled="True"
                             HorizontalScrollBarVisibility="Disabled"
                             IsEnabled="{Binding CanInitialize}"
-                            IsVisible="{Binding EnableInitialize}"
+                            IsVisible="{Binding ConfigsContent, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static cvt:Converters.IsNotNull}}"
                             VerticalScrollBarVisibility="Auto">
                             <ContentPresenter Content="{TemplateBinding ConfigsContent}" />
                         </ScrollViewer>
@@ -159,7 +159,7 @@
                             Margin="32,16"
                             Background="{DynamicResource Background3}"
                             CornerRadius="1.5"
-                            IsVisible="{Binding EnableInitialize}" />
+                            IsVisible="{Binding ConfigsContent, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static cvt:Converters.IsNotNull}}" />
 
                         <!--  结果区  -->
                         <ContentPresenter
