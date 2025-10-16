@@ -18,7 +18,7 @@
             Text="{Binding $parent[UserControl].Result}">
             <TextBox.Styles>
                 <Style Selector="TextBox">
-                    <Setter Property="Background" Value="{DynamicResource Background2}" />
+                    <Setter Property="Background" Value="Transparent" />
                     <Setter Property="CornerRadius" Value="4" />
                     <Setter Property="TextWrapping" Value="Wrap" />
                     <Setter Property="BorderThickness" Value="0" />
@@ -27,19 +27,19 @@
                     <Style Selector="^:focus">
                         <Style Selector="^ /template/ Border#PART_BorderElement">
                             <Setter Property="BorderThickness" Value="0" />
-                            <Setter Property="Background" Value="{DynamicResource Background2}" />
+                            <Setter Property="Background" Value="Transparent" />
                         </Style>
                     </Style>
                     <Style Selector="^:pointerover">
                         <Style Selector="^ /template/ Border#PART_BorderElement">
                             <Setter Property="BorderThickness" Value="0" />
-                            <Setter Property="Background" Value="{DynamicResource Background2}" />
+                            <Setter Property="Background" Value="Transparent" />
                         </Style>
                     </Style>
                     <Style Selector="^:disabled">
                         <Style Selector="^ /template/ Border#PART_BorderElement">
                             <Setter Property="BorderThickness" Value="0" />
-                            <Setter Property="Background" Value="{DynamicResource Background2}" />
+                            <Setter Property="Background" Value="Transparent" />
                         </Style>
                     </Style>
                 </Style>

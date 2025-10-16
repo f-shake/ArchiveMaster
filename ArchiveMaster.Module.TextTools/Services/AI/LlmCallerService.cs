@@ -16,25 +16,28 @@ public class LlmCallerService(AiProviderConfig config)
 {
     public AiProviderConfig Config { get; } = config;
 
-    public async Task<string> CallAsync(string systemPrompt, string userPrompt, CancellationToken ct = default)
+    public async Task<string> CallAsync(string systemPrompt, string userPrompt, ChatOptions options = null,
+        CancellationToken ct = default)
     {
         var chatClient = GetChatClient();
 
         var sys = new ChatMessage(ChatRole.System, systemPrompt);
         var user = new ChatMessage(ChatRole.User, userPrompt);
-        var response = await chatClient.GetResponseAsync([sys, user], cancellationToken: ct);
+        var response = await chatClient.GetResponseAsync([sys, user], options, ct);
         return response.Text;
     }
 
     public async IAsyncEnumerable<string> CallStreamAsync(string systemPrompt, string userPrompt,
-        [EnumeratorCancellation] CancellationToken ct = default)
+        ChatOptions options = null,
+        [EnumeratorCancellation]
+        CancellationToken ct = default)
     {
         var chatClient = GetChatClient();
 
         var sys = new ChatMessage(ChatRole.System, systemPrompt);
         var user = new ChatMessage(ChatRole.User, userPrompt);
         await foreach (ChatResponseUpdate item in
-                       chatClient.GetStreamingResponseAsync([sys, user], cancellationToken: ct))
+                       chatClient.GetStreamingResponseAsync([sys, user], options, ct))
         {
             ct.ThrowIfCancellationRequested();
             yield return item.Text;

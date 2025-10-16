@@ -8,6 +8,7 @@ using ArchiveMaster.ViewModels;
 using ArchiveMaster.ViewModels.FileSystem;
 using DocumentFormat.OpenXml.Bibliography;
 using DocumentFormat.OpenXml.InkML;
+using Microsoft.Extensions.AI;
 
 namespace ArchiveMaster.Services;
 
@@ -231,7 +232,8 @@ public class TypoCheckerService(AppConfig appConfig)
                 systemPrompt += "用户具有额外要求，在满足上面格式输出要求的前提下，尽可能满足以下要求：" + Config.ExtraAiPrompt;
             }
 
-            string result = await llm.CallAsync(systemPrompt, segment, ct);
+            string result = await llm.CallAsync(systemPrompt, segment,
+                new ChatOptions { ResponseFormat = ChatResponseFormat.Json }, ct);
 
             yield return new OutputItem(result);
             var lines = result.Split(['\n', '\r'], StringSplitOptions.RemoveEmptyEntries);

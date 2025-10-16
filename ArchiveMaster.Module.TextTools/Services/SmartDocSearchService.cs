@@ -105,7 +105,7 @@ namespace ArchiveMaster.Services
             }
 
             List<string> result = new List<string>();
-            await foreach (var part in s.CallStreamAsync(sys, prompt.ToString(), ct))
+            await foreach (var part in s.CallStreamAsync(sys, prompt.ToString(), null, ct))
             {
                 AitStreamUpdate?.Invoke(this, new ChatStreamUpdateEventArgs(part));
                 result.Add(part);
