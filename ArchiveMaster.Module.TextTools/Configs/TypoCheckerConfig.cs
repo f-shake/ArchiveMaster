@@ -11,6 +11,9 @@ public partial class TypoCheckerConfig : ConfigBase
     [ObservableProperty]
     private int minSegmentLength = 200;
     
+    [ObservableProperty]
+    private string extraAiPrompt;
+    
     public override void Check()
     {
     }

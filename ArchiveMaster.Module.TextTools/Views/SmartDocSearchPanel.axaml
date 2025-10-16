@@ -9,7 +9,7 @@
     xmlns:gb="using:GroupBox.Avalonia.Controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:v="using:ArchiveMaster.Views"
-    xmlns:vm="clr-namespace:ArchiveMaster.ViewModels"
+    xmlns:vm="using:ArchiveMaster.ViewModels"
     x:Name="root"
     d:DesignHeight="450"
     d:DesignWidth="800"
@@ -119,7 +119,7 @@
                                             <Button
                                                 Grid.Row="2"
                                                 Padding="8,4"
-                                                Command="{Binding #root.DataContext.OpenFileCommand}"
+                                                Command="{Binding OpenFileCommand, Source={x:Static vm:GlobalCommands.Instance}}"
                                                 CommandParameter="{Binding Source}"
                                                 Content="{Binding Source, Converter={x:Static cvt:Converters.FileName}}"
                                                 CornerRadius="16"

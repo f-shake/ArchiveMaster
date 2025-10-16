@@ -96,7 +96,7 @@ public static class Initializer
         builder.Services.AddTransient<MainWindow>();
         builder.Services.AddTransient<MainView>();
         builder.Services.AddTransient<MainViewModel>();
-        builder.Services.AddSingleton<TextHelper>();
+        builder.Services.AddSingleton<GlobalCommands>();
         builder.Services.AddViewAndViewModel<SettingDialog, SettingViewModel>();
         builder.Services.AddViewAndViewModel<MasterPasswordDialog, MasterPasswordViewModel>();
         builder.Services.AddHostedService<AppLifetime>();

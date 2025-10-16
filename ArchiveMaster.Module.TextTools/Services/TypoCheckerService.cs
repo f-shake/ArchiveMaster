@@ -75,7 +75,9 @@ public class TypoCheckerService(AppConfig appConfig)
 
                                         请严格按上述JSON格式输出结果，不要包含任何额外的解释或说明。
                                         输出的格式应该严格遵从JSON格式，该转义的地方记得转义。
+
                                         """;
+
     public event GenericEventHandler<TypoItem> TypoItemGenerated;
 
     public static List<TypoSegment> SegmentTypos(string rawText, IList<TypoItem> typos)
@@ -223,7 +225,13 @@ public class TypoCheckerService(AppConfig appConfig)
 
             yield return new PromptItem(segment);
 
-            string result = await llm.CallAsync(SYSTEM_PROMPT, segment, ct);
+            string systemPrompt = SYSTEM_PROMPT;
+            if (!string.IsNullOrWhiteSpace(Config.ExtraAiPrompt))
+            {
+                systemPrompt += "用户具有额外要求，在满足上面格式输出要求的前提下，尽可能满足以下要求：" + Config.ExtraAiPrompt;
+            }
+
+            string result = await llm.CallAsync(systemPrompt, segment, ct);
 
             yield return new OutputItem(result);
             var lines = result.Split(['\n', '\r'], StringSplitOptions.RemoveEmptyEntries);
@@ -313,6 +321,7 @@ public class TypoCheckerService(AppConfig appConfig)
             throw new Exception($"文本长度超过限制（{MAX_LENGTH}）");
         }
     }
+
     private IEnumerable<TypoItem> Parse(string text, string source)
     {
         if (!JsonNode.Parse(text).AsObject().TryGetPropertyValue("errors", out var errors))

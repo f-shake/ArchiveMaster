@@ -33,6 +33,7 @@ namespace ArchiveMaster.Configs
 
         [ObservableProperty]
         private bool useRegex = false;
+        
         public override void Check()
         {
             if (Source.FromFile)

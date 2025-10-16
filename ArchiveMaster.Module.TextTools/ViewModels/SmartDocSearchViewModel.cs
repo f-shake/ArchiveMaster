@@ -51,25 +51,4 @@ public partial class SmartDocSearchViewModel(AppConfig appConfig, IDialogService
         SearchResults.Clear();
         AiConclude = "";
     }
-
-    [RelayCommand]
-    private void OpenFile(string path)
-    {
-        if (path == null || !File.Exists(path))
-        {
-            return;
-        }
-
-        try
-        {
-            Process.Start(new ProcessStartInfo(path)
-            {
-                UseShellExecute = true
-            });
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, "打开文件失败");
-        }
-    }
 }

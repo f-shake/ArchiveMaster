@@ -10,11 +10,12 @@
     xmlns:h="using:ArchiveMaster.Helpers"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:v="using:ArchiveMaster.Views"
-    xmlns:vm="clr-namespace:ArchiveMaster.ViewModels"
+    xmlns:vm="using:ArchiveMaster.ViewModels"
     x:Name="root"
     d:DesignHeight="450"
     d:DesignWidth="800"
     x:DataType="vm:TypoCheckerViewModel"
+    ExecuteButtonContent="检查"
     mc:Ignorable="d">
     <v:TwoStepPanelBase.ConfigsContent>
         <ct:StackFormItemGroup>
@@ -22,7 +23,9 @@
                 <v:TextSourceInput Source="{Binding Config.Source}" />
             </ct:FormItem>
 
-            <ct:FormItem Label="最短分段字数：">
+            <ct:FormItem
+                Description="较长的文本需要分段提供给AI。分段越短，检查效果越好，但时间会更长"
+                Label="最短分段字数：">
                 <DockPanel HorizontalSpacing="8">
                     <TextBlock
                         Width="72"
@@ -37,8 +40,13 @@
                         Value="{Binding Config.MinSegmentLength}" />
                 </DockPanel>
             </ct:FormItem>
+
+            <ct:FormItem Label="额外提示词：">
+                <TextBox Text="{Binding Config.ExtraAiPrompt}" />
+            </ct:FormItem>
         </ct:StackFormItemGroup>
     </v:TwoStepPanelBase.ConfigsContent>
+
     <v:TwoStepPanelBase.ResultsContent>
         <ScrollViewer Padding="0,0,20,0">
             <ItemsControl ItemsSource="{Binding Typos}">
@@ -57,7 +65,7 @@
                                         <TextBlock Text="{Binding Context}" />
                                         <Button
                                             Classes="Icon Transparent"
-                                            Command="{Binding CopyTextCommand, Source={x:Static h:TextHelper.Instance}}"
+                                            Command="{Binding CopyTextCommand, Source={x:Static vm:GlobalCommands.Instance}}"
                                             CommandParameter="{Binding Context}"
                                             Content="{StaticResource Copy}" />
                                     </StackPanel>
@@ -78,7 +86,7 @@
                                             Text="{Binding Original}" />
                                         <Button
                                             Classes="Icon Transparent"
-                                            Command="{Binding CopyTextCommand, Source={x:Static h:TextHelper.Instance}}"
+                                            Command="{Binding CopyTextCommand, Source={x:Static vm:GlobalCommands.Instance}}"
                                             CommandParameter="{Binding Original}"
                                             Content="{StaticResource Copy}" />
                                         <TextBlock
@@ -90,20 +98,21 @@
                                             Text="{Binding Corrected}" />
                                         <Button
                                             Classes="Icon Transparent"
-                                            Command="{Binding CopyTextCommand, Source={x:Static h:TextHelper.Instance}}"
+                                            Command="{Binding CopyTextCommand, Source={x:Static vm:GlobalCommands.Instance}}"
                                             CommandParameter="{Binding Corrected}"
                                             Content="{StaticResource Copy}" />
                                     </StackPanel>
 
-                                    <Border
+                                    <Button
                                         Grid.Column="2"
                                         Padding="8,4"
                                         HorizontalAlignment="Right"
-                                        Background="{DynamicResource Background3}"
+                                        Command="{Binding OpenFileCommand, Source={x:Static vm:GlobalCommands.Instance}}"
+                                        CommandParameter="{Binding Source}"
+                                        Content="{Binding Source, Converter={x:Static cvt:Converters.FileName}}"
                                         CornerRadius="16"
-                                        IsVisible="{Binding Source, Converter={x:Static cvt:Converters.IsNotNull}}">
-                                        <TextBlock Text="{Binding Source, Converter={x:Static cvt:Converters.FileName}}" />
-                                    </Border>
+                                        IsVisible="{Binding Source, Converter={x:Static cvt:Converters.IsNotNull}}"
+                                        ToolTip.Tip="{Binding Source}" />
                                 </Grid>
                             </Grid>
                         </Border>
