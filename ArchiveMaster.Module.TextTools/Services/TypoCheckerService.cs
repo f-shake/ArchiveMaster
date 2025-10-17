@@ -232,7 +232,7 @@ public class TypoCheckerService(AppConfig appConfig)
             string result = await llm.CallAsync(systemPrompt, segment,
                 new ChatOptions { ResponseFormat = ChatResponseFormat.Json }, ct);
 
-            yield return new OutputItem(result);
+            yield return new LlmOutputItem(result);
             var lines = result.Split(['\n', '\r'], StringSplitOptions.RemoveEmptyEntries);
             int startLine = 0;
             for (int i = 0; i < lines.Length; i++)
@@ -288,7 +288,7 @@ public class TypoCheckerService(AppConfig appConfig)
                     case TypoItem t:
                         TypoItemGenerated?.Invoke(this, new GenericEventArgs<TypoItem>(t));
                         break;
-                    case OutputItem f:
+                    case LlmOutputItem f:
                         // Outputs.Add(f);
                         break;
                     case PromptItem p:
@@ -345,6 +345,12 @@ public class TypoCheckerService(AppConfig appConfig)
                 !errorObj.TryGetPropertyValue("explanation", out var explanation))
             {
                 throw new FormatException("输出内容中的errors对象缺少必要字段");
+            }
+
+            if (original == corrected)
+            {
+                //有时候AI会提出一个不是错误的错误，忽略
+                continue;
             }
 
             yield return new TypoItem

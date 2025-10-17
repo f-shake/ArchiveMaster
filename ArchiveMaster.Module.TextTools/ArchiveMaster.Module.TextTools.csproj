@@ -26,6 +26,10 @@
       <DependentUpon>TypoCheckerPanel.axaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Views\TextRewriterPanel.axaml.cs">
+      <DependentUpon>TextRewriterPanel.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>

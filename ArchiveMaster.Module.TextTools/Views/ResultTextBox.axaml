@@ -5,6 +5,7 @@
     xmlns:cvt="clr-namespace:ArchiveMaster.Converters;assembly=ArchiveMaster.Core"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="clr-namespace:ArchiveMaster.ViewModels;assembly=ArchiveMaster.Core"
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
@@ -52,7 +53,8 @@
             Grid.Row="2"
             Grid.Column="2"
             Classes="Icon"
-            Click="CopyButton_OnClick"
+            Command="{Binding CopyTextCommand, Source={x:Static vm:GlobalCommands.Instance}}"
+            CommandParameter="{Binding Result}"
             Content="{StaticResource Copy}"
             IsEnabled="{Binding $parent[UserControl].Result, Converter={x:Static cvt:Converters.IsNotNull}}" />
     </Grid>

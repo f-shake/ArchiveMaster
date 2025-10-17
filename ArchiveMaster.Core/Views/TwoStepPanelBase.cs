@@ -31,7 +31,7 @@ namespace ArchiveMaster.Views
 
         private Grid bottomTwoLine;
 
-        private ScrollViewer configGrid;
+        private ScrollViewer configScrViewer;
 
         private Grid container;
         
@@ -77,11 +77,11 @@ namespace ArchiveMaster.Views
         {
             base.OnApplyTemplate(e);
             var gridSplitter = e.NameScope.Find<GridSplitter>("PART_GridSplitter");
-            configGrid = e.NameScope.Find<ScrollViewer>("PART_Configs");
+            configScrViewer = e.NameScope.Find<ScrollViewer>("PART_Configs");
             bottomOneLine = e.NameScope.Find<Grid>("PART_BottomOneLine");
             bottomTwoLine = e.NameScope.Find<Grid>("PART_BottomTwoLine");
             container = e.NameScope.Find<Grid>("PART_ContentContainer");
-            if (gridSplitter == null || configGrid == null || bottomOneLine == null || bottomTwoLine == null)
+            if (gridSplitter == null || configScrViewer == null || bottomOneLine == null || bottomTwoLine == null)
             {
                 throw new InvalidOperationException($"{nameof(TwoStepPanelBase)}的模板不对应");
             }
@@ -92,10 +92,10 @@ namespace ArchiveMaster.Views
                 //1.取消滚动区高度限制
                 //2.配置单元格实际高度为当前高度，避免闪现
                 //3.配置单元格最大高度为需要的高度
-                configGrid.MaxHeight = double.MaxValue;
+                configScrViewer.MaxHeight = double.MaxValue;
                 container.RowDefinitions[0].Height =
                     new GridLength(container.RowDefinitions[0].ActualHeight, GridUnitType.Pixel);
-                container.RowDefinitions[0].MaxHeight = configGrid.Extent.Height + 16;
+                container.RowDefinitions[0].MaxHeight = configScrViewer.Extent.Height + 16;
             };
         }
 
@@ -109,7 +109,7 @@ namespace ArchiveMaster.Views
         {
             if (resetHeight)
             {
-                configGrid.MaxHeight = Bounds.Height > 700 ? 300d : 200d;
+                configScrViewer.MaxHeight = Bounds.Height > 700 ? 300d : 200d;
                 container.RowDefinitions[0].Height = GridLength.Auto;
                 container.RowDefinitions[0].MaxHeight = double.MaxValue;
             }
@@ -118,6 +118,7 @@ namespace ArchiveMaster.Views
             {
                 bottomTwoLine.IsVisible = !(bottomOneLine.IsVisible = Bounds.Width > 500);
             }
+            
         }
     }
 }

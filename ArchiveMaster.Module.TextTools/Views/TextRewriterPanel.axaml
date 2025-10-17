@@ -1,0 +1,55 @@
+<v:TwoStepPanelBase
+    x:Class="ArchiveMaster.Views.TextRewriterPanel"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:b="using:ArchiveMaster.Behaviors"
+    xmlns:c="using:ArchiveMaster.Configs"
+    xmlns:ct="using:FzLib.Avalonia.Controls"
+    xmlns:cvt="clr-namespace:ArchiveMaster.Converters;assembly=ArchiveMaster.Core"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:e="using:ArchiveMaster.Enums"
+    xmlns:gb="using:GroupBox.Avalonia.Controls"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:me="using:FzLib.Avalonia.MarkupExtensions"
+    xmlns:v="using:ArchiveMaster.Views"
+    xmlns:vm="using:ArchiveMaster.ViewModels"
+    x:Name="root"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    x:DataType="vm:TextRewriterViewModel"
+    ExecuteButtonContent="处理"
+    mc:Ignorable="d">
+    <v:TwoStepPanelBase.ConfigsContent>
+        <ct:StackFormItemGroup>
+            <ct:FormItem Label="文本源：">
+                <v:TextSourceInput Source="{Binding Config.Source}" />
+            </ct:FormItem>
+
+            <ct:FormItem Label="类型：">
+                <ct:RadioButtonGroup
+                    DisplayMemberBinding="{Binding ., Converter={x:Static cvt:Converters.Description}}"
+                    ItemsSource="{me:EnumValues e:TextRewriterType}"
+                    SelectedItem="{Binding Config.Type}" />
+            </ct:FormItem>
+
+            <ct:FormItem
+                IsEnabled="{Binding Config.Type, Converter={x:Static cvt:Converters.EqualWithParameter}, ConverterParameter=Custom}"
+                Label="自定义提示词：">
+                <TextBox Text="{Binding Config.CustomPrompt}" />
+            </ct:FormItem>
+
+
+            <ct:FormItem
+                IsEnabled="{Binding Config.Type, Converter={x:Static cvt:Converters.EqualWithParameter}, ConverterParameter=Translation}"
+                Label="翻译目标语言：">
+                <TextBox Text="{Binding Config.TranslationTargetLanguage}" />
+            </ct:FormItem>
+
+
+        </ct:StackFormItemGroup>
+    </v:TwoStepPanelBase.ConfigsContent>
+
+    <v:TwoStepPanelBase.ResultsContent>
+        <v:ResultTextBox Result="{Binding Result}" />
+    </v:TwoStepPanelBase.ResultsContent>
+</v:TwoStepPanelBase>

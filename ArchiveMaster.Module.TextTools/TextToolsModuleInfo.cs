@@ -21,6 +21,7 @@ namespace ArchiveMaster
 
         public IList<ConfigMetadata> Configs =>
         [
+            new ConfigMetadata(typeof(TextRewriterConfig)),
             new ConfigMetadata(typeof(TextEncryptionConfig)),
             new ConfigMetadata(typeof(SmartDocSearchConfig)),
             new ConfigMetadata(typeof(TypoCheckerConfig)),
@@ -42,12 +43,15 @@ namespace ArchiveMaster
             typeof(SmartDocSearchService),
             typeof(TextEncryptionService),
             typeof(TypoCheckerService),
+            typeof(TextRewriterService),
         ];
 
         public ToolPanelGroupInfo Views => new ToolPanelGroupInfo()
         {
             Panels =
             {
+                new ToolPanelInfo(typeof(TextRewriterPanel), typeof(TextRewriterViewModel), "文本改写",
+                    "使用AI对文本进行改写，实现文本的优化、简化、扩展、翻译、摘要等", baseUrl + "rewrite.svg"),
                 new ToolPanelInfo(typeof(TextEncryptionPanel), typeof(TextEncryptionViewModel), "文本混淆",
                     "使用替换式密码的方式混淆文本，实现防君子不防小人的文本加密", baseUrl + "encrypt.svg"),
                 new ToolPanelInfo(typeof(SmartDocSearchPanel), typeof(SmartDocSearchViewModel), "文档智能搜索",

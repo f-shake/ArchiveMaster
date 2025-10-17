@@ -254,7 +254,7 @@ namespace ArchiveMaster.Configs
                 Log.Logger.Error(ex, "后台保存配置失败");
             }
         }
-        
+
         public void Save()
         {
             try
@@ -298,6 +298,25 @@ namespace ArchiveMaster.Configs
                     {
                         yield return (config, p);
                     }
+                }
+            }
+        }
+
+
+        private IEnumerable<(ConfigItem config, PropertyInfo property)> EnumerateProperties()
+        {
+            foreach (var config in configs)
+            {
+                if (config.Config is null)
+                {
+                    continue;
+                }
+
+                var type = config.Config.GetType();
+                var properties = type.GetRuntimeProperties();
+                foreach (var p in properties)
+                {
+                    yield return (config, p);
                 }
             }
         }
@@ -383,9 +402,18 @@ namespace ArchiveMaster.Configs
         /// </summary>
         private void ProcessAllNullObjects()
         {
-            ProcessNullObjects<SecurePassword>();
-            ProcessNullObjects<FileFilterRule>();
-            ProcessNullObjects<ObservableStringList>();
+            foreach (var (c, p) in EnumerateProperties())
+            {
+                if (p.PropertyType.IsClass 
+                    && p.GetValue(c.Config) is null
+                    && !p.PropertyType.Namespace.StartsWith("System"))//如果是Class且为null，就创建一个实例
+                {
+                    if (p.PropertyType.GetConstructor(Type.EmptyTypes) is ConstructorInfo)//需要有无参构造函数
+                    {
+                        p.SetValue(c.Config, Activator.CreateInstance(p.PropertyType));
+                    }
+                }
+            }
         }
 
         private void ProcessNullObjects<T>() where T : new()

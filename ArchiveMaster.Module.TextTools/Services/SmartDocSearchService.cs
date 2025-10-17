@@ -11,6 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using ArchiveMaster.Events;
 using ArchiveMaster.Helpers;
+using ArchiveMaster.Models;
 using ArchiveMaster.ViewModels;
 using ArchiveMaster.ViewModels.FileSystem;
 using Markdig;
@@ -20,7 +21,7 @@ namespace ArchiveMaster.Services
     public class SmartDocSearchService(AppConfig appConfig)
         : AiTwoStepServiceBase<SmartDocSearchConfig>(appConfig)
     {
-        public event EventHandler<ChatStreamUpdateEventArgs> AitStreamUpdate;
+        public event GenericEventHandler<LlmOutputItem> AitStreamUpdate;
 
         public string AiConclude { get; private set; }
 
@@ -107,7 +108,7 @@ namespace ArchiveMaster.Services
             List<string> result = new List<string>();
             await foreach (var part in s.CallStreamAsync(sys, prompt.ToString(), null, ct))
             {
-                AitStreamUpdate?.Invoke(this, new ChatStreamUpdateEventArgs(part));
+                AitStreamUpdate?.Invoke(this, new GenericEventArgs<LlmOutputItem>(part));
                 result.Add(part);
             }
 

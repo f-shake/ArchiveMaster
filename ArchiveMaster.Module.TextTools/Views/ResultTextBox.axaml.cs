@@ -16,11 +16,16 @@ namespace ArchiveMaster.Views
         public ResultTextBox()
         {
             InitializeComponent();
+            //自动滚动到最底部
+            this.GetObservable(ResultProperty).Subscribe(r => { result.ScrollToLine(result.GetLineCount()-1); });
         }
 
         public static readonly StyledProperty<string> MessageProperty =
             AvaloniaProperty.Register<ResultTextBox, string>(
                 nameof(Message));
+
+        public static readonly StyledProperty<string> ResultProperty = AvaloniaProperty.Register<ResultTextBox, string>(
+            nameof(Result));
 
         public string Message
         {
@@ -28,35 +33,10 @@ namespace ArchiveMaster.Views
             set => SetValue(MessageProperty, value);
         }
 
-        public static readonly StyledProperty<string> ResultProperty = AvaloniaProperty.Register<ResultTextBox, string>(
-            nameof(Result));
-
         public string Result
         {
             get => GetValue(ResultProperty);
             set => SetValue(ResultProperty, value);
-        }
-
-        private async void CopyButton_OnClick(object sender, RoutedEventArgs e)
-        {
-            if (string.IsNullOrEmpty(Result))
-            {
-                return;
-            }
-
-            try
-            {
-                var clipboard = TopLevel.GetTopLevel(this)?.Clipboard;
-                if (clipboard == null)
-                {
-                    return;
-                }
-                await clipboard.SetTextAsync(Result);
-            }
-            catch
-            {
-                Debug.Assert(false);
-            }
         }
     }
 }
