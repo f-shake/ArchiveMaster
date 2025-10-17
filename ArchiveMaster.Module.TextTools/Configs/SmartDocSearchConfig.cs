@@ -29,9 +29,6 @@ namespace ArchiveMaster.Configs
         private TextSource source = new TextSource();
 
         [ObservableProperty]
-        private bool useAiConclude = true;
-
-        [ObservableProperty]
         private bool useRegex = false;
         
         public override void Check()

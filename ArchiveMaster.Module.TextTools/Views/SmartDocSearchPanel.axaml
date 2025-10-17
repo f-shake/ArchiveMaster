@@ -47,26 +47,15 @@
                 </ct:WrapFormItemGroup>
             </ct:FormItem>
 
-            <ct:FormItem Label="{Binding .}">
-                <ct:FormItem.LabelTemplate>
-                    <DataTemplate>
-                        <CheckBox
-                            Content="AI总结："
-                            IsChecked="{Binding Config.UseAiConclude}" />
-                    </DataTemplate>
-                </ct:FormItem.LabelTemplate>
+            <ct:FormItem Label="AI总结：">
                 <ct:WrapFormItemGroup>
-                    <ct:FormItem
-                        Header="额外提示词"
-                        IsVisible="{Binding Config.UseAiConclude}">
+                    <ct:FormItem Header="额外提示词">
                         <TextBox
                             Width="240"
                             Text="{Binding Config.ExtraAiPrompt}"
                             Watermark="默认对搜索结果进行归纳总结" />
                     </ct:FormItem>
-                    <ct:FormItem
-                        Header="期望回答长度（字数）"
-                        IsVisible="{Binding Config.UseAiConclude}">
+                    <ct:FormItem Header="期望回答长度（字数）">
                         <NumericUpDown
                             Width="140"
                             FormatString="0"
@@ -75,9 +64,7 @@
                             Minimum="50"
                             Value="{Binding Config.ExpectedAiConcludeLength}" />
                     </ct:FormItem>
-                    <ct:FormItem
-                        Header="上传条目数量限制"
-                        IsVisible="{Binding Config.UseAiConclude}">
+                    <ct:FormItem Header="上传条目数量限制">
                         <NumericUpDown
                             Width="140"
                             FormatString="0"

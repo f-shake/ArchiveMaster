@@ -198,10 +198,7 @@ public class TypoCheckerService(AppConfig appConfig)
         return segments;
     }
 
-    public async IAsyncEnumerable<ICheckItem> CheckAsync(IList<DocFilePart> parts,
-        IProgress<double> progress,
-        [EnumeratorCancellation]
-        CancellationToken ct)
+    public async IAsyncEnumerable<ICheckItem> CheckAsync(IList<DocFilePart> parts, [EnumeratorCancellation] CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(parts);
         if (parts.Count == 0)
@@ -222,7 +219,7 @@ public class TypoCheckerService(AppConfig appConfig)
             ct.ThrowIfCancellationRequested();
 
             string segment = segments[index].text;
-            progress?.Report((double)(0 + index) / segments.Count);
+            NotifyProgress((double)(0 + index) / segments.Count);
 
             yield return new PromptItem(segment);
 
@@ -273,8 +270,6 @@ public class TypoCheckerService(AppConfig appConfig)
     {
         StringBuilder str = new StringBuilder();
 
-        Progress<double> progress = new Progress<double>(NotifyProgress);
-
         await Task.Run(async () =>
         {
             List<DocFilePart> parts = new List<DocFilePart>();
@@ -286,7 +281,7 @@ public class TypoCheckerService(AppConfig appConfig)
             }
 
             NotifyMessage("正在检查错别字");
-            await foreach (var item in CheckAsync(parts, progress, ct))
+            await foreach (var item in CheckAsync(parts, ct))
             {
                 switch (item)
                 {

@@ -19,6 +19,21 @@ using ArchiveMaster.ViewModels.FileSystem;
 
 namespace ArchiveMaster.ViewModels;
 
+// [Flags]
+// public enum TwoStepState
+// {
+//     CanInitialize = 0x01,
+//     CanExecute = 0x02,
+//     CanCancel = 0x04,
+//     CanReset = 0x08,
+//
+//     Ready = CanInitialize,
+//     Initializing = CanCancel,
+//     Initialized = CanExecute | CanReset,
+//     Executing = CanCancel,
+//     Executed = CanReset,
+// }
+
 public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPresetViewModelBase<TConfig>
     where TService : TwoStepServiceBase<TConfig>
     where TConfig : ConfigBase, new()
@@ -72,7 +87,10 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
     [ObservableProperty]
     private bool canReset = false;
 
-    private void UpdateCommandExecutable(bool? canInitialize, bool? canExecute, bool? canCancel, bool? canReset)
+    private void UpdateCommandExecutable(bool? canInitialize = null,
+        bool? canExecute = null,
+        bool? canCancel = null,
+        bool? canReset = null)
     {
         if (canInitialize.HasValue)
         {
@@ -112,8 +130,7 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
     /// <summary>
     /// 进度
     /// </summary>
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(ProgressIndeterminate))]
+    [ObservableProperty] [NotifyPropertyChangedFor(nameof(ProgressIndeterminate))]
     private double progress;
 
     /// <summary>
@@ -161,6 +178,10 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
     {
         Service = CreateServiceImplement();
         Debug.Assert(Service != null);
+        if (Service == null)
+        {
+            throw new NullReferenceException($"{nameof(Service)}为空");
+        }
         Service.ProgressUpdate += Service_ProgressUpdate;
         Service.MessageUpdate += Service_MessageUpdate;
     }
@@ -355,16 +376,14 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
         CancelCommand.NotifyCanExecuteChanged();
         WeakReferenceMessenger.Default.Send(new LoadingMessage(true));
         if (InitializeCommand.IsRunning)
-        {TOOD
+        {
             InitializeCommand.Cancel();
-            CanInitialize = false;
-            InitializeCommand.NotifyCanExecuteChanged();
+            UpdateCommandExecutable(canInitialize: false);
         }
         else if (ExecuteCommand.IsRunning)
         {
             ExecuteCommand.Cancel();
-            CanExecute = false;
-            ExecuteCommand.NotifyCanExecuteChanged();
+            UpdateCommandExecutable(canExecute: false);
         }
     }
 
@@ -381,18 +400,8 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
             AppConfig.SaveBackground();
             CreateService();
         }
-
-        if (Service == null)
-        {
-            throw new NullReferenceException($"{nameof(Service)}为空");
-        }
-
-        CanExecute = false;
-        CanInitialize = false;
-        CanReset = false;
-        ResetCommand.NotifyCanExecuteChanged();
-        CanCancel = true;
-        CancelCommand.NotifyCanExecuteChanged();
+        
+        UpdateCommandExecutable(false, false, true, false);
 
         await TryRunServiceMethodAsync(async () =>
         {
@@ -404,21 +413,7 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
             await CheckWarningFilesOnExecutedAsync(ct);
         }, "执行失败");
 
-        CanReset = true;
-        ResetCommand.NotifyCanExecuteChanged();
-        CanCancel = false;
-        CancelCommand.NotifyCanExecuteChanged();
-
-        if (EnableRepeatExecute)
-        {
-            CanExecute = true;
-            if (!EnableInitialize)
-            {
-                CanInitialize = true;
-            }
-
-            ExecuteCommand.NotifyCanExecuteChanged();
-        }
+        UpdateCommandExecutable(null, EnableRepeatExecute, false, true);
     }
 
     /// <summary>
@@ -429,12 +424,7 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
     private async Task InitializeAsync(CancellationToken ct)
     {
         AppConfig.SaveBackground();
-        CanInitialize = false;
-        InitializeCommand.NotifyCanExecuteChanged();
-        CanReset = false;
-        ResetCommand.NotifyCanExecuteChanged();
-        CanCancel = true;
-        CancelCommand.NotifyCanExecuteChanged();
+        UpdateCommandExecutable(false,false,true,false);
 
         if (await TryRunServiceMethodAsync(async () =>
             {
@@ -446,21 +436,13 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
             }, "初始化失败") //初始化成功
             && !await CheckWarningFilesOnInitializedAsync(ct)) //有需要处理的文件
         {
-            CanExecute = true;
-            CanReset = true;
+         
+            UpdateCommandExecutable(false,true,false,true);
         }
         else
         {
-            CanExecute = false;
-            CanReset = false;
-            CanInitialize = true;
+            UpdateCommandExecutable(true,false,false,false);
         }
-
-        ExecuteCommand.NotifyCanExecuteChanged();
-        ResetCommand.NotifyCanExecuteChanged();
-        InitializeCommand.NotifyCanExecuteChanged();
-        CanCancel = false;
-        CancelCommand.NotifyCanExecuteChanged();
     }
 
     /// <summary>
@@ -469,13 +451,7 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
     [RelayCommand(CanExecute = nameof(CanReset))]
     private void Reset()
     {
-        CanReset = false;
-        CanInitialize = true;
-        CanExecute = !EnableInitialize;
-
-        ResetCommand.NotifyCanExecuteChanged();
-        ExecuteCommand.NotifyCanExecuteChanged();
-        InitializeCommand.NotifyCanExecuteChanged();
+        UpdateCommandExecutable(true,!EnableInitialize,false,false);
 
         Message = "就绪";
         OnReset();
