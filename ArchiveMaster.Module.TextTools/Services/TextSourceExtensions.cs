@@ -2,7 +2,7 @@
 using System.Text;
 using ArchiveMaster.ViewModels;
 using DocumentFormat.OpenXml.Packaging;
-using NPOI.XWPF.UserModel;
+// using NPOI.XWPF.UserModel;
 using DocumentFormat.OpenXml.Wordprocessing;
 using Markdig;
 using UtfUnknown;
@@ -26,7 +26,7 @@ public static class TextSourceExtensions
                 var lines = Path.GetExtension(file.File) switch
                 {
                     ".docx" => file.ReadDocxAsync(ct: ct),
-                    ".doc" => file.ReadDocAsync(ct: ct),
+                    // ".doc" => file.ReadDocAsync(ct: ct),
                     ".md" => file.ReadMarkdownAsync(ct: ct),
                     _ => file.ReadTxtAsync(ct: ct)
                 };
@@ -107,22 +107,22 @@ public static class TextSourceExtensions
         return encoding;
     }
 
-    private static async IAsyncEnumerable<string> ReadDocAsync(this DocFile file,
-            [EnumeratorCancellation]
-        CancellationToken ct = default)
-    {
-        await using var stream = File.OpenRead(file.File);
-        XWPFDocument doc = new XWPFDocument(stream);
-        foreach (var para in doc.Paragraphs)
-        {
-            ct.ThrowIfCancellationRequested();
-            string v = para.ParagraphText; //获得文本
-            if (!string.IsNullOrEmpty(v))
-            {
-                yield return v;
-            }
-        }
-    }
+    // private static async IAsyncEnumerable<string> ReadDocAsync(this DocFile file,
+    //         [EnumeratorCancellation]
+    //     CancellationToken ct = default)
+    // {
+    //     await using var stream = File.OpenRead(file.File);
+    //     XWPFDocument doc = new XWPFDocument(stream);
+    //     foreach (var para in doc.Paragraphs)
+    //     {
+    //         ct.ThrowIfCancellationRequested();
+    //         string v = para.ParagraphText; //获得文本
+    //         if (!string.IsNullOrEmpty(v))
+    //         {
+    //             yield return v;
+    //         }
+    //     }
+    // }
 
     private static async IAsyncEnumerable<string> ReadDocxAsync(this DocFile file,
         [EnumeratorCancellation]

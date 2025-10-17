@@ -157,7 +157,7 @@ public partial class FilePickerTextBox : UserControl
     {
         if (CanDrop(e))
         {
-            var files = e.Data.GetFiles()?.Select(p => p.TryGetLocalPath()).ToList();
+            var files = e.DataTransfer.TryGetFiles()?.Select(p => p.TryGetLocalPath()).ToList();
             if (files is null or { Count: 0 })
             {
                 return;
@@ -246,11 +246,11 @@ public partial class FilePickerTextBox : UserControl
 
     private bool CanDrop(DragEventArgs e)
     {
-        if (e.Data.GetDataFormats().Contains(DataFormats.Files))
+        if (e.DataTransfer.Formats.Contains(DataFormat.File))
         {
-            var fileAttributes = e.Data.GetFiles()
+            var fileAttributes = e.DataTransfer.TryGetFiles()?
                 .Select(p => p.TryGetLocalPath())
-                .Select(p => File.GetAttributes(p))
+                .Select(File.GetAttributes)
                 .ToList();
             if (Type == PickerType.SaveFile && fileAttributes.Count > 1)
             {
@@ -350,7 +350,7 @@ public partial class FilePickerTextBox : UserControl
             });
 
             WeakReferenceMessenger.Default.Send(new LoadingMessage(false));
-            
+
             var dialog = new FilterTestResultDialog(results.Count, totalLength, results);
             await dialog.ShowDialog(dialogService.ContainerType, TopLevel.GetTopLevel(this));
         }

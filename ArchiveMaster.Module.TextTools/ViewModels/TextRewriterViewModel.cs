@@ -23,6 +23,7 @@ public partial class TextRewriterViewModel(AppConfig appConfig, IDialogService d
     private string result = "";
 
     public override bool EnableInitialize => false;
+
     public override bool EnableRepeatExecute => true;
 
     protected override Task OnExecutingAsync(CancellationToken ct)

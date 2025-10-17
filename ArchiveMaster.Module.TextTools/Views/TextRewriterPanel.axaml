@@ -31,20 +31,27 @@
                     ItemsSource="{me:EnumValues e:TextRewriterType}"
                     SelectedItem="{Binding Config.Type}" />
             </ct:FormItem>
-
-            <ct:FormItem
-                IsEnabled="{Binding Config.Type, Converter={x:Static cvt:Converters.EqualWithParameter}, ConverterParameter=Custom}"
-                Label="自定义提示词：">
-                <TextBox Text="{Binding Config.CustomPrompt}" />
+            <ct:FormItem Label="自定义：">
+                <UniformGrid
+                    ColumnSpacing="8"
+                    Rows="1">
+                    <ct:FormItem
+                        Header="额外提示词"
+                        IsVisible="{Binding Config.Type, Converter={x:Static cvt:Converters.NotEqualWithParameter}, ConverterParameter=Custom}">
+                        <TextBox Text="{Binding Config.ExtraAiPrompt}" />
+                    </ct:FormItem>
+                    <ct:FormItem
+                        Header="自定义提示词"
+                        IsVisible="{Binding Config.Type, Converter={x:Static cvt:Converters.EqualWithParameter}, ConverterParameter=Custom}">
+                        <TextBox Text="{Binding Config.CustomPrompt}" />
+                    </ct:FormItem>
+                    <ct:FormItem
+                        Header="翻译目标语言"
+                        IsVisible="{Binding Config.Type, Converter={x:Static cvt:Converters.EqualWithParameter}, ConverterParameter=Translation}">
+                        <TextBox Text="{Binding Config.TranslationTargetLanguage}" />
+                    </ct:FormItem>
+                </UniformGrid>
             </ct:FormItem>
-
-
-            <ct:FormItem
-                IsEnabled="{Binding Config.Type, Converter={x:Static cvt:Converters.EqualWithParameter}, ConverterParameter=Translation}"
-                Label="翻译目标语言：">
-                <TextBox Text="{Binding Config.TranslationTargetLanguage}" />
-            </ct:FormItem>
-
 
         </ct:StackFormItemGroup>
     </v:TwoStepPanelBase.ConfigsContent>

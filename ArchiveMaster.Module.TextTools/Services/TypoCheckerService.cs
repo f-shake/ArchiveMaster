@@ -254,7 +254,7 @@ public class TypoCheckerService(AppConfig appConfig)
             {
                 results = Parse(result, segments[index].source).ToList();
             }
-            catch (FormatException ex)
+            catch (FormatException )
             {
                 continue;
             }

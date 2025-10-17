@@ -14,11 +14,11 @@ public partial class GlobalCommands(IClipboardService clipboardService, IDialogS
     [RelayCommand]
     private Task CopyTextAsync(string text)
     {
-        return HostServices.GetRequiredService<IClipboardService>().SetTextAsync(text);
+        return clipboardService.SetTextAsync(text);
     }
 
     [RelayCommand]
-    private void OpenFile(string path)
+    private async Task OpenFileAsync(string path)
     {
         try
         {
@@ -29,6 +29,7 @@ public partial class GlobalCommands(IClipboardService clipboardService, IDialogS
         }
         catch (Exception ex)
         {
+            await dialogService.ShowErrorDialogAsync("打开文件失败", ex);
             Log.Error(ex, "打开文件失败");
         }
     }

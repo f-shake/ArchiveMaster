@@ -37,8 +37,8 @@ namespace ArchiveMaster.Views
             }
 
             var pickerOptions = FilePickerOptionsBuilder.Create()
-                .AddFilter("所有文本文档", "txt", "doc", "docx", "md", "txt")
-                .AddFilter("Word文档", "doc", "docx")
+                .AddFilter("所有文本文档", "txt",/* "doc",*/ "docx", "md", "txt")
+                .AddFilter("Word文档", /*"doc",*/ "docx")
                 .AddFilter("Markdown文档", "md")
                 .AddFilter("纯文本", "txt")
                 .AddFilter("所有文件（作为纯文本读取）", "*")

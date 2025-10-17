@@ -7,17 +7,19 @@ namespace ArchiveMaster.Configs;
 public partial class TextRewriterConfig : ConfigBase
 {
     [ObservableProperty]
-    private TextRewriterType type;
+    private string customPrompt;
 
     [ObservableProperty]
-    private string customPrompt;
+    private string extraAiPrompt;
+
+    [ObservableProperty]
+    private TextSource source = new TextSource();
 
     [ObservableProperty]
     private string translationTargetLanguage;
 
     [ObservableProperty]
-    private TextSource source = new TextSource();
-
+    private TextRewriterType type;
     public override void Check()
     {
         switch (Type)

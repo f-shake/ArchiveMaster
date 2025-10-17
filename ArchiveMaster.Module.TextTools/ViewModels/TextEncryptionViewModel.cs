@@ -21,14 +21,13 @@ namespace ArchiveMaster.ViewModels;
 
 public partial class TextEncryptionViewModel : ViewModelBase
 {
+    private readonly ConcurrentQueue<Func<Task>> taskQueue = new ConcurrentQueue<Func<Task>>();
+
     [ObservableProperty]
     private string result;
 
     [ObservableProperty]
     private TextSource source = new TextSource() { FromFile = false }; //敏感数据，不保存到配置文件
-
-    private readonly ConcurrentQueue<Func<Task>> taskQueue = new ConcurrentQueue<Func<Task>>();
-
     public TextEncryptionViewModel(AppConfig appConfig, IDialogService dialogService) : base(dialogService)
     {
         Config = appConfig.GetOrCreateConfigWithDefaultKey<TextEncryptionConfig>();
@@ -42,14 +41,14 @@ public partial class TextEncryptionViewModel : ViewModelBase
 
     public TextEncryptionService Service { get; }
 
-    private void ConfigOnPropertyChanged(object sender, PropertyChangedEventArgs e)
+    private async void ConfigOnPropertyChanged(object sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName is nameof(TextSource.Text)
             or nameof(TextEncryptionConfig.Prefix)
             or nameof(TextEncryptionConfig.Suffix)
             or nameof(SecurePassword.Password))
         {
-            ExecuteLastAsync();
+            await ExecuteLastAsync();
         }
     }
 
