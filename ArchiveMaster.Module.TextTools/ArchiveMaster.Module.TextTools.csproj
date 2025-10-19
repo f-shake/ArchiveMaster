@@ -50,6 +50,7 @@
 <!--    <PackageReference Include="NPOI" />-->
     <PackageReference Include="OllamaSharp" />
     <PackageReference Include="OpenAI" />
+    <PackageReference Include="PdfPig" />
     <PackageReference Include="UTF.Unknown" />
   </ItemGroup>
 </Project>

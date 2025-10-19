@@ -275,7 +275,7 @@ public class TypoCheckerService(AppConfig appConfig)
             List<DocFilePart> parts = new List<DocFilePart>();
 
             NotifyMessage("正在读取文本源");
-            await foreach (var part in Config.Source.GetPlainTextAsync(TextSourceReadMode.PerFile, ct))
+            await foreach (var part in Config.Source.GetPlainTextAsync(TextSourceReadUnit.PerFile, ct))
             {
                 parts.Add(part);
             }

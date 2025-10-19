@@ -58,11 +58,18 @@
                                                     Classes="Link"
                                                     Command="{Binding OpenFileCommand, Source={x:Static vm:GlobalCommands.Instance}}"
                                                     CommandParameter="{Binding File}"
-                                                    Content="打开" />
+                                                    Content="打开"
+                                                    ToolTip.Tip="使用关联的程序打开文件" />
+                                                <Button
+                                                    Classes="Link"
+                                                    Click="OpenFileButton_Click"
+                                                    Content="测试"
+                                                    ToolTip.Tip="尝试读取文件" />
                                                 <Button
                                                     Classes="Link"
                                                     Click="RemoveFileButton_Click"
-                                                    Content="移除" />
+                                                    Content="移除"
+                                                    ToolTip.Tip="从文件列表中移除" />
                                             </StackPanel>
                                         </StackPanel>
                                     </Flyout>

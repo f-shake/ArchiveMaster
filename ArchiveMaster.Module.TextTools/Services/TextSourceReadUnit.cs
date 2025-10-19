@@ -1,6 +1,6 @@
 ﻿namespace ArchiveMaster.Services;
 
-public enum TextSourceReadMode
+public enum TextSourceReadUnit
 {
     Combined,
     PerFile,

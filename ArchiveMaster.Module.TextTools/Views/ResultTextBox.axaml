@@ -16,36 +16,8 @@
         <TextBox
             x:Name="result"
             Grid.ColumnSpan="3"
-            Text="{Binding $parent[UserControl].Result}">
-            <TextBox.Styles>
-                <Style Selector="TextBox">
-                    <Setter Property="Background" Value="Transparent" />
-                    <Setter Property="CornerRadius" Value="4" />
-                    <Setter Property="TextWrapping" Value="Wrap" />
-                    <Setter Property="BorderThickness" Value="0" />
-                    <Setter Property="ClearSelectionOnLostFocus" Value="True" />
-                    <Setter Property="IsReadOnly" Value="True" />
-                    <Style Selector="^:focus">
-                        <Style Selector="^ /template/ Border#PART_BorderElement">
-                            <Setter Property="BorderThickness" Value="0" />
-                            <Setter Property="Background" Value="Transparent" />
-                        </Style>
-                    </Style>
-                    <Style Selector="^:pointerover">
-                        <Style Selector="^ /template/ Border#PART_BorderElement">
-                            <Setter Property="BorderThickness" Value="0" />
-                            <Setter Property="Background" Value="Transparent" />
-                        </Style>
-                    </Style>
-                    <Style Selector="^:disabled">
-                        <Style Selector="^ /template/ Border#PART_BorderElement">
-                            <Setter Property="BorderThickness" Value="0" />
-                            <Setter Property="Background" Value="Transparent" />
-                        </Style>
-                    </Style>
-                </Style>
-            </TextBox.Styles>
-        </TextBox>
+            Classes="Display"
+            Text="{Binding $parent[UserControl].Result}" />
         <TextBlock
             Grid.Row="2"
             Text="{Binding $parent[UserControl].Message}" />

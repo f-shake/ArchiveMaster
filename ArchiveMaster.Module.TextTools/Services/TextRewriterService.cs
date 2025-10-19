@@ -28,7 +28,7 @@ public class TextRewriterService(AppConfig appConfig)
         {
             string text = null;
             NotifyMessage("正在读取文本源");
-            await foreach (var part in Config.Source.GetPlainTextAsync(TextSourceReadMode.Combined, ct))
+            await foreach (var part in Config.Source.GetPlainTextAsync(TextSourceReadUnit.Combined, ct))
             {
                 //肯定只有一个
                 text = part.Text;
@@ -78,14 +78,14 @@ public class TextRewriterService(AppConfig appConfig)
             TextRewriterType.Translation => string.IsNullOrWhiteSpace(Config.TranslationTargetLanguage)
                 ? throw new ArgumentNullException(nameof(Config.TranslationTargetLanguage), "请指定翻译目标语言。")
                 : $"请将文本翻译成{Config.TranslationTargetLanguage}。",
-            TextRewriterType.Summary => "请对文本进行摘要。",
+            TextRewriterType.Summary => "请对文本进行摘要，形成一段连续完整的话，保留原文的主要意思。",
             TextRewriterType.Custom => string.IsNullOrWhiteSpace(Config.CustomPrompt)
                 ? throw new ArgumentNullException(nameof(Config.CustomPrompt), "请指定自定义提示。")
                 : Config.CustomPrompt,
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
         };
 
-        if (!string.IsNullOrWhiteSpace(Config.ExtraAiPrompt))
+        if (type != TextRewriterType.Custom && !string.IsNullOrWhiteSpace(Config.ExtraAiPrompt))
         {
             prompt += $"{Environment.NewLine}用户的额外要求：{Config.ExtraAiPrompt}";
         }
