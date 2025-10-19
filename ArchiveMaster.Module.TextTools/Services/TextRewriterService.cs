@@ -1,6 +1,7 @@
 ﻿using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json.Nodes;
+using ArchiveMaster.Attributes;
 using ArchiveMaster.Configs;
 using ArchiveMaster.Enums;
 using ArchiveMaster.Events;
@@ -41,7 +42,7 @@ public class TextRewriterService(AppConfig appConfig)
 
             NotifyMessage("正在调用AI进行处理");
 
-            var prompt = GetSystemPrompt(Config.Type);
+            var prompt = GetSystemPrompt(Config.Category);
             var ai = new LlmCallerService(AI);
             await foreach (var output in ai.CallStreamAsync(prompt, text, ct: ct))
             {
@@ -60,36 +61,48 @@ public class TextRewriterService(AppConfig appConfig)
         throw new NotImplementedException();
     }
 
-    private string GetSystemPrompt(TextRewriterType type)
+    private string GetSystemPrompt(TextGenerationCategory type)
     {
         var prompt =
-            "你是一个文本处理机器人。你需要根据以下要求，对用户输入的语段进行修改。" +
-            "要求输出的时候，仅输出修改后的文本，不要输出其他内容。" +
-            "输出格式上，要完全符合用户输入的语段，不要添加额外的内容，绝对不要输出MarkDown格式（用户输入Markdown除外）。" +
-            "以下是具体要求：";
+            "你是一个文本处理机器人。";
         prompt += type switch
         {
-            TextRewriterType.Refinement => "请优化语言表达，使文本更流畅和优美。",
-            TextRewriterType.Simplification => "请简化文本，保留基本意思，缩短语句。",
-            TextRewriterType.Elongation => "请扩展文本，增加细节和描述，丰富内容。",
-            TextRewriterType.Formalization => "请将文本转化为更正式的表达方式。",
-            TextRewriterType.Casualization => "请将文本转化为更口语化的表达方式。",
-            TextRewriterType.Reconstruction => "请用不同的方式表达同样的意思。",
-            TextRewriterType.Translation => string.IsNullOrWhiteSpace(Config.TranslationTargetLanguage)
-                ? throw new ArgumentNullException(nameof(Config.TranslationTargetLanguage), "请指定翻译目标语言。")
-                : $"请将文本翻译成{Config.TranslationTargetLanguage}。",
-            TextRewriterType.Summary => "请对文本进行摘要，形成一段连续完整的话，保留原文的主要意思。",
-            TextRewriterType.Custom => string.IsNullOrWhiteSpace(Config.CustomPrompt)
+            TextGenerationCategory.ExpressionOptimization => GetPrompt(Config.ExpressionOptimizationType),
+            TextGenerationCategory.StructuralAdjustment => GetPrompt(Config.StructuralAdjustmentType),
+            TextGenerationCategory.ContentTransformation => GetPrompt(Config.ContentTransformationType),
+            TextGenerationCategory.TextEvaluation => GetPrompt(Config.TextEvaluationType),
+            TextGenerationCategory.Custom => string.IsNullOrWhiteSpace(Config.CustomPrompt)
                 ? throw new ArgumentNullException(nameof(Config.CustomPrompt), "请指定自定义提示。")
                 : Config.CustomPrompt,
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
         };
+        
+        //对翻译类任务单独处理
+        if (type == TextGenerationCategory.ContentTransformation
+            && Config.ContentTransformationType == ContentTransformationType.Translation)
+        {
+            prompt += $"请将文本翻译成{Config.TranslationTargetLanguage}。";
+        }
 
-        if (type != TextRewriterType.Custom && !string.IsNullOrWhiteSpace(Config.ExtraAiPrompt))
+        //处理额外提示
+        if (type != TextGenerationCategory.Custom && !string.IsNullOrWhiteSpace(Config.ExtraAiPrompt))
         {
             prompt += $"{Environment.NewLine}用户的额外要求：{Config.ExtraAiPrompt}";
         }
 
+        prompt +=
+            "要求输出的时候，仅输出结果，不要输出其他内容。" +
+            "输出格式上，要完全符合用户输入的语段，不要添加额外的内容，绝对不要输出MarkDown格式（用户输入Markdown除外）。";
         return prompt;
+    }
+
+
+    private static string GetPrompt(Enum type)
+    {
+        var field = type.GetType().GetField(type.ToString());
+        var attr = field?.GetCustomAttributes(typeof(AiPromptAttribute), false);
+        return attr is { Length: > 0 }
+            ? ((AiPromptAttribute)attr[0]).SystemPrompt
+            : throw new ArgumentException("未找到提示");
     }
 }

@@ -19,15 +19,29 @@ public partial class TextRewriterConfig : ConfigBase
     private string translationTargetLanguage;
 
     [ObservableProperty]
-    private TextRewriterType type;
+    private TextGenerationCategory category;
+
+    [ObservableProperty]
+    private ExpressionOptimizationType expressionOptimizationType;
+
+    [ObservableProperty]
+    private StructuralAdjustmentType structuralAdjustmentType;
+
+    [ObservableProperty]
+    private ContentTransformationType contentTransformationType;
+
+    [ObservableProperty]
+    private TextEvaluationType textEvaluationType;
+
     public override void Check()
     {
-        switch (Type)
+        switch (Category)
         {
-            case TextRewriterType.Custom:
+            case TextGenerationCategory.Custom:
                 CheckEmpty(CustomPrompt, "自定义提示");
                 break;
-            case TextRewriterType.Translation:
+            case TextGenerationCategory.ContentTransformation
+                when ContentTransformationType == ContentTransformationType.Translation:
                 CheckEmpty(TranslationTargetLanguage, "翻译目标语言");
                 break;
             default:

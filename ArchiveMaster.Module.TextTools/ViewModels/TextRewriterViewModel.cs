@@ -33,6 +33,12 @@ public partial class TextRewriterViewModel(AppConfig appConfig, IDialogService d
         return base.OnExecutingAsync(ct);
     }
 
+    protected override Task OnExecutedAsync(CancellationToken ct)
+    {
+        Result = LlmCallerService.RemoveThink(Result);
+        return base.OnExecutedAsync(ct);
+    }
+
     protected override void OnReset()
     {
         Result = "";

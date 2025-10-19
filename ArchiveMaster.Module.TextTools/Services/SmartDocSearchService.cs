@@ -112,8 +112,7 @@ namespace ArchiveMaster.Services
                 result.Add(part);
             }
 
-            var removeThink = Regex.Replace(string.Concat(result), @"<Think>.*?</Think>", string.Empty,
-                RegexOptions.Singleline | RegexOptions.IgnoreCase);
+            var removeThink = LlmCallerService.RemoveThink(string.Concat(result));
             string plainText = Markdown.ToPlainText(removeThink);
             return plainText;
         }

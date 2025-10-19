@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using ArchiveMaster.Configs;
 using ArchiveMaster.Models;
 using Microsoft.Extensions.AI;
@@ -32,6 +33,8 @@ public class LlmCallerService(AiProviderConfig config)
         [EnumeratorCancellation]
         CancellationToken ct = default)
     {
+        Debug.WriteLine(
+            $"调用AI，系统提示：{systemPrompt}，用户提示：{(userPrompt.Length > 100 ? userPrompt[..100] + "..." : userPrompt)}");
         var chatClient = GetChatClient();
 
         var sys = new ChatMessage(ChatRole.System, systemPrompt);
@@ -60,5 +63,11 @@ public class LlmCallerService(AiProviderConfig config)
         }
 
         return chatClient;
+    }
+
+    public static string RemoveThink(string text)
+    {
+        return Regex.Replace(text, @"^\s*<Think>.*?</Think>\s*$\r?\n?", string.Empty,
+            RegexOptions.Singleline | RegexOptions.IgnoreCase | RegexOptions.Multiline);
     }
 }
