@@ -20,11 +20,13 @@ public class LlmCallerService(AiProviderConfig config)
     public async Task<string> CallAsync(string systemPrompt, string userPrompt, ChatOptions options = null,
         CancellationToken ct = default)
     {
+        DebugWritePrompt(systemPrompt, userPrompt, false);
         var chatClient = GetChatClient();
 
         var sys = new ChatMessage(ChatRole.System, systemPrompt);
         var user = new ChatMessage(ChatRole.User, userPrompt);
         var response = await chatClient.GetResponseAsync([sys, user], options, ct);
+        Debug.WriteLine($"AI回答：{response.Text}");
         return response.Text;
     }
 
@@ -33,30 +35,59 @@ public class LlmCallerService(AiProviderConfig config)
         [EnumeratorCancellation]
         CancellationToken ct = default)
     {
-        Debug.WriteLine(
-            $"调用AI，系统提示：{systemPrompt}，用户提示：{(userPrompt.Length > 100 ? userPrompt[..100] + "..." : userPrompt)}");
+        DebugWritePrompt(systemPrompt, userPrompt, true);
         var chatClient = GetChatClient();
 
         var sys = new ChatMessage(ChatRole.System, systemPrompt);
         var user = new ChatMessage(ChatRole.User, userPrompt);
+        Debug.WriteLine("AI开始回答");
         await foreach (ChatResponseUpdate item in
                        chatClient.GetStreamingResponseAsync([sys, user], options, ct))
         {
+            Debug.Write(item.Text);
             ct.ThrowIfCancellationRequested();
             yield return item.Text;
         }
     }
 
+    private void DebugWritePrompt(string systemPrompt, string userPrompt, bool stream)
+    {
+        Debug.WriteLine(
+            new StringBuilder().Append("调用AI")
+                .AppendLine(stream ? "（流式）" : "")
+                .AppendLine("##系统提示##")
+                .AppendLine(GetPreAndSuffixes(systemPrompt))
+                .AppendLine("##用户提示##")
+                .Append(GetPreAndSuffixes(userPrompt))
+                .ToString());
+
+        string GetPreAndSuffixes(string str)
+        {
+            str = str.Replace('\n', ' ').Replace('\r', ' ');
+            if (str.Length < 100)
+            {
+                return str;
+            }
+
+            return $"{str[..50]}...{str[^50..]} (长度为{str.Length})";
+        }
+    }
+
     private IChatClient GetChatClient()
     {
-        IChatClient chatClient = null;
+        IChatClient chatClient;
         switch (Config.Type)
         {
             case AiProviderType.OpenAI:
                 chatClient = new OpenAIChatClient(Config.Url, Config.Model, Config.Key);
                 break;
             case AiProviderType.Ollama:
-                chatClient = new OllamaApiClient(new Uri(Config.Url), Config.Model);
+                var httpClient = new HttpClient
+                {
+                    BaseAddress = new Uri(Config.Url),
+                    Timeout = TimeSpan.FromHours(1)
+                };
+                chatClient = new OllamaApiClient(httpClient, Config.Model);
                 break;
             default:
                 throw new ArgumentOutOfRangeException();

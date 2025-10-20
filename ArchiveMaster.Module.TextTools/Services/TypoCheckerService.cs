@@ -9,6 +9,7 @@ using ArchiveMaster.ViewModels.FileSystem;
 using DocumentFormat.OpenXml.Bibliography;
 using DocumentFormat.OpenXml.InkML;
 using Microsoft.Extensions.AI;
+using Serilog;
 
 namespace ArchiveMaster.Services;
 
@@ -198,7 +199,9 @@ public class TypoCheckerService(AppConfig appConfig)
         return segments;
     }
 
-    public async IAsyncEnumerable<ICheckItem> CheckAsync(IList<DocFilePart> parts, [EnumeratorCancellation] CancellationToken ct)
+    public async IAsyncEnumerable<ICheckItem> CheckAsync(IList<DocFilePart> parts,
+        [EnumeratorCancellation]
+        CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(parts);
         if (parts.Count == 0)
@@ -254,8 +257,9 @@ public class TypoCheckerService(AppConfig appConfig)
             {
                 results = Parse(result, segments[index].source).ToList();
             }
-            catch (FormatException )
+            catch (FormatException ex)
             {
+                Log.Logger.Error(ex, "解析错别字检查的AI发来的JSON失败：{Result}", result);
                 continue;
             }
 
@@ -347,7 +351,7 @@ public class TypoCheckerService(AppConfig appConfig)
                 throw new FormatException("输出内容中的errors对象缺少必要字段");
             }
 
-            if (original == corrected)
+            if (original.GetValue<string>() == corrected.GetValue<string>())
             {
                 //有时候AI会提出一个不是错误的错误，忽略
                 continue;
@@ -355,11 +359,11 @@ public class TypoCheckerService(AppConfig appConfig)
 
             yield return new TypoItem
             {
-                Context = context.ToString(),
-                Original = original.ToString(),
-                Corrected = corrected.ToString(),
+                Context = context.GetValue<string>(),
+                Original = original.GetValue<string>(),
+                Corrected = corrected.GetValue<string>(),
                 // FixedSegment = fixedSegment.ToString(),
-                Explanation = explanation.ToString(),
+                Explanation = explanation.GetValue<string>(),
                 Source = source
             };
         }

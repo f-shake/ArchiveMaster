@@ -114,7 +114,8 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
     /// <summary>
     /// 进度
     /// </summary>
-    [ObservableProperty] [NotifyPropertyChangedFor(nameof(ProgressIndeterminate))]
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ProgressIndeterminate))]
     private double progress;
 
     /// <summary>
@@ -453,9 +454,18 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
             await action();
             return true;
         }
-        catch (OperationCanceledException)
+        catch (OperationCanceledException ex)
         {
-            await Services.Dialog.ShowOkDialogAsync("操作已取消", "操作已被用户取消");
+            if (ex.InnerException is TimeoutException t)
+            {
+                await Services.Dialog.ShowWarningDialogAsync("操作已超时", $"发生了超时（{t.Message}）", ex.ToString());
+            }
+            else
+            {
+                await Services.Dialog.ShowOkDialogAsync("操作已取消", "操作已被用户取消", ex.ToString());
+            }
+
+            Log.Information(ex, "任务取消");
             return false;
         }
         catch (Exception ex)

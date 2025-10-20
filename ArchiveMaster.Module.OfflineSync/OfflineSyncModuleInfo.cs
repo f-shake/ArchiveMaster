@@ -57,7 +57,8 @@ namespace ArchiveMaster
                 await HostServices.GetRequiredService<IProgressOverlayService>()
                     .WithOverlayAsync(() => TestService.CreateSyncTestFilesAsync(folder),
                         ex => HostServices.GetRequiredService<IDialogService>()
-                            .ShowErrorDialogAsync("生成测试数据失败", ex));
+                            .ShowErrorDialogAsync("生成测试数据失败", ex),
+                        "正在生成测试数据");
             }
         }
 
@@ -71,7 +72,8 @@ namespace ArchiveMaster
                             .ShowOkDialogAsync("自动化测试", "通过测试");
                     },
                     ex => HostServices.GetRequiredService<IDialogService>()
-                        .ShowErrorDialogAsync("自动化测试失败", ex));
+                        .ShowErrorDialogAsync("自动化测试失败", ex),
+                    "正在自动化测试");
         }
 
 

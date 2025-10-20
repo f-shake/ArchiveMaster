@@ -357,7 +357,8 @@ public partial class FilePickerTextBox : UserControl
             onError: async ex =>
             {
                 await HostServices.GetRequiredService<IDialogService>().ShowErrorDialogAsync("测试失败", ex);
-            });
+            },
+            initialMessage:"正在筛选指定目录中的文件");
 
         if (ok)
         {
