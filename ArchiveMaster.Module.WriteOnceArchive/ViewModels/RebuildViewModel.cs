@@ -8,8 +8,8 @@ using System.Collections.ObjectModel;
 
 namespace ArchiveMaster.ViewModels;
 
-public partial class RebuildViewModel(AppConfig appConfig, IDialogService dialogService)
-    : TwoStepViewModelBase<RebuildService, RebuildConfig>(appConfig, dialogService,
+public partial class RebuildViewModel(ViewModelServices services)
+    : TwoStepViewModelBase<RebuildService, RebuildConfig>(services,
         WriteOnceArchiveModuleInfo.CONFIG_GROUP)
 {
     [ObservableProperty]

@@ -10,8 +10,8 @@ using ArchiveMaster.Enums;
 
 namespace ArchiveMaster.ViewModels;
 
-public partial class VerifyViewModel(AppConfig appConfig, IDialogService dialogService)
-    : TwoStepViewModelBase<VerifyService, VerifyConfig>(appConfig, dialogService,
+public partial class VerifyViewModel(ViewModelServices services)
+    : TwoStepViewModelBase<VerifyService, VerifyConfig>(services,
         WriteOnceArchiveModuleInfo.CONFIG_GROUP)
 {
     [ObservableProperty]

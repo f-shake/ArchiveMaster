@@ -10,8 +10,8 @@ using FzLib.Programming;
 
 namespace ArchiveMaster.ViewModels;
 
-public partial class DirStructureSyncViewModel(AppConfig appConfig, IDialogService dialogService)
-    : TwoStepViewModelBase<DirStructureSyncService, DirStructureSyncConfig>(appConfig, dialogService)
+public partial class DirStructureSyncViewModel(ViewModelServices services)
+    : TwoStepViewModelBase<DirStructureSyncService, DirStructureSyncConfig>(services)
 {
     [ObservableProperty]
     private int checkedFilesCount = 0;

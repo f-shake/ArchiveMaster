@@ -16,8 +16,8 @@ using Serilog;
 
 namespace ArchiveMaster.ViewModels;
 
-public partial class SmartDocSearchViewModel(AppConfig appConfig, IDialogService dialogService)
-    : AiTwoStepViewModelBase<SmartDocSearchService, SmartDocSearchConfig>(appConfig, dialogService)
+public partial class SmartDocSearchViewModel(ViewModelServices services)
+    : AiTwoStepViewModelBase<SmartDocSearchService, SmartDocSearchConfig>(services)
 {
     [ObservableProperty]
     private string aiConclude = "";

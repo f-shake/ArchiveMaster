@@ -16,8 +16,8 @@ using Serilog;
 
 namespace ArchiveMaster.ViewModels;
 
-public partial class TextRewriterViewModel(AppConfig appConfig, IDialogService dialogService)
-    : AiTwoStepViewModelBase<TextRewriterService, TextRewriterConfig>(appConfig, dialogService)
+public partial class TextRewriterViewModel(ViewModelServices services)
+    : AiTwoStepViewModelBase<TextRewriterService, TextRewriterConfig>(services)
 {
     [ObservableProperty]
     private string result = "";

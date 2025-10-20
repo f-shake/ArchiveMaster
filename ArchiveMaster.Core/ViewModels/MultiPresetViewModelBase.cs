@@ -30,18 +30,11 @@ public abstract partial class MultiPresetViewModelBase<TConfig> : ViewModelBase 
 
     private bool processOnPresetNameChanged = true;
 
-    protected MultiPresetViewModelBase(AppConfig appConfig, IDialogService dialogService, string configGroupName) :
-        base(dialogService)
+    protected MultiPresetViewModelBase(ViewModelServices services, string configGroupName) :
+        base(services)
     {
         ConfigGroupName = configGroupName;
-        AppConfig = appConfig;
     }
-
-
-    /// <summary>
-    /// 配置管理
-    /// </summary>
-    public AppConfig AppConfig { get; }
 
     /// <summary>
     /// 配置版本的组名（见AppConfig）
@@ -57,8 +50,8 @@ public abstract partial class MultiPresetViewModelBase<TConfig> : ViewModelBase 
         processOnPresetNameChanged = false;
         try
         {
-            PresetNames = new ObservableCollection<string>(AppConfig.GetPresets(ConfigGroupName));
-            PresetName = AppConfig.GetCurrentPreset(ConfigGroupName);
+            PresetNames = new ObservableCollection<string>(Services.AppConfig.GetPresets(ConfigGroupName));
+            PresetName = Services.AppConfig.GetCurrentPreset(ConfigGroupName);
             processOnPresetNameChanged = true;
             OnPresetNameChanged(PresetName);
         }
@@ -79,11 +72,11 @@ public abstract partial class MultiPresetViewModelBase<TConfig> : ViewModelBase 
     [RelayCommand]
     private async Task AddPresetAsync()
     {
-        var result = await DialogService.ShowInputTextDialogAsync("新增配置", "", "新配置", "", PresetNameValidation);
+        var result = await Services.Dialog.ShowInputTextDialogAsync("新增配置", "", "新配置", "", PresetNameValidation);
         if (result != null)
         {
             PresetNames.Add(result);
-            AppConfig.GetOrCreateConfigWithDefaultKey<TConfig>(result);
+            Services.AppConfig.GetOrCreateConfigWithDefaultKey<TConfig>(result);
             PresetName = result;
         }
     }
@@ -102,7 +95,7 @@ public abstract partial class MultiPresetViewModelBase<TConfig> : ViewModelBase 
             newName = $"{PresetName} ({i})";
         }
 
-        var newConfig = AppConfig.GetOrCreateConfigWithDefaultKey<TConfig>(newName);
+        var newConfig = Services.AppConfig.GetOrCreateConfigWithDefaultKey<TConfig>(newName);
         Config.Adapt(newConfig);
         PresetNames.Add(newName);
         PresetName = newName;
@@ -130,10 +123,10 @@ public abstract partial class MultiPresetViewModelBase<TConfig> : ViewModelBase 
     [RelayCommand]
     private async Task ModifyPresetNameAsync()
     {
-        var result = await DialogService.ShowInputTextDialogAsync("修改配置名称", "", PresetName, "", PresetNameValidation);
+        var result = await Services.Dialog.ShowInputTextDialogAsync("修改配置名称", "", PresetName, "", PresetNameValidation);
         if (result != null)
         {
-            AppConfig.RenamePreset(ConfigGroupName, PresetName, result);
+            Services.AppConfig.RenamePreset(ConfigGroupName, PresetName, result);
 
             var index = PresetNames.IndexOf(PresetName);
             Debug.Assert(index >= 0);
@@ -159,9 +152,9 @@ public abstract partial class MultiPresetViewModelBase<TConfig> : ViewModelBase 
             return;
         }
 
-        AppConfig.SetCurrentPreset(ConfigGroupName, value);
+        Services.AppConfig.SetCurrentPreset(ConfigGroupName, value);
         var oldConfig = Config;
-        Config = AppConfig.GetOrCreateConfigWithDefaultKey<TConfig>(value);
+        Config = Services.AppConfig.GetOrCreateConfigWithDefaultKey<TConfig>(value);
         if (oldConfig != Config)
         {
             OnConfigChanged();
@@ -175,12 +168,12 @@ public abstract partial class MultiPresetViewModelBase<TConfig> : ViewModelBase 
     private async Task RemovePresetAsync()
     {
         var name = PresetName;
-        var result = await DialogService.ShowYesNoDialogAsync("删除配置", $"是否移除配置：{name}？");
+        var result = await Services.Dialog.ShowYesNoDialogAsync("删除配置", $"是否移除配置：{name}？");
 
         if (true.Equals(result))
         {
             PresetNames.Remove(name);
-            AppConfig.RemovePreset<TConfig>(typeof(TConfig).Name, name);
+            Services.AppConfig.RemovePreset<TConfig>(typeof(TConfig).Name, name);
             if (PresetNames.Count == 0)
             {
                 PresetNames.Add(AppConfig.DEFAULT_PRESET);

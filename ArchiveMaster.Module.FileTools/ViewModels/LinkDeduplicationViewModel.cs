@@ -7,8 +7,8 @@ using FzLib.Avalonia.Dialogs;
 
 namespace ArchiveMaster.ViewModels;
 
-public partial class LinkDeduplicationViewModel(AppConfig appConfig,IDialogService dialogService)
-    : TwoStepViewModelBase<LinkDeduplicationService, LinkDeduplicationConfig>(appConfig,dialogService)
+public partial class LinkDeduplicationViewModel(ViewModelServices services)
+    : TwoStepViewModelBase<LinkDeduplicationService, LinkDeduplicationConfig>(services)
 {
     [ObservableProperty]
     private BulkObservableCollection<SimpleFileInfo> groups;

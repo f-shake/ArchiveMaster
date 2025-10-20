@@ -13,8 +13,8 @@ using FzLib.Avalonia.Dialogs;
 
 namespace ArchiveMaster.ViewModels;
 
-public partial class BatchCommandLineViewModel(AppConfig appConfig, IDialogService dialogService)
-    : TwoStepViewModelBase<BatchCommandLineService, BatchCommandLineConfig>(appConfig, dialogService)
+public partial class BatchCommandLineViewModel(ViewModelServices services)
+    : TwoStepViewModelBase<BatchCommandLineService, BatchCommandLineConfig>(services)
 {
     [ObservableProperty]
     private List<BatchCommandLineFileInfo> files;

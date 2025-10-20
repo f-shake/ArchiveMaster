@@ -1,6 +1,5 @@
 using ArchiveMaster.Configs;
 using ArchiveMaster.Helpers;
-using ArchiveMaster.Messages;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data;
@@ -14,6 +13,7 @@ using FzLib.IO;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using ArchiveMaster.ViewModels.FileSystem;
+using FzLib.Avalonia.Controls;
 
 namespace ArchiveMaster.Views;
 
@@ -300,9 +300,13 @@ public partial class FilePickerTextBox : UserControl
 
     private async void TestButton_Click(object sender, RoutedEventArgs e)
     {
+        var progress = HostServices.GetRequiredService<IProgressOverlayService>();
         var dialogService = HostServices.GetRequiredService<IDialogService>();
-        WeakReferenceMessenger.Default.Send(new LoadingMessage(true));
-        try
+        var results = new List<SimpleFileInfo>();
+        long totalLength = 0;
+        bool ok = false;
+
+        async Task MainTask(CancellationToken ct)
         {
             if (Type is not PickerType.OpenFolder)
             {
@@ -332,8 +336,6 @@ public partial class FilePickerTextBox : UserControl
                 }
             }
 
-            var results = new List<SimpleFileInfo>();
-            long totalLength = 0;
             var filter = Filter;
 
             await Task.Run(() =>
@@ -342,22 +344,25 @@ public partial class FilePickerTextBox : UserControl
                 {
                     results.AddRange(new DirectoryInfo(dir)
                         .EnumerateFiles("*", FileEnumerateExtension.GetEnumerationOptions())
-                        .ApplyFilter(CancellationToken.None, filter)
+                        .ApplyFilter(ct, filter)
                         .Select(p => new SimpleFileInfo(p, dir)));
                 }
 
                 totalLength = results.Sum(p => p.Length);
+            }, ct);
+            ok = true;
+        }
+
+        await progress.WithOverlayAsync(MainTask,
+            onError: async ex =>
+            {
+                await HostServices.GetRequiredService<IDialogService>().ShowErrorDialogAsync("测试失败", ex);
             });
 
-            WeakReferenceMessenger.Default.Send(new LoadingMessage(false));
-
+        if (ok)
+        {
             var dialog = new FilterTestResultDialog(results.Count, totalLength, results);
             await dialog.ShowDialog(dialogService.ContainerType, TopLevel.GetTopLevel(this));
-        }
-        catch (Exception ex)
-        {
-            WeakReferenceMessenger.Default.Send(new LoadingMessage(false));
-            await dialogService.ShowErrorDialogAsync("测试失败", ex);
         }
     }
 }

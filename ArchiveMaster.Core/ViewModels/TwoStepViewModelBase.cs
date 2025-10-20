@@ -1,7 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
-using ArchiveMaster.Messages;
 using ArchiveMaster.Services;
 using System;
 using System.Collections.ObjectModel;
@@ -19,34 +18,19 @@ using ArchiveMaster.ViewModels.FileSystem;
 
 namespace ArchiveMaster.ViewModels;
 
-// [Flags]
-// public enum TwoStepState
-// {
-//     CanInitialize = 0x01,
-//     CanExecute = 0x02,
-//     CanCancel = 0x04,
-//     CanReset = 0x08,
-//
-//     Ready = CanInitialize,
-//     Initializing = CanCancel,
-//     Initialized = CanExecute | CanReset,
-//     Executing = CanCancel,
-//     Executed = CanReset,
-// }
-
 public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPresetViewModelBase<TConfig>
     where TService : TwoStepServiceBase<TConfig>
     where TConfig : ConfigBase, new()
 {
     #region 构造函数
 
-    protected TwoStepViewModelBase(AppConfig appConfig, IDialogService dialogService, string configGroupName)
-        : base(appConfig, dialogService, configGroupName)
+    protected TwoStepViewModelBase(ViewModelServices services, string configGroupName)
+        : base(services, configGroupName)
     {
     }
 
-    protected TwoStepViewModelBase(AppConfig appConfig, IDialogService dialogService)
-        : this(appConfig, dialogService, typeof(TConfig).Name)
+    protected TwoStepViewModelBase(ViewModelServices services)
+        : this(services, typeof(TConfig).Name)
     {
     }
 
@@ -182,6 +166,7 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
         {
             throw new NullReferenceException($"{nameof(Service)}为空");
         }
+
         Service.ProgressUpdate += Service_ProgressUpdate;
         Service.MessageUpdate += Service_MessageUpdate;
     }
@@ -308,7 +293,7 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
 
                 return $"{p.RelativePath}（{p.Message}）";
             }));
-            await DialogService.ShowWarningDialogAsync("存在警告", message, details);
+            await Services.Dialog.ShowWarningDialogAsync("存在警告", message, details);
         }
     }
 
@@ -353,7 +338,7 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
 
         if (!files.Any())
         {
-            await DialogService.ShowWarningDialogAsync("结果为空", "不存在符合条件的需要处理的文件");
+            await Services.Dialog.ShowWarningDialogAsync("结果为空", "不存在符合条件的需要处理的文件");
             return true;
         }
 
@@ -374,7 +359,7 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
     {
         CanCancel = false;
         CancelCommand.NotifyCanExecuteChanged();
-        WeakReferenceMessenger.Default.Send(new LoadingMessage(true));
+        Services.ProgressOverlay.SetVisible(true);
         if (InitializeCommand.IsRunning)
         {
             InitializeCommand.Cancel();
@@ -397,10 +382,10 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
     {
         if (!EnableInitialize)
         {
-            AppConfig.SaveBackground();
+            Services.AppConfig.SaveBackground();
             CreateService();
         }
-        
+
         UpdateCommandExecutable(false, false, true, false);
 
         await TryRunServiceMethodAsync(async () =>
@@ -423,8 +408,8 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
     [RelayCommand(IncludeCancelCommand = true, CanExecute = nameof(CanInitialize))]
     private async Task InitializeAsync(CancellationToken ct)
     {
-        AppConfig.SaveBackground();
-        UpdateCommandExecutable(false,false,true,false);
+        Services.AppConfig.SaveBackground();
+        UpdateCommandExecutable(false, false, true, false);
 
         if (await TryRunServiceMethodAsync(async () =>
             {
@@ -436,12 +421,11 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
             }, "初始化失败") //初始化成功
             && !await CheckWarningFilesOnInitializedAsync(ct)) //有需要处理的文件
         {
-         
-            UpdateCommandExecutable(false,true,false,true);
+            UpdateCommandExecutable(false, true, false, true);
         }
         else
         {
-            UpdateCommandExecutable(true,false,false,false);
+            UpdateCommandExecutable(true, false, false, false);
         }
     }
 
@@ -451,7 +435,7 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
     [RelayCommand(CanExecute = nameof(CanReset))]
     private void Reset()
     {
-        UpdateCommandExecutable(true,!EnableInitialize,false,false);
+        UpdateCommandExecutable(true, !EnableInitialize, false, false);
 
         Message = "就绪";
         OnReset();
@@ -471,13 +455,13 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
         }
         catch (OperationCanceledException)
         {
-            await DialogService.ShowOkDialogAsync("操作已取消", "操作已被用户取消");
+            await Services.Dialog.ShowOkDialogAsync("操作已取消", "操作已被用户取消");
             return false;
         }
         catch (Exception ex)
         {
             Log.Error(ex, "执行工具失败");
-            await DialogService.ShowErrorDialogAsync(errorTitle, ex);
+            await Services.Dialog.ShowErrorDialogAsync(errorTitle, ex);
             return false;
         }
         finally
@@ -486,7 +470,7 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
             IsWorking = false;
             canReceiveServiceMessage = false;
             Message = "完成";
-            WeakReferenceMessenger.Default.Send(new LoadingMessage(false));
+            Services.ProgressOverlay.SetVisible(false);
         }
     }
 

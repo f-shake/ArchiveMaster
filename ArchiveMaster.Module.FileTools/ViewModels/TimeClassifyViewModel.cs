@@ -11,8 +11,8 @@ using FzLib.Avalonia.Dialogs;
 
 namespace ArchiveMaster.ViewModels;
 
-public partial class TimeClassifyViewModel(AppConfig appConfig, IDialogService dialogService)
-    : TwoStepViewModelBase<TimeClassifyService, TimeClassifyConfig>(appConfig, dialogService)
+public partial class TimeClassifyViewModel(ViewModelServices services)
+    : TwoStepViewModelBase<TimeClassifyService, TimeClassifyConfig>(services)
 {
     [ObservableProperty]
     private List<FileSystem.FilesTimeDirInfo> sameTimePhotosDirs;

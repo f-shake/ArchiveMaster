@@ -93,7 +93,7 @@ namespace ArchiveMaster.Services
                 }, ct, FilesLoopOptions.Builder().AutoApplyFileNumberProgress().Build());
 
                 Files = files;
-            });
+            }, ct);
         }
 
         private STRtree<IFeature> CreateSpatialIndexFromFeatures(IEnumerable<IFeature> features)

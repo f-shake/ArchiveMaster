@@ -2,7 +2,6 @@
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using FzLib.Avalonia.Dialogs;
-using ArchiveMaster.Messages;
 using ArchiveMaster.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -29,6 +28,7 @@ using Avalonia.Media;
 using Avalonia.Media.Transformation;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
+using FzLib.Avalonia.Controls;
 using Serilog;
 
 namespace ArchiveMaster.Views;
@@ -49,6 +49,7 @@ public partial class MainView : UserControl
     public MainView(MainViewModel viewModel,
         AppConfig appConfig,
         IDialogService dialogService,
+        IProgressOverlayService  progressOverlayService ,
         IViewPadding viewPadding = null,
         IPermissionService permissionService = null)
     {
@@ -58,6 +59,7 @@ public partial class MainView : UserControl
         DataContext = viewModel;
 
         InitializeComponent();
+        progressOverlayService.Attach(loading);
         if (viewPadding != null)
         {
             Padding = new Thickness(0, viewPadding.GetTop(), 0, viewPadding.GetBottom());
@@ -112,13 +114,6 @@ public partial class MainView : UserControl
             Resources["BoxHeight"] = 280d;
             Resources["ShowDescription"] = true;
         }
-    }
-
-    protected override void OnUnloaded(RoutedEventArgs e)
-    {
-        base.OnUnloaded(e);
-        WeakReferenceMessenger.Default.UnregisterAll(this);
-        WeakReferenceMessenger.Default.Cleanup();
     }
 
     private void BeginChangingContent()

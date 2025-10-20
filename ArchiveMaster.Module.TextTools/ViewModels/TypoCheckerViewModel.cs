@@ -22,16 +22,13 @@ using Serilog;
 namespace ArchiveMaster.ViewModels;
 
 public partial class TypoCheckerViewModel(
-    AppConfig appConfig,
-    IDialogService dialogService,
-    IClipboardService clipboardService)
-    : TwoStepViewModelBase<TypoCheckerService, TypoCheckerConfig>(appConfig, dialogService)
+    ViewModelServices services)
+    : TwoStepViewModelBase<TypoCheckerService, TypoCheckerConfig>(services)
 {
-    public IClipboardService ClipboardService { get; } = clipboardService;
-
     public override bool EnableInitialize { get; } = false;
     public override bool EnableRepeatExecute { get; } = true;
     public ObservableCollection<TypoItem> Typos { get; } = new ObservableCollection<TypoItem>();
+
     protected override Task OnExecutingAsync(CancellationToken ct)
     {
         Typos.Clear();

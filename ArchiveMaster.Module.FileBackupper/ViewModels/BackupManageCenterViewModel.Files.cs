@@ -69,7 +69,9 @@ public partial class BackupManageCenterViewModel
     {
         if (value is BackupFile)
         {
-            await TryDoAsync("加载文件历史记录", async () => await LoadFileHistoryAsync(value));
+            await Services.ProgressOverlay.WithOverlayAsync(async ()=>await LoadFileHistoryAsync(value),
+                ex => Services.Dialog.ShowErrorDialogAsync("加载文件历史记录失败", ex),
+                "正在加载文件历史记录");
         }
     }
 
@@ -91,12 +93,12 @@ public partial class BackupManageCenterViewModel
     {
         if (file.Entity.BackupFileName == null)
         {
-            await DialogService.ShowErrorDialogAsync("备份文件不存在", "该文件不存在实际备份文件，可能是由虚拟快照生成");
+            await Services.Dialog.ShowErrorDialogAsync("备份文件不存在", "该文件不存在实际备份文件，可能是由虚拟快照生成");
             return;
         }
 
         var extension = Path.GetExtension(file.Name).TrimStart('.');
-        var saveFile = await Storage.SaveFilePickerAsync(
+        var saveFile = await Services.StorageProvider.SaveFilePickerAsync(
             new FilePickerSaveOptions()
             {
                 DefaultExtension = extension,
@@ -115,11 +117,11 @@ public partial class BackupManageCenterViewModel
             string backupFile = Path.Combine(SelectedTask.BackupDir, file.Entity.BackupFileName);
             if (!File.Exists(backupFile))
             {
-                await DialogService.ShowErrorDialogAsync("备份文件不存在", "该文件不存在实际备份文件，可能是文件丢失");
+                await Services.Dialog.ShowErrorDialogAsync("备份文件不存在", "该文件不存在实际备份文件，可能是文件丢失");
                 return;
             }
 
-            var task1 = DialogService.ShowCustomDialogAsync(dialog);
+            var task1 = Services.Dialog.ShowCustomDialogAsync(dialog);
             var task2 = dialog.CopyFileAsync(backupFile, path, file.Time);
             await Task.WhenAll(task1, task2);
         }
@@ -127,7 +129,7 @@ public partial class BackupManageCenterViewModel
 
     private async Task SaveFolder(TreeDirInfo dir)
     {
-        var rootDir = await Storage.OpenFolderPickerAndGetFirstAsync(new FolderPickerOpenOptions());
+        var rootDir = await Services.StorageProvider.OpenFolderPickerAndGetFirstAsync(new FolderPickerOpenOptions());
         var files = dir.Flatten();
         List<string> sourcePaths = new List<string>();
         List<string> destinationPaths = new List<string>();
@@ -160,14 +162,14 @@ public partial class BackupManageCenterViewModel
         bool copy = true;
         if (notExistedFiles.Count > 0)
         {
-            copy = await DialogService.ShowYesNoDialogAsync("部分文件不存在", "部分文件不存在实际备份文件，可能是虚拟备份或文件丢失。是否另存为其余文件？",
+            copy = await Services.Dialog.ShowYesNoDialogAsync("部分文件不存在", "部分文件不存在实际备份文件，可能是虚拟备份或文件丢失。是否另存为其余文件？",
                 string.Join(Environment.NewLine, notExistedFiles)) == true;
         }
 
         if (copy)
         {
             var dialog = new FileProgressDialog();
-            var task1 = DialogService.ShowCustomDialogAsync(dialog);
+            var task1 = Services.Dialog.ShowCustomDialogAsync(dialog);
             var task2 = dialog.CopyFilesAsync(sourcePaths, destinationPaths, times);
             await Task.WhenAll(task1, task2);
         }
@@ -177,18 +179,20 @@ public partial class BackupManageCenterViewModel
     private async Task OrganizeFilesAsync()
     {
         (IList<FileInfo> RedundantFiles, IList<BackupFileEntity> LostFiles) issuedFiles = ([], []);
-        await TryDoAsync("整理文件", async () =>
-        {
-            await using var db = new DbService(SelectedTask);
-            issuedFiles = await db.CheckFilesAsync(default);
-        });
+        await Services.ProgressOverlay.WithOverlayAsync(async () =>
+            {
+                await using var db = new DbService(SelectedTask);
+                issuedFiles = await db.CheckFilesAsync(default);
+            },
+            ex => Services.Dialog.ShowErrorDialogAsync("整理文件失败", ex),
+            "正在整理文件");
         if (issuedFiles.RedundantFiles.Count + issuedFiles.LostFiles.Count == 0)
         {
-            await DialogService.ShowOkDialogAsync("检查文件", "不存在多余或丢失的备份文件");
+            await Services.Dialog.ShowOkDialogAsync("检查文件", "不存在多余或丢失的备份文件");
             return;
         }
 
-        var result = await DialogService.ShowYesNoDialogAsync("检查文件",
+        var result = await Services.Dialog.ShowYesNoDialogAsync("检查文件",
             $"存在{issuedFiles.RedundantFiles.Count}个多余文件；{Environment.NewLine}存在{issuedFiles.LostFiles.Count}个丢失的备份文件{Environment.NewLine}是否删除多余文件？",
             $"多余文件（在备份文件夹中存在但数据库中不存在的文件）：{Environment.NewLine}"
             + string.Join(Environment.NewLine, issuedFiles.RedundantFiles.Select(p => p.Name))
@@ -197,22 +201,21 @@ public partial class BackupManageCenterViewModel
 
         if (true.Equals(result))
         {
-            await TryDoAsync("删除多余文件", () =>
-            {
-                return Task.Run(() =>
+            await Services.ProgressOverlay.WithOverlayAsync(() => Task.Run(() =>
                 {
                     foreach (var file in issuedFiles.RedundantFiles)
                     {
                         FileHelper.DeleteByConfig(file.FullName);
                     }
-                });
-            });
+                }),
+                ex => Services.Dialog.ShowErrorDialogAsync("删除多余文件失败", ex),
+                "正在删除多余文件");
         }
     }
 
     [RelayCommand]
     private async Task CopyAsync(object obj)
     {
-        await Clipboard.SetTextAsync(obj as string ?? (obj?.ToString() ?? ""));
+        await Services.Clipboard.SetTextAsync(obj as string ?? (obj?.ToString() ?? ""));
     }
 }

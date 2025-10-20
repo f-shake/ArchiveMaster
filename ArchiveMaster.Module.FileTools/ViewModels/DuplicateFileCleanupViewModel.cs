@@ -16,8 +16,8 @@ using FzLib.Avalonia.Dialogs;
 
 namespace ArchiveMaster.ViewModels;
 
-public partial class DuplicateFileCleanupViewModel(AppConfig appConfig,IDialogService dialogService)
-    : TwoStepViewModelBase<DuplicateFileCleanupService, DuplicateFileCleanupConfig>(appConfig,dialogService)
+public partial class DuplicateFileCleanupViewModel(ViewModelServices services)
+    : TwoStepViewModelBase<DuplicateFileCleanupService, DuplicateFileCleanupConfig>(services)
 {
     [ObservableProperty]
     private BulkObservableCollection<SimpleFileInfo> groups;

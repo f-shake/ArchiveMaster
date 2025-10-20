@@ -10,8 +10,8 @@ using FzLib.Avalonia.Dialogs;
 namespace ArchiveMaster.ViewModels;
 
 public partial class
-    DirStructureCloneViewModel(AppConfig appConfig, IDialogService dialogService)
-    : TwoStepViewModelBase<DirStructureCloneService, DirStructureCloneConfig>(appConfig, dialogService)
+    DirStructureCloneViewModel(ViewModelServices services)
+    : TwoStepViewModelBase<DirStructureCloneService, DirStructureCloneConfig>(services)
 {
     [ObservableProperty]
     private BulkObservableCollection<SimpleFileInfo> treeFiles;
@@ -29,7 +29,7 @@ public partial class
         base.OnEnter();
         if (!OperatingSystem.IsWindows())
         {
-            await DialogService.ShowErrorDialogAsync("不支持的操作系统", "该工具目前仅支持Windows系统");
+            await Services.Dialog.ShowErrorDialogAsync("锟斤拷支锟街的诧拷锟斤拷系统", "锟矫癸拷锟斤拷目前锟斤拷支锟斤拷Windows系统");
             Exit();
         }
     }

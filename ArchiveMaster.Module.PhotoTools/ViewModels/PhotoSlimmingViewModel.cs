@@ -17,8 +17,8 @@ using FzLib.Avalonia.Dialogs;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ArchiveMaster.ViewModels;
-public partial class PhotoSlimmingViewModel(AppConfig appConfig,IDialogService dialogService)
-    : TwoStepViewModelBase<PhotoSlimmingService, PhotoSlimmingConfig>(appConfig,dialogService)
+public partial class PhotoSlimmingViewModel(ViewModelServices services)
+    : TwoStepViewModelBase<PhotoSlimmingService, PhotoSlimmingConfig>(services)
 {
     [ObservableProperty]
     private bool canCancel;

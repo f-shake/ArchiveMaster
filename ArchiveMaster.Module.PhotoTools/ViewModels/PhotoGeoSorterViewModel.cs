@@ -7,8 +7,8 @@ using FzLib.Avalonia.Dialogs;
 
 namespace ArchiveMaster.ViewModels;
 
-public partial class PhotoGeoSorterViewModel(AppConfig appConfig, IDialogService dialogService)
-    : TwoStepViewModelBase<PhotoGeoSorterService, PhotoGeoSorterConfig>(appConfig, dialogService)
+public partial class PhotoGeoSorterViewModel(ViewModelServices services)
+    : TwoStepViewModelBase<PhotoGeoSorterService, PhotoGeoSorterConfig>(services)
 {
     [ObservableProperty]
     public ObservableCollection<GpsFileInfo> files;

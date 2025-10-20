@@ -160,8 +160,7 @@
 | `Configs`               | 工具的配置文件                                               |
 | `Converters`            | 用于XAML的值转换器                                           |
 | `Enums`                 | 枚举类型                                                     |
-| `Messages`              | 用于ViewModel和View之间通过`WeakReferenceMessenger`的通信    |
-| `Services`              | 各工具的执行逻辑代码，每个`Service`拥有一个`ConfigBase`的属性。 |
+| `Services`              | 各工具~~~~的执行逻辑代码，每个`Service`拥有一个`ConfigBase`的属性。 |
 | `ViewModels`            | 视图模型，连接`Views`、`Configs`和`Services`。               |
 | `ViewModels.FileSystem` | 用于表达文件或目录信息的类，继承自`SimpleFileInfo`。         |
 | `Views`                 | UI视图界面。本软件实现了完全的MVVM。除`UI`项目外，`Views`中仅包含界面，不包含逻辑。 |

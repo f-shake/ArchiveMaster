@@ -8,23 +8,15 @@ namespace ArchiveMaster.ViewModels
 {
     public partial class BackupManageCenterViewModel : ViewModelBase
     {
-        public IClipboardService Clipboard { get; }
-        public IStorageProviderService Storage { get; }
         private readonly BackupService backupService;
-
-        private AppConfig appConfig;
 
         [ObservableProperty]
         private int selectedTabIndex;
 
-        public BackupManageCenterViewModel(AppConfig appConfig, IDialogService dialogService,
-            IClipboardService clipboard, IStorageProviderService storage, BackupService backupService)
-            : base(dialogService)
+        public BackupManageCenterViewModel(ViewModelServices services, BackupService backupService)
+            : base(services)
         {
-            Clipboard = clipboard;
-            Storage = storage;
-            Config = appConfig.GetOrCreateConfigWithDefaultKey<FileBackupperConfig>();
-            this.appConfig = appConfig;
+            Config = services.AppConfig.GetOrCreateConfigWithDefaultKey<FileBackupperConfig>();
             this.backupService = backupService;
             BackupService.NewLog += (s, e) =>
             {

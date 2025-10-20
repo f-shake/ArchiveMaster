@@ -28,10 +28,11 @@ public partial class TextEncryptionViewModel : ViewModelBase
 
     [ObservableProperty]
     private TextSource source = new TextSource() { FromFile = false }; //敏感数据，不保存到配置文件
-    public TextEncryptionViewModel(AppConfig appConfig, IDialogService dialogService) : base(dialogService)
+
+    public TextEncryptionViewModel(ViewModelServices services) : base(services)
     {
-        Config = appConfig.GetOrCreateConfigWithDefaultKey<TextEncryptionConfig>();
-        Service = new TextEncryptionService(Config, appConfig);
+        Config = Services.AppConfig.GetOrCreateConfigWithDefaultKey<TextEncryptionConfig>();
+        Service = new TextEncryptionService(Config, services.AppConfig);
         Source.PropertyChanged += ConfigOnPropertyChanged;
         Config.Password.PropertyChanged += ConfigOnPropertyChanged;
         Config.PropertyChanged += ConfigOnPropertyChanged;
@@ -82,7 +83,7 @@ public partial class TextEncryptionViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            await DialogService.ShowErrorDialogAsync($"{(encrypt ? "加密" : "解密")}失败", ex);
+            await Services.Dialog.ShowErrorDialogAsync($"{(encrypt ? "加密" : "解密")}失败", ex);
         }
     }
 
@@ -132,7 +133,7 @@ public partial class TextEncryptionViewModel : ViewModelBase
             catch (Exception ex)
             {
                 //应该不会到这儿
-                await DialogService.ShowErrorDialogAsync("执行任务时发生错误", ex);
+                await Services.Dialog.ShowErrorDialogAsync("执行任务时发生错误", ex);
             }
             finally
             {

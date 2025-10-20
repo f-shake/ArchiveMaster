@@ -1,5 +1,4 @@
 ﻿using ArchiveMaster.Configs;
-using ArchiveMaster.Messages;
 using ArchiveMaster.ViewModels;
 using ArchiveMaster.Views;
 using Avalonia;
@@ -19,6 +18,7 @@ using Avalonia.Markup.Xaml;
 using Avalonia.Platform.Storage;
 using Avalonia.Styling;
 using CommunityToolkit.Mvvm.Input;
+using FzLib.Avalonia.Controls;
 using FzLib.Avalonia.Services;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -47,6 +47,34 @@ namespace ArchiveMaster
         public IList<Type> TransientServices { get; } =
             [typeof(Step1Service), typeof(Step2Service), typeof(Step3Service)];
 
+        private async Task GenerateTestDataAsync()
+        {
+            var folders = await HostServices.GetRequiredService<IStorageProviderService>()
+                .OpenFolderPickerAsync(new FolderPickerOpenOptions());
+            if (folders.Count > 0)
+            {
+                var folder = folders[0].TryGetLocalPath();
+                await HostServices.GetRequiredService<IProgressOverlayService>()
+                    .WithOverlayAsync(() => TestService.CreateSyncTestFilesAsync(folder),
+                        ex => HostServices.GetRequiredService<IDialogService>()
+                            .ShowErrorDialogAsync("生成测试数据失败", ex));
+            }
+        }
+
+        private async Task TestAllAsync()
+        {
+            await HostServices.GetRequiredService<IProgressOverlayService>()
+                .WithOverlayAsync(async () =>
+                    {
+                        await TestService.TestAllAsync();
+                        await HostServices.GetRequiredService<IDialogService>()
+                            .ShowOkDialogAsync("自动化测试", "通过测试");
+                    },
+                    ex => HostServices.GetRequiredService<IDialogService>()
+                        .ShowErrorDialogAsync("自动化测试失败", ex));
+        }
+
+
         public ToolPanelGroupInfo Views => new ToolPanelGroupInfo()
         {
             Panels =
@@ -62,45 +90,8 @@ namespace ArchiveMaster
             GroupDescription = ModuleDescription,
             MenuItems =
             {
-                new ModuleMenuItemInfo("生成测试数据", new AsyncRelayCommand(async () =>
-                {
-                    var folders = await HostServices.GetRequiredService<IStorageProviderService>()
-                        .OpenFolderPickerAsync(new FolderPickerOpenOptions());
-                    if (folders.Count > 0)
-                    {
-                        var folder = folders[0].TryGetLocalPath();
-                        WeakReferenceMessenger.Default.Send(new LoadingMessage(true));
-                        try
-                        {
-                            await TestService.CreateSyncTestFilesAsync(folder);
-                        }
-                        finally
-                        {
-                            WeakReferenceMessenger.Default.Send(new LoadingMessage(false));
-                        }
-                    }
-                })),
-                new ModuleMenuItemInfo("自动化测试", new AsyncRelayCommand(async () =>
-                {
-                    try
-                    {
-                        WeakReferenceMessenger.Default.Send(new LoadingMessage(true));
-                        try
-                        {
-                            await TestService.TestAllAsync();
-                        }
-                        finally
-                        {
-                            WeakReferenceMessenger.Default.Send(new LoadingMessage(false));
-                        }
-
-                        await HostServices.GetRequiredService<IDialogService>().ShowOkDialogAsync("自动化测试", "通过测试");
-                    }
-                    catch (Exception ex)
-                    {
-                        await HostServices.GetRequiredService<IDialogService>().ShowErrorDialogAsync("自动化测试",  ex);
-                    }
-                }))
+                new ModuleMenuItemInfo("生成测试数据", new AsyncRelayCommand(GenerateTestDataAsync)),
+                new ModuleMenuItemInfo("自动化测试", new AsyncRelayCommand(TestAllAsync))
             }
         };
     }

@@ -93,6 +93,7 @@ public static class Initializer
         InitializeModules(builder.Services, config);
         config.Initialize();
         builder.Services.AddSingleton(config);
+        builder.Services.AddTransient<ViewModelServices>();
         builder.Services.AddTransient<MainWindow>();
         builder.Services.AddTransient<MainView>();
         builder.Services.AddTransient<MainViewModel>();
@@ -104,6 +105,7 @@ public static class Initializer
         builder.Services.AddDialogService();
         builder.Services.AddClipboardService();
         builder.Services.AddStorageProviderService();
+        builder.Services.AddProgressOverlayService();
         ServiceInitializing?.Invoke(null, new ServiceInitializingEventArgs(builder.Services));
         AppHost = builder.Build();
         HostServices.Initialize(AppHost.Services);

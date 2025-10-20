@@ -223,7 +223,8 @@
         </SplitView>
 
 
-        <ctrl:ProgressRingOverlay
+        <ctrl:ProgressRingBoxOverlay
+            x:Name="loading"
             Grid.ColumnSpan="3"
             IsActive="{Binding IsProgressRingOverlayActive}" />
     </Grid>

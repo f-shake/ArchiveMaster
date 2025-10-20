@@ -16,13 +16,13 @@ using Serilog;
 
 namespace ArchiveMaster.ViewModels;
 
-public partial class AiProvidersViewModel(AppConfig appConfig, IDialogService dialogService)
-    : ViewModelBase(dialogService)
+public partial class AiProvidersViewModel(ViewModelServices services)
+    : ViewModelBase(services)
 {
     [ObservableProperty]
     private AiProviderConfig selectedProvider;
 
-    public AiProvidersConfig Config { get; } = appConfig.GetOrCreateConfigWithDefaultKey<AiProvidersConfig>();
+    public AiProvidersConfig Config { get; } = services.AppConfig.GetOrCreateConfigWithDefaultKey<AiProvidersConfig>();
     
     [RelayCommand]
     private void AddProvider()

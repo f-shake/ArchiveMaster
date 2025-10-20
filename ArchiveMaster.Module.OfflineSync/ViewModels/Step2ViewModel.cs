@@ -16,17 +16,13 @@ using LocalAndOffsiteDir = ArchiveMaster.ViewModels.FileSystem.LocalAndOffsiteDi
 
 namespace ArchiveMaster.ViewModels
 {
-    public partial class Step2ViewModel(
-        AppConfig appConfig,
-        IDialogService dialogService,
-        IStorageProviderService storage)
-        : OfflineSyncViewModelBase<Step2Service, OfflineSyncStep2Config, FileSystem.SyncFileInfo>(appConfig,
-            dialogService, storage)
+    public partial class Step2ViewModel(ViewModelServices services)
+        : OfflineSyncViewModelBase<Step2Service, OfflineSyncStep2Config, FileSystem.SyncFileInfo>(services)
     {
         [RelayCommand]
         private async Task BrowseLocalDirAsync()
         {
-            var folders = await Storage.OpenFolderPickerAsync(new FolderPickerOpenOptions()
+            var folders = await Services.StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions()
             {
                 AllowMultiple = true,
             });
@@ -48,7 +44,7 @@ namespace ArchiveMaster.ViewModels
         [RelayCommand]
         private async Task BrowseOffsiteSnapshotAsync()
         {
-            var file = await Storage.OpenFilePickerAndGetFirstAsync(new FilePickerOpenOptions()
+            var file = await Services.StorageProvider.OpenFilePickerAndGetFirstAsync(new FilePickerOpenOptions()
             {
                 FileTypeFilter =
                 [
@@ -65,7 +61,7 @@ namespace ArchiveMaster.ViewModels
         [RelayCommand]
         private async Task BrowsePatchDirAsync()
         {
-            var folder = await Storage.OpenFolderPickerAndGetFirstAsync(new FolderPickerOpenOptions());
+            var folder = await Services.StorageProvider.OpenFolderPickerAndGetFirstAsync(new FolderPickerOpenOptions());
 
             if (folder != null)
             {
@@ -87,7 +83,7 @@ namespace ArchiveMaster.ViewModels
         {
             if (Files.Any(p => p.Status == ProcessStatus.Error))
             {
-                await DialogService.ShowErrorDialogAsync("导出失败", "导出完成，但部分文件出现错误");
+                await Services.Dialog.ShowErrorDialogAsync("导出失败", "导出完成，但部分文件出现错误");
             }
         }
 
@@ -105,7 +101,7 @@ namespace ArchiveMaster.ViewModels
             }
             catch (Exception ex)
             {
-                await DialogService.ShowErrorDialogAsync("匹配失败", ex);
+                await Services.Dialog.ShowErrorDialogAsync("匹配失败", ex);
             }
         }
 

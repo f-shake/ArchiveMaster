@@ -6,8 +6,8 @@ using FzLib.Avalonia.Dialogs;
 
 namespace ArchiveMaster.ViewModels;
 
-public partial class PhotoGeoTaggingViewModel(AppConfig appConfig,IDialogService dialogService)
-    : TwoStepViewModelBase<PhotoGeoTaggingService, PhotoGeoTaggingConfig>(appConfig,dialogService)
+public partial class PhotoGeoTaggingViewModel(ViewModelServices services)
+    : TwoStepViewModelBase<PhotoGeoTaggingService, PhotoGeoTaggingConfig>(services)
 {
     [ObservableProperty]
     private List<GpsFileInfo> files = new List<GpsFileInfo>();

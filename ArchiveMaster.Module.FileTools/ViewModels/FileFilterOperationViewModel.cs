@@ -13,8 +13,8 @@ using FzLib.Avalonia.Dialogs;
 
 namespace ArchiveMaster.ViewModels;
 
-public partial class FileFilterOperationViewModel(AppConfig appConfig, IDialogService dialogService)
-    : TwoStepViewModelBase<FileFilterOperationService, FileFilterOperationConfig>(appConfig, dialogService)
+public partial class FileFilterOperationViewModel(ViewModelServices services)
+    : TwoStepViewModelBase<FileFilterOperationService, FileFilterOperationConfig>(services)
 {
     [ObservableProperty]
     private List<FileFilterOperationFileInfo> files;
@@ -32,7 +32,7 @@ public partial class FileFilterOperationViewModel(AppConfig appConfig, IDialogSe
                 .ToList();
             if (duplicateTargetNameFiles.Count > 0)
             {
-                await DialogService.ShowWarningDialogAsync("存在重复目标文件",
+                await Services.Dialog.ShowWarningDialogAsync("存在重复目标文件",
                     $"存在{duplicateTargetNameFiles.Count}个重复的目标文件。若强制执行，部分文件会自动重命名。",
                     string.Join(Environment.NewLine, duplicateTargetNameFiles));
             }
