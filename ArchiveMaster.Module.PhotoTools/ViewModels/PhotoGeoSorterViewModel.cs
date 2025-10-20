@@ -18,4 +18,9 @@ public partial class PhotoGeoSorterViewModel(AppConfig appConfig, IDialogService
         Files = new ObservableCollection<GpsFileInfo>(Service.Files);
         return base.OnInitializedAsync();
     }
+
+    protected override void OnReset()
+    {
+        Files = null;
+    }
 }

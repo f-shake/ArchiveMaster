@@ -171,7 +171,7 @@ public partial class MainView : UserControl
         catch (Exception ex)
         {
             Log.Error(ex, "打开面板失败");
-            await dialogService.ShowErrorDialogAsync("打开面板失败", ex.Message);
+            await dialogService.ShowErrorDialogAsync("打开面板失败", ex);
         }
     }
 
