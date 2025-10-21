@@ -19,7 +19,9 @@ public class GlobalConfigs
 
     public char FlattenPathSeparatorReplacement { get; set; } = '-';
 
-    public bool IsMainViewPlanOpen { get; set; } = true;
+    public bool IsMainViewPaneOpen { get; set; } = true;
+    
+    public bool IsSmoothScrollingEnabled { get; set; } = true;
 
     public string MasterPassword { get; set; } = SecurePasswordStoreService.EncryptMasterPassword(DefaultPassword);
 }

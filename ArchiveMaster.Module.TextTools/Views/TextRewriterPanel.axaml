@@ -102,6 +102,8 @@
     </v:TwoStepPanelBase.ConfigsContent>
 
     <v:TwoStepPanelBase.ResultsContent>
-        <v:ResultTextBox Result="{Binding Result}" />
+        <v:ResultTextBox
+            Message="{Binding AI.Name, StringFormat='{}AI服务提供商：{0}'}"
+            Result="{Binding Result}" />
     </v:TwoStepPanelBase.ResultsContent>
 </v:TwoStepPanelBase>

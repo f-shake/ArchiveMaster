@@ -14,35 +14,59 @@
     PrimaryButtonContent="完成"
     mc:Ignorable="d">
     <StackPanel Orientation="Vertical">
-        <CheckBox
-            Content="调试模式"
-            IsChecked="{Binding Path=Configs.DebugMode}" />
-        <ct:FormItem Header="调试模式循环延迟（毫秒）">
-            <TextBox Text="{Binding Path=Configs.DebugModeLoopDelay}" />
-        </ct:FormItem>
-        <CheckBox
-            Command="{Binding SetAutoStartCommand}"
-            CommandParameter="{Binding $self.IsChecked, Mode=OneWay}"
-            Content="开机自启"
-            IsChecked="{Binding IsAutoStart}" />
-        <CheckBox
-            Content="优先删除文件到回收站"
-            IsChecked="{Binding Configs.PreferDeleteToRecycleBin}" />
+        <HeaderedContentControl
+            Classes="GroupBox"
+            Header="调试">
+            <StackPanel Orientation="Vertical">
+                <CheckBox
+                    Content="调试模式"
+                    IsChecked="{Binding Path=Configs.DebugMode}" />
+                <ct:FormItem Header="调试模式循环延迟（毫秒）">
+                    <TextBox Text="{Binding Path=Configs.DebugModeLoopDelay}" />
+                </ct:FormItem>
+            </StackPanel>
+        </HeaderedContentControl>
+        <HeaderedContentControl
+            Classes="GroupBox"
+            Header="程序和界面">
+            <StackPanel Orientation="Vertical">
+                <CheckBox
+                    Command="{Binding SetAutoStartCommand}"
+                    CommandParameter="{Binding $self.IsChecked, Mode=OneWay}"
+                    Content="开机自启"
+                    IsChecked="{Binding IsAutoStart}" />
 
-        <ct:FormItem
-            Description="将多级目录路径按指定层级转换为扁平化格式时，使用分隔符代替斜杠"
-            Header="目录编码分隔符">
-            <ComboBox
-                HorizontalAlignment="Stretch"
-                SelectedItem="{Binding Path=Configs.FlattenPathSeparatorReplacement}">
-                <sys:Char>-</sys:Char>
-                <sys:Char>_</sys:Char>
-                <sys:Char>%</sys:Char>
-                <sys:Char>.</sys:Char>
-                <sys:Char>#</sys:Char>
-                <sys:Char>@</sys:Char>
-                <sys:Char>&#32;</sys:Char>
-            </ComboBox>
-        </ct:FormItem>
+                <ct:FormItem Description="重启界面后应用">
+                    <CheckBox
+                        Content="平滑滚动"
+                        IsChecked="{Binding Configs.IsSmoothScrollingEnabled}" />
+                </ct:FormItem>
+            </StackPanel>
+        </HeaderedContentControl>
+        <HeaderedContentControl
+            Classes="GroupBox"
+            Header="文件和目录">
+            <StackPanel Orientation="Vertical">
+                <CheckBox
+                    Content="优先删除文件到回收站"
+                    IsChecked="{Binding Configs.PreferDeleteToRecycleBin}" />
+
+                <ct:FormItem
+                    Description="将多级目录路径按指定层级转换为扁平化格式时，使用分隔符代替斜杠"
+                    Header="目录编码分隔符">
+                    <ComboBox
+                        HorizontalAlignment="Stretch"
+                        SelectedItem="{Binding Path=Configs.FlattenPathSeparatorReplacement}">
+                        <sys:Char>-</sys:Char>
+                        <sys:Char>_</sys:Char>
+                        <sys:Char>%</sys:Char>
+                        <sys:Char>.</sys:Char>
+                        <sys:Char>#</sys:Char>
+                        <sys:Char>@</sys:Char>
+                        <sys:Char>&#32;</sys:Char>
+                    </ComboBox>
+                </ct:FormItem>
+            </StackPanel>
+        </HeaderedContentControl>
     </StackPanel>
 </dialog:DialogHost>

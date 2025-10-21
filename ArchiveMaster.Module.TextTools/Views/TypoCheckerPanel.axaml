@@ -3,9 +3,11 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:b="using:ArchiveMaster.Behaviors"
+    xmlns:cfg="clr-namespace:ArchiveMaster.Configs;assembly=ArchiveMaster.Core"
     xmlns:ct="using:FzLib.Avalonia.Controls"
     xmlns:cvt="clr-namespace:ArchiveMaster.Converters;assembly=ArchiveMaster.Core"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:fzb="clr-namespace:FzLib.Avalonia.Behaviors;assembly=FzLib.Avalonia"
     xmlns:gb="using:GroupBox.Avalonia.Controls"
     xmlns:h="using:ArchiveMaster.Helpers"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -48,94 +50,106 @@
     </v:TwoStepPanelBase.ConfigsContent>
 
     <v:TwoStepPanelBase.ResultsContent>
-        <ScrollViewer Padding="0,0,20,0">
-            <ItemsControl ItemsSource="{Binding Typos}">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <Border
-                            Margin="2,4"
-                            Padding="8"
-                            Background="{DynamicResource Background2}"
-                            BorderBrush="{DynamicResource Background3}"
-                            BorderThickness="1"
-                            CornerRadius="8">
-                            <Grid RowDefinitions="Auto,8,Auto">
-                                <!--  这里，要保证Explanation在最右侧、Context在最左侧、复制按钮跟在Context右侧，且考虑Context超长的情况，用Grid无法解决，最终尝试DockPanel成功  -->
-                                <DockPanel HorizontalSpacing="8">
-                                    <TextBlock
-                                        MaxWidth="240"
-                                        HorizontalAlignment="Right"
-                                        DockPanel.Dock="Right"
-                                        Opacity="0.7"
-                                        Text="{Binding Explanation}"
-                                        TextTrimming="CharacterEllipsis"
-                                        ToolTip.Tip="{Binding Explanation}" />
-                                    <DockPanel
-                                        HorizontalAlignment="Left"
-                                        HorizontalSpacing="8">
-                                        <Button
-                                            Grid.Column="2"
-                                            Classes="Icon Transparent"
-                                            Command="{Binding CopyTextCommand, Source={x:Static vm:GlobalCommands.Instance}}"
-                                            CommandParameter="{Binding Context}"
-                                            Content="{StaticResource Copy}"
-                                            DockPanel.Dock="Right" />
-                                        <TextBlock
-                                            Text="{Binding Context}"
-                                            TextTrimming="CharacterEllipsis"
-                                            ToolTip.Tip="{Binding Context}" />
-                                    </DockPanel>
-
-                                </DockPanel>
-
-                                <Grid
-                                    Grid.Row="2"
-                                    ColumnDefinitions="Auto,8,*">
+        <Grid RowDefinitions="*,8,Auto">
+            <ScrollViewer
+                Padding="0,0,20,0"
+                fzb:SmoothScrollBehavior.IsEnabled="{Binding Source={x:Static cfg:GlobalConfigs.Instance}, Mode=TwoWay, Path=IsSmoothScrollingEnabled}">
+                <ItemsControl ItemsSource="{Binding Typos}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border
+                                Margin="2,4"
+                                Padding="8"
+                                Background="{DynamicResource Background2}"
+                                BorderBrush="{DynamicResource Background3}"
+                                BorderThickness="1"
+                                CornerRadius="8">
+                                <Grid RowDefinitions="Auto,8,Auto">
+                                    <!--  这里，要保证Explanation在最右侧、Context在最左侧、复制按钮跟在Context右侧，且考虑Context超长的情况，用Grid无法解决，最终尝试DockPanel成功  -->
                                     <DockPanel HorizontalSpacing="8">
                                         <TextBlock
                                             MaxWidth="240"
-                                            VerticalAlignment="Center"
-                                            Text="{Binding Original}"
+                                            HorizontalAlignment="Right"
+                                            DockPanel.Dock="Right"
+                                            Opacity="0.7"
+                                            Text="{Binding Explanation}"
                                             TextTrimming="CharacterEllipsis"
-                                            ToolTip.Tip="{Binding Original}" />
-                                        <Button
-                                            Classes="Icon Transparent"
-                                            Command="{Binding CopyTextCommand, Source={x:Static vm:GlobalCommands.Instance}}"
-                                            CommandParameter="{Binding Original}"
-                                            Content="{StaticResource Copy}" />
-                                        <TextBlock
-                                            MaxWidth="240"
-                                            Margin="8,0"
-                                            VerticalAlignment="Center"
-                                            Text="→" />
-                                        <TextBlock
-                                            VerticalAlignment="Center"
-                                            Text="{Binding Corrected}"
-                                            TextTrimming="CharacterEllipsis"
-                                            ToolTip.Tip="{Binding Corrected}" />
-                                        <Button
-                                            Classes="Icon Transparent"
-                                            Command="{Binding CopyTextCommand, Source={x:Static vm:GlobalCommands.Instance}}"
-                                            CommandParameter="{Binding Corrected}"
-                                            Content="{StaticResource Copy}" />
+                                            ToolTip.Tip="{Binding Explanation}" />
+                                        <DockPanel
+                                            HorizontalAlignment="Left"
+                                            HorizontalSpacing="8">
+                                            <Button
+                                                Grid.Column="2"
+                                                Classes="Icon Transparent"
+                                                Command="{Binding CopyTextCommand, Source={x:Static vm:GlobalCommands.Instance}}"
+                                                CommandParameter="{Binding Context}"
+                                                Content="{StaticResource Copy}"
+                                                DockPanel.Dock="Right" />
+                                            <TextBlock
+                                                Text="{Binding Context}"
+                                                TextTrimming="CharacterEllipsis"
+                                                ToolTip.Tip="{Binding Context}" />
+                                        </DockPanel>
+
                                     </DockPanel>
 
-                                    <Button
-                                        Grid.Column="2"
-                                        Padding="8,4"
-                                        HorizontalAlignment="Right"
-                                        Command="{Binding OpenFileCommand, Source={x:Static vm:GlobalCommands.Instance}}"
-                                        CommandParameter="{Binding Source}"
-                                        Content="{Binding Source, Converter={x:Static cvt:Converters.FileName}}"
-                                        CornerRadius="16"
-                                        IsVisible="{Binding Source, Converter={x:Static cvt:Converters.IsNotNull}}"
-                                        ToolTip.Tip="{Binding Source}" />
+                                    <Grid
+                                        Grid.Row="2"
+                                        ColumnDefinitions="Auto,8,*">
+                                        <DockPanel HorizontalSpacing="8">
+                                            <TextBlock
+                                                MaxWidth="240"
+                                                VerticalAlignment="Center"
+                                                Text="{Binding Original}"
+                                                TextTrimming="CharacterEllipsis"
+                                                ToolTip.Tip="{Binding Original}" />
+                                            <Button
+                                                Classes="Icon Transparent"
+                                                Command="{Binding CopyTextCommand, Source={x:Static vm:GlobalCommands.Instance}}"
+                                                CommandParameter="{Binding Original}"
+                                                Content="{StaticResource Copy}" />
+                                            <TextBlock
+                                                MaxWidth="240"
+                                                Margin="8,0"
+                                                VerticalAlignment="Center"
+                                                Text="→" />
+                                            <TextBlock
+                                                VerticalAlignment="Center"
+                                                Text="{Binding Corrected}"
+                                                TextTrimming="CharacterEllipsis"
+                                                ToolTip.Tip="{Binding Corrected}" />
+                                            <Button
+                                                Classes="Icon Transparent"
+                                                Command="{Binding CopyTextCommand, Source={x:Static vm:GlobalCommands.Instance}}"
+                                                CommandParameter="{Binding Corrected}"
+                                                Content="{StaticResource Copy}" />
+                                        </DockPanel>
+
+                                        <Button
+                                            Grid.Column="2"
+                                            Padding="8,4"
+                                            HorizontalAlignment="Right"
+                                            Command="{Binding OpenFileCommand, Source={x:Static vm:GlobalCommands.Instance}}"
+                                            CommandParameter="{Binding Source}"
+                                            Content="{Binding Source, Converter={x:Static cvt:Converters.FileName}}"
+                                            CornerRadius="16"
+                                            IsVisible="{Binding Source, Converter={x:Static cvt:Converters.IsNotNull}}"
+                                            ToolTip.Tip="{Binding Source}" />
+                                    </Grid>
                                 </Grid>
-                            </Grid>
-                        </Border>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-        </ScrollViewer>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+            <Grid
+                Grid.Row="2"
+                ColumnDefinitions="Auto,*,Auto">
+                <TextBlock Text="{Binding AI.Name, StringFormat='{}AI服务提供商：{0}'}" />
+                <TextBlock
+                    Grid.Column="2"
+                    Text="{Binding Typos.Count, StringFormat='{}共{0}条'}" />
+            </Grid>
+        </Grid>
     </v:TwoStepPanelBase.ResultsContent>
 </v:TwoStepPanelBase>

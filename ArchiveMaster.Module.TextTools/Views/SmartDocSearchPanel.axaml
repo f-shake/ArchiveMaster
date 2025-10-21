@@ -3,9 +3,11 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:b="using:ArchiveMaster.Behaviors"
+    xmlns:cfg="clr-namespace:ArchiveMaster.Configs;assembly=ArchiveMaster.Core"
     xmlns:ct="using:FzLib.Avalonia.Controls"
     xmlns:cvt="clr-namespace:ArchiveMaster.Converters;assembly=ArchiveMaster.Core"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:fzb="clr-namespace:FzLib.Avalonia.Behaviors;assembly=FzLib.Avalonia"
     xmlns:gb="using:GroupBox.Avalonia.Controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:v="using:ArchiveMaster.Views"
@@ -82,7 +84,7 @@
         <Grid ColumnDefinitions="2*,8,*">
             <gb:GroupBox Header="搜索结果">
                 <Grid Grid.RowDefinitions="*,8,Auto">
-                    <ScrollViewer>
+                    <ScrollViewer fzb:SmoothScrollBehavior.IsEnabled="{Binding Source={x:Static cfg:GlobalConfigs.Instance}, Mode=TwoWay, Path=IsSmoothScrollingEnabled}">
                         <ItemsControl
                             Margin="0,0,20,0"
                             ItemsSource="{Binding SearchResults}">

@@ -23,7 +23,7 @@ namespace ArchiveMaster.ViewModels;
 
 public partial class TypoCheckerViewModel(
     ViewModelServices services)
-    : TwoStepViewModelBase<TypoCheckerService, TypoCheckerConfig>(services)
+    : AiTwoStepViewModelBase<TypoCheckerService, TypoCheckerConfig>(services)
 {
     public override bool EnableInitialize { get; } = false;
     public override bool EnableRepeatExecute { get; } = true;

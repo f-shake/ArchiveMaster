@@ -37,7 +37,7 @@
             Background="Transparent"
             CompactPaneLength="40"
             DisplayMode="CompactInline"
-            IsPaneOpen="{Binding Source={x:Static cfg:GlobalConfigs.Instance}, Mode=TwoWay, Path=IsMainViewPlanOpen}"
+            IsPaneOpen="{Binding Source={x:Static cfg:GlobalConfigs.Instance}, Mode=TwoWay, Path=IsMainViewPaneOpen}"
             OpenPaneLength="200"
             PaneBackground="Transparent">
             <SplitView.Pane>
@@ -48,7 +48,7 @@
                         RowDefinitions="*,4,Auto">
                         <!--  主菜单  -->
                         <ScrollViewer
-                            b:SmoothScrollBehavior.IsEnabled="True"
+                            b:SmoothScrollBehavior.IsEnabled="{Binding Source={x:Static cfg:GlobalConfigs.Instance}, Mode=TwoWay, Path=IsSmoothScrollingEnabled}"
                             AllowAutoHide="True"
                             BringIntoViewOnFocusChange="{Binding ScrollViewBringIntoViewOnFocusChange}"
                             HorizontalScrollBarVisibility="Disabled"
