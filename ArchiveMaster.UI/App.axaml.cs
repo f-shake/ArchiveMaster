@@ -35,6 +35,9 @@ public class App : Application
 
     public override void Initialize()
     {
+        //存在界面相关一次性读取的配置（平滑滚动），需要在AvaloniaXamlLoader.Load(this)之前读取
+        var config = new AppConfig();
+        config.Initialize();
         AvaloniaXamlLoader.Load(this);
         if (RuntimeFeature.IsDynamicCodeSupported) //非AOT，启动速度慢
         {
@@ -54,7 +57,7 @@ public class App : Application
             }
         }
 
-        Initializer.Initialize();
+        Initializer.Initialize(config);
         if (OperatingSystem.IsWindows())
         {
             Resources.Add("ContentControlThemeFontFamily", new FontFamily("Microsoft YaHei UI"));

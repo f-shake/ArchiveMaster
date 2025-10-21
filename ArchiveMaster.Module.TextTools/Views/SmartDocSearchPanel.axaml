@@ -84,7 +84,7 @@
         <Grid ColumnDefinitions="2*,8,*">
             <gb:GroupBox Header="搜索结果">
                 <Grid Grid.RowDefinitions="*,8,Auto">
-                    <ScrollViewer fzb:SmoothScrollBehavior.IsEnabled="{Binding Source={x:Static cfg:GlobalConfigs.Instance}, Mode=TwoWay, Path=IsSmoothScrollingEnabled}">
+                    <ScrollViewer>
                         <ItemsControl
                             Margin="0,0,20,0"
                             ItemsSource="{Binding SearchResults}">

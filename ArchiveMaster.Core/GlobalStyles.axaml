@@ -1,6 +1,8 @@
 <Styles
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:b="using:FzLib.Avalonia.Behaviors"
+    xmlns:cfg="using:ArchiveMaster.Configs"
     xmlns:ctrl="clr-namespace:FzLib.Avalonia.Controls;assembly=FzLib.Avalonia">
     <Design.PreviewWith>
         <Border Padding="20">
@@ -24,6 +26,13 @@
         <Style Selector="^ /template/ ContentPresenter#PART_Label">
             <Setter Property="FontWeight" Value="Bold" />
         </Style>
+    </Style>
+
+    <!-- <Style Selector="TextBox"> -->
+    <!--     <Setter Property="b:SmoothScrollBehavior.IsEnabled" Value="{Binding Source={x:Static cfg:GlobalConfigs.Instance}, Mode=TwoWay, Path=IsSmoothScrollingEnabled}" /> -->
+    <!-- </Style> -->
+    <Style Selector="ScrollViewer">
+        <Setter Property="b:SmoothScrollBehavior.IsEnabled" Value="{Binding Source={x:Static cfg:GlobalConfigs.Instance}, Path=IsSmoothScrollingEnabled}" />
     </Style>
 
     <Style Selector="TextBlock">

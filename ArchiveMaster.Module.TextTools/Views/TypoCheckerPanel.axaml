@@ -51,9 +51,7 @@
 
     <v:TwoStepPanelBase.ResultsContent>
         <Grid RowDefinitions="*,8,Auto">
-            <ScrollViewer
-                Padding="0,0,20,0"
-                fzb:SmoothScrollBehavior.IsEnabled="{Binding Source={x:Static cfg:GlobalConfigs.Instance}, Mode=TwoWay, Path=IsSmoothScrollingEnabled}">
+            <ScrollViewer Padding="0,0,20,0">
                 <ItemsControl ItemsSource="{Binding Typos}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
