@@ -69,6 +69,8 @@ public class TextRewriterService(AppConfig appConfig)
         {
             TextGenerationCategory.ExpressionOptimization => GetPrompt(Config.ExpressionOptimizationType),
             TextGenerationCategory.StructuralAdjustment => GetPrompt(Config.StructuralAdjustmentType),
+            TextGenerationCategory.ContentTransformation when Config.ContentTransformationType == ContentTransformationType.Translation
+                => $"请将文本翻译成{Config.TranslationTargetLanguage}。",
             TextGenerationCategory.ContentTransformation => GetPrompt(Config.ContentTransformationType),
             TextGenerationCategory.TextEvaluation => GetPrompt(Config.TextEvaluationType),
             TextGenerationCategory.Custom => string.IsNullOrWhiteSpace(Config.CustomPrompt)
@@ -76,13 +78,6 @@ public class TextRewriterService(AppConfig appConfig)
                 : Config.CustomPrompt,
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
         };
-        
-        //对翻译类任务单独处理
-        if (type == TextGenerationCategory.ContentTransformation
-            && Config.ContentTransformationType == ContentTransformationType.Translation)
-        {
-            prompt += $"请将文本翻译成{Config.TranslationTargetLanguage}。";
-        }
 
         //处理额外提示
         if (type != TextGenerationCategory.Custom && !string.IsNullOrWhiteSpace(Config.ExtraAiPrompt))

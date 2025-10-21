@@ -18,6 +18,7 @@ using FzLib;
 using FzLib.Avalonia.Dialogs;
 using Microsoft.Extensions.DependencyInjection;
 using System.Runtime.CompilerServices;
+using Avalonia.Markup.Xaml.Styling;
 using Avalonia.Threading;
 using FzLib.Programming;
 using Serilog;
@@ -35,9 +36,6 @@ public class App : Application
 
     public override void Initialize()
     {
-        //存在界面相关一次性读取的配置（平滑滚动），需要在AvaloniaXamlLoader.Load(this)之前读取
-        var config = new AppConfig();
-        config.Initialize();
         AvaloniaXamlLoader.Load(this);
         if (RuntimeFeature.IsDynamicCodeSupported) //非AOT，启动速度慢
         {
@@ -57,7 +55,12 @@ public class App : Application
             }
         }
 
-        Initializer.Initialize(config);
+        Initializer.Initialize();
+        UpdateStyles();
+    }
+
+    private void UpdateStyles()
+    {
         if (OperatingSystem.IsWindows())
         {
             Resources.Add("ContentControlThemeFontFamily", new FontFamily("Microsoft YaHei UI"));
@@ -66,6 +69,10 @@ public class App : Application
         {
             Resources.Add("ContentControlThemeFontFamily", new FontFamily("$Default"));
         }
+
+        //部分样式需要在配置文件加载后再加载，所以使用代码进行加载（如平滑滚动）
+        Styles.Add(new StyleInclude(new Uri("avares://ArchiveMaster.UI", UriKind.Absolute))
+            { Source = new Uri("avares://ArchiveMaster.Core/GlobalStyles.axaml", UriKind.Absolute) });
     }
 
     static Task OnActivatedAsync()

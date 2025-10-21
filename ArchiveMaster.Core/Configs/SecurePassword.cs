@@ -89,11 +89,18 @@ public partial class SecurePassword : ObservableObject
             {
                 try
                 {
-                    var masterPassword = GlobalConfigs.Instance.MasterPassword;
-                    masterPassword = SecurePasswordStoreService.DecryptMasterPassword(masterPassword);
-                    string pswd =
-                        SecurePasswordStoreService.SavePassword(value.Password, masterPassword);
-                    writer.WriteStringValue(pswd);
+                    if (string.IsNullOrEmpty(value.Password))
+                    {
+                        writer.WriteStringValue("");
+                    }
+                    else
+                    {
+                        var masterPassword = GlobalConfigs.Instance.MasterPassword;
+                        masterPassword = SecurePasswordStoreService.DecryptMasterPassword(masterPassword);
+                        string pswd =
+                            SecurePasswordStoreService.SavePassword(value.Password, masterPassword);
+                        writer.WriteStringValue(pswd);
+                    }
                 }
                 catch (Exception ex)
                 {

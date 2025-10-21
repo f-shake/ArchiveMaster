@@ -79,7 +79,7 @@ public static class Initializer
             .AsReadOnly();
     }
 
-    public static void Initialize(AppConfig config)
+    public static void Initialize( )
     {
         if (AppHost != null)
         {
@@ -89,8 +89,9 @@ public static class Initializer
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
         var builder = Host.CreateApplicationBuilder();
-      
+        var config = new AppConfig();
         InitializeModules(builder.Services, config);
+        config.Initialize();
         builder.Services.AddSingleton(config);
         builder.Services.AddTransient<ViewModelServices>();
         builder.Services.AddTransient<MainWindow>();
