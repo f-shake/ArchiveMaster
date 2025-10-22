@@ -44,14 +44,21 @@ public class App : Application
 
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            if (!TcpSingleInstanceHelper.EnsureSingleInstance(OnActivatedAsync))
+            try
             {
-                Log.Information("检测到已有实例在运行，程序将退出");
-                SplashWindow.CloseCurrent();
-                doNotOpen = true;
-                desktop.Shutdown();
-                Environment.Exit(0);
-                return;
+                if (!TcpSingleInstanceHelper.EnsureSingleInstance(OnActivatedAsync))
+                {
+                    Log.Information("检测到已有实例在运行，程序将退出");
+                    SplashWindow.CloseCurrent();
+                    doNotOpen = true;
+                    desktop.Shutdown();
+                    Environment.Exit(0);
+                    return;
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Logger.Error(ex, "单例模式检测出现错误");
             }
         }
 

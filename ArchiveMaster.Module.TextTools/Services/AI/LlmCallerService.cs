@@ -9,6 +9,7 @@ using ArchiveMaster.Models;
 using Microsoft.Extensions.AI;
 using OllamaSharp;
 using OpenAI;
+using Serilog;
 using ChatResponseFormat = OpenAI.Chat.ChatResponseFormat;
 
 namespace ArchiveMaster.Services;
@@ -20,13 +21,14 @@ public class LlmCallerService(AiProviderConfig config)
     public async Task<string> CallAsync(string systemPrompt, string userPrompt, ChatOptions options = null,
         CancellationToken ct = default)
     {
-        DebugWritePrompt(systemPrompt, userPrompt, false);
+        LogPrompt(systemPrompt, userPrompt, false);
         var chatClient = GetChatClient();
 
         var sys = new ChatMessage(ChatRole.System, systemPrompt);
         var user = new ChatMessage(ChatRole.User, userPrompt);
         var response = await chatClient.GetResponseAsync([sys, user], options, ct);
         Debug.WriteLine($"AI回答：{response.Text}");
+        Log.Logger.Information("AI回答：{ResponseText}", response.Text);
         return response.Text;
     }
 
@@ -35,31 +37,36 @@ public class LlmCallerService(AiProviderConfig config)
         [EnumeratorCancellation]
         CancellationToken ct = default)
     {
-        DebugWritePrompt(systemPrompt, userPrompt, true);
+        LogPrompt(systemPrompt, userPrompt, true);
         var chatClient = GetChatClient();
 
         var sys = new ChatMessage(ChatRole.System, systemPrompt);
         var user = new ChatMessage(ChatRole.User, userPrompt);
         Debug.WriteLine("AI开始回答");
+        StringBuilder str = new StringBuilder("AI回答：");
         await foreach (ChatResponseUpdate item in
                        chatClient.GetStreamingResponseAsync([sys, user], options, ct))
         {
             Debug.Write(item.Text);
+            str.Append(item.Text);
             ct.ThrowIfCancellationRequested();
             yield return item.Text;
         }
+        
+        Log.Logger.Information(str.ToString());
     }
 
-    private void DebugWritePrompt(string systemPrompt, string userPrompt, bool stream)
+    private void LogPrompt(string systemPrompt, string userPrompt, bool stream)
     {
-        Debug.WriteLine(
-            new StringBuilder().Append("调用AI")
-                .AppendLine(stream ? "（流式）" : "")
-                .AppendLine("##系统提示##")
-                .AppendLine(GetPreAndSuffixes(systemPrompt))
-                .AppendLine("##用户提示##")
-                .Append(GetPreAndSuffixes(userPrompt))
-                .ToString());
+        var str = new StringBuilder().Append("调用AI")
+            .AppendLine(stream ? "（流式）" : "")
+            .AppendLine("##系统提示##")
+            .AppendLine(GetPreAndSuffixes(systemPrompt))
+            .AppendLine("##用户提示##")
+            .Append(GetPreAndSuffixes(userPrompt))
+            .ToString();
+        Debug.WriteLine(str);
+        Log.Logger.Information(str);
 
         string GetPreAndSuffixes(string str)
         {

@@ -34,6 +34,7 @@ public class TypoCheckerService(AppConfig appConfig)
                                         如果该段话中有多个错别字，应当全部进行修正。
                                         2. 不需要对文本进行优化，仅指出明显错误的地方
                                         3. 以下情况豁免：网络用语、标注方言、代码/专有名词
+                                        4. 不要输出正确的内容。例如，original和corrected一致的，不要输出。
 
                                         示例输入："新iphone很贵，但 销量很好，她笑的很开心，因为他是销售经历。"
                                         示例输出：
@@ -232,9 +233,20 @@ public class TypoCheckerService(AppConfig appConfig)
                 systemPrompt += "用户具有额外要求，在满足上面格式输出要求的前提下，尽可能满足以下要求：" + Config.ExtraAiPrompt;
             }
 
+#if DEBUG
+            StringBuilder temp = new StringBuilder();
+            await foreach (var t in llm
+                               .CallStreamAsync(systemPrompt, segment,
+                                   new ChatOptions { ResponseFormat = ChatResponseFormat.Json }, ct))
+            {
+                temp.Append(t);
+            }
+
+            string result = temp.ToString();
+#else
             string result = await llm.CallAsync(systemPrompt, segment,
                 new ChatOptions { ResponseFormat = ChatResponseFormat.Json }, ct);
-
+#endif
             yield return new LlmOutputItem(result);
             var lines = result.Split(['\n', '\r'], StringSplitOptions.RemoveEmptyEntries);
             int startLine = 0;
@@ -257,7 +269,7 @@ public class TypoCheckerService(AppConfig appConfig)
             {
                 results = Parse(result, segments[index].source).ToList();
             }
-            catch (FormatException ex)
+            catch (Exception ex)
             {
                 Log.Logger.Error(ex, "解析错别字检查的AI发来的JSON失败：{Result}", result);
                 continue;
