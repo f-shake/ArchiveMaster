@@ -59,6 +59,7 @@ public partial class MainView : UserControl
         DataContext = viewModel;
 
         InitializeComponent();
+        progressOverlayService.Unregister();
         progressOverlayService.Attach(loading);
         if (viewPadding != null)
         {
