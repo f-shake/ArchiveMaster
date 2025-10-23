@@ -67,6 +67,7 @@ public partial class TextEncryptionViewModel : ViewModelBase
 
     private async Task EncryptOrDecryptAsync(bool encrypt)
     {
+        Config.Check();
         Config.LastOperation = encrypt;
         try
         {

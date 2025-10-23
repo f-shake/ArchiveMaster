@@ -4,9 +4,11 @@ namespace ArchiveMaster.Services;
 
 public class TextEncryptor(string password)
 {
+    public string Password { get; } = password ?? throw new ArgumentNullException(nameof(password));
     private static readonly UnicodeRange[] rangeLookup;
 
-    private readonly Dictionary<UnicodeRange, char[]> reversedShuffledCharLists = new Dictionary<UnicodeRange, char[]>();
+    private readonly Dictionary<UnicodeRange, char[]>
+        reversedShuffledCharLists = new Dictionary<UnicodeRange, char[]>();
 
     private readonly Dictionary<UnicodeRange, char[]> shuffledCharLists = new Dictionary<UnicodeRange, char[]>();
 
@@ -75,6 +77,7 @@ public class TextEncryptor(string password)
                 lookup[i] = range;
             }
         }
+
         return lookup;
     }
 
@@ -86,12 +89,13 @@ public class TextEncryptor(string password)
             charList[i] = (char)(i + range.Start);
         }
 
-        ShuffleList(charList, password);
+        ShuffleList(charList, Password);
         var reversedCharList = new char[range.End - range.Start + 1];
         for (int i = 0; i < reversedCharList.Length; i++)
         {
             reversedCharList[charList[i] - range.Start] = (char)(i + range.Start);
         }
+
         shuffledCharLists[range] = charList;
         reversedShuffledCharLists[range] = reversedCharList;
     }
@@ -104,9 +108,11 @@ public class TextEncryptor(string password)
         {
             GenerateShuffleList(range);
         }
+
         shuffleList = shuffledCharLists[range];
         reversedShuffleList = reversedShuffledCharLists[range];
     }
+
     private bool NeedProcess(char ch) => !char.IsControl(ch)
                                          && !char.IsWhiteSpace(ch)
                                          && !char.IsPunctuation(ch)
@@ -119,6 +125,7 @@ public class TextEncryptor(string password)
         {
             seed = (seed * 31 + password[i]) % int.MaxValue;
         }
+
         MersenneTwister mt = new MersenneTwister((uint)seed);
 
         for (int i = list.Length - 1; i > 0; i--)
@@ -127,5 +134,4 @@ public class TextEncryptor(string password)
             (list[i], list[j]) = (list[j], list[i]);
         }
     }
-
 }

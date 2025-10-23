@@ -16,6 +16,7 @@ public partial class TextEncryptionConfig : ConfigBase
 
     [ObservableProperty]
     private string suffix = "##";
+    
     public override void Check()
     {
         CheckEmpty(Password, "密码");
