@@ -1,7 +1,6 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
-using ArchiveMaster.Basic;
 using ArchiveMaster.Configs;
 using ArchiveMaster.Enums;
 using ArchiveMaster.Helpers;
@@ -9,6 +8,7 @@ using ArchiveMaster.Models;
 using ArchiveMaster.Services;
 using ArchiveMaster.ViewModels.FileSystem;
 using ArchiveMaster.Views;
+using Avalonia.Collections;
 using Avalonia.Platform.Storage;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -33,7 +33,7 @@ public partial class BackupManageCenterViewModel
     private SimpleFileInfo selectedFile;
 
     [ObservableProperty]
-    private BulkObservableCollection<SimpleFileInfo> treeFiles;
+    private AvaloniaList<SimpleFileInfo> treeFiles;
 
     private async Task LoadFileChangesAsync()
     {
@@ -59,7 +59,7 @@ public partial class BackupManageCenterViewModel
         tree.Reorder();
         tree.Name = $"快照{SelectedSnapshot.BeginTime}";
 
-        TreeFiles = new BulkObservableCollection<SimpleFileInfo>();
+        TreeFiles = new AvaloniaList<SimpleFileInfo>();
         TreeFiles.Add(tree);
     }
 

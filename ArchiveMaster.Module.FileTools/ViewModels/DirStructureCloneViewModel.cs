@@ -1,9 +1,9 @@
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
-using ArchiveMaster.Basic;
 using ArchiveMaster.Configs;
 using ArchiveMaster.Services;
 using ArchiveMaster.ViewModels.FileSystem;
+using Avalonia.Collections;
 using CommunityToolkit.Mvvm.ComponentModel;
 using FzLib.Avalonia.Dialogs;
 
@@ -14,11 +14,11 @@ public partial class
     : TwoStepViewModelBase<DirStructureCloneService, DirStructureCloneConfig>(services)
 {
     [ObservableProperty]
-    private BulkObservableCollection<SimpleFileInfo> treeFiles;
+    private AvaloniaList<SimpleFileInfo> treeFiles;
 
     protected override Task OnInitializedAsync()
     {
-        var files = new BulkObservableCollection<SimpleFileInfo>();
+        var files = new AvaloniaList<SimpleFileInfo>();
         files.AddRange(Service.RootDir.Subs);
         TreeFiles = files;
         return base.OnInitializedAsync();

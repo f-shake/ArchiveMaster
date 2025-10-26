@@ -10,8 +10,8 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
-using ArchiveMaster.Basic;
 using ArchiveMaster.ViewModels.FileSystem;
+using Avalonia.Collections;
 using FzLib.Avalonia.Dialogs;
 
 namespace ArchiveMaster.ViewModels;
@@ -20,11 +20,11 @@ public partial class DuplicateFileCleanupViewModel(ViewModelServices services)
     : TwoStepViewModelBase<DuplicateFileCleanupService, DuplicateFileCleanupConfig>(services)
 {
     [ObservableProperty]
-    private BulkObservableCollection<SimpleFileInfo> groups;
+    private AvaloniaList<SimpleFileInfo> groups;
 
     protected override Task OnInitializedAsync()
     {
-        Groups = new BulkObservableCollection<SimpleFileInfo>(Service.DuplicateGroups.SubDirs);
+        Groups = new AvaloniaList<SimpleFileInfo>(Service.DuplicateGroups.SubDirs);
         return base.OnInitializedAsync();
     }
 

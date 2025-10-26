@@ -1,10 +1,10 @@
-using ArchiveMaster.Basic;
 using ArchiveMaster.Configs;
 using ArchiveMaster.Services;
 using ArchiveMaster.ViewModels.FileSystem;
 using CommunityToolkit.Mvvm.ComponentModel;
 using FzLib.Avalonia.Dialogs;
 using System.Collections.ObjectModel;
+using Avalonia.Collections;
 
 namespace ArchiveMaster.ViewModels;
 
@@ -13,7 +13,7 @@ public partial class RebuildViewModel(ViewModelServices services)
         WriteOnceArchiveModuleInfo.CONFIG_GROUP)
 {
     [ObservableProperty]
-    private BulkObservableCollection<SimpleFileInfo> fileTree;
+    private AvaloniaList<SimpleFileInfo> fileTree;
 
     [ObservableProperty]
     private ObservableCollection<WriteOnceFile> matchedFiles;
@@ -23,7 +23,7 @@ public partial class RebuildViewModel(ViewModelServices services)
 
     protected override Task OnInitializedAsync()
     {
-        FileTree = new BulkObservableCollection<SimpleFileInfo>(Service.FileTree.Subs);
+        FileTree = new AvaloniaList<SimpleFileInfo>(Service.FileTree.Subs);
         MatchedFiles = new ObservableCollection<WriteOnceFile>(Service.MatchedFiles);
         Report = Service.InitializeReport;
         return base.OnInitializedAsync();

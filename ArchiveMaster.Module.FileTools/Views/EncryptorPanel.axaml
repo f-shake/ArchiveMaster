@@ -3,7 +3,6 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:c="using:ArchiveMaster.Converters"
-    xmlns:cr="clr-namespace:System.Security.Cryptography;assembly=mscorlib"
     xmlns:ct="using:FzLib.Avalonia.Controls"
     xmlns:ctrl="clr-namespace:FzLib.Avalonia.Controls;assembly=FzLib.Avalonia"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"

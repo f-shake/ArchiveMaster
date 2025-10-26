@@ -2,13 +2,13 @@ using System.Collections;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Windows.Input;
-using ArchiveMaster.Basic;
 using ArchiveMaster.Configs;
 using ArchiveMaster.Converters;
 using ArchiveMaster.Services;
 using ArchiveMaster.ViewModels;
 using ArchiveMaster.ViewModels.FileSystem;
 using Avalonia;
+using Avalonia.Collections;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Shapes;
@@ -109,9 +109,9 @@ public class TreeFileDataGrid : SimpleFileDataGrid
 
     public void Search()
     {
-        if (ItemsSource is not BulkObservableCollection<SimpleFileInfo> items)
+        if (ItemsSource is not AvaloniaList<SimpleFileInfo> items)
         {
-            throw new Exception($"{nameof(ItemsSource)}必须为{nameof(BulkObservableCollection<SimpleFileInfo>)}");
+            throw new Exception($"{nameof(ItemsSource)}必须为{nameof(AvaloniaList<SimpleFileInfo>)}");
         }
 
         if (items.Count == 0 || items[0] is not TreeDirInfo root)
@@ -297,9 +297,9 @@ public class TreeFileDataGrid : SimpleFileDataGrid
             return;
         }
 
-        if (ItemsSource is not BulkObservableCollection<SimpleFileInfo> items)
+        if (ItemsSource is not AvaloniaList<SimpleFileInfo> items)
         {
-            throw new Exception($"{nameof(ItemsSource)}必须为{nameof(BulkObservableCollection<SimpleFileInfo>)}");
+            throw new Exception($"{nameof(ItemsSource)}必须为{nameof(AvaloniaList<SimpleFileInfo>)}");
         }
 
         foreach (var subDir in dir.SubDirs.Where(p => p.IsExpanded))
@@ -315,7 +315,7 @@ public class TreeFileDataGrid : SimpleFileDataGrid
     {
         if (e.Source is Visual { DataContext: TreeDirInfo dir })
         {
-            if (ItemsSource is not BulkObservableCollection<SimpleFileInfo> items)
+            if (ItemsSource is not AvaloniaList<SimpleFileInfo> items)
             {
                 return;
             }
@@ -360,9 +360,9 @@ public class TreeFileDataGrid : SimpleFileDataGrid
             return;
         }
 
-        if (ItemsSource is not BulkObservableCollection<SimpleFileInfo> items)
+        if (ItemsSource is not AvaloniaList<SimpleFileInfo> items)
         {
-            throw new Exception($"{nameof(ItemsSource)}必须为{nameof(BulkObservableCollection<SimpleFileInfo>)}");
+            throw new Exception($"{nameof(ItemsSource)}必须为{nameof(AvaloniaList<SimpleFileInfo>)}");
         }
 
         // dir.Subs.ForEach(p => p.IsChecked = false);
