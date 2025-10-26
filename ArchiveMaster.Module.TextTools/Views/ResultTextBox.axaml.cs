@@ -6,7 +6,6 @@ using Avalonia;
 using Avalonia.Input.Platform;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
-using FzLib.Avalonia.Dialogs.Pickers;
 using Serilog;
 
 namespace ArchiveMaster.Views
