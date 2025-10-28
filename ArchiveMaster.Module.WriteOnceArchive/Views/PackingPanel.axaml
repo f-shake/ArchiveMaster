@@ -8,6 +8,7 @@
     xmlns:enums="using:ArchiveMaster.Enums"
     xmlns:fcvt="using:FzLib.Avalonia.Converters"
     xmlns:gb="using:GroupBox.Avalonia.Controls"
+    xmlns:ic="using:FluentIcons.Avalonia.MarkupExtensions"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:me="using:FzLib.Avalonia.MarkupExtensions"
     xmlns:sys="clr-namespace:System;assembly=mscorlib"
@@ -216,13 +217,13 @@
                 <Button
                     Classes="Icon"
                     Command="{Binding SelectAllCommand}"
-                    Content="{StaticResource SelectAll}"
+                    Content="{ic:FluentIcon Icon=SelectAllOn}"
                     ToolTip.Tip="全选" />
                 <Button
                     Grid.Column="2"
                     Classes="Icon"
                     Command="{Binding SelectNoneCommand}"
-                    Content="{StaticResource ClearSelection}"
+                    Content="{ic:FluentIcon Icon=SelectAllOff}"
                     ToolTip.Tip="清除" />
             </Grid>
         </Grid>

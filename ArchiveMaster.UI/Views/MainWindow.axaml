@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:c="using:Avalonia.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:ic="using:FluentIcons.Avalonia.MarkupExtensions"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:v="using:FzLib.Avalonia.Controls"
     xmlns:views="clr-namespace:ArchiveMaster.Views"
@@ -21,7 +22,7 @@
             <Button
                 Classes="Icon"
                 Click="LightDarkButton_OnClick"
-                Content="{StaticResource BlueLight}" />
+                Content="{ic:FluentIcon Icon=WeatherSunny}" />
         </StackPanel>
     </v:ExtendedWindow.TitleBarFooter>
 </v:ExtendedWindow>

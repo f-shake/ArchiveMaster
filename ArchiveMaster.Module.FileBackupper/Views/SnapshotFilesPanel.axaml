@@ -3,6 +3,7 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:ic="using:FluentIcons.Avalonia.MarkupExtensions"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:v="using:ArchiveMaster.Views"
     d:DesignHeight="450"
@@ -15,7 +16,7 @@
                 Grid.Column="2"
                 Classes="Icon"
                 Command="{Binding #dg.Search}"
-                Content="{StaticResource Search}" />
+                Content="{ic:FluentIcon Icon=Search}" />
         </Grid>
         <v:TreeFileDataGrid
             x:Name="dg"

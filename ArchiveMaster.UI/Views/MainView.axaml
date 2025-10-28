@@ -97,7 +97,7 @@
                                                     ToolTip.Tip="{Binding GroupDescription}" />
                                                 <Button
                                                     HorizontalAlignment="Left"
-                                                    Classes="Icon Transparent"
+                                                    Classes="Icon"
                                                     Content="{ic:FluentIcon Icon=MoreHorizontal}"
                                                     IsVisible="{Binding MenuItems, Converter={x:Static cvt:Converters.CountGreaterThanZero}}">
                                                     <Button.Flyout>
@@ -149,13 +149,13 @@
                             Spacing="8">
                             <Button
                                 Padding="6"
-                                Classes="Icon Transparent"
+                                Classes="Icon"
                                 Command="{Binding OpenSettingDialogCommand}"
                                 Content="{ic:FluentIcon Icon=Settings}"
                                 ToolTip.Tip="设置" />
                             <Button
                                 Padding="6"
-                                Classes="Icon Transparent"
+                                Classes="Icon"
                                 Command="{Binding OpenMasterPasswordDialogCommand}"
                                 Content="{ic:FluentIcon Icon=LockClosedKey}"
                                 ToolTip.Tip="密码设置" />

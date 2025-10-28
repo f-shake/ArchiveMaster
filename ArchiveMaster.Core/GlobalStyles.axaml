@@ -101,6 +101,7 @@
         </Style>
         <Style Selector="^.Icon">
             <Setter Property="Padding" Value="4" />
+            <Setter Property="Background" Value="Transparent" />
             <Style Selector="^:disabled /template/ ContentPresenter#PART_ContentPresenter">
                 <Setter Property="Background" Value="Transparent" />
                 <Setter Property="Opacity" Value="0.5" />
@@ -141,6 +142,7 @@
         <Setter Property="Padding" Value="24,6" />
         <Style Selector="^.Icon">
             <Setter Property="Padding" Value="4" />
+            <Setter Property="Background" Value="Transparent" />
             <Style Selector="^:disabled /template/ ContentPresenter#PART_ContentPresenter">
                 <Setter Property="Background" Value="Transparent" />
                 <Setter Property="Opacity" Value="0.5" />

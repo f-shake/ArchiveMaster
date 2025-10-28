@@ -14,9 +14,30 @@ using ChatResponseFormat = OpenAI.Chat.ChatResponseFormat;
 
 namespace ArchiveMaster.Services;
 
-public class LlmCallerService(AiProviderConfig config)
+public class LlmCallerService
 {
-    public AiProviderConfig Config { get; } = config;
+    public LlmCallerService(AiProviderConfig config)
+    {
+        if (string.IsNullOrWhiteSpace(config.Url))
+        {
+            throw new ArgumentException($"AI提供商{config.Name}的地址为空");
+        }
+
+        if (string.IsNullOrWhiteSpace(config.Model))
+        {
+            throw new ArgumentException($"AI提供商{config.Name}的模型名为空");
+        }
+
+        if (config.Type == AiProviderType.OpenAI &&
+            (string.IsNullOrWhiteSpace(config.Key) || string.IsNullOrWhiteSpace(config.Key.Password)))
+        {
+            throw new ArgumentException($"AI提供商{config.Name}的密钥为空");
+        }
+
+        Config = config;
+    }
+
+    public AiProviderConfig Config { get; }
 
     public async Task<string> CallAsync(string systemPrompt, string userPrompt, ChatOptions options = null,
         CancellationToken ct = default)
@@ -26,7 +47,16 @@ public class LlmCallerService(AiProviderConfig config)
 
         var sys = new ChatMessage(ChatRole.System, systemPrompt);
         var user = new ChatMessage(ChatRole.User, userPrompt);
-        var response = await chatClient.GetResponseAsync([sys, user], options, ct);
+        ChatResponse response = null;
+        try
+        {
+            response = await chatClient.GetResponseAsync([sys, user], options, ct);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"AI模型调用失败（{ex.Message}）", ex);
+        }
+
         Debug.WriteLine($"AI回答：{response.Text}");
         Log.Logger.Information("AI回答：{ResponseText}", response.Text);
         return response.Text;
@@ -44,15 +74,25 @@ public class LlmCallerService(AiProviderConfig config)
         var user = new ChatMessage(ChatRole.User, userPrompt);
         Debug.WriteLine("AI开始回答");
         StringBuilder str = new StringBuilder("AI回答：");
-        await foreach (ChatResponseUpdate item in
-                       chatClient.GetStreamingResponseAsync([sys, user], options, ct))
+
+        IAsyncEnumerable<ChatResponseUpdate> items = null;
+        try
+        {
+            items = chatClient.GetStreamingResponseAsync([sys, user], options, ct);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"AI模型调用失败（{ex.Message}）", ex);
+        }
+
+        await foreach (ChatResponseUpdate item in items)
         {
             Debug.Write(item.Text);
             str.Append(item.Text);
             ct.ThrowIfCancellationRequested();
             yield return item.Text;
         }
-        
+
         Log.Logger.Information(str.ToString());
     }
 

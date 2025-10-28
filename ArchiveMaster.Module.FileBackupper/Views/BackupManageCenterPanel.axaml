@@ -8,6 +8,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:e="using:ArchiveMaster.Enums"
     xmlns:g="clr-namespace:GroupBox.Avalonia.Controls;assembly=GroupBox.Avalonia"
+    xmlns:ic="using:FluentIcons.Avalonia.MarkupExtensions"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:me="using:FzLib.Avalonia.MarkupExtensions"
     xmlns:sys="clr-namespace:System;assembly=mscorlib"
@@ -41,7 +42,7 @@
                     <Button
                         Classes="Icon"
                         Command="{Binding LoadTasksCommand}"
-                        Content="{StaticResource Refresh}"
+                        Content="{ic:FluentIcon Icon=ArrowClockwise}"
                         ToolTip.Tip="刷新" />
                 </StackPanel>
             </Grid>
@@ -52,21 +53,14 @@
                 IsVisible="{Binding !!SelectedTask}"
                 Orientation="Horizontal"
                 ZIndex="99">
-                <TextBlock>
-                    <Run
-                        FontWeight="Bold"
-                        Text="当前选择的任务：" />
-                    <Run Text="{Binding SelectedTask.Name, Mode=OneWay}" />
-                </TextBlock>
+                <TextBlock Text="{Binding SelectedTask.Name, StringFormat='{}当前选择的任务：{0}'}" />
+                <!--  换了FluentIcon以后，有些按钮需要指定约束才可以正常显示尺寸，不然会在宽度或高度上撑满  -->
                 <Button
+                    Height="28"
                     Classes="Icon"
                     Command="{Binding LoadTasksCommand}"
-                    Content="{StaticResource ReturnToCall}"
-                    ToolTip.Tip="返回">
-                    <Button.RenderTransform>
-                        <ScaleTransform ScaleX="-1" />
-                    </Button.RenderTransform>
-                </Button>
+                    Content="{ic:FluentIcon Icon=ArrowHookUpLeft}"
+                    ToolTip.Tip="返回" />
             </StackPanel>
 
             <TabControl IsVisible="{Binding !!SelectedTask}">

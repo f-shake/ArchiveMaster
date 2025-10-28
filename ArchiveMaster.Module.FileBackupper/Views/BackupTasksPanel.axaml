@@ -7,6 +7,7 @@
     xmlns:cvt="using:ArchiveMaster.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:g="clr-namespace:GroupBox.Avalonia.Controls;assembly=GroupBox.Avalonia"
+    xmlns:ic="using:FluentIcons.Avalonia.MarkupExtensions"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:sys="clr-namespace:System;assembly=mscorlib"
     xmlns:v="using:ArchiveMaster.Views"
@@ -33,12 +34,12 @@
                     <Button
                         Classes="Icon"
                         Command="{Binding AddTaskCommand}"
-                        Content="{StaticResource Add}"
+                        Content="{ic:FluentIcon Icon=Add}"
                         ToolTip.Tip="新增" />
                     <Button
                         Classes="Icon"
                         Command="{Binding DeleteSelectedTaskCommand}"
-                        Content="{StaticResource Delete}"
+                        Content="{ic:FluentIcon Icon=Delete}"
                         IsEnabled="{Binding SelectedTask, Converter={x:Static cvt:Converters.IsNotNull}}"
                         ToolTip.Tip="删除" />
                 </StackPanel>

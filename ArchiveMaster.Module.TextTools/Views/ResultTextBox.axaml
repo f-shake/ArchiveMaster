@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:cvt="clr-namespace:ArchiveMaster.Converters;assembly=ArchiveMaster.Core"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:ic="using:FluentIcons.Avalonia.MarkupExtensions"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:ArchiveMaster.ViewModels;assembly=ArchiveMaster.Core"
     d:DesignHeight="450"
@@ -27,7 +28,7 @@
             Classes="Icon"
             Command="{Binding CopyTextCommand, Source={x:Static vm:GlobalCommands.Instance}}"
             CommandParameter="{Binding Result}"
-            Content="{StaticResource Copy}"
+            Content="{ic:FluentIcon Icon=Copy}"
             IsEnabled="{Binding $parent[UserControl].Result, Converter={x:Static cvt:Converters.IsNotNull}}" />
     </Grid>
 </UserControl>

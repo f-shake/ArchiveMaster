@@ -100,22 +100,22 @@
                                 SelectedItem="{Binding PresetName}"
                                 ToolTip.Tip="切换预设" />
                             <Button
-                                Classes="Icon Transparent"
+                                Classes="Icon"
                                 Command="{Binding AddPresetCommand}"
                                 Content="{ic:FluentIcon Icon=Add}"
                                 ToolTip.Tip="新增预设" />
                             <Button
-                                Classes="Icon Transparent"
+                                Classes="Icon"
                                 Command="{Binding RemovePresetCommand}"
                                 Content="{ic:FluentIcon Icon=Delete}"
                                 ToolTip.Tip="删除当前预设" />
                             <Button
-                                Classes="Icon Transparent"
+                                Classes="Icon"
                                 Command="{Binding ModifyPresetNameCommand}"
                                 Content="{ic:FluentIcon Icon=Edit}"
                                 ToolTip.Tip="修改当前预设名称" />
                             <Button
-                                Classes="Icon Transparent"
+                                Classes="Icon"
                                 Command="{Binding ClonePresetCommand}"
                                 Content="{ic:FluentIcon Icon=Copy}"
                                 ToolTip.Tip="建立当前预设的副本" />

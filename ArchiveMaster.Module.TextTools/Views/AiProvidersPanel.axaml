@@ -8,6 +8,7 @@
     xmlns:cvt="clr-namespace:ArchiveMaster.Converters;assembly=ArchiveMaster.Core"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:gb="using:GroupBox.Avalonia.Controls"
+    xmlns:ic="using:FluentIcons.Avalonia.MarkupExtensions"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:me="using:FzLib.Avalonia.MarkupExtensions"
     xmlns:v="using:ArchiveMaster.Views"
@@ -42,12 +43,12 @@
                     <Button
                         Classes="Icon"
                         Command="{Binding AddProviderCommand}"
-                        Content="{StaticResource Add}"
+                        Content="{ic:FluentIcon Icon=Add}"
                         ToolTip.Tip="新增" />
                     <Button
                         Classes="Icon"
                         Command="{Binding DeleteSelectedProviderCommand}"
-                        Content="{StaticResource Delete}"
+                        Content="{ic:FluentIcon Icon=Delete}"
                         IsEnabled="{Binding SelectedProvider, Converter={x:Static cvt:Converters.IsNotNull}}"
                         ToolTip.Tip="删除" />
                 </StackPanel>
