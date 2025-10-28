@@ -10,6 +10,7 @@ using ArchiveMaster.ViewModels.FileSystem;
 using Avalonia;
 using Avalonia.Collections;
 using Avalonia.Controls;
+using Avalonia.Controls.Presenters;
 using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Shapes;
 using Avalonia.Controls.Templates;
@@ -22,6 +23,8 @@ using Avalonia.Markup.Xaml.MarkupExtensions;
 using Avalonia.Markup.Xaml.Templates;
 using Avalonia.Media;
 using Avalonia.VisualTree;
+using FluentIcons.Avalonia;
+using FluentIcons.Common;
 using FzLib;
 using FzLib.Avalonia.Converters;
 using Serilog;
@@ -257,13 +260,12 @@ public class TreeFileDataGrid : SimpleFileDataGrid
             }
 
             //文件文件夹图标
-            var icon = new TextBlock()
+            var icon = new ContentPresenter()
             {
-                Text = value is TreeDirInfo ? "\uE8B7" : "\uE160",
-                Foreground = value is TreeDirInfo ? Brushes.ForestGreen : Brushes.Coral,
-                FontFamily = this.FindResource("IconFont") as FontFamily ?? throw new Exception("找不到IconFont"),
-                // [!MarginProperty] = new Binding(nameof(SimpleFileInfo.Depth)) 
-                // { Converter = new DirDepthMarginConverter() },
+                Content = value is TreeDirInfo
+                    ? new FluentIcon { Icon = Icon.Folder }
+                    : new FluentIcon { Icon = Icon.Document },
+                Foreground = value is TreeDirInfo ? Brushes.ForestGreen : Brushes.Coral
             };
 
             return new StackPanel

@@ -9,6 +9,7 @@
     xmlns:cvt="using:ArchiveMaster.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:gb="using:GroupBox.Avalonia.Controls"
+    xmlns:ic="using:FluentIcons.Avalonia.MarkupExtensions"
     xmlns:local="clr-namespace:ArchiveMaster.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="clr-namespace:ArchiveMaster.Models;assembly=ArchiveMaster.Core"
@@ -95,14 +96,10 @@
                                                     Text="{Binding GroupName}"
                                                     ToolTip.Tip="{Binding GroupDescription}" />
                                                 <Button
-                                                    Padding="4"
                                                     HorizontalAlignment="Left"
-                                                    Classes="Transparent"
+                                                    Classes="Icon Transparent"
+                                                    Content="{ic:FluentIcon Icon=MoreHorizontal}"
                                                     IsVisible="{Binding MenuItems, Converter={x:Static cvt:Converters.CountGreaterThanZero}}">
-                                                    <TextBlock
-                                                        FontFamily="{StaticResource IconFont}"
-                                                        FontSize="16"
-                                                        Text="{StaticResource More}" />
                                                     <Button.Flyout>
                                                         <MenuFlyout
                                                             ItemContainerTheme="{StaticResource GroupMenuTheme}"
@@ -154,13 +151,13 @@
                                 Padding="6"
                                 Classes="Icon Transparent"
                                 Command="{Binding OpenSettingDialogCommand}"
-                                Content="{StaticResource Settings}"
+                                Content="{ic:FluentIcon Icon=Settings}"
                                 ToolTip.Tip="设置" />
                             <Button
                                 Padding="6"
                                 Classes="Icon Transparent"
                                 Command="{Binding OpenMasterPasswordDialogCommand}"
-                                Content="{StaticResource Lock}"
+                                Content="{ic:FluentIcon Icon=LockClosedKey}"
                                 ToolTip.Tip="密码设置" />
                         </StackPanel>
 
@@ -175,8 +172,6 @@
                             HorizontalContentAlignment="Center"
                             VerticalContentAlignment="Center"
                             Classes="Split"
-                            Content="{StaticResource ArrowLeft8}"
-                            FontFamily="{StaticResource IconFont}"
                             IsChecked="{Binding #spl.IsPaneOpen}"
                             ToolTip.Tip="折叠">
                             <Interaction.Behaviors>
@@ -185,14 +180,14 @@
                                     Value="False">
                                     <ChangePropertyAction
                                         PropertyName="Content"
-                                        Value="{StaticResource GlobalNavButton}" />
+                                        Value="{ic:FluentIcon Icon=Navigation}" />
                                 </DataTriggerBehavior>
                                 <DataTriggerBehavior
                                     Binding="{Binding #spl.IsPaneOpen}"
                                     Value="True">
                                     <ChangePropertyAction
                                         PropertyName="Content"
-                                        Value="{StaticResource ArrowLeft8}" />
+                                        Value="{ic:FluentIcon Icon=ArrowLeft}" />
                                 </DataTriggerBehavior>
                             </Interaction.Behaviors>
                         </ToggleButton>

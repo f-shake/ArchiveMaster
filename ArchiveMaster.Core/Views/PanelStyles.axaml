@@ -5,6 +5,7 @@
     xmlns:cfg="clr-namespace:ArchiveMaster.Configs"
     xmlns:cvt="clr-namespace:ArchiveMaster.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:ic="using:FluentIcons.Avalonia.MarkupExtensions"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:sys="clr-namespace:System;assembly=System.Runtime"
     xmlns:v="using:ArchiveMaster.Views"
@@ -92,22 +93,6 @@
                             VerticalAlignment="Top"
                             IsEnabled="{Binding !IsWorking}"
                             Orientation="Horizontal">
-                            <StackPanel.Styles>
-                                <Style Selector="Button:disabled /template/ ContentPresenter#PART_ContentPresenter">
-                                    <Setter Property="Background" Value="Transparent" />
-                                </Style>
-                                <Style Selector="Button">
-                                    <Setter Property="Padding" Value="0" />
-                                    <Setter Property="Width" Value="32" />
-                                    <Setter Property="Height" Value="32" />
-                                    <Setter Property="Grid.Row" Value="2" />
-                                    <Setter Property="VerticalAlignment" Value="Center" />
-                                    <Setter Property="HorizontalContentAlignment" Value="Center" />
-                                    <Setter Property="VerticalContentAlignment" Value="Center" />
-                                    <Setter Property="Background" Value="Transparent" />
-                                    <Setter Property="FontFamily" Value="{StaticResource IconFont}" />
-                                </Style>
-                            </StackPanel.Styles>
                             <ComboBox
                                 Width="128"
                                 VerticalAlignment="Center"
@@ -115,20 +100,24 @@
                                 SelectedItem="{Binding PresetName}"
                                 ToolTip.Tip="切换预设" />
                             <Button
+                                Classes="Icon Transparent"
                                 Command="{Binding AddPresetCommand}"
-                                Content="{StaticResource Add}"
+                                Content="{ic:FluentIcon Icon=Add}"
                                 ToolTip.Tip="新增预设" />
                             <Button
+                                Classes="Icon Transparent"
                                 Command="{Binding RemovePresetCommand}"
-                                Content="{StaticResource Delete}"
+                                Content="{ic:FluentIcon Icon=Delete}"
                                 ToolTip.Tip="删除当前预设" />
                             <Button
+                                Classes="Icon Transparent"
                                 Command="{Binding ModifyPresetNameCommand}"
-                                Content="{StaticResource Edit}"
+                                Content="{ic:FluentIcon Icon=Edit}"
                                 ToolTip.Tip="修改当前预设名称" />
                             <Button
+                                Classes="Icon Transparent"
                                 Command="{Binding ClonePresetCommand}"
-                                Content="{StaticResource Copy}"
+                                Content="{ic:FluentIcon Icon=Copy}"
                                 ToolTip.Tip="建立当前预设的副本" />
                         </StackPanel>
                     </Grid>

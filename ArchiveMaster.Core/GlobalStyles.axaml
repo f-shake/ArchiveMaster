@@ -3,7 +3,8 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:b="using:FzLib.Avalonia.Behaviors"
     xmlns:cfg="using:ArchiveMaster.Configs"
-    xmlns:ctrl="clr-namespace:FzLib.Avalonia.Controls;assembly=FzLib.Avalonia">
+    xmlns:ctrl="clr-namespace:FzLib.Avalonia.Controls;assembly=FzLib.Avalonia"
+    xmlns:ic="using:FluentIcons.Avalonia">
     <Design.PreviewWith>
         <Border Padding="20">
             <!--  Add Controls for Previewer Here  -->
@@ -17,6 +18,11 @@
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Styles.Resources>
+
+    <Style Selector="ic|FluentIcon">
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="FontSize" Value="18" />
+    </Style>
 
     <Style Selector="ctrl|WrapFormItemGroup CheckBox">
         <Setter Property="VerticalAlignment" Value="Bottom" />
@@ -94,8 +100,7 @@
             </Style>
         </Style>
         <Style Selector="^.Icon">
-            <Setter Property="Padding" Value="6" />
-            <Setter Property="FontFamily" Value="{StaticResource IconFont}" />
+            <Setter Property="Padding" Value="4" />
             <Style Selector="^:disabled /template/ ContentPresenter#PART_ContentPresenter">
                 <Setter Property="Background" Value="Transparent" />
                 <Setter Property="Opacity" Value="0.5" />
@@ -135,8 +140,7 @@
     <Style Selector="ToggleButton">
         <Setter Property="Padding" Value="24,6" />
         <Style Selector="^.Icon">
-            <Setter Property="Padding" Value="6" />
-            <Setter Property="FontFamily" Value="{StaticResource IconFont}" />
+            <Setter Property="Padding" Value="4" />
             <Style Selector="^:disabled /template/ ContentPresenter#PART_ContentPresenter">
                 <Setter Property="Background" Value="Transparent" />
                 <Setter Property="Opacity" Value="0.5" />

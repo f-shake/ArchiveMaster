@@ -181,13 +181,12 @@
                         Header="多匹配">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock
+                                <ContentPresenter
                                     x:Name="e"
                                     Margin="16,0"
                                     VerticalAlignment="Center"
-                                    FontFamily="{StaticResource IconFont}"
+                                    Content="{Binding ., Converter={x:Static cvt:DirStructureSyncTypeDescriptionConverter.Instance}, ConverterParameter=Content}"
                                     Foreground="{Binding ., Converter={x:Static cvt:DirStructureSyncTypeDescriptionConverter.Instance}, ConverterParameter=Foreground}"
-                                    Text="{Binding ., Converter={x:Static cvt:DirStructureSyncTypeDescriptionConverter.Instance}, ConverterParameter=Text}"
                                     ToolTip.Tip="{Binding ., Converter={x:Static cvt:DirStructureSyncTypeDescriptionConverter.Instance}, ConverterParameter=ToolTip}" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>

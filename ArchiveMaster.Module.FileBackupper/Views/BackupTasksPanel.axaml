@@ -34,13 +34,11 @@
                         Classes="Icon"
                         Command="{Binding AddTaskCommand}"
                         Content="{StaticResource Add}"
-                        FontFamily="{StaticResource IconFont}"
                         ToolTip.Tip="新增" />
                     <Button
                         Classes="Icon"
                         Command="{Binding DeleteSelectedTaskCommand}"
                         Content="{StaticResource Delete}"
-                        FontFamily="{StaticResource IconFont}"
                         IsEnabled="{Binding SelectedTask, Converter={x:Static cvt:Converters.IsNotNull}}"
                         ToolTip.Tip="删除" />
                 </StackPanel>

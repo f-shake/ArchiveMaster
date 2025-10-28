@@ -2,8 +2,11 @@ using System.Diagnostics;
 using System.Globalization;
 using ArchiveMaster.ViewModels;
 using Avalonia.Controls;
+using Avalonia.Controls.Presenters;
 using Avalonia.Data.Converters;
 using Avalonia.Media;
+using FluentIcons.Avalonia;
+using FluentIcons.Common;
 using MatchingFileInfo = ArchiveMaster.ViewModels.FileSystem.MatchingFileInfo;
 
 namespace ArchiveMaster.Converters;
@@ -11,7 +14,7 @@ namespace ArchiveMaster.Converters;
 public class DirStructureSyncTypeDescriptionConverter : IValueConverter
 {
     public static readonly DirStructureSyncTypeDescriptionConverter Instance = new();
-    
+
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
         var data = value as MatchingFileInfo;
@@ -19,18 +22,19 @@ public class DirStructureSyncTypeDescriptionConverter : IValueConverter
         {
             return null;
         }
+
         Debug.Assert(data != null);
         switch (parameter as string)
         {
-            case nameof(TextBlock.Text):
+            case nameof(ContentPresenter.Content):
                 if (data.RightPosition)
                 {
-                    return "\ue930";
+                    return new FluentIcon{ Icon = Icon.Checkmark };
                 }
 
-                return data.MultipleMatches ? "\ue7ba" : "\ue783";
+                return data.MultipleMatches ? new FluentIcon{ Icon = Icon.Warning } : new FluentIcon{ Icon = Icon.ErrorCircle };
 
-            case nameof(TextBlock.Foreground):
+            case nameof(ContentPresenter.Foreground):
                 if (data.RightPosition)
                 {
                     return Brushes.Green;

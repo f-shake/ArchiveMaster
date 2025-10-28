@@ -3,7 +3,6 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:ctrl="using:FzLib.Avalonia.Controls">
     <ResourceDictionary.MergedDictionaries>
-        <ResourceInclude Source="FontIcons.axaml" />
         <ResourceInclude Source="Views/FileDataGridStyle.axaml" />
         <ResourceInclude Source="Views/PanelStyles.axaml" />
     </ResourceDictionary.MergedDictionaries>

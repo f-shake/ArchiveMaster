@@ -9,6 +9,7 @@
     <PackageVersion Include="Avalonia.Themes.Fluent" Version="$(AvaloniaVersion)" />
     <PackageVersion Include="DiscUtils.Iso9660" Version="0.16.13" />
     <PackageVersion Include="DocumentFormat.OpenXml" Version="3.3.0" />
+    <PackageVersion Include="FluentIcons.Avalonia" Version="1.2.313" />
     <PackageVersion Include="HtmlAgilityPack" Version="1.12.4" />
     <PackageVersion Include="Markdig" Version="0.42.0" />
     <PackageVersion Include="Microsoft.Extensions.AI" Version="9.9.1" />
