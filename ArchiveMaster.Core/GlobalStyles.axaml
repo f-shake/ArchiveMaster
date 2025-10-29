@@ -28,15 +28,6 @@
         <Setter Property="VerticalAlignment" Value="Bottom" />
     </Style>
 
-    <Style Selector="ctrl|FormItem.BoldLabel">
-        <Style Selector="^ /template/ ContentPresenter#PART_Label">
-            <Setter Property="FontWeight" Value="Bold" />
-        </Style>
-    </Style>
-
-    <!-- <Style Selector="TextBox"> -->
-    <!--     <Setter Property="b:SmoothScrollBehavior.IsEnabled" Value="{Binding Source={x:Static cfg:GlobalConfigs.Instance}, Mode=TwoWay, Path=IsSmoothScrollingEnabled}" /> -->
-    <!-- </Style> -->
     <Style Selector="ScrollViewer">
         <Setter Property="b:SmoothScrollBehavior.IsEnabled" Value="{Binding Source={x:Static cfg:GlobalConfigs.Instance}, Path=IsSmoothScrollingEnabled}" />
     </Style>
@@ -58,10 +49,6 @@
 
     <Style Selector="DataGridCell.Right">
         <Setter Property="HorizontalContentAlignment" Value="Right" />
-    </Style>
-
-    <Style Selector="ListBox">
-        <Setter Property="Background" Value="Transparent" />
     </Style>
 
     <Style Selector="CheckBox.Middle">
@@ -86,43 +73,12 @@
             <Setter Property="VerticalContentAlignment" Value="Center" />
             <Setter Property="Width" Value="120" />
         </Style>
-        <Style Selector="^.Primary">
-            <Setter Property="Background" Value="{DynamicResource Accent1}" />
-            <Setter Property="Foreground" Value="White" />
-
-            <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-                <Setter Property="Background" Value="{DynamicResource Accent2}" />
-                <Setter Property="Foreground" Value="White" />
-            </Style>
-            <Style Selector="^:pressed /template/ ContentPresenter#PART_ContentPresenter">
-                <Setter Property="Background" Value="{DynamicResource Accent3}" />
-                <Setter Property="Foreground" Value="White" />
-            </Style>
-        </Style>
         <Style Selector="^.Icon">
             <Setter Property="Padding" Value="4" />
             <Setter Property="Background" Value="Transparent" />
             <Style Selector="^:disabled /template/ ContentPresenter#PART_ContentPresenter">
                 <Setter Property="Background" Value="Transparent" />
                 <Setter Property="Opacity" Value="0.5" />
-            </Style>
-        </Style>
-        <Style Selector="^.Link">
-            <Setter Property="Background" Value="Transparent" />
-            <Setter Property="Foreground" Value="{DynamicResource Accent0}" />
-            <Setter Property="Cursor" Value="Hand" />
-            <Setter Property="Padding" Value="8,3" />
-            <Style Selector="^:disabled /template/ ContentPresenter#PART_ContentPresenter">
-                <Setter Property="Background" Value="Transparent" />
-                <Setter Property="Foreground" Value="{DynamicResource Foreground3}" />
-            </Style>
-            <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-                <Setter Property="Background" Value="Transparent" />
-                <Setter Property="Foreground" Value="{DynamicResource Foreground1}" />
-            </Style>
-            <Style Selector="^:pressed /template/ ContentPresenter#PART_ContentPresenter">
-                <Setter Property="Background" Value="Transparent" />
-                <Setter Property="Foreground" Value="{DynamicResource Foreground2}" />
             </Style>
         </Style>
         <Style Selector="^.Transparent">
@@ -148,13 +104,6 @@
                 <Setter Property="Opacity" Value="0.5" />
             </Style>
         </Style>
-        <Style Selector="^.Transparent">
-            <Setter Property="Background" Value="Transparent" />
-            <Style Selector="^:disabled /template/ ContentPresenter#PART_ContentPresenter">
-                <Setter Property="Background" Value="Transparent" />
-                <Setter Property="Foreground" Value="{DynamicResource Foreground3}" />
-            </Style>
-        </Style>
     </Style>
 
     <Style Selector="StackPanel">
@@ -171,25 +120,6 @@
 
     <Style Selector="MenuFlyoutPresenter StackPanel">
         <Setter Property="Spacing" Value="0" />
-    </Style>
-
-    <Style Selector="DropDownButton">
-        <Style Selector="^.Link">
-            <Setter Property="Background" Value="Transparent" />
-            <Setter Property="Padding" Value="8,3" />
-            <Style Selector="^:disabled /template/ ContentPresenter#PART_ContentPresenter">
-                <Setter Property="Background" Value="Transparent" />
-                <Setter Property="Foreground" Value="{DynamicResource Foreground3}" />
-            </Style>
-            <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-                <Setter Property="Background" Value="Transparent" />
-                <Setter Property="Foreground" Value="{DynamicResource Foreground1}" />
-            </Style>
-            <Style Selector="^:pressed /template/ ContentPresenter#PART_ContentPresenter">
-                <Setter Property="Background" Value="Transparent" />
-                <Setter Property="Foreground" Value="{DynamicResource Foreground2}" />
-            </Style>
-        </Style>
     </Style>
 
     <Style Selector="ctrl|RadioButtonGroup">
