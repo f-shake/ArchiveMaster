@@ -65,6 +65,11 @@ public abstract partial class MultiPresetViewModelBase<TConfig> : ViewModelBase 
     {
     }
 
+
+    protected virtual void OnCurrentConfigChanged(TConfig oldConfig, TConfig newConfig)
+    {
+    }
+
     /// <summary>
     /// 新增配置版本
     /// </summary>
@@ -158,6 +163,7 @@ public abstract partial class MultiPresetViewModelBase<TConfig> : ViewModelBase 
         if (oldConfig != Config)
         {
             OnConfigChanged();
+            OnCurrentConfigChanged(oldConfig, Config);
         }
     }
 

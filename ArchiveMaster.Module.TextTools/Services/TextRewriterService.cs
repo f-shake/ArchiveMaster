@@ -18,6 +18,7 @@ public class TextRewriterService(AppConfig appConfig)
     : AiTwoStepServiceBase<TextRewriterConfig>(appConfig)
 {
     public const int MAX_LENGTH = 300_000;
+    public const int MAX_REF_LENGTH = 10_000;
 
     public event GenericEventHandler<LlmOutputItem> TextGenerated;
 
@@ -42,7 +43,7 @@ public class TextRewriterService(AppConfig appConfig)
 
             NotifyMessage("正在调用AI进行处理");
 
-            var prompt = GetSystemPrompt(Config.Category);
+            var prompt = await GetSystemPromptAsync(Config.Category, ct);
             var ai = new LlmCallerService(AI);
             await foreach (var output in ai.CallStreamAsync(prompt, text, ct: ct))
             {
@@ -61,23 +62,42 @@ public class TextRewriterService(AppConfig appConfig)
         throw new NotImplementedException();
     }
 
-    private string GetSystemPrompt(TextGenerationCategory type)
+    private async Task<string> GetSystemPromptAsync(TextGenerationCategory type, CancellationToken ct)
     {
         var prompt =
             "你是一个文本处理机器人。";
-        prompt += type switch
+        (var attr, var e) = Config.GetCurrentAgent();
+        prompt += e switch
         {
-            TextGenerationCategory.ExpressionOptimization => GetPrompt(Config.ExpressionOptimizationType),
-            TextGenerationCategory.StructuralAdjustment => GetPrompt(Config.StructuralAdjustmentType),
-            TextGenerationCategory.ContentTransformation when Config.ContentTransformationType == ContentTransformationType.Translation
+            TextGenerationCategory.ContentTransformation when Config.ContentTransformationType ==
+                                                              ContentTransformationType.Translation
                 => $"请将文本翻译成{Config.TranslationTargetLanguage}。",
-            TextGenerationCategory.ContentTransformation => GetPrompt(Config.ContentTransformationType),
-            TextGenerationCategory.TextEvaluation => GetPrompt(Config.TextEvaluationType),
             TextGenerationCategory.Custom => string.IsNullOrWhiteSpace(Config.CustomPrompt)
                 ? throw new ArgumentNullException(nameof(Config.CustomPrompt), "请指定自定义提示。")
                 : Config.CustomPrompt,
-            _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+            _ => attr.SystemPrompt
         };
+
+        if (attr.NeedReferenceText)
+        {
+            StringBuilder referenceText = new StringBuilder();
+            await foreach (var part in Config.ReferenceSource.GetPlainTextAsync(TextSourceReadUnit.Combined, ct))
+            {
+                referenceText.Append(part.Text);
+                if (referenceText.Length > MAX_REF_LENGTH)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(Config.ReferenceSource),
+                        $"参考文本长度超过限制（{MAX_REF_LENGTH}），请缩减参考文本长度。");
+                }
+            }
+
+            if (referenceText.Length == 0)
+            {
+                throw new ArgumentException("参考文本为空");
+            }
+
+            prompt = prompt.Replace(AiAgentAttribute.ReferenceTextPlaceholder, referenceText.ToString());
+        }
 
         //处理额外提示
         if (type != TextGenerationCategory.Custom && !string.IsNullOrWhiteSpace(Config.ExtraAiPrompt))
@@ -89,15 +109,5 @@ public class TextRewriterService(AppConfig appConfig)
             "要求输出的时候，仅输出结果，不要输出其他内容。" +
             "输出格式上，要完全符合用户输入的语段，不要添加额外的内容，绝对不要输出MarkDown格式（用户输入Markdown除外）。";
         return prompt;
-    }
-
-
-    private static string GetPrompt(Enum type)
-    {
-        var field = type.GetType().GetField(type.ToString());
-        var attr = field?.GetCustomAttributes(typeof(AiPromptAttribute), false);
-        return attr is { Length: > 0 }
-            ? ((AiPromptAttribute)attr[0]).SystemPrompt
-            : throw new ArgumentException("未找到提示");
     }
 }

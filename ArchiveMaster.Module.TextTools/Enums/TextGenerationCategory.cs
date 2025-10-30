@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using ArchiveMaster.Attributes;
 
 namespace ArchiveMaster.Enums;
 
@@ -17,5 +18,5 @@ public enum TextGenerationCategory
     TextEvaluation,
 
     [Description("自定义")]
-    Custom // 自定义
+    Custom
 }

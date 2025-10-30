@@ -5,19 +5,29 @@ namespace ArchiveMaster.Enums;
 
 public enum ContentTransformationType
 {
-    [Description("翻译")]
-    [AiPrompt("请将文本翻译成指定语言。")]
+    [AiAgent("翻译",
+        "将文本翻译成指定语言",
+        "请将文本翻译成指定语言。")]
     Translation,
 
-    [Description("摘要生成")]
-    [AiPrompt("请对文本进行摘要，形成一段连续完整的话，保留原文的主要意思。")]
+    [AiAgent("摘要生成",
+        "将文本进行摘要，形成一段连续完整的话，保留原文的主要意思",
+        "请对文本进行摘要，形成一段连续完整的话，保留原文的主要意思。")]
     Summary,
-    
-    [Description("关键词提取")]
-    [AiPrompt("请提取文本中的三个关键词。")]
+
+    [AiAgent("关键词提取",
+        "提取文本中的三个关键词",
+        "请提取文本中的三个关键词。")]
     KeywordExtraction,
-    
-    [Description("标题生成")]
-    [AiPrompt("请为文本生成一个合适的标题。")]
+
+    [AiAgent("标题生成",
+        "为文本生成一个合适的标题",
+        "请为文本生成一个合适的标题。")]
     TitleGeneration,
+
+    [AiAgent("文段仿写",
+        "根据提供的参考文段，仿照其格式和内容，对文本源进行改写，形成新的文本",
+        $"请根据参考文段，对文本进行仿写。参考文段从#####开始，以$$$$$结束。\n#####\n{AiAgentAttribute.ReferenceTextPlaceholder}\n$$$$$", 
+        true)]
+    TextImitation,
 }
