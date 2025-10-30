@@ -64,20 +64,13 @@ public class TextRewriterService(AppConfig appConfig)
 
     private async Task<string> GetSystemPromptAsync(TextGenerationCategory type, CancellationToken ct)
     {
-        var prompt =
-            "你是一个文本处理机器人。";
+        var prompt = new StringBuilder();
+        prompt.AppendLine("你是一个文本处理机器人。");
         (var attr, var e) = Config.GetCurrentAgent();
-        prompt += e switch
-        {
-            TextGenerationCategory.ContentTransformation when Config.ContentTransformationType ==
-                                                              ContentTransformationType.Translation
-                => $"请将文本翻译成{Config.TranslationTargetLanguage}。",
-            TextGenerationCategory.Custom => string.IsNullOrWhiteSpace(Config.CustomPrompt)
-                ? throw new ArgumentNullException(nameof(Config.CustomPrompt), "请指定自定义提示。")
-                : Config.CustomPrompt,
-            _ => attr.SystemPrompt
-        };
 
+        var tempPrompt = attr.SystemPrompt;
+
+        //处理参考文本（如仿写中的参考文本）
         if (attr.NeedReferenceText)
         {
             StringBuilder referenceText = new StringBuilder();
@@ -96,18 +89,31 @@ public class TextRewriterService(AppConfig appConfig)
                 throw new ArgumentException("参考文本为空");
             }
 
-            prompt = prompt.Replace(AiAgentAttribute.ReferenceTextPlaceholder, referenceText.ToString());
+            tempPrompt = tempPrompt.Replace(AiAgentAttribute.ReferenceTextPlaceholder, referenceText.ToString());
         }
+
+        //处理额外信息（如翻译中的目标语言）
+        if (attr.NeedExtraInformation)
+        {
+            if (string.IsNullOrWhiteSpace(Config.ExtraInformation))
+            {
+                throw new ArgumentNullException(nameof(Config.ExtraInformation), $"请指定{attr.ExtraInformationLabel}");
+            }
+
+            tempPrompt = tempPrompt.Replace(AiAgentAttribute.ExtraInformationPlaceholder, Config.ExtraInformation);
+        }
+
+        prompt.AppendLine(tempPrompt);
 
         //处理额外提示
         if (type != TextGenerationCategory.Custom && !string.IsNullOrWhiteSpace(Config.ExtraAiPrompt))
         {
-            prompt += $"{Environment.NewLine}用户的额外要求：{Config.ExtraAiPrompt}";
+            prompt.AppendLine($"用户的额外要求：{Config.ExtraAiPrompt}");
         }
 
-        prompt +=
-            "要求输出的时候，仅输出结果，不要输出其他内容。" +
-            "输出格式上，要完全符合用户输入的语段，不要添加额外的内容，绝对不要输出MarkDown格式（用户输入Markdown除外）。";
-        return prompt;
+
+        prompt.AppendLine("要求输出的时候，仅输出结果，不要输出其他内容。");
+        prompt.AppendLine("输出格式上，要完全符合用户输入的语段，不要添加额外的内容，绝对不要输出MarkDown格式（用户输入Markdown除外）。");
+        return prompt.ToString();
     }
 }

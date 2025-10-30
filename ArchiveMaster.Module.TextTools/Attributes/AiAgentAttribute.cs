@@ -4,17 +4,22 @@
 public class AiAgentAttribute(
     string name,
     string description,
-    string systemPrompt,
-    bool needReferenceText = false)
+    string systemPrompt)
     : Attribute
 {
     public const string ReferenceTextPlaceholder = "{ref}";
+    
+    public const string ExtraInformationPlaceholder = "{info}";
 
-    public string Description { get; } = description;
+    public string Description { get; init; } = description;
 
-    public string Name { get; } = name;
+    public string Name { get; init; } = name;
 
-    public bool NeedReferenceText { get; } = needReferenceText;
+    public bool NeedReferenceText { get; init; }
 
-    public string SystemPrompt { get; } = systemPrompt;
+    public bool NeedExtraInformation { get; init; }
+
+    public string ExtraInformationLabel { get; init; }
+
+    public string SystemPrompt { get; init; } = systemPrompt;
 }

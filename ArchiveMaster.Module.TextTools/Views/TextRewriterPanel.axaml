@@ -31,7 +31,7 @@
             </ct:FormItem>
 
             <ct:FormItem
-                Description="{Binding ModeDescription}"
+                Description="{Binding Config.CurrentMode, Converter={StaticResource AiAgentConverter}, ConverterParameter=Description}"
                 Label="类型：">
                 <WrapPanel
                     ItemSpacing="8"
@@ -41,22 +41,22 @@
                         ItemsSource="{me:EnumValues e:TextGenerationCategory}"
                         SelectedItem="{Binding Config.Category}" />
                     <ct:RadioButtonGroup
-                        DisplayMemberBinding="{Binding ., Converter={StaticResource AiAgentConverter}}"
+                        DisplayMemberBinding="{Binding ., Converter={StaticResource AiAgentConverter}, ConverterParameter=Name}"
                         IsVisible="{Binding Config.Category, Converter={x:Static cvt:Converters.EqualWithParameter}, ConverterParameter=ExpressionOptimization}"
                         ItemsSource="{me:EnumValues e:ExpressionOptimizationType}"
                         SelectedItem="{Binding Config.ExpressionOptimizationType}" />
                     <ct:RadioButtonGroup
-                        DisplayMemberBinding="{Binding ., Converter={StaticResource AiAgentConverter}}"
+                        DisplayMemberBinding="{Binding ., Converter={StaticResource AiAgentConverter}, ConverterParameter=Name}"
                         IsVisible="{Binding Config.Category, Converter={x:Static cvt:Converters.EqualWithParameter}, ConverterParameter=StructuralAdjustment}"
                         ItemsSource="{me:EnumValues e:StructuralAdjustmentType}"
                         SelectedItem="{Binding Config.StructuralAdjustmentType}" />
                     <ct:RadioButtonGroup
-                        DisplayMemberBinding="{Binding ., Converter={StaticResource AiAgentConverter}}"
+                        DisplayMemberBinding="{Binding ., Converter={StaticResource AiAgentConverter}, ConverterParameter=Name}"
                         IsVisible="{Binding Config.Category, Converter={x:Static cvt:Converters.EqualWithParameter}, ConverterParameter=ContentTransformation}"
                         ItemsSource="{me:EnumValues e:ContentTransformationType}"
                         SelectedItem="{Binding Config.ContentTransformationType}" />
                     <ct:RadioButtonGroup
-                        DisplayMemberBinding="{Binding ., Converter={StaticResource AiAgentConverter}}"
+                        DisplayMemberBinding="{Binding ., Converter={StaticResource AiAgentConverter}, ConverterParameter=Name}"
                         IsVisible="{Binding Config.Category, Converter={x:Static cvt:Converters.EqualWithParameter}, ConverterParameter=TextEvaluation}"
                         ItemsSource="{me:EnumValues e:TextEvaluationType}"
                         SelectedItem="{Binding Config.TextEvaluationType}" />
@@ -72,49 +72,15 @@
                         IsVisible="{Binding Config.Category, Converter={x:Static cvt:Converters.NotEqualWithParameter}, ConverterParameter=Custom}">
                         <TextBox Text="{Binding Config.ExtraAiPrompt}" />
                     </ct:FormItem>
-                    <ct:FormItem
-                        Header="自定义提示词"
-                        IsVisible="{Binding Config.Category, Converter={x:Static cvt:Converters.EqualWithParameter}, ConverterParameter=Custom}">
-                        <TextBox Text="{Binding Config.CustomPrompt}" />
-                    </ct:FormItem>
-                    <ct:FormItem Header="翻译目标语言">
-                        <ct:FormItem.IsVisible>
-                            <MultiBinding Converter="{x:Static cvt:Converters.AndLogic}">
-                                <Binding
-                                    Converter="{x:Static cvt:Converters.EqualWithParameter}"
-                                    ConverterParameter="ContentTransformation"
-                                    Path="Config.Category" />
-                                <Binding
-                                    Converter="{x:Static cvt:Converters.EqualWithParameter}"
-                                    ConverterParameter="Translation"
-                                    Path="Config.ContentTransformationType" />
-                            </MultiBinding>
-                        </ct:FormItem.IsVisible>
-                        <AutoCompleteBox Text="{Binding Config.TranslationTargetLanguage}">
-                            <AutoCompleteBox.ItemsSource>
-                                <collections:ArrayList>
-                                    <sys:String>中文</sys:String>
-                                    <sys:String>英文</sys:String>
-                                    <sys:String>日文</sys:String>
-                                    <sys:String>韩文</sys:String>
-                                </collections:ArrayList>
-                            </AutoCompleteBox.ItemsSource>
-                        </AutoCompleteBox>
-                    </ct:FormItem>
 
-                    <ct:FormItem Header="参考文本源">
-                        <ct:FormItem.IsVisible>
-                            <MultiBinding Converter="{x:Static cvt:Converters.AndLogic}">
-                                <Binding
-                                    Converter="{x:Static cvt:Converters.EqualWithParameter}"
-                                    ConverterParameter="ContentTransformation"
-                                    Path="Config.Category" />
-                                <Binding
-                                    Converter="{x:Static cvt:Converters.EqualWithParameter}"
-                                    ConverterParameter="TextImitation"
-                                    Path="Config.ContentTransformationType" />
-                            </MultiBinding>
-                        </ct:FormItem.IsVisible>
+                    <ct:FormItem
+                        Header="{Binding Config.CurrentMode, Converter={StaticResource AiAgentConverter}, ConverterParameter=ExtraInformationLabel}"
+                        IsVisible="{Binding Config.CurrentMode, Converter={StaticResource AiAgentConverter}, ConverterParameter=NeedExtraInformation}">
+                        <TextBox Text="{Binding Config.ExtraInformation}" />
+                    </ct:FormItem>
+                    <ct:FormItem
+                        Header="参考文本源"
+                        IsVisible="{Binding Config.CurrentMode, Converter={StaticResource AiAgentConverter}, ConverterParameter=NeedReferenceText}">
                         <v:TextSourceInput Source="{Binding Config.ReferenceSource}" />
                     </ct:FormItem>
                 </UniformGrid>

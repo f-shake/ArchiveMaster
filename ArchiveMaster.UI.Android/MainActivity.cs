@@ -23,7 +23,6 @@ using static Android.Views.View;
 using Environment = Android.OS.Environment;
 using Uri = Android.Net.Uri;
 using ArchiveMaster.Views;
-using NPOI.OpenXml4Net.OPC.Internal;
 using FileHelper = ArchiveMaster.Helpers.FileHelper;
 
 namespace ArchiveMaster.UI.Android;

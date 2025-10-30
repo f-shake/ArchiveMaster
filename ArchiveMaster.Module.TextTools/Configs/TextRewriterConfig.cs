@@ -8,15 +8,15 @@ namespace ArchiveMaster.Configs;
 
 public partial class TextRewriterConfig : ConfigBase
 {
+    [NotifyPropertyChangedFor(nameof(CurrentMode))]
     [ObservableProperty]
     private TextGenerationCategory category;
 
+    [NotifyPropertyChangedFor(nameof(CurrentMode))]
     [ObservableProperty]
     private ContentTransformationType contentTransformationType;
 
-    [ObservableProperty]
-    private string customPrompt;
-
+    [NotifyPropertyChangedFor(nameof(CurrentMode))]
     [ObservableProperty]
     private ExpressionOptimizationType expressionOptimizationType;
 
@@ -28,34 +28,43 @@ public partial class TextRewriterConfig : ConfigBase
 
     [ObservableProperty]
     private TextSource source = new TextSource();
- 
+
+    [NotifyPropertyChangedFor(nameof(CurrentMode))]
     [ObservableProperty]
     private StructuralAdjustmentType structuralAdjustmentType;
 
+    [NotifyPropertyChangedFor(nameof(CurrentMode))]
     [ObservableProperty]
     private TextEvaluationType textEvaluationType;
+    
+    [NotifyPropertyChangedFor(nameof(CurrentMode))]
+    [ObservableProperty]
+    private CustomType customType;
+
+    public Enum CurrentMode => GetCurrentAgent().Item;
 
     [ObservableProperty]
-    private string translationTargetLanguage;
+    private string extraInformation;
+
     public event EventHandler ModeChanged;
 
     public override void Check()
     {
-        switch (Category)
-        {
-            case TextGenerationCategory.Custom:
-                CheckEmpty(CustomPrompt, "自定义提示");
-                break;
-            case TextGenerationCategory.ContentTransformation
-                when ContentTransformationType == ContentTransformationType.Translation:
-                CheckEmpty(TranslationTargetLanguage, "翻译目标语言");
-                break;
-            default:
-                break;
-        }
+        // switch (Category)
+        // {
+        //     case TextGenerationCategory.Custom:
+        //         CheckEmpty(CustomPrompt, "自定义提示");
+        //         break;
+        //     case TextGenerationCategory.ContentTransformation
+        //         when ContentTransformationType == ContentTransformationType.Translation:
+        //         CheckEmpty(TranslationTargetLanguage, "翻译目标语言");
+        //         break;
+        //     default:
+        //         break;
+        // }
     }
 
-    public (AiAgentAttribute Attribute, Enum) GetCurrentAgent()
+    public (AiAgentAttribute Attribute, Enum Item) GetCurrentAgent()
     {
         Enum item = Category switch
         {
@@ -63,16 +72,9 @@ public partial class TextRewriterConfig : ConfigBase
             TextGenerationCategory.StructuralAdjustment => StructuralAdjustmentType,
             TextGenerationCategory.ContentTransformation => ContentTransformationType,
             TextGenerationCategory.TextEvaluation => TextEvaluationType,
-            TextGenerationCategory.Custom => TextGenerationCategory.Custom,
+            TextGenerationCategory.Custom => CustomType,
             _ => throw new ArgumentOutOfRangeException()
         };
-        if (TextGenerationCategory.Custom.Equals(item))
-        {
-            return (
-                new AiAgentAttribute("自定义", "自定义提示", CustomPrompt),
-                TextGenerationCategory.Custom);
-        }
-
         return (GetAiPrompt(item), item);
     }
 
@@ -88,6 +90,7 @@ public partial class TextRewriterConfig : ConfigBase
             ModeChanged?.Invoke(this, EventArgs.Empty);
         }
     }
+
     private static AiAgentAttribute GetAiPrompt(Enum type)
     {
         var field = type.GetType().GetField(type.ToString());

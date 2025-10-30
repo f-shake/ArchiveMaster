@@ -7,7 +7,9 @@ public enum ContentTransformationType
 {
     [AiAgent("翻译",
         "将文本翻译成指定语言",
-        "请将文本翻译成指定语言。")]
+        $"请将文本翻译成{AiAgentAttribute.ExtraInformationPlaceholder}",
+        NeedExtraInformation = true,
+        ExtraInformationLabel = "目标语言")]
     Translation,
 
     [AiAgent("摘要生成",
@@ -27,7 +29,7 @@ public enum ContentTransformationType
 
     [AiAgent("文段仿写",
         "根据提供的参考文段，仿照其格式和内容，对文本源进行改写，形成新的文本",
-        $"请根据参考文段，对文本进行仿写。参考文段从#####开始，以$$$$$结束。\n#####\n{AiAgentAttribute.ReferenceTextPlaceholder}\n$$$$$", 
-        true)]
+        $"请根据参考文段，对文本进行仿写。参考文段从#####开始，以$$$$$结束。\n#####\n{AiAgentAttribute.ReferenceTextPlaceholder}\n$$$$$",
+        NeedReferenceText = true)]
     TextImitation,
 }
