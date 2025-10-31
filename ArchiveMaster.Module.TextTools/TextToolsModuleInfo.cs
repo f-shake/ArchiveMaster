@@ -26,6 +26,7 @@ namespace ArchiveMaster
             new ConfigMetadata(typeof(SmartDocSearchConfig)),
             new ConfigMetadata(typeof(TypoCheckerConfig)),
             new ConfigMetadata(typeof(AiProvidersConfig)),
+            new ConfigMetadata(typeof(EncodingConverterConfig)),
         ];
 
         public string ModuleName => "文本工具";
@@ -44,6 +45,7 @@ namespace ArchiveMaster
             typeof(TextEncryptionService),
             typeof(TypoCheckerService),
             typeof(TextRewriterService),
+            typeof(EncodingConverterService),
         ];
 
         public ToolPanelGroupInfo Views => new ToolPanelGroupInfo()
@@ -58,6 +60,8 @@ namespace ArchiveMaster
                     "从多个文档中搜索关键词，并通过AI进行总结归纳", baseUrl + "docSearch.svg"),
                 new ToolPanelInfo(typeof(TypoCheckerPanel), typeof(TypoCheckerViewModel), "错别字检查",
                     "使用AI检查文本是否存在错别字", baseUrl + "typo.svg"),
+                new ToolPanelInfo(typeof(EncodingConverterPanel), typeof(EncodingConverterViewModel), "编码识别与转换",
+                    "识别文本文件的编码，并可以转换为指定编码", baseUrl + "encoding.svg"),
                 new ToolPanelInfo(typeof(AiProvidersPanel), typeof(AiProvidersViewModel), "AI服务提供商",
                     "配置AI服务提供商", baseUrl + "ai.svg"),
             },

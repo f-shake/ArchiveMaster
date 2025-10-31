@@ -26,11 +26,6 @@
                         <StackPanel
                             Orientation="Horizontal"
                             Spacing="8">
-                            <!--  <Button  -->
-                            <!--  Classes="Link"  -->
-                            <!--  Command="{Binding $parent[TabItem].DataContext.SaveAsCommand}"  -->
-                            <!--  CommandParameter="{Binding .}"  -->
-                            <!--  Content="另存为" />  -->
                             <DropDownButton
                                 Classes="Link"
                                 Content="操作">

@@ -30,6 +30,10 @@
       <DependentUpon>TextRewriterPanel.axaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Views\EncodingConverterPanel.axaml.cs">
+      <DependentUpon>EncodingConverterPanel.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>

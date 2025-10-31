@@ -1,0 +1,91 @@
+<v:TwoStepPanelBase
+    x:Class="ArchiveMaster.Views.EncodingConverterPanel"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:b="using:ArchiveMaster.Behaviors"
+    xmlns:cfg="clr-namespace:ArchiveMaster.Configs;assembly=ArchiveMaster.Core"
+    xmlns:ct="using:FzLib.Avalonia.Controls"
+    xmlns:cvt="clr-namespace:ArchiveMaster.Converters;assembly=ArchiveMaster.Core"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:fzb="clr-namespace:FzLib.Avalonia.Behaviors;assembly=FzLib.Avalonia"
+    xmlns:gb="using:GroupBox.Avalonia.Controls"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:v="using:ArchiveMaster.Views"
+    xmlns:vm="using:ArchiveMaster.ViewModels"
+    x:Name="root"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    x:DataType="vm:SmartDocSearchViewModel"
+    ExecuteButtonContent="转换"
+    InitializeButtonContent="识别"
+    mc:Ignorable="d">
+    <v:TwoStepPanelBase.ConfigsContent>
+        <ct:StackFormItemGroup>
+            <ct:FormItem Label="目录：">
+                <v:FilePickerTextBox
+                    FileNames="{Binding Config.Dir}"
+                    Filter="{Binding Config.Filter}"
+                    IsFilterBarVisible="True"
+                    Type="OpenFolder" />
+            </ct:FormItem>
+
+            <ct:FormItem Label="目标编码：">
+                <DockPanel HorizontalSpacing="8">
+                    <CheckBox
+                        Content="BOM（若支持）"
+                        DockPanel.Dock="Right"
+                        IsChecked="{Binding Config.WithBom}"
+                        IsThreeState="True" />
+                    <AutoCompleteBox
+                        ItemsSource="{Binding EncodingNames}"
+                        Text="{Binding Config.TargetEncoding}" />
+                </DockPanel>
+            </ct:FormItem>
+        </ct:StackFormItemGroup>
+    </v:TwoStepPanelBase.ConfigsContent>
+
+    <v:TwoStepPanelBase.ResultsContent>
+        <v:SimpleFileDataGrid
+            ColumnLengthIndex="3.2"
+            ColumnPathIndex="3.1"
+            ColumnTimeIndex="3.3"
+            ItemsSource="{Binding Files}">
+            <DataGrid.Columns>
+                <DataGridTextColumn
+                    Binding="{Binding Encoding.Encoding.EncodingName}"
+                    Header="最佳编码"
+                    IsReadOnly="True" />
+                <DataGridTemplateColumn
+                    CanUserResize="False"
+                    Header="BOM"
+                    SortMemberPath="Encoding.HasBOM">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Ellipse
+                                Width="8"
+                                Height="8"
+                                Fill="{DynamicResource Foreground0}"
+                                IsVisible="{Binding Encoding.HasBOM}" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTextColumn
+                    Binding="{Binding Encoding.Confidence, StringFormat={}{0:P0}}"
+                    Header="置信度"
+                    IsReadOnly="True" />
+                <DataGridTemplateColumn>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button
+                                Classes="Link"
+                                Command="{Binding #root.DataContext.TestEncodingCommand}"
+                                CommandParameter="{Binding .}"
+                                Content="测试"
+                                IsVisible="{Binding Encoding, Converter={x:Static cvt:Converters.IsNotNull}}" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </v:SimpleFileDataGrid>
+    </v:TwoStepPanelBase.ResultsContent>
+</v:TwoStepPanelBase>
