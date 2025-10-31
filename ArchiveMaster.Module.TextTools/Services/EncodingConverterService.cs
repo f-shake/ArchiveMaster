@@ -15,6 +15,7 @@ using ArchiveMaster.Models;
 using ArchiveMaster.ViewModels;
 using ArchiveMaster.ViewModels.FileSystem;
 using Markdig;
+using Serilog;
 using UtfUnknown;
 
 namespace ArchiveMaster.Services
@@ -25,9 +26,50 @@ namespace ArchiveMaster.Services
         private bool targetBom;
         private Encoding targetEncoding;
         public List<EncodingFileInfo> Files { get; private set; }
+
         public override async Task ExecuteAsync(CancellationToken ct)
         {
-            await Task.Run(async () => { }, ct);
+            await Task.Run(() =>
+            {
+                return TryForFilesAsync(Files, async (file, s) =>
+                {
+                    var tempFile = Path.Combine(Path.GetDirectoryName(file.Path), Guid.NewGuid().ToString());
+                    var backupFile = $"{file.Path}.{DateTime.Now:yyyyMMddHHmmss}.bak";
+                    int bufferLength = 1000;
+                    char[] buffer = new char[bufferLength];
+                    try
+                    {
+                        await using (var fsWrite = new StreamWriter(tempFile, false, targetEncoding))
+                        {
+                            using (var fsRead = new StreamReader(file.Path, file.Encoding.Encoding))
+                            {
+                                int readLength;
+                                while ((readLength = await fsRead.ReadAsync(buffer, 0, bufferLength)) > 0)
+                                {
+                                    ct.ThrowIfCancellationRequested();
+                                    await fsWrite.WriteAsync(buffer, 0, readLength);
+                                }
+                            }
+                        }
+
+                        File.Replace(tempFile, file.Path, backupFile);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        if (File.Exists(tempFile))
+                        {
+                            try
+                            {
+                                File.Delete(tempFile);
+                            }
+                            catch (Exception ex)
+                            {
+                                Log.Error(ex, "删除文件失败");
+                            }
+                        }
+                    }
+                }, ct, FilesLoopOptions.Builder().AutoApplyFileLengthProgress().Build());
+            }, ct);
         }
 
         public override IEnumerable<SimpleFileInfo> GetInitializedFiles()
@@ -66,15 +108,23 @@ namespace ArchiveMaster.Services
                     {
                         file.Encoding = result.Detected;
                         file.Details = result.Details;
-                        if (targetEncoding.WebName == result.Detected.Encoding.WebName) //编码相同
+                        if (result.Detected.EncodingName == "ascii")
                         {
-                            //编码名相同，看是指定BOM，期望的BOM和实际的BOM是否一致
-                            file.IsChecked = Config.WithBom.HasValue && targetBom != result.Detected.HasBOM;
+                            //大部分编码向后兼容ASCII
+                            file.IsChecked = false;
                         }
                         else
                         {
-                            //编码名不同，肯定要转换
-                            file.IsChecked = true;
+                            if (targetEncoding.WebName == result.Detected.Encoding.WebName) //编码相同
+                            {
+                                //编码名相同，看是指定BOM，期望的BOM和实际的BOM是否一致
+                                file.IsChecked = Config.WithBom.HasValue && targetBom != result.Detected.HasBOM;
+                            }
+                            else
+                            {
+                                //编码名不同，肯定要转换
+                                file.IsChecked = true;
+                            }
                         }
                     }
                     else
