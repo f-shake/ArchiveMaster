@@ -23,12 +23,22 @@ public partial class EncodingConverterViewModel(ViewModelServices services)
     [ObservableProperty]
     private ObservableCollection<EncodingFileInfo> files;
 
-    public List<string> EncodingNames { get; } = Encoding.GetEncodings().Select(p => p.Name).ToList();
+    [ObservableProperty]
+    private ObservableCollection<EncodingFilesGroup> groups;
 
+    public List<string> EncodingNames { get; } = Encoding.GetEncodings().Select(p => p.Name).ToList();
     protected override Task OnInitializedAsync()
     {
         Files = new ObservableCollection<EncodingFileInfo>(Service.Files);
+        var groups = Files.GroupBy(p => p.Encoding.Encoding)
+            .Select(p => new EncodingFilesGroup(p.Key, p));
+        Groups = new ObservableCollection<EncodingFilesGroup>(groups);
         return base.OnInitializedAsync();
+    }
+
+    protected override void OnReset()
+    {
+        Files = null;
     }
 
     [RelayCommand]
@@ -41,7 +51,7 @@ public partial class EncodingConverterViewModel(ViewModelServices services)
 
         int bufferLength = 1000;
         int maxLength = 10_000;
-        int readLength ;
+        int readLength;
         char[] buffer = new char[bufferLength];
         StringBuilder str = new StringBuilder(maxLength + 100);
         bool notEnd = false;
@@ -75,10 +85,5 @@ public partial class EncodingConverterViewModel(ViewModelServices services)
                 notEnd ? "文件较大，仅读取前10000个字符，展开详情查看" : "展开详情查看",
                 str.ToString());
         }
-    }
-
-    protected override void OnReset()
-    {
-        Files = null;
     }
 }

@@ -44,11 +44,12 @@
         </ct:StackFormItemGroup>
     </v:TwoStepPanelBase.ConfigsContent>
 
+
     <v:TwoStepPanelBase.ResultsContent>
         <v:SimpleFileDataGrid
-            ColumnLengthIndex="3.2"
-            ColumnPathIndex="3.1"
-            ColumnTimeIndex="3.3"
+            ColumnLengthIndex="4.2"
+            ColumnPathIndex="4.1"
+            ColumnTimeIndex="4.3"
             ItemsSource="{Binding Files}">
             <DataGrid.Columns>
                 <DataGridTextColumn
@@ -86,6 +87,24 @@
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
             </DataGrid.Columns>
+
+            <v:SimpleFileDataGrid.Footer>
+                <DropDownButton Content="按编码筛选">
+                    <DropDownButton.Flyout>
+                        <Flyout>
+                            <ItemsControl ItemsSource="{Binding Groups}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:EncodingFilesGroup">
+                                        <CheckBox
+                                            Content="{Binding Encoding.EncodingName}"
+                                            IsChecked="{Binding IsChecked}" />
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </Flyout>
+                    </DropDownButton.Flyout>
+                </DropDownButton>
+            </v:SimpleFileDataGrid.Footer>
         </v:SimpleFileDataGrid>
     </v:TwoStepPanelBase.ResultsContent>
 </v:TwoStepPanelBase>
