@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.Text.Json.Serialization;
 using ArchiveMaster.Attributes;
 using ArchiveMaster.Enums;
 using ArchiveMaster.ViewModels;
@@ -18,13 +19,23 @@ public partial class TextRewriterConfig : ConfigBase
 
     [NotifyPropertyChangedFor(nameof(CurrentMode))]
     [ObservableProperty]
+    private CustomType customType;
+
+    [NotifyPropertyChangedFor(nameof(CurrentMode))]
+    [ObservableProperty]
     private ExpressionOptimizationType expressionOptimizationType;
 
+    [property: JsonIgnore]
     [ObservableProperty]
     private string extraAiPrompt;
 
+    [property: JsonIgnore]
     [ObservableProperty]
-    private TextSource referenceSource = new TextSource();
+    private string extraInformation;
+
+    [property: JsonIgnore]
+    [ObservableProperty]
+    private TextSource referenceSource = new TextSource() { FromFile = false };
 
     [ObservableProperty]
     private TextSource source = new TextSource();
@@ -36,32 +47,28 @@ public partial class TextRewriterConfig : ConfigBase
     [NotifyPropertyChangedFor(nameof(CurrentMode))]
     [ObservableProperty]
     private TextEvaluationType textEvaluationType;
-    
-    [NotifyPropertyChangedFor(nameof(CurrentMode))]
-    [ObservableProperty]
-    private CustomType customType;
-
-    public Enum CurrentMode => GetCurrentAgent().Item;
-
-    [ObservableProperty]
-    private string extraInformation;
 
     public event EventHandler ModeChanged;
 
+    public Enum CurrentMode => GetCurrentAgent().Item;
+
     public override void Check()
     {
-        // switch (Category)
-        // {
-        //     case TextGenerationCategory.Custom:
-        //         CheckEmpty(CustomPrompt, "自定义提示");
-        //         break;
-        //     case TextGenerationCategory.ContentTransformation
-        //         when ContentTransformationType == ContentTransformationType.Translation:
-        //         CheckEmpty(TranslationTargetLanguage, "翻译目标语言");
-        //         break;
-        //     default:
-        //         break;
-        // }
+        if (Source.IsEmpty())
+        {
+            throw new ArgumentException("文本源为空");
+        }
+
+        var current = GetCurrentAgent();
+        if (current.Attribute.NeedExtraInformation)
+        {
+            CheckEmpty(ExtraInformation, current.Attribute.ExtraInformationLabel);
+        }
+
+        if (current.Attribute.NeedReferenceText && ReferenceSource.IsEmpty())
+        {
+            throw new ArgumentException("参考文本为空");
+        }
     }
 
     public (AiAgentAttribute Attribute, Enum Item) GetCurrentAgent()

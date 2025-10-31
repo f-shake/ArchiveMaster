@@ -29,7 +29,7 @@ public partial class
         base.OnEnter();
         if (!OperatingSystem.IsWindows())
         {
-            await Services.Dialog.ShowErrorDialogAsync("��֧�ֵĲ���ϵͳ", "�ù���Ŀǰ��֧��Windowsϵͳ");
+            await Services.Dialog.ShowErrorDialogAsync("无法运行该工具", "该工具依赖Windows的API，当前系统不支持运行");
             Exit();
         }
     }

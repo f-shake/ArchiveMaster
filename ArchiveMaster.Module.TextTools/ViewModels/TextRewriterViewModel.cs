@@ -20,35 +20,12 @@ public partial class TextRewriterViewModel(ViewModelServices services)
     : AiTwoStepViewModelBase<TextRewriterService, TextRewriterConfig>(services)
 {
     [ObservableProperty]
-    private string modeDescription;
-
-    [ObservableProperty]
     private string result = "";
 
     public override bool EnableInitialize => false;
 
     public override bool EnableRepeatExecute => true;
-
-    protected override void OnCurrentConfigChanged(TextRewriterConfig oldConfig, TextRewriterConfig newConfig)
-    {
-        if (oldConfig != null)
-        {
-            oldConfig.ModeChanged -= NewConfigOnModeChanged;
-        }
-
-        if (newConfig != null)
-        {
-            newConfig.ModeChanged += NewConfigOnModeChanged;
-        }
-
-        NewConfigOnModeChanged(this, EventArgs.Empty);
-
-        void NewConfigOnModeChanged(object sender, EventArgs e)
-        {
-            ModeDescription = Config.GetCurrentAgent().Attribute.Description;
-        }
-    }
-
+    
     protected override Task OnExecutedAsync(CancellationToken ct)
     {
         Result = LlmCallerService.RemoveThink(Result);

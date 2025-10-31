@@ -10,6 +10,7 @@ using ArchiveMaster.ViewModels;
 using ArchiveMaster.ViewModels.FileSystem;
 using DocumentFormat.OpenXml.Bibliography;
 using DocumentFormat.OpenXml.InkML;
+using FzLib.Collections;
 using Microsoft.Extensions.AI;
 
 namespace ArchiveMaster.Services;
@@ -28,18 +29,10 @@ public class TextRewriterService(AppConfig appConfig)
 
         await Task.Run(async () =>
         {
-            string text = null;
             NotifyMessage("正在读取文本源");
-            await foreach (var part in Config.Source.GetPlainTextAsync(TextSourceReadUnit.Combined, ct))
-            {
-                //肯定只有一个
-                text = part.Text;
-            }
-
-            if (string.IsNullOrWhiteSpace(text))
-            {
-                throw new ArgumentException("文本源为空");
-            }
+            string text = (await Config.Source.GetPlainTextAsync(TextSourceReadUnit.Combined, ct)
+                .FirstOrDefaultAsync()).Text;
+            CheckTextSource(text, MAX_LENGTH, "文本源");
 
             NotifyMessage("正在调用AI进行处理");
 
@@ -62,6 +55,19 @@ public class TextRewriterService(AppConfig appConfig)
         throw new NotImplementedException();
     }
 
+    private void CheckTextSource(string text, int maxLength, string name)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            throw new ArgumentException($"{name}为空");
+        }
+
+        if (text.Length > maxLength)
+        {
+            throw new ArgumentOutOfRangeException(nameof(Config.Source),
+                $"{name}长度超过限制（{maxLength}），请缩减文本源长度。");
+        }
+    }
     private async Task<string> GetSystemPromptAsync(TextGenerationCategory type, CancellationToken ct)
     {
         var prompt = new StringBuilder();
@@ -73,23 +79,10 @@ public class TextRewriterService(AppConfig appConfig)
         //处理参考文本（如仿写中的参考文本）
         if (attr.NeedReferenceText)
         {
-            StringBuilder referenceText = new StringBuilder();
-            await foreach (var part in Config.ReferenceSource.GetPlainTextAsync(TextSourceReadUnit.Combined, ct))
-            {
-                referenceText.Append(part.Text);
-                if (referenceText.Length > MAX_REF_LENGTH)
-                {
-                    throw new ArgumentOutOfRangeException(nameof(Config.ReferenceSource),
-                        $"参考文本长度超过限制（{MAX_REF_LENGTH}），请缩减参考文本长度。");
-                }
-            }
-
-            if (referenceText.Length == 0)
-            {
-                throw new ArgumentException("参考文本为空");
-            }
-
-            tempPrompt = tempPrompt.Replace(AiAgentAttribute.ReferenceTextPlaceholder, referenceText.ToString());
+            string referenceText = (await Config.ReferenceSource.GetPlainTextAsync(TextSourceReadUnit.Combined, ct)
+                .FirstOrDefaultAsync()).Text;
+            CheckTextSource(referenceText, MAX_REF_LENGTH, "参考文本");
+            tempPrompt = tempPrompt.Replace(AiAgentAttribute.ReferenceTextPlaceholder, referenceText);
         }
 
         //处理额外信息（如翻译中的目标语言）
@@ -111,7 +104,7 @@ public class TextRewriterService(AppConfig appConfig)
             prompt.AppendLine($"用户的额外要求：{Config.ExtraAiPrompt}");
         }
 
-
+        //增加其他要求
         prompt.AppendLine("要求输出的时候，仅输出结果，不要输出其他内容。");
         prompt.AppendLine("输出格式上，要完全符合用户输入的语段，不要添加额外的内容，绝对不要输出MarkDown格式（用户输入Markdown除外）。");
         return prompt.ToString();

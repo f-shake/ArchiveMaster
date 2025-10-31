@@ -10,11 +10,15 @@ public partial class TypoCheckerConfig : ConfigBase
 
     [ObservableProperty]
     private int minSegmentLength = 200;
-    
+
     [ObservableProperty]
     private string extraAiPrompt;
-    
+
     public override void Check()
     {
+        if (Source.IsEmpty())
+        {
+            throw new ArgumentException("文本源为空");
+        }
     }
 }
