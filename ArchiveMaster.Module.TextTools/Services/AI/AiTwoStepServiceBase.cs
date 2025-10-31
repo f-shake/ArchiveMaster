@@ -3,7 +3,7 @@
 namespace ArchiveMaster.Services;
 
 public abstract class AiTwoStepServiceBase<TConfig>(AppConfig appConfig)
-    : TwoStepServiceBase<TConfig>(appConfig) 
+    : TwoStepServiceBase<TConfig>(appConfig)
     where TConfig : ConfigBase
 {
     protected AppConfig AppConfig { get; } = appConfig;

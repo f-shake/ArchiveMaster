@@ -21,12 +21,11 @@ namespace ArchiveMaster.ViewModels
         [ObservableProperty]
         private ObservableCollection<BackupTask> tasks;
 
-        public BackupTasksViewModel(AppConfig appConfig, BackupService backupService, IDialogService dialogService) :
-            base(dialogService)
+        public BackupTasksViewModel(ViewModelServices services, BackupService backupService) :
+            base(services)
         {
             this.backupService = backupService;
-            Config = appConfig.GetOrCreateConfigWithDefaultKey<FileBackupperConfig>();
-            AppConfig = appConfig;
+            Config = services.AppConfig.GetOrCreateConfigWithDefaultKey<FileBackupperConfig>();
 #if DEBUG
             if (Config.Tasks.Count == 0)
             {
@@ -38,11 +37,9 @@ namespace ArchiveMaster.ViewModels
                 });
             }
 
-            appConfig.Save();
+            services.AppConfig.Save();
 #endif
         }
-
-        public AppConfig AppConfig { get; }
 
         public FileBackupperConfig Config { get; }
 
@@ -53,7 +50,7 @@ namespace ArchiveMaster.ViewModels
             while (backupService.IsBackingUp)
             {
                 var result =
-                    await DialogService.ShowErrorDialogAsync("正在备份", "有任务正在备份，无法进行任务配置，请前往管理中心停止备份或重试",
+                    await Services.Dialog.ShowErrorDialogAsync("正在备份", "有任务正在备份，无法进行任务配置，请前往管理中心停止备份或重试",
                         retryButton: true);
 
                 if (false.Equals(result))
@@ -65,17 +62,6 @@ namespace ArchiveMaster.ViewModels
 
             Tasks = new ObservableCollection<BackupTask>(Config.Tasks);
             await Tasks.UpdateStatusAsync();
-        }
-
-        public override async Task OnExitAsync(CancelEventArgs args)
-        {
-            var result = await DialogService.ShowYesNoDialogAsync("保存配置", "有未保存的配置，是否保存？");
-            if (true.Equals(result))
-            {
-                Save();
-            }
-
-            await base.OnExitAsync(args);
         }
 
         [RelayCommand]
@@ -97,7 +83,7 @@ namespace ArchiveMaster.ViewModels
         private void Save()
         {
             Config.Tasks = Tasks.Select(p => p.Clone() as BackupTask).ToList();
-            AppConfig.Save();
+            Services.AppConfig.Save();
         }
     }
 }

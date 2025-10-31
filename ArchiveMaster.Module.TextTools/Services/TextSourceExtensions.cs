@@ -2,84 +2,124 @@
 using System.Text;
 using ArchiveMaster.ViewModels;
 using DocumentFormat.OpenXml.Packaging;
-using NPOI.XWPF.UserModel;
+// using NPOI.XWPF.UserModel;
 using DocumentFormat.OpenXml.Wordprocessing;
+using FzLib.Collections;
+using FzLib.Text;
 using Markdig;
+using UglyToad.PdfPig;
+using UglyToad.PdfPig.DocumentLayoutAnalysis.TextExtractor;
+using UglyToad.PdfPig.DocumentLayoutAnalysis.WordExtractor;
 using UtfUnknown;
 
 namespace ArchiveMaster.Services;
 
 public static class TextSourceExtensions
 {
-    public static async IAsyncEnumerable<DocFileLine> GetPlainTextAsync(this TextSource source,
-        bool combinePerFile = true,
+    public static async IAsyncEnumerable<DocFilePart> GetPlainTextAsync(this TextSource source,
+        TextSourceReadUnit readUnit = TextSourceReadUnit.PerFile,
         [EnumeratorCancellation]
         CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(source);
 
+        StringBuilder combined = new StringBuilder();
         if (source.FromFile)
         {
             foreach (var file in source.Files)
             {
+                ct.ThrowIfCancellationRequested();
+
+                if (file.File == null || !File.Exists(file.File))
+                {
+                    throw new FileNotFoundException(file.File);
+                }
+
+                switch (new FileInfo(file.File).Length)
+                {
+                    case <= 0:
+                        throw new InvalidOperationException($"文件{file.File}的大小为0");
+                    case > 1024 * 1024 * 1024:
+                        throw new InvalidOperationException($"文件{file.File}的大小超过1GB");
+                }
+
+                bool perParagraph = readUnit == TextSourceReadUnit.PerParagraph;
                 var lines = Path.GetExtension(file.File) switch
                 {
-                    ".docx" => file.ReadDocxAsync(ct: ct),
-                    ".doc" => file.ReadDocAsync(ct: ct),
-                    ".md" => file.ReadMarkdownAsync(ct: ct),
-                    _ => file.ReadTxtAsync(ct: ct)
+                    ".docx" => file.ReadDocxAsync(perParagraph, ct),
+                    // ".doc" => file.ReadDocAsync(ct: ct),
+                    ".md" => file.ReadMarkdownAsync(perParagraph, ct),
+                    ".pdf" => file.ReadPdfAsync(perParagraph, ct),
+                    _ => file.ReadTxtAsync(perParagraph, ct)
                 };
 
-                if (combinePerFile)
+                switch (readUnit)
                 {
-                    StringBuilder str = new StringBuilder();
-                    await foreach (var line in lines.WithCancellation(ct))
+                    case TextSourceReadUnit.PerFile:
+                    case TextSourceReadUnit.PerParagraph:
                     {
-                        if (source.IgnoreLineBreak)
+                        await foreach (var line in lines.WithCancellation(ct))
                         {
-                            str.Append(line);
+                            yield return new DocFilePart(file.File, line);
                         }
-                        else
-                        {
-                            str.AppendLine(line);
-                        }
+
+                        break;
+                    }
+                    case TextSourceReadUnit.Combined:
+                    {
+                        combined.AppendLine(await lines.FirstAsync());
+
+                        break;
                     }
 
-                    yield return new DocFileLine(file.File, str.ToString());
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(readUnit), readUnit, null);
                 }
-                else
-                {
-                    await foreach (var line in lines.WithCancellation(ct))
-                    {
-                        yield return new DocFileLine(file.File, line);
-                    }
-                }
+            }
+
+            if (readUnit == TextSourceReadUnit.Combined)
+            {
+                yield return new DocFilePart(null, combined.ToString());
             }
         }
         else
         {
-            yield return new DocFileLine(null, source.Text);
-        }
-    }
-
-    private static async IAsyncEnumerable<string> ReadDocAsync(this DocFile file,
-        [EnumeratorCancellation] CancellationToken ct = default)
-    {
-        await using var stream = File.OpenRead(file.File);
-        XWPFDocument doc = new XWPFDocument(stream);
-        foreach (var para in doc.Paragraphs)
-        {
-            ct.ThrowIfCancellationRequested();
-            string v = para.ParagraphText; //获得文本
-            if (!string.IsNullOrEmpty(v))
+            switch (readUnit)
             {
-                yield return v;
+                case TextSourceReadUnit.PerFile:
+                case TextSourceReadUnit.Combined:
+                    yield return new DocFilePart(null, source.Text);
+                    break;
+                case TextSourceReadUnit.PerParagraph:
+                    foreach (var line in source.Text.SplitLines())
+                    {
+                        yield return new DocFilePart(null, line);
+                    }
+
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(readUnit), readUnit, null);
             }
         }
     }
 
+    private static async Task<Encoding> DetectEncoding(DocFile file, CancellationToken ct)
+    {
+        try
+        {
+            var result = await CharsetDetector.DetectFromFileAsync(file.File, ct);
+            return result.Detected?.Encoding ?? Encoding.UTF8;
+        }
+        catch (Exception)
+        {
+            return Encoding.UTF8;
+        }
+    }
+
     private static async IAsyncEnumerable<string> ReadDocxAsync(this DocFile file,
-        [EnumeratorCancellation] CancellationToken ct = default)
+        bool perParagraph,
+        [EnumeratorCancellation]
+        CancellationToken ct = default)
     {
         await using var stream = File.OpenRead(file.File);
 
@@ -91,39 +131,98 @@ public static class TextSourceExtensions
             yield break;
         }
 
+        StringBuilder str = new StringBuilder();
         foreach (var para in body.Elements<Paragraph>())
         {
             ct.ThrowIfCancellationRequested();
-            yield return para.InnerText;
+            if (perParagraph)
+            {
+                yield return para.InnerText;
+            }
+            else
+            {
+                str.AppendLine(para.InnerText);
+            }
+        }
+
+        if (!perParagraph)
+        {
+            yield return str.ToString();
+        }
+    }
+
+    private static async IAsyncEnumerable<string> ReadPdfAsync(this DocFile file,
+        bool perParagraph,
+        [EnumeratorCancellation]
+        CancellationToken ct = default)
+    {
+        var bytes = await File.ReadAllBytesAsync(file.File, ct);
+        using var doc = PdfDocument.Open(bytes);
+        StringBuilder str = new StringBuilder();
+        foreach (var page in doc.GetPages())
+        {
+            string text = ContentOrderTextExtractor.GetText(page);
+            if (perParagraph)
+            {
+                foreach (var line in text.SplitLines())
+                {
+                    yield return line;
+                }
+            }
+            else
+            {
+                str.AppendLine(text);
+            }
+            // var words = page.GetWords(NearestNeighbourWordExtractor.Instance);
+        }
+
+        if (!perParagraph)
+        {
+            yield return str.ToString();
         }
     }
 
     private static async IAsyncEnumerable<string> ReadMarkdownAsync(this DocFile file,
-        [EnumeratorCancellation] CancellationToken ct = default)
+        bool perParagraph,
+        [EnumeratorCancellation]
+        CancellationToken ct = default)
     {
         var encoding = await DetectEncoding(file, ct);
         var markdown = await File.ReadAllTextAsync(file.File, encoding, ct);
         ct.ThrowIfCancellationRequested();
         var text = Markdown.ToPlainText(markdown);
-        yield return text;
-    }
-
-    private static async IAsyncEnumerable<string> ReadTxtAsync(this DocFile file,
-        [EnumeratorCancellation] CancellationToken ct = default)
-    {
-        var encoding = await DetectEncoding(file, ct);
-        var lines = await File.ReadAllLinesAsync(file.File, encoding, ct);
-        foreach (var line in lines)
+        if (perParagraph)
         {
-            ct.ThrowIfCancellationRequested();
-            yield return line;
+            foreach (var line in text.SplitLines())
+            {
+                yield return line;
+            }
+        }
+        else
+        {
+            yield return text;
         }
     }
 
-    private static async Task<Encoding> DetectEncoding(DocFile file, CancellationToken ct)
+    private static async IAsyncEnumerable<string> ReadTxtAsync(this DocFile file,
+        bool perParagraph,
+        [EnumeratorCancellation]
+        CancellationToken ct = default)
     {
-        var result = await CharsetDetector.DetectFromFileAsync(file.File, ct);
-        var encoding = result.Detected?.Encoding ?? Encoding.UTF8;
-        return encoding;
+        var encoding = await DetectEncoding(file, ct);
+        if (perParagraph)
+        {
+            var lines = await File.ReadAllLinesAsync(file.File, encoding, ct);
+            foreach (var line in lines)
+            {
+                ct.ThrowIfCancellationRequested();
+                yield return line;
+            }
+        }
+        else
+        {
+            var text = await File.ReadAllTextAsync(file.File, encoding, ct);
+            yield return text;
+        }
     }
 }

@@ -9,8 +9,8 @@ using FzLib.Avalonia.Dialogs;
 
 namespace ArchiveMaster.ViewModels;
 
-public partial class FileCopyTestViewModel(AppConfig appConfig, IDialogService dialogService)
-    : TwoStepViewModelBase<FileCopyTestService, FileCopyTestConfig>(appConfig, dialogService)
+public partial class FileCopyTestViewModel(ViewModelServices services)
+    : TwoStepViewModelBase<FileCopyTestService, FileCopyTestConfig>(services)
 {
     [ObservableProperty]
     private ObservableCollection<CopyingFile> files;

@@ -15,10 +15,9 @@ using FzLib.Avalonia.Services;
 
 namespace ArchiveMaster.ViewModels;
 
-public partial class EncryptorViewModel : TwoStepViewModelBase<EncryptorService, EncryptorConfig>
+public partial class EncryptorViewModel(ViewModelServices services)
+    : TwoStepViewModelBase<EncryptorService, EncryptorConfig>(services)
 {
-    public IClipboardService Clipboard { get; }
-
     [ObservableProperty]
     private bool isEncrypting = true;
 
@@ -29,16 +28,10 @@ public partial class EncryptorViewModel : TwoStepViewModelBase<EncryptorService,
 
     public PaddingMode[] PaddingModes => Enum.GetValues<PaddingMode>();
 
-    public EncryptorViewModel(AppConfig appConfig, IDialogService dialogService, IClipboardService clipboard) : base(
-        appConfig, dialogService)
-    {
-        Clipboard = clipboard;
-    }
-
     [RelayCommand]
-    private async Task CopyErrorAsync(Exception exception)
+    private Task CopyErrorAsync(Exception exception)
     {
-        await WeakReferenceMessenger.Default.Send(Clipboard.SetTextAsync(exception.ToString()));
+        return Services.Clipboard.SetTextAsync(exception.ToString());
     }
 
     protected override Task OnInitializingAsync()

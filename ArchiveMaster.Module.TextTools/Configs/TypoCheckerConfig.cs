@@ -1,0 +1,24 @@
+﻿using ArchiveMaster.ViewModels;
+using CommunityToolkit.Mvvm.ComponentModel;
+
+namespace ArchiveMaster.Configs;
+
+public partial class TypoCheckerConfig : ConfigBase
+{
+    [ObservableProperty]
+    private TextSource source = new TextSource();
+
+    [ObservableProperty]
+    private int minSegmentLength = 200;
+
+    [ObservableProperty]
+    private string extraAiPrompt;
+
+    public override void Check()
+    {
+        if (Source.IsEmpty())
+        {
+            throw new ArgumentException("文本源为空");
+        }
+    }
+}

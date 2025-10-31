@@ -8,7 +8,7 @@
     xmlns:gb="using:GroupBox.Avalonia.Controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:v="using:ArchiveMaster.Views"
-    xmlns:vm="clr-namespace:ArchiveMaster.ViewModels"
+    xmlns:vm="using:ArchiveMaster.ViewModels"
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
@@ -51,17 +51,26 @@
                                                 FontWeight="Bold"
                                                 Text="{Binding File}"
                                                 TextWrapping="Wrap" />
-                                            <!-- <ct:FormItem Header="文档密码（若有）"> -->
-                                            <!--  <TextBox  -->
-                                            <!--  Classes="revealPasswordButton"  -->
-                                            <!--  PasswordChar="*"  -->
-                                            <!--  Text="{Binding Password.Password}" />  -->
-                                            <!-- </ct:FormItem> -->
-                                            <Button
+                                            <StackPanel
                                                 HorizontalAlignment="Right"
-                                                Classes="Link"
-                                                Click="RemoveFileButton_Click"
-                                                Content="移除" />
+                                                Orientation="Horizontal">
+                                                <Button
+                                                    Classes="Link"
+                                                    Command="{Binding OpenFileCommand, Source={x:Static vm:GlobalCommands.Instance}}"
+                                                    CommandParameter="{Binding File}"
+                                                    Content="打开"
+                                                    ToolTip.Tip="使用关联的程序打开文件" />
+                                                <Button
+                                                    Classes="Link"
+                                                    Click="OpenFileButton_Click"
+                                                    Content="测试"
+                                                    ToolTip.Tip="尝试读取文件" />
+                                                <Button
+                                                    Classes="Link"
+                                                    Click="RemoveFileButton_Click"
+                                                    Content="移除"
+                                                    ToolTip.Tip="从文件列表中移除" />
+                                            </StackPanel>
                                         </StackPanel>
                                     </Flyout>
                                 </Button.Flyout>

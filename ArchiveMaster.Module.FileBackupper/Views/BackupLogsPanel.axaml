@@ -5,6 +5,7 @@
     xmlns:c="using:ArchiveMaster.Converters"
     xmlns:cvt="using:ArchiveMaster.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:ic="using:FluentIcons.Avalonia.MarkupExtensions"
     xmlns:l="using:Microsoft.Extensions.Logging"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:me="using:FzLib.Avalonia.MarkupExtensions"
@@ -40,7 +41,7 @@
                 Grid.Column="14"
                 Classes="Icon"
                 Command="{Binding SearchLogsCommand}"
-                Content="{StaticResource Search}" />
+                Content="{ic:FluentIcon Icon=Search}" />
             <ComboBox
                 Grid.Column="16"
                 Margin="32,0,0,0"

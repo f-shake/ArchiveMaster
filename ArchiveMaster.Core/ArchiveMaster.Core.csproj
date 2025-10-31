@@ -34,6 +34,7 @@
 
 
   <ItemGroup>
+    <PackageReference Include="FluentIcons.Avalonia" />
     <PackageReference Include="Magick.NET-Q16-AnyCPU" />
     <PackageReference Include="Mapster" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" />
@@ -57,6 +58,10 @@
     <None Update="Views\TwoStepPanelBase.axaml">
       <SubType>Designer</SubType>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Assets\" />
   </ItemGroup>
 
 </Project>

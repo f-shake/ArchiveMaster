@@ -2,6 +2,7 @@
 using ImageMagick;
 using MetadataExtractor;
 using MetadataExtractor.Formats.Exif;
+using Serilog;
 using ExifTag = ExifLibrary.ExifTag;
 
 namespace ArchiveMaster.Helpers;
@@ -76,47 +77,39 @@ public static class ExifHelper
             var directories = ImageMetadataReader.ReadMetadata(file);
             var gpsDir = directories.OfType<GpsDirectory>().FirstOrDefault();
 
-            if (gpsDir != null)
+            if (gpsDir != null && gpsDir.TryGetGeoLocation(out var gps) && !gps.IsZero)
             {
-                var gps = gpsDir.GetGeoLocation();
-
-                if (gps != null && !gps.IsZero)
-                {
-                    return (gps.Latitude, gps.Longitude);
-                }
+                return (gps.Latitude, gps.Longitude);
             }
 
             //2. 使用更全面的 ImageMagisk 读取，速度慢很多
-            using (var image = new MagickImage(file))
+            using var image = new MagickImage(file);
+            var profile = image.GetExifProfile();
+            if (profile == null)
             {
-                var profile = image.GetExifProfile();
-                if (profile == null)
-                {
-                    return null;
-                }
+                return null;
+            }
 
-                // 读取GPS纬度
-                var latitude = profile.GetValue(ImageMagick.ExifTag.GPSLatitude);
-                var latitudeRef = profile.GetValue(ImageMagick.ExifTag.GPSLatitudeRef);
+            // 读取GPS纬度
+            var latitude = profile.GetValue(ImageMagick.ExifTag.GPSLatitude);
+            var latitudeRef = profile.GetValue(ImageMagick.ExifTag.GPSLatitudeRef);
 
-                // 读取GPS经度
-                var longitude = profile.GetValue(ImageMagick.ExifTag.GPSLongitude);
-                var longitudeRef = profile.GetValue(ImageMagick.ExifTag.GPSLongitudeRef);
+            // 读取GPS经度
+            var longitude = profile.GetValue(ImageMagick.ExifTag.GPSLongitude);
+            var longitudeRef = profile.GetValue(ImageMagick.ExifTag.GPSLongitudeRef);
 
-                if (latitude != null && longitude != null)
-                {
-                    double lat = ConvertRationalToDouble(latitude.Value, latitudeRef?.Value == "S");
-                    double lon = ConvertRationalToDouble(longitude.Value, longitudeRef?.Value == "W");
-                    return (lat, lon);
-                }
+            if (latitude != null && longitude != null)
+            {
+                double lat = ConvertRationalToDouble(latitude.Value, latitudeRef?.Value == "S");
+                double lon = ConvertRationalToDouble(longitude.Value, longitudeRef?.Value == "W");
+                return (lat, lon);
             }
 
             return null;
         }
         catch (Exception ex)
         {
-            // 记录错误（实际项目中建议使用日志系统）
-            Console.WriteLine($"读取 {file} 的 GPS 信息失败: {ex.Message}");
+            Log.Logger.Warning("读取 {File} 的 GPS 信息失败: {ExMessage}", file, ex.Message);
             return null;
         }
     }
@@ -150,7 +143,7 @@ public static class ExifHelper
 
     private static double ConvertRationalToDouble(ImageMagick.Rational[] rationals, bool isNegative)
     {
-        if (rationals == null || rationals.Length != 3)
+        if (rationals is not { Length: 3 })
         {
             return 0;
         }

@@ -1,4 +1,4 @@
-namespace ArchiveMaster.ViewModels;
+namespace ArchiveMaster.Models;
 
 public class PagedList<T>
 {

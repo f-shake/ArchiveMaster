@@ -15,12 +15,8 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace ArchiveMaster.ViewModels
 {
-    public partial class Step3ViewModel(
-        AppConfig appConfig,
-        IDialogService dialogService,
-        IStorageProviderService storage)
-        : OfflineSyncViewModelBase<Step3Service, OfflineSyncStep3Config, FileSystem.SyncFileInfo>(appConfig,
-            dialogService, storage)
+    public partial class Step3ViewModel(ViewModelServices services)
+        : OfflineSyncViewModelBase<Step3Service, OfflineSyncStep3Config, FileSystem.SyncFileInfo>(services)
     {
         public IEnumerable DeleteModes => Enum.GetValues<DeleteMode>();
 
@@ -34,7 +30,7 @@ namespace ArchiveMaster.ViewModels
         {
             if (Service.DeletingDirectories.Count != 0)
             {
-                var result = await DialogService.ShowYesNoDialogAsync("删除空目录",
+                var result = await Services.Dialog.ShowYesNoDialogAsync("删除空目录",
                     $"有{Service.DeletingDirectories.Count}个已不存在于本地的空目录，是否删除？",
                     string.Join(Environment.NewLine, Service.DeletingDirectories.Select(p => p.Path)));
 

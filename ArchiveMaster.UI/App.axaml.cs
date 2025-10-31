@@ -18,6 +18,7 @@ using FzLib;
 using FzLib.Avalonia.Dialogs;
 using Microsoft.Extensions.DependencyInjection;
 using System.Runtime.CompilerServices;
+using Avalonia.Markup.Xaml.Styling;
 using Avalonia.Threading;
 using FzLib.Programming;
 using Serilog;
@@ -43,18 +44,30 @@ public class App : Application
 
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            if (!TcpSingleInstanceHelper.EnsureSingleInstance(OnActivatedAsync))
+            try
             {
-                Log.Information("检测到已有实例在运行，程序将退出");
-                SplashWindow.CloseCurrent();
-                doNotOpen = true;
-                desktop.Shutdown();
-                Environment.Exit(0);
-                return;
+                if (!TcpSingleInstanceHelper.EnsureSingleInstance(OnActivatedAsync))
+                {
+                    Log.Information("检测到已有实例在运行，程序将退出");
+                    SplashWindow.CloseCurrent();
+                    doNotOpen = true;
+                    desktop.Shutdown();
+                    Environment.Exit(0);
+                    return;
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Logger.Error(ex, "单例模式检测出现错误");
             }
         }
 
         Initializer.Initialize();
+        UpdateStyles();
+    }
+
+    private void UpdateStyles()
+    {
         if (OperatingSystem.IsWindows())
         {
             Resources.Add("ContentControlThemeFontFamily", new FontFamily("Microsoft YaHei UI"));
@@ -63,6 +76,10 @@ public class App : Application
         {
             Resources.Add("ContentControlThemeFontFamily", new FontFamily("$Default"));
         }
+
+        //部分样式需要在配置文件加载后再加载，所以使用代码进行加载（如平滑滚动）
+        Styles.Add(new StyleInclude(new Uri("avares://ArchiveMaster.UI", UriKind.Absolute))
+            { Source = new Uri("avares://ArchiveMaster.Core/GlobalStyles.axaml", UriKind.Absolute) });
     }
 
     static Task OnActivatedAsync()

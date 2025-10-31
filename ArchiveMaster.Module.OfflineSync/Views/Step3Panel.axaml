@@ -8,7 +8,6 @@
     xmlns:enums="using:ArchiveMaster.Enums"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:sys="clr-namespace:System;assembly=mscorlib"
-    xmlns:ui="http://schemas.modernwpf.com/2019"
     xmlns:v="using:ArchiveMaster.Views"
     xmlns:vm="clr-namespace:ArchiveMaster.ViewModels"
     d:DesignHeight="450"

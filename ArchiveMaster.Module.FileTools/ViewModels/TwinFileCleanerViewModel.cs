@@ -12,8 +12,8 @@ using FzLib.Avalonia.Dialogs;
 
 namespace ArchiveMaster.ViewModels;
 
-public partial class TwinFileCleanerViewModel(AppConfig appConfig, IDialogService dialogService)
-    : TwoStepViewModelBase<TwinFileCleanerService, TwinFileCleanerConfig>(appConfig, dialogService)
+public partial class TwinFileCleanerViewModel(ViewModelServices services)
+    : TwoStepViewModelBase<TwinFileCleanerService, TwinFileCleanerConfig>(services)
 {
     [ObservableProperty]
     private List<TwinFileInfo> deletingFiles;

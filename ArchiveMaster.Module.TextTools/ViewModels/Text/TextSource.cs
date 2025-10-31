@@ -16,4 +16,14 @@ public partial class TextSource : ObservableObject
     
     [ObservableProperty]
     private bool ignoreLineBreak = false;
+
+    public bool IsEmpty()
+    {
+        if (FromFile)
+        {
+            return Files.Count == 0;
+        }
+        
+        return string.IsNullOrWhiteSpace(Text);
+    }
 }

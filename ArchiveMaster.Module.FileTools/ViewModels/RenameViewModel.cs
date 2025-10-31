@@ -15,8 +15,8 @@ using FzLib.Avalonia.Dialogs;
 
 namespace ArchiveMaster.ViewModels;
 
-public partial class RenameViewModel(AppConfig appConfig, IDialogService dialogService)
-    : TwoStepViewModelBase<RenameService, RenameConfig>(appConfig, dialogService)
+public partial class RenameViewModel(ViewModelServices services)
+    : TwoStepViewModelBase<RenameService, RenameConfig>(services)
 {
     [ObservableProperty]
     private ObservableCollection<FileSystem.RenameFileInfo> files;
@@ -54,7 +54,7 @@ public partial class RenameViewModel(AppConfig appConfig, IDialogService dialogS
             return;
         }
 
-        if (true.Equals(await DialogService.ShowYesNoDialogAsync("重命名完成，请检查结果",
+        if (true.Equals(await Services.Dialog.ShowYesNoDialogAsync("重命名完成，请检查结果",
                 $"共重命名{Files.Count(p => p.Status==ProcessStatus.Success)}项，失败{Files.Count(p => p.Status == ProcessStatus.Error)}项。{Environment.NewLine}" +
                 $"请检查结果，若不符合预期，可以进行撤销。是否撤销？")))
         {

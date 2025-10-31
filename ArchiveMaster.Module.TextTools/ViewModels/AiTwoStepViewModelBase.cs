@@ -8,9 +8,9 @@ public abstract class AiTwoStepViewModelBase<TService, TConfig> : TwoStepViewMod
     where TService : TwoStepServiceBase<TConfig>
     where TConfig : ConfigBase, new()
 {
-    protected AiTwoStepViewModelBase(AppConfig appConfig, IDialogService dialogService) : base(appConfig, dialogService)
+    protected AiTwoStepViewModelBase(ViewModelServices services) : base(services)
     {
-        AppConfig.GetOrCreateConfigWithDefaultKey<AiProvidersConfig>().PropertyChanged += (s, e) =>
+        Services.AppConfig.GetOrCreateConfigWithDefaultKey<AiProvidersConfig>().PropertyChanged += (s, e) =>
         {
             if (e.PropertyName == nameof(AiProvidersConfig.CurrentProvider))
             {
@@ -19,5 +19,6 @@ public abstract class AiTwoStepViewModelBase<TService, TConfig> : TwoStepViewMod
         };
     }
 
-    public AiProviderConfig AI => AppConfig.GetOrCreateConfigWithDefaultKey<AiProvidersConfig>().CurrentProvider;
+    public AiProviderConfig AI =>
+        Services.AppConfig.GetOrCreateConfigWithDefaultKey<AiProvidersConfig>().CurrentProvider;
 }

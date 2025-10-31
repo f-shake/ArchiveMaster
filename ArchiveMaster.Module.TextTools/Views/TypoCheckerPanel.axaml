@@ -1,0 +1,158 @@
+<v:TwoStepPanelBase
+    x:Class="ArchiveMaster.Views.TypoCheckerPanel"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:b="using:ArchiveMaster.Behaviors"
+    xmlns:cfg="clr-namespace:ArchiveMaster.Configs;assembly=ArchiveMaster.Core"
+    xmlns:ct="using:FzLib.Avalonia.Controls"
+    xmlns:cvt="clr-namespace:ArchiveMaster.Converters;assembly=ArchiveMaster.Core"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:fzb="clr-namespace:FzLib.Avalonia.Behaviors;assembly=FzLib.Avalonia"
+    xmlns:gb="using:GroupBox.Avalonia.Controls"
+    xmlns:h="using:ArchiveMaster.Helpers"
+    xmlns:ic="using:FluentIcons.Avalonia.MarkupExtensions"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:v="using:ArchiveMaster.Views"
+    xmlns:vm="using:ArchiveMaster.ViewModels"
+    x:Name="root"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    x:DataType="vm:TypoCheckerViewModel"
+    ExecuteButtonContent="检查"
+    mc:Ignorable="d">
+    <v:TwoStepPanelBase.ConfigsContent>
+        <ct:StackFormItemGroup>
+            <ct:FormItem Label="文本源：">
+                <v:TextSourceInput Source="{Binding Config.Source}" />
+            </ct:FormItem>
+
+            <ct:FormItem
+                Description="较长的文本需要分段提供给AI。分段越短，检查效果越好，但时间会更长"
+                Label="最短分段字数：">
+                <DockPanel HorizontalSpacing="8">
+                    <TextBlock
+                        Width="72"
+                        DockPanel.Dock="Right"
+                        Text="{Binding Config.MinSegmentLength, StringFormat='{}{0}字'}"
+                        TextAlignment="Right" />
+                    <Slider
+                        IsSnapToTickEnabled="True"
+                        Maximum="2000"
+                        Minimum="100"
+                        TickFrequency="10"
+                        Value="{Binding Config.MinSegmentLength}" />
+                </DockPanel>
+            </ct:FormItem>
+
+            <ct:FormItem Label="额外提示词：">
+                <TextBox Text="{Binding Config.ExtraAiPrompt}" />
+            </ct:FormItem>
+        </ct:StackFormItemGroup>
+    </v:TwoStepPanelBase.ConfigsContent>
+
+    <v:TwoStepPanelBase.ResultsContent>
+        <Grid RowDefinitions="*,8,Auto">
+            <ScrollViewer Padding="0,0,20,0">
+                <ItemsControl ItemsSource="{Binding Typos}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border
+                                Margin="2,4"
+                                Padding="8"
+                                Background="{DynamicResource Background2}"
+                                BorderBrush="{DynamicResource Background3}"
+                                BorderThickness="1"
+                                CornerRadius="8">
+                                <Grid RowDefinitions="Auto,8,Auto">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="8" />
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition />
+                                            <ColumnDefinition
+                                                Width="Auto"
+                                                MaxWidth="360" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock
+                                            Text="{Binding Context}"
+                                            TextTrimming="CharacterEllipsis"
+                                            ToolTip.Tip="{Binding Context}" />
+                                        <Button
+                                            Grid.Column="2"
+                                            Classes="Icon"
+                                            Command="{Binding CopyTextCommand, Source={x:Static vm:GlobalCommands.Instance}}"
+                                            CommandParameter="{Binding Context}"
+                                            Content="{ic:FluentIcon Icon=Copy}"
+                                            DockPanel.Dock="Right" />
+                                        <TextBlock
+                                            Grid.Column="4"
+                                            HorizontalAlignment="Right"
+                                            DockPanel.Dock="Right"
+                                            Opacity="0.7"
+                                            Text="{Binding Explanation}"
+                                            TextTrimming="CharacterEllipsis"
+                                            ToolTip.Tip="{Binding Explanation}" />
+                                    </Grid>
+
+
+                                    <Grid
+                                        Grid.Row="2"
+                                        ColumnDefinitions="Auto,8,*">
+                                        <DockPanel HorizontalSpacing="8">
+                                            <TextBlock
+                                                MaxWidth="240"
+                                                VerticalAlignment="Center"
+                                                Text="{Binding Original}"
+                                                TextTrimming="CharacterEllipsis"
+                                                ToolTip.Tip="{Binding Original}" />
+                                            <Button
+                                                Classes="Icon"
+                                                Command="{Binding CopyTextCommand, Source={x:Static vm:GlobalCommands.Instance}}"
+                                                CommandParameter="{Binding Original}"
+                                                Content="{ic:FluentIcon Icon=Copy}" />
+                                            <TextBlock
+                                                MaxWidth="240"
+                                                Margin="8,0"
+                                                VerticalAlignment="Center"
+                                                Text="→" />
+                                            <TextBlock
+                                                VerticalAlignment="Center"
+                                                Text="{Binding Corrected}"
+                                                TextTrimming="CharacterEllipsis"
+                                                ToolTip.Tip="{Binding Corrected}" />
+                                            <Button
+                                                Classes="Icon"
+                                                Command="{Binding CopyTextCommand, Source={x:Static vm:GlobalCommands.Instance}}"
+                                                CommandParameter="{Binding Corrected}"
+                                                Content="{ic:FluentIcon Icon=Copy}" />
+                                        </DockPanel>
+
+                                        <Button
+                                            Grid.Column="2"
+                                            Padding="8,4"
+                                            HorizontalAlignment="Right"
+                                            Command="{Binding OpenFileCommand, Source={x:Static vm:GlobalCommands.Instance}}"
+                                            CommandParameter="{Binding Source}"
+                                            Content="{Binding Source, Converter={x:Static cvt:Converters.FileName}}"
+                                            CornerRadius="16"
+                                            IsVisible="{Binding Source, Converter={x:Static cvt:Converters.IsNotNull}}"
+                                            ToolTip.Tip="{Binding Source}" />
+                                    </Grid>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+            <Grid
+                Grid.Row="2"
+                ColumnDefinitions="Auto,*,Auto">
+                <TextBlock Text="{Binding AI.Name, StringFormat='{}AI服务提供商：{0}'}" />
+                <TextBlock
+                    Grid.Column="2"
+                    Text="{Binding Typos.Count, StringFormat='{}共{0}条'}" />
+            </Grid>
+        </Grid>
+    </v:TwoStepPanelBase.ResultsContent>
+</v:TwoStepPanelBase>

@@ -52,7 +52,7 @@ class Program
             }).Catch((ex, s) =>
             {
                 Log.Fatal(ex, "未捕获的异常，来源：{ExceptionSource}", s);
-                Log.CloseAndFlush();
+                // Log.CloseAndFlush();
             })
             .Finally(() =>
             {

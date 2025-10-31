@@ -14,7 +14,6 @@ using System.Text;
 using System.Threading.Tasks;
 using static ArchiveMaster.ViewModels.MainViewModel;
 using ArchiveMaster.Configs;
-using ArchiveMaster.Messages;
 using ArchiveMaster.Models;
 using ArchiveMaster.Platforms;
 using ArchiveMaster.Services;
@@ -29,22 +28,20 @@ namespace ArchiveMaster.ViewModels;
 
 public partial class MainViewModel : ObservableObject
 {
-    private readonly IDialogService dialogService;
-
-    [ObservableProperty]
-    private AppConfig appConfig;
+    private readonly ViewModelServices services;
 
     [ObservableProperty]
     private bool isProgressRingOverlayActive;
+
     [ObservableProperty]
     private ObservableCollection<ToolPanelGroupInfo> panelGroups = new ObservableCollection<ToolPanelGroupInfo>();
 
     [ObservableProperty]
     private bool scrollViewBringIntoViewOnFocusChange;
-    public MainViewModel(AppConfig appConfig,IDialogService dialogService, IBackCommandService backCommandService = null)
+
+    public MainViewModel(ViewModelServices services, IBackCommandService backCommandService = null)
     {
-        this.dialogService = dialogService;
-        AppConfig = appConfig;
+        this.services = services;
         foreach (var view in Initializer.Views)
         {
             PanelGroups.Add(view);
@@ -61,8 +58,6 @@ public partial class MainViewModel : ObservableObject
             return false;
         });
         BackCommandService = backCommandService;
-        
-        WeakReferenceMessenger.Default.Register<LoadingMessage>(this, (o, m) => IsProgressRingOverlayActive = m.IsVisible);
     }
 
     public IBackCommandService BackCommandService { get; }
@@ -71,14 +66,14 @@ public partial class MainViewModel : ObservableObject
     private async Task OpenMasterPasswordDialogAsync()
     {
         var dialog = HostServices.GetRequiredService<MasterPasswordDialog>();
-        await dialogService.ShowCustomDialogAsync(dialog);
+        await services.Dialog.ShowCustomDialogAsync(dialog);
     }
 
     [RelayCommand]
     private async Task OpenSettingDialogAsync()
     {
         var dialog = HostServices.GetRequiredService<SettingDialog>();
-        await dialogService.ShowCustomDialogAsync(dialog);
+        await services.Dialog.ShowCustomDialogAsync(dialog);
     }
 
     [RelayCommand]

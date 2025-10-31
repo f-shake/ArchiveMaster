@@ -1,5 +1,4 @@
 ﻿using ArchiveMaster.Configs;
-using ArchiveMaster.Messages;
 using ArchiveMaster.Services;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
@@ -15,12 +14,8 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace ArchiveMaster.ViewModels
 {
-    public partial class Step1ViewModel(
-        AppConfig appConfig,
-        IDialogService dialogService,
-        IStorageProviderService storage)
-        : OfflineSyncViewModelBase<Step1Service, OfflineSyncStep1Config, SimpleFileInfo>(appConfig, dialogService,
-            storage)
+    public partial class Step1ViewModel(ViewModelServices services)
+        : OfflineSyncViewModelBase<Step1Service, OfflineSyncStep1Config, SimpleFileInfo>(services)
     {
         [ObservableProperty]
         private string selectedSyncDir;
@@ -89,7 +84,7 @@ namespace ArchiveMaster.ViewModels
         [RelayCommand]
         private async Task BrowseDirAsync()
         {
-            var files = await Storage.OpenFolderPickerAsync(new FolderPickerOpenOptions()
+            var files = await Services.StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions()
             {
                 AllowMultiple = true,
             });
@@ -105,7 +100,7 @@ namespace ArchiveMaster.ViewModels
                 }
                 catch (Exception ex)
                 {
-                    await DialogService.ShowErrorDialogAsync("加入失败", ex);
+                    await Services.Dialog.ShowErrorDialogAsync("加入失败", ex);
                 }
             }
         }
@@ -120,7 +115,7 @@ namespace ArchiveMaster.ViewModels
 
             if (string.IsNullOrWhiteSpace(Config.OutputFile))
             {
-                var result = await Storage.SaveFilePickerAndGetPathAsync(new FilePickerSaveOptions()
+                var result = await Services.StorageProvider.SaveFilePickerAndGetPathAsync(new FilePickerSaveOptions()
                 {
                     FileTypeChoices =
                     [
@@ -139,7 +134,7 @@ namespace ArchiveMaster.ViewModels
         {
             try
             {
-                var result = await DialogService.ShowInputTextDialogAsync("输入目录", "请输入欲加入的目录地址");
+                var result = await Services.Dialog.ShowInputTextDialogAsync("输入目录", "请输入欲加入的目录地址");
                 if (!string.IsNullOrWhiteSpace(result))
                 {
                     AddSyncDir(result);
@@ -147,7 +142,7 @@ namespace ArchiveMaster.ViewModels
             }
             catch (Exception ex)
             {
-                await DialogService.ShowErrorDialogAsync("加入失败", ex);
+                await Services.Dialog.ShowErrorDialogAsync("加入失败", ex);
             }
         }
 

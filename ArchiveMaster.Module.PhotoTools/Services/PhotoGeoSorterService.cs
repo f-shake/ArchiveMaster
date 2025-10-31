@@ -93,30 +93,31 @@ namespace ArchiveMaster.Services
                 }, ct, FilesLoopOptions.Builder().AutoApplyFileNumberProgress().Build());
 
                 Files = files;
-            });
+            }, ct);
         }
 
         private STRtree<IFeature> CreateSpatialIndexFromFeatures(IEnumerable<IFeature> features)
         {
-            if (!features.Any())
+            var featureList = features.ToList();
+            if (featureList.Count == 0)
             {
                 throw new Exception("矢量文件中没有包含任何要素");
             }
 
             // 检查第一个要素的几何类型
-            var firstGeometryType = features.First().Geometry.GeometryType;
+            var firstGeometryType = featureList[0].Geometry.GeometryType;
             if (!firstGeometryType.Contains("Polygon")) // 包括 Polygon 和 MultiPolygon
             {
                 throw new Exception($"矢量文件的几何类型应当为面(Polygon)或多面(MultiPolygon)，实际为{firstGeometryType}");
             }
 
-            if (!features.First().Attributes.Exists(Config.FieldName))
+            if (!featureList[0].Attributes.Exists(Config.FieldName))
             {
                 throw new Exception($"没有名为{Config.FieldName}的字段");
             }
 
             var tree = new STRtree<IFeature>();
-            foreach (var feature in features)
+            foreach (var feature in featureList)
             {
                 tree.Insert(feature.Geometry.EnvelopeInternal, feature);
             }

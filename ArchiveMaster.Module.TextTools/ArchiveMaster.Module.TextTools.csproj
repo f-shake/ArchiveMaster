@@ -14,6 +14,22 @@
       <DependentUpon>AiProvidersPanel.axaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Views\TextEncryptionPanel.axaml.cs">
+      <DependentUpon>TextEncryptionPanel.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\ResultTextBox.axaml.cs">
+      <DependentUpon>ResultTextBox.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\TypoCheckerPanel.axaml.cs">
+      <DependentUpon>TypoCheckerPanel.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\TextRewriterPanel.axaml.cs">
+      <DependentUpon>TextRewriterPanel.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>
@@ -31,9 +47,10 @@
     <PackageReference Include="NetTopologySuite" />
     <PackageReference Include="NetTopologySuite.IO.Esri.Shapefile" />
     <PackageReference Include="NetTopologySuite.IO.GeoJSON4STJ" />
-    <PackageReference Include="NPOI" />
+<!--    <PackageReference Include="NPOI" />-->
     <PackageReference Include="OllamaSharp" />
     <PackageReference Include="OpenAI" />
+    <PackageReference Include="PdfPig" />
     <PackageReference Include="UTF.Unknown" />
   </ItemGroup>
 </Project>

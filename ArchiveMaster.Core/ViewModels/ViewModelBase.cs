@@ -1,6 +1,5 @@
 using System.ComponentModel;
 using ArchiveMaster.Configs;
-using ArchiveMaster.Messages;
 using ArchiveMaster.Services;
 using Avalonia.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -11,9 +10,9 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace ArchiveMaster.ViewModels;
 
-public abstract partial class ViewModelBase(IDialogService dialogService) : ObservableObject
+public abstract partial class ViewModelBase(ViewModelServices services) : ObservableObject
 {
-    public IDialogService DialogService { get; } = dialogService;
+    public ViewModelServices Services { get; } = services;
 
     public static ViewModelBase Current { get; private set; }
 
@@ -37,23 +36,5 @@ public abstract partial class ViewModelBase(IDialogService dialogService) : Obse
     {
         Current = null;
         return Task.CompletedTask;
-    }
-
-    protected async Task<bool> TryDoAsync(string workName, Func<Task> task)
-    {
-        WeakReferenceMessenger.Default.Send(new LoadingMessage(true));
-        await Task.Delay(100);
-        try
-        {
-            await task();
-            WeakReferenceMessenger.Default.Send(new LoadingMessage(false));
-            return true;
-        }
-        catch (Exception ex)
-        {
-            WeakReferenceMessenger.Default.Send(new LoadingMessage(false));
-            await DialogService.ShowErrorDialogAsync($"{workName}失败", ex);
-            return false;
-        }
     }
 }

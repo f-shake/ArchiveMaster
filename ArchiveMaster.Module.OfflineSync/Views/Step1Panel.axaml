@@ -5,6 +5,7 @@
     xmlns:ct="using:FzLib.Avalonia.Controls"
     xmlns:cvt="using:ArchiveMaster.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:ic="using:FluentIcons.Avalonia.MarkupExtensions"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:v="using:ArchiveMaster.Views"
     xmlns:vm="clr-namespace:ArchiveMaster.ViewModels"
@@ -39,23 +40,23 @@
                 <Button
                     Classes="Icon"
                     Command="{Binding InputDirCommand}"
-                    Content="{StaticResource KeyboardStandard}"
+                    Content="{ic:FluentIcon Icon=Keyboard}"
                     ToolTip.Tip="输入以新增备份目录" />
                 <Button
                     Classes="Icon"
                     Command="{Binding BrowseDirCommand}"
-                    Content="{StaticResource OpenFile}"
+                    Content="{ic:FluentIcon Icon=FolderOpen}"
                     ToolTip.Tip="浏览并新增备份目录" />
                 <Button
                     Classes="Icon"
                     Command="{Binding RemoveSelectedCommand}"
-                    Content="{StaticResource Remove}"
+                    Content="{ic:FluentIcon Icon=Delete}"
                     IsEnabled="{Binding SelectedSyncDir, Converter={x:Static cvt:Converters.IsNotNull}}"
                     ToolTip.Tip="移除选中项" />
                 <Button
                     Classes="Icon"
                     Command="{Binding RemoveAllCommand}"
-                    Content="{StaticResource Clear}"
+                    Content="{ic:FluentIcon Icon=ArrowClockwise}"
                     ToolTip.Tip="移除全部" />
             </StackPanel>
         </Grid>

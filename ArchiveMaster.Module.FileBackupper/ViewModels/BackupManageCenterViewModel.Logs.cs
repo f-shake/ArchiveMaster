@@ -69,7 +69,7 @@ public partial class BackupManageCenterViewModel
         catch (Exception ex)
         {
             LogPages = null;
-            await DialogService.ShowErrorDialogAsync("加载日志失败", ex);
+            await Services.Dialog.ShowErrorDialogAsync("加载日志失败", ex);
         }
     }
 
@@ -93,7 +93,9 @@ public partial class BackupManageCenterViewModel
     [RelayCommand]
     private async Task SearchLogsAsync()
     {
-        await TryDoAsync("加载日志", LoadLogsAsync);
+        await Services.ProgressOverlay.WithOverlayAsync(LoadLogsAsync,
+            ex => Services.Dialog.ShowErrorDialogAsync("加载日志失败", ex),
+            "正在加载日志");
     }
 
     [RelayCommand]
@@ -101,7 +103,7 @@ public partial class BackupManageCenterViewModel
     {
         return log == null
             ? Task.CompletedTask
-            : DialogService.ShowOkDialogAsync(Converters.Converters.LogMap.Map[log.Type.ToString()], log.Message,
+            : Services.Dialog.ShowOkDialogAsync(Converters.Converters.LogMap.Map[log.Type.ToString()], log.Message,
                 log.Detail);
     }
 }

@@ -12,7 +12,6 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:me="using:FzLib.Avalonia.MarkupExtensions"
     xmlns:sys="clr-namespace:System;assembly=mscorlib"
-    xmlns:ui="http://schemas.modernwpf.com/2019"
     xmlns:v="using:ArchiveMaster.Views"
     xmlns:vm="clr-namespace:ArchiveMaster.ViewModels"
     x:Name="root"

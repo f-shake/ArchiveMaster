@@ -4,6 +4,7 @@
     xmlns:ctrl="using:FzLib.Avalonia.Controls"
     xmlns:cvt="using:ArchiveMaster.Converters"
     xmlns:fs="clr-namespace:ArchiveMaster.ViewModels.FileSystem"
+    xmlns:ic="using:FluentIcons.Avalonia.MarkupExtensions"
     xmlns:v="using:ArchiveMaster.Views">
     <SolidColorBrush
         x:Key="DataGridCellFocusVisualPrimaryBrush"
@@ -166,32 +167,27 @@
                             <Button
                                 x:Name="PART_SelectAllButton"
                                 Classes="Icon"
-                                Content="{StaticResource SelectAll}"
-                                FontFamily="{StaticResource IconFont}"
+                                Content="{ic:FluentIcon Icon=SelectAllOn}"
                                 ToolTip.Tip="全选" />
                             <Button
                                 x:Name="PART_SelectNoneButton"
                                 Classes="Icon"
-                                Content="{StaticResource ClearSelection}"
-                                FontFamily="{StaticResource IconFont}"
+                                Content="{ic:FluentIcon Icon=SelectAllOff}"
                                 ToolTip.Tip="全不选" />
                             <Button
                                 x:Name="PART_SwitchSelectionButton"
                                 Classes="Icon"
-                                Content="{StaticResource Switch}"
-                                FontFamily="{StaticResource IconFont}"
+                                Content="{ic:FluentIcon Icon=CopySelect}"
                                 ToolTip.Tip="反选" />
                             <ToggleButton
                                 x:Name="PART_ProcessCheckedOnlyButton"
                                 Classes="Icon"
-                                Content="{StaticResource MultiSelect}"
-                                FontFamily="{StaticResource IconFont}"
+                                Content="{ic:FluentIcon Icon=Multiselect}"
                                 ToolTip.Tip="仅处理选中的行" />
                             <Button
                                 x:Name="PART_SearchButton"
                                 Classes="Icon"
-                                Content="{StaticResource Search}"
-                                FontFamily="{StaticResource IconFont}"
+                                Content="{ic:FluentIcon Icon=Search}"
                                 ToolTip.Tip="搜索">
                                 <Button.Flyout>
                                     <Flyout>
@@ -200,8 +196,7 @@
                                             <Button
                                                 Grid.Column="2"
                                                 Classes="Icon"
-                                                Content="{StaticResource Search}"
-                                                FontFamily="{StaticResource IconFont}"
+                                                Content="{ic:FluentIcon Icon=Search}"
                                                 ToolTip.Tip="搜索" />
                                         </Grid>
                                     </Flyout>
@@ -210,8 +205,7 @@
                             <Button
                                 x:Name="PART_FilterButton"
                                 Classes="Icon"
-                                Content="{StaticResource Filter}"
-                                FontFamily="{StaticResource IconFont}"
+                                Content="{ic:FluentIcon Icon=Filter}"
                                 ToolTip.Tip="筛选">
                                 <Button.Flyout>
                                     <Flyout>

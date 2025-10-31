@@ -1,5 +1,4 @@
 using System.Collections.ObjectModel;
-using ArchiveMaster.Basic;
 using ArchiveMaster.Configs;
 using ArchiveMaster.Enums;
 using ArchiveMaster.Models;
@@ -38,17 +37,18 @@ public partial class BackupManageCenterViewModel
             return;
         }
 
-        await TryDoAsync("加载快照详情", async () =>
-        {
-            SelectedTabIndex = 0;
-            LogSearchText = null;
-            LogType = LogLevel.None;
-            LogTimeFrom = value.BeginTime.AddHours(-1);
-            LogTimeTo = value.EndTime.AddHours(1);
-            await LoadLogsAsync();
-            await LoadFilesAsync();
-            await LoadFileChangesAsync();
-        });
+        await Services.ProgressOverlay.WithOverlayAsync(async () =>
+            {
+                SelectedTabIndex = 0;
+                LogSearchText = null;
+                LogType = LogLevel.None;
+                LogTimeFrom = value.BeginTime.AddHours(-1);
+                LogTimeTo = value.EndTime.AddHours(1);
+                await LoadLogsAsync();
+                await LoadFilesAsync();
+                await LoadFileChangesAsync();
+            }, ex => Services.Dialog.ShowErrorDialogAsync("加载快照详情失败", ex),
+            "正在加载快照详情");
     }
 
 
@@ -100,7 +100,7 @@ public partial class BackupManageCenterViewModel
     {
         if (backupService.IsBackingUp)
         {
-            await DialogService.ShowErrorDialogAsync("删除快照", $"目前有任务正在备份，无法删除快照");
+            await Services.Dialog.ShowErrorDialogAsync("删除快照", $"目前有任务正在备份，无法删除快照");
             return;
         }
 
@@ -115,17 +115,18 @@ public partial class BackupManageCenterViewModel
             message = "删除此快照，将同步删除后续的增量快照，是否删除此快照？";
         }
 
-        bool confirm = true.Equals(await DialogService.ShowYesNoDialogAsync("删除快照", message));
+        bool confirm = true.Equals(await Services.Dialog.ShowYesNoDialogAsync("删除快照", message));
 
         if (confirm)
         {
-            await TryDoAsync("删除快照", async () =>
-            {
-                ThrowIfIsBackingUp();
-                await using var db = new DbService(SelectedTask);
-                await db.DeleteSnapshotAsync(snapshot);
-                await LoadSnapshotsAsync();
-            });
+            await Services.ProgressOverlay.WithOverlayAsync(async () =>
+                {
+                    ThrowIfIsBackingUp();
+                    await using var db = new DbService(SelectedTask);
+                    await db.DeleteSnapshotAsync(snapshot);
+                    await LoadSnapshotsAsync();
+                }, ex => Services.Dialog.ShowErrorDialogAsync("删除快照失败", ex),
+                "正在删除快照");
         }
     }
 }

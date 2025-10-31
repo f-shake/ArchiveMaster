@@ -2,14 +2,15 @@ using System.Collections;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Windows.Input;
-using ArchiveMaster.Basic;
 using ArchiveMaster.Configs;
 using ArchiveMaster.Converters;
 using ArchiveMaster.Services;
 using ArchiveMaster.ViewModels;
 using ArchiveMaster.ViewModels.FileSystem;
 using Avalonia;
+using Avalonia.Collections;
 using Avalonia.Controls;
+using Avalonia.Controls.Presenters;
 using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Shapes;
 using Avalonia.Controls.Templates;
@@ -22,6 +23,8 @@ using Avalonia.Markup.Xaml.MarkupExtensions;
 using Avalonia.Markup.Xaml.Templates;
 using Avalonia.Media;
 using Avalonia.VisualTree;
+using FluentIcons.Avalonia;
+using FluentIcons.Common;
 using FzLib;
 using FzLib.Avalonia.Converters;
 using Serilog;
@@ -109,9 +112,9 @@ public class TreeFileDataGrid : SimpleFileDataGrid
 
     public void Search()
     {
-        if (ItemsSource is not BulkObservableCollection<SimpleFileInfo> items)
+        if (ItemsSource is not AvaloniaList<SimpleFileInfo> items)
         {
-            throw new Exception($"{nameof(ItemsSource)}必须为{nameof(BulkObservableCollection<SimpleFileInfo>)}");
+            throw new Exception($"{nameof(ItemsSource)}必须为{nameof(AvaloniaList<SimpleFileInfo>)}");
         }
 
         if (items.Count == 0 || items[0] is not TreeDirInfo root)
@@ -257,13 +260,12 @@ public class TreeFileDataGrid : SimpleFileDataGrid
             }
 
             //文件文件夹图标
-            var icon = new TextBlock()
+            var icon = new ContentPresenter()
             {
-                Text = value is TreeDirInfo ? "\uE8B7" : "\uE160",
-                Foreground = value is TreeDirInfo ? Brushes.ForestGreen : Brushes.Coral,
-                FontFamily = this.FindResource("IconFont") as FontFamily ?? throw new Exception("找不到IconFont"),
-                // [!MarginProperty] = new Binding(nameof(SimpleFileInfo.Depth)) 
-                // { Converter = new DirDepthMarginConverter() },
+                Content = value is TreeDirInfo
+                    ? new FluentIcon { Icon = Icon.Folder }
+                    : new FluentIcon { Icon = Icon.Document },
+                Foreground = value is TreeDirInfo ? Brushes.ForestGreen : Brushes.Coral
             };
 
             return new StackPanel
@@ -297,9 +299,9 @@ public class TreeFileDataGrid : SimpleFileDataGrid
             return;
         }
 
-        if (ItemsSource is not BulkObservableCollection<SimpleFileInfo> items)
+        if (ItemsSource is not AvaloniaList<SimpleFileInfo> items)
         {
-            throw new Exception($"{nameof(ItemsSource)}必须为{nameof(BulkObservableCollection<SimpleFileInfo>)}");
+            throw new Exception($"{nameof(ItemsSource)}必须为{nameof(AvaloniaList<SimpleFileInfo>)}");
         }
 
         foreach (var subDir in dir.SubDirs.Where(p => p.IsExpanded))
@@ -315,7 +317,7 @@ public class TreeFileDataGrid : SimpleFileDataGrid
     {
         if (e.Source is Visual { DataContext: TreeDirInfo dir })
         {
-            if (ItemsSource is not BulkObservableCollection<SimpleFileInfo> items)
+            if (ItemsSource is not AvaloniaList<SimpleFileInfo> items)
             {
                 return;
             }
@@ -360,9 +362,9 @@ public class TreeFileDataGrid : SimpleFileDataGrid
             return;
         }
 
-        if (ItemsSource is not BulkObservableCollection<SimpleFileInfo> items)
+        if (ItemsSource is not AvaloniaList<SimpleFileInfo> items)
         {
-            throw new Exception($"{nameof(ItemsSource)}必须为{nameof(BulkObservableCollection<SimpleFileInfo>)}");
+            throw new Exception($"{nameof(ItemsSource)}必须为{nameof(AvaloniaList<SimpleFileInfo>)}");
         }
 
         // dir.Subs.ForEach(p => p.IsChecked = false);

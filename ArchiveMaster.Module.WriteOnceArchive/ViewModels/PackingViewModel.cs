@@ -6,8 +6,8 @@ using FzLib.Avalonia.Dialogs;
 
 namespace ArchiveMaster.ViewModels;
 
-public partial class PackingViewModel(AppConfig appConfig, IDialogService dialogService)
-    : TwoStepViewModelBase<PackingService, PackingConfig>(appConfig, dialogService,
+public partial class PackingViewModel(ViewModelServices services)
+    : TwoStepViewModelBase<PackingService, PackingConfig>(services,
         WriteOnceArchiveModuleInfo.CONFIG_GROUP)
 {
     public static readonly (long sizeGB, string desc)[] PresetPackageSizes =

@@ -1,7 +1,10 @@
 <Styles
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:ctrl="clr-namespace:FzLib.Avalonia.Controls;assembly=FzLib.Avalonia">
+    xmlns:b="using:FzLib.Avalonia.Behaviors"
+    xmlns:cfg="using:ArchiveMaster.Configs"
+    xmlns:ctrl="clr-namespace:FzLib.Avalonia.Controls;assembly=FzLib.Avalonia"
+    xmlns:ic="using:FluentIcons.Avalonia">
     <Design.PreviewWith>
         <Border Padding="20">
             <!--  Add Controls for Previewer Here  -->
@@ -16,14 +19,17 @@
         </ResourceDictionary>
     </Styles.Resources>
 
+    <Style Selector="ic|FluentIcon">
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="FontSize" Value="18" />
+    </Style>
+
     <Style Selector="ctrl|WrapFormItemGroup CheckBox">
         <Setter Property="VerticalAlignment" Value="Bottom" />
     </Style>
 
-    <Style Selector="ctrl|FormItem.BoldLabel">
-        <Style Selector="^ /template/ ContentPresenter#PART_Label">
-            <Setter Property="FontWeight" Value="Bold" />
-        </Style>
+    <Style Selector="ScrollViewer">
+        <Setter Property="b:SmoothScrollBehavior.IsEnabled" Value="{Binding Source={x:Static cfg:GlobalConfigs.Instance}, Path=IsSmoothScrollingEnabled}" />
     </Style>
 
     <Style Selector="TextBlock">
@@ -43,10 +49,6 @@
 
     <Style Selector="DataGridCell.Right">
         <Setter Property="HorizontalContentAlignment" Value="Right" />
-    </Style>
-
-    <Style Selector="ListBox">
-        <Setter Property="Background" Value="Transparent" />
     </Style>
 
     <Style Selector="CheckBox.Middle">
@@ -71,41 +73,12 @@
             <Setter Property="VerticalContentAlignment" Value="Center" />
             <Setter Property="Width" Value="120" />
         </Style>
-        <Style Selector="^.Primary">
-            <Setter Property="Background" Value="{DynamicResource Accent1}" />
-            <Setter Property="Foreground" Value="White" />
-
-            <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-                <Setter Property="Background" Value="{DynamicResource Accent2}" />
-                <Setter Property="Foreground" Value="White" />
-            </Style>
-            <Style Selector="^:pressed /template/ ContentPresenter#PART_ContentPresenter">
-                <Setter Property="Background" Value="{DynamicResource Accent3}" />
-                <Setter Property="Foreground" Value="White" />
-            </Style>
-        </Style>
         <Style Selector="^.Icon">
-            <Setter Property="Padding" Value="6" />
-            <Setter Property="FontFamily">
-                <StaticResource ResourceKey="IconFont" />
-            </Setter>
-        </Style>
-        <Style Selector="^.Link">
+            <Setter Property="Padding" Value="4" />
             <Setter Property="Background" Value="Transparent" />
-            <Setter Property="Foreground" Value="{DynamicResource Accent0}" />
-            <Setter Property="Cursor" Value="Hand" />
-            <Setter Property="Padding" Value="8,3" />
             <Style Selector="^:disabled /template/ ContentPresenter#PART_ContentPresenter">
                 <Setter Property="Background" Value="Transparent" />
-                <Setter Property="Foreground" Value="{DynamicResource Foreground3}" />
-            </Style>
-            <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-                <Setter Property="Background" Value="Transparent" />
-                <Setter Property="Foreground" Value="{DynamicResource Foreground1}" />
-            </Style>
-            <Style Selector="^:pressed /template/ ContentPresenter#PART_ContentPresenter">
-                <Setter Property="Background" Value="Transparent" />
-                <Setter Property="Foreground" Value="{DynamicResource Foreground2}" />
+                <Setter Property="Opacity" Value="0.5" />
             </Style>
         </Style>
         <Style Selector="^.Transparent">
@@ -124,16 +97,11 @@
     <Style Selector="ToggleButton">
         <Setter Property="Padding" Value="24,6" />
         <Style Selector="^.Icon">
-            <Setter Property="Padding" Value="6" />
-            <Setter Property="FontFamily">
-                <StaticResource ResourceKey="IconFont" />
-            </Setter>
-        </Style>
-        <Style Selector="^.Transparent">
+            <Setter Property="Padding" Value="4" />
             <Setter Property="Background" Value="Transparent" />
             <Style Selector="^:disabled /template/ ContentPresenter#PART_ContentPresenter">
                 <Setter Property="Background" Value="Transparent" />
-                <Setter Property="Foreground" Value="{DynamicResource Foreground3}" />
+                <Setter Property="Opacity" Value="0.5" />
             </Style>
         </Style>
     </Style>
@@ -152,25 +120,6 @@
 
     <Style Selector="MenuFlyoutPresenter StackPanel">
         <Setter Property="Spacing" Value="0" />
-    </Style>
-
-    <Style Selector="DropDownButton">
-        <Style Selector="^.Link">
-            <Setter Property="Background" Value="Transparent" />
-            <Setter Property="Padding" Value="8,3" />
-            <Style Selector="^:disabled /template/ ContentPresenter#PART_ContentPresenter">
-                <Setter Property="Background" Value="Transparent" />
-                <Setter Property="Foreground" Value="{DynamicResource Foreground3}" />
-            </Style>
-            <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-                <Setter Property="Background" Value="Transparent" />
-                <Setter Property="Foreground" Value="{DynamicResource Foreground1}" />
-            </Style>
-            <Style Selector="^:pressed /template/ ContentPresenter#PART_ContentPresenter">
-                <Setter Property="Background" Value="Transparent" />
-                <Setter Property="Foreground" Value="{DynamicResource Foreground2}" />
-            </Style>
-        </Style>
     </Style>
 
     <Style Selector="ctrl|RadioButtonGroup">

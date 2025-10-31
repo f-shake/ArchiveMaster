@@ -9,7 +9,6 @@
     xmlns:fileSystem="clr-namespace:ArchiveMaster.ViewModels.FileSystem"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:sys="clr-namespace:System;assembly=mscorlib"
-    xmlns:ui="http://schemas.modernwpf.com/2019"
     xmlns:v="using:ArchiveMaster.Views"
     xmlns:vm="using:ArchiveMaster.ViewModels"
     x:Name="root"
@@ -182,13 +181,12 @@
                         Header="多匹配">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock
+                                <ContentPresenter
                                     x:Name="e"
                                     Margin="16,0"
                                     VerticalAlignment="Center"
-                                    FontFamily="{StaticResource IconFont}"
+                                    Content="{Binding ., Converter={x:Static cvt:DirStructureSyncTypeDescriptionConverter.Instance}, ConverterParameter=Content}"
                                     Foreground="{Binding ., Converter={x:Static cvt:DirStructureSyncTypeDescriptionConverter.Instance}, ConverterParameter=Foreground}"
-                                    Text="{Binding ., Converter={x:Static cvt:DirStructureSyncTypeDescriptionConverter.Instance}, ConverterParameter=Text}"
                                     ToolTip.Tip="{Binding ., Converter={x:Static cvt:DirStructureSyncTypeDescriptionConverter.Instance}, ConverterParameter=ToolTip}" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>

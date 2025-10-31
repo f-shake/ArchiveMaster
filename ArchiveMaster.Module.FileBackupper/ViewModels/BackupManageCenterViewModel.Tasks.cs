@@ -50,7 +50,7 @@ public partial class BackupManageCenterViewModel
         }
         catch (Exception ex)
         {
-            await DialogService.ShowErrorDialogAsync("备份失败", ex);
+            await Services.Dialog.ShowErrorDialogAsync("备份失败", ex);
         }
     }
 
@@ -67,18 +67,18 @@ public partial class BackupManageCenterViewModel
 
         if (newValue != null)
         {
-            await TryDoAsync("加载任务", async () =>
-            {
-                newValue.Check();
-                await LoadSnapshotsAsync();
-                LogTimeFrom = DateTime.Today;
-                LogTimeTo = DateTime.Today.AddDays(1);
-                await LoadLogsAsync();
-                SelectedTabIndex = 3;
-                await UpdateOperationsEnableAsync();
-                newValue.PropertyChanged += SelectedBackupTaskPropertyChanged;
-            });
-
+            await Services.ProgressOverlay.WithOverlayAsync(async () =>
+                {
+                    newValue.Check();
+                    await LoadSnapshotsAsync();
+                    LogTimeFrom = DateTime.Today;
+                    LogTimeTo = DateTime.Today.AddDays(1);
+                    await LoadLogsAsync();
+                    SelectedTabIndex = 3;
+                    await UpdateOperationsEnableAsync();
+                    newValue.PropertyChanged += SelectedBackupTaskPropertyChanged;
+                }, ex => Services.Dialog.ShowErrorDialogAsync("加载任务失败", ex),
+                "正在加载任务");
         }
     }
 

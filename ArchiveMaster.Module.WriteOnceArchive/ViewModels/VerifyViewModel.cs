@@ -1,5 +1,4 @@
 using System.Collections;
-using ArchiveMaster.Basic;
 using ArchiveMaster.Configs;
 using ArchiveMaster.Services;
 using ArchiveMaster.ViewModels.FileSystem;
@@ -7,15 +6,16 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using FzLib.Avalonia.Dialogs;
 using System.Collections.ObjectModel;
 using ArchiveMaster.Enums;
+using Avalonia.Collections;
 
 namespace ArchiveMaster.ViewModels;
 
-public partial class VerifyViewModel(AppConfig appConfig, IDialogService dialogService)
-    : TwoStepViewModelBase<VerifyService, VerifyConfig>(appConfig, dialogService,
+public partial class VerifyViewModel(ViewModelServices services)
+    : TwoStepViewModelBase<VerifyService, VerifyConfig>(services,
         WriteOnceArchiveModuleInfo.CONFIG_GROUP)
 {
     [ObservableProperty]
-    private BulkObservableCollection<SimpleFileInfo> fileTree;
+    private AvaloniaList<SimpleFileInfo> fileTree;
 
     [ObservableProperty]
     private ObservableCollection<WriteOnceFile> files;
@@ -25,7 +25,7 @@ public partial class VerifyViewModel(AppConfig appConfig, IDialogService dialogS
 
     protected override Task OnInitializedAsync()
     {
-        FileTree = new BulkObservableCollection<SimpleFileInfo>(Service.FileTree.Subs);
+        FileTree = new AvaloniaList<SimpleFileInfo>(Service.FileTree.Subs);
         IComparer<ProcessStatus> comparer = Comparer<ProcessStatus>.Create((x, y) =>
         {
             int Order(ProcessStatus status) => status switch

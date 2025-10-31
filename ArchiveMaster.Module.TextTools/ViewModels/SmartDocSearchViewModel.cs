@@ -16,8 +16,8 @@ using Serilog;
 
 namespace ArchiveMaster.ViewModels;
 
-public partial class SmartDocSearchViewModel(AppConfig appConfig, IDialogService dialogService)
-    : AiTwoStepViewModelBase<SmartDocSearchService, SmartDocSearchConfig>(appConfig, dialogService)
+public partial class SmartDocSearchViewModel(ViewModelServices services)
+    : AiTwoStepViewModelBase<SmartDocSearchService, SmartDocSearchConfig>(services)
 {
     [ObservableProperty]
     private string aiConclude = "";
@@ -36,7 +36,7 @@ public partial class SmartDocSearchViewModel(AppConfig appConfig, IDialogService
     protected override Task OnExecutingAsync(CancellationToken ct)
     {
         AiConclude = "";
-        Service.AitStreamUpdate += (sender, e) => AiConclude += e.Text;
+        Service.AitStreamUpdate += (sender, e) => AiConclude += e.Value;
         return base.OnExecutingAsync(ct);
     }
 
@@ -50,26 +50,5 @@ public partial class SmartDocSearchViewModel(AppConfig appConfig, IDialogService
     {
         SearchResults.Clear();
         AiConclude = "";
-    }
-
-    [RelayCommand]
-    private void OpenFile(string path)
-    {
-        if (path == null || !File.Exists(path))
-        {
-            return;
-        }
-
-        try
-        {
-            Process.Start(new ProcessStartInfo(path)
-            {
-                UseShellExecute = true
-            });
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, "打开文件失败");
-        }
     }
 }

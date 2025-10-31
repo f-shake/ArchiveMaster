@@ -29,25 +29,13 @@ namespace ArchiveMaster.Configs
         private TextSource source = new TextSource();
 
         [ObservableProperty]
-        private bool useAiConclude = true;
-
-        [ObservableProperty]
         private bool useRegex = false;
+
         public override void Check()
         {
-            if (Source.FromFile)
+            if (Source.IsEmpty())
             {
-                if (Source.Files.Count == 0)
-                {
-                    throw new ArgumentException("请添加至少一个文件");
-                }
-            }
-            else
-            {
-                if (string.IsNullOrWhiteSpace(Source.Text))
-                {
-                    throw new ArgumentException("请输入文本");
-                }
+                throw new ArgumentException("文本源为空");
             }
 
             if (!Keywords.Trimmed.Any())

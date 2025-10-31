@@ -1,6 +1,5 @@
 ﻿using ArchiveMaster.Configs;
 using ArchiveMaster.Enums;
-using ArchiveMaster.Messages;
 using ArchiveMaster.Services;
 using ArchiveMaster.ViewModels;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -20,17 +19,12 @@ using Microsoft.Extensions.DependencyInjection;
 namespace ArchiveMaster.ViewModels
 {
     public abstract partial class
-        OfflineSyncViewModelBase<TService, TConfig, TFile>(
-            AppConfig appConfig,
-            IDialogService dialogService,
-            IStorageProviderService storage)
-        : TwoStepViewModelBase<TService, TConfig>(appConfig, dialogService, OfflineSyncModuleInfo.CONFIG_GRROUP)
+        OfflineSyncViewModelBase<TService, TConfig, TFile>(ViewModelServices services)
+        : TwoStepViewModelBase<TService, TConfig>(services, OfflineSyncModuleInfo.CONFIG_GRROUP)
         where TService : TwoStepServiceBase<TConfig>
         where TConfig : ConfigBase, new()
         where TFile : SimpleFileInfo
     {
-        public IStorageProviderService Storage { get; } = storage;
-
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(AddedFileLength),
             nameof(AddedFileCount),

@@ -9,7 +9,7 @@ using FzLib.IO;
 
 namespace ArchiveMaster.ViewModels;
 
-public partial class FileFilterTestViewModel(IDialogService dialogService) : ViewModelBase(dialogService)
+public partial class FileFilterTestViewModel(ViewModelServices services) : ViewModelBase(services)
 {
     [ObservableProperty]
     private FileFilterRule filter = new FileFilterRule();

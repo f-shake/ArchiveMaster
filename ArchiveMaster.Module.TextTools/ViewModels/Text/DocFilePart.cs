@@ -2,14 +2,14 @@
 
 namespace ArchiveMaster.ViewModels;
 
-public struct DocFileLine
+public struct DocFilePart
 {
-    public DocFileLine()
+    public DocFilePart()
     {
         
     }
 
-    public DocFileLine(string source, string text)
+    public DocFilePart(string source, string text)
     {
         Source = source;
         Text = text;

@@ -13,8 +13,8 @@ using FzLib.Avalonia.Dialogs;
 
 namespace ArchiveMaster.ViewModels;
 
-public partial class RepairModifiedTimeViewModel(AppConfig appConfig, IDialogService dialogService)
-    : TwoStepViewModelBase<RepairModifiedTimeService, RepairModifiedTimeConfig>(appConfig, dialogService)
+public partial class RepairModifiedTimeViewModel(ViewModelServices services)
+    : TwoStepViewModelBase<RepairModifiedTimeService, RepairModifiedTimeConfig>(services)
 {
     [ObservableProperty]
     private List<ExifTimeFileInfo> files = new List<ExifTimeFileInfo>();

@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:gb="using:GroupBox.Avalonia.Controls"
+    xmlns:ic="using:FluentIcons.Avalonia.MarkupExtensions"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:v="using:ArchiveMaster.Views"
     d:DesignHeight="450"
@@ -77,7 +78,7 @@
             <Button
                 Classes="Icon"
                 Click="ResetButton_OnClick"
-                Content="{StaticResource Refresh}" />
+                Content="{ic:FluentIcon Icon=ArrowClockwise}" />
             <CheckBox
                 Grid.Column="2"
                 Content="使用正则表达式"
