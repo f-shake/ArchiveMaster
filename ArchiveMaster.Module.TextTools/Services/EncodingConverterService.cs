@@ -31,8 +31,9 @@ namespace ArchiveMaster.Services
         {
             await Task.Run(() =>
             {
-                return TryForFilesAsync(Files, async (file, s) =>
+                return TryForFilesAsync(Files.CheckedOnly().ToList(), async (file, s) =>
                 {
+                    NotifyMessage($"正在转换文件编码{s.GetFileNumberMessage()}：{file.Name}");
                     var tempFile = Path.Combine(Path.GetDirectoryName(file.Path), Guid.NewGuid().ToString());
                     var backupFile = $"{file.Path}.{DateTime.Now:yyyyMMddHHmmss}.bak";
                     int bufferLength = 1000;

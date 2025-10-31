@@ -1,4 +1,4 @@
-using Avalonia;
+ï»¿using Avalonia;
 using Avalonia.Controls;
 using System;
 using ArchiveMaster.ViewModels;
@@ -13,19 +13,19 @@ namespace ArchiveMaster.Views
             AvaloniaProperty.Register<TwoStepPanelBase, object>(nameof(ConfigsContent));
 
         public static readonly StyledProperty<object> ExecuteButtonContentProperty
-            = AvaloniaProperty.Register<TwoStepPanelBase, object>(nameof(ExecuteButtonContent), "Ö´ĞĞ");
+            = AvaloniaProperty.Register<TwoStepPanelBase, object>(nameof(ExecuteButtonContent), "æ‰§è¡Œ");
 
         public static readonly StyledProperty<object> InitializeButtonContentProperty
-            = AvaloniaProperty.Register<TwoStepPanelBase, object>(nameof(InitializeButtonContent), "³õÊ¼»¯");
+            = AvaloniaProperty.Register<TwoStepPanelBase, object>(nameof(InitializeButtonContent), "åˆå§‹åŒ–");
 
         public static readonly StyledProperty<object> ResetButtonContentProperty
-            = AvaloniaProperty.Register<TwoStepPanelBase, object>(nameof(ResetButtonContent), "ÖØÖÃ");
+            = AvaloniaProperty.Register<TwoStepPanelBase, object>(nameof(ResetButtonContent), "é‡ç½®");
 
         public static readonly StyledProperty<object> ResultsContentProperty =
             AvaloniaProperty.Register<TwoStepPanelBase, object>(nameof(ResultsContent));
 
         public static readonly StyledProperty<object> StopButtonContentProperty
-            = AvaloniaProperty.Register<TwoStepPanelBase, object>(nameof(StopButtonContent), "È¡Ïû");
+            = AvaloniaProperty.Register<TwoStepPanelBase, object>(nameof(StopButtonContent), "å–æ¶ˆ");
 
         private Grid bottomOneLine;
 
@@ -83,15 +83,15 @@ namespace ArchiveMaster.Views
             container = e.NameScope.Find<Grid>("PART_ContentContainer");
             if (gridSplitter == null || configScrViewer == null || bottomOneLine == null || bottomTwoLine == null)
             {
-                throw new InvalidOperationException($"{nameof(TwoStepPanelBase)}µÄÄ£°å²»¶ÔÓ¦");
+                throw new InvalidOperationException($"{nameof(TwoStepPanelBase)}çš„æ¨¡æ¿ä¸å¯¹åº”");
             }
 
             gridSplitter.DragStarted += (_, _) =>
             {
-                //¿ªÊ¼ÍÏ¶¯ºó£¬½â³ıÏà¹ØÏŞÖÆ¡£
-                //1.È¡Ïû¹ö¶¯Çø¸ß¶ÈÏŞÖÆ
-                //2.ÅäÖÃµ¥Ôª¸ñÊµ¼Ê¸ß¶ÈÎªµ±Ç°¸ß¶È£¬±ÜÃâÉÁÏÖ
-                //3.ÅäÖÃµ¥Ôª¸ñ×î´ó¸ß¶ÈÎªĞèÒªµÄ¸ß¶È
+                //å¼€å§‹æ‹–åŠ¨åï¼Œè§£é™¤ç›¸å…³é™åˆ¶ã€‚
+                //1.å–æ¶ˆæ»šåŠ¨åŒºé«˜åº¦é™åˆ¶
+                //2.é…ç½®å•å…ƒæ ¼å®é™…é«˜åº¦ä¸ºå½“å‰é«˜åº¦ï¼Œé¿å…é—ªç°
+                //3.é…ç½®å•å…ƒæ ¼æœ€å¤§é«˜åº¦ä¸ºéœ€è¦çš„é«˜åº¦
                 configScrViewer.MaxHeight = double.MaxValue;
                 container.RowDefinitions[0].Height =
                     new GridLength(container.RowDefinitions[0].ActualHeight, GridUnitType.Pixel);

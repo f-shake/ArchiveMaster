@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+ï»¿using System.Collections.ObjectModel;
 using ArchiveMaster.ViewModels;
 using ArchiveMaster.ViewModels.FileSystem;
 using Avalonia;
@@ -13,7 +13,7 @@ public partial class FilterTestResultDialog : DialogHost
 {
     public FilterTestResultDialog()
     {
-        throw new Exception("Çëµ÷ÓÃ´ø²ÎÊıµÄ¹¹Ôìº¯Êı");
+        throw new Exception("è¯·è°ƒç”¨å¸¦å‚æ•°çš„æ„é€ å‡½æ•°");
     }
 
     public FilterTestResultDialog(int count, long length, IEnumerable<SimpleFileInfo> files)
