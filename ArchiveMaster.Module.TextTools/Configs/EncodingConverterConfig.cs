@@ -22,10 +22,20 @@ namespace ArchiveMaster.Configs
 
         [ObservableProperty]
         private bool? withBom;
+        
+        [ObservableProperty]
+        private bool saveToAnotherDir;
+        
+        [ObservableProperty]
+        private string anotherDir;
 
         public override void Check()
         {
             CheckDir(Dir, "目录");
+            if (SaveToAnotherDir)
+            {
+                CheckDir(AnotherDir, "另存目录");
+            }
 
             CheckEmpty(TargetEncoding, "目标编码");
             try

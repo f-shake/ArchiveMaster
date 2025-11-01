@@ -10,6 +10,7 @@
     xmlns:fzb="clr-namespace:FzLib.Avalonia.Behaviors;assembly=FzLib.Avalonia"
     xmlns:gb="using:GroupBox.Avalonia.Controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:sys="clr-namespace:System;assembly=System.Runtime"
     xmlns:v="using:ArchiveMaster.Views"
     xmlns:vm="using:ArchiveMaster.ViewModels"
     x:Name="root"
@@ -39,6 +40,25 @@
                     <AutoCompleteBox
                         ItemsSource="{Binding EncodingNames}"
                         Text="{Binding Config.TargetEncoding}" />
+                </DockPanel>
+            </ct:FormItem>
+
+            <ct:FormItem Label="保存位置：">
+                <DockPanel HorizontalSpacing="8">
+                    <ct:RadioButtonGroup SelectedIndex="{Binding Config.SaveToAnotherDir, Converter={x:Static cvt:Converters.BoolZeroOne}}">
+                        <sys:String>替换原文件</sys:String>
+                        <sys:String>另存为</sys:String>
+                    </ct:RadioButtonGroup>
+                    <Panel>
+                        <TextBlock
+                            Classes="Description"
+                            IsVisible="{Binding !Config.SaveToAnotherDir}"
+                            Text="原始文件将移动至备份文件" />
+                        <v:FilePickerTextBox
+                            FileNames="{Binding Config.AnotherDir}"
+                            IsVisible="{Binding Config.SaveToAnotherDir}"
+                            Type="OpenFolder" />
+                    </Panel>
                 </DockPanel>
             </ct:FormItem>
         </ct:StackFormItemGroup>

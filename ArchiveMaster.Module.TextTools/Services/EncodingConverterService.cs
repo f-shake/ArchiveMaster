@@ -34,13 +34,15 @@ namespace ArchiveMaster.Services
                 return TryForFilesAsync(Files.CheckedOnly().ToList(), async (file, s) =>
                 {
                     NotifyMessage($"正在转换文件编码{s.GetFileNumberMessage()}：{file.Name}");
-                    var tempFile = Path.Combine(Path.GetDirectoryName(file.Path), Guid.NewGuid().ToString());
-                    var backupFile = $"{file.Path}.{DateTime.Now:yyyyMMddHHmmss}.bak";
+                    string targetFile = null;
+                    targetFile = Config.SaveToAnotherDir
+                        ? Path.Combine(Config.AnotherDir, file.Name)
+                        : Path.Combine(Path.GetDirectoryName(file.Path), Guid.NewGuid().ToString());
                     int bufferLength = 1000;
                     char[] buffer = new char[bufferLength];
                     try
                     {
-                        await using (var fsWrite = new StreamWriter(tempFile, false, targetEncoding))
+                        await using (var fsWrite = new StreamWriter(targetFile, false, targetEncoding))
                         {
                             using (var fsRead = new StreamReader(file.Path, file.Encoding.Encoding))
                             {
@@ -53,15 +55,23 @@ namespace ArchiveMaster.Services
                             }
                         }
 
-                        File.Replace(tempFile, file.Path, backupFile);
+                        if (Config.SaveToAnotherDir)
+                        {
+                            //没什么要做的
+                        }
+                        else
+                        {
+                            var backupFile = $"{file.Path}.{DateTime.Now:yyyyMMddHHmmss}.bak";
+                            File.Replace(targetFile, file.Path, backupFile);
+                        }
                     }
                     catch (OperationCanceledException)
                     {
-                        if (File.Exists(tempFile))
+                        if (File.Exists(targetFile))
                         {
                             try
                             {
-                                File.Delete(tempFile);
+                                File.Delete(targetFile);
                             }
                             catch (Exception ex)
                             {
@@ -84,7 +94,7 @@ namespace ArchiveMaster.Services
             {
                 PrepareTargetEncoding();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw new Exception($"无法识别目标编码：{Config.TargetEncoding}");
             }
