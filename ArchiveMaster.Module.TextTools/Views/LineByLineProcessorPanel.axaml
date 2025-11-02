@@ -60,7 +60,7 @@
                 <DockPanel VerticalSpacing="8">
                     <Grid
                         Margin="0,0,8,0"
-                        ColumnDefinitions="Auto,Auto,*"
+                        ColumnDefinitions="Auto,Auto,Auto,*"
                         ColumnSpacing="8"
                         DockPanel.Dock="Bottom">
                         <Button
@@ -75,13 +75,20 @@
                             Content="{ic:FluentIcon Icon=Delete}"
                             IsEnabled="{Binding SelectedExample, Converter={x:Static cvt:Converters.IsNotNull}}"
                             ToolTip.Tip="删除" />
-                        <TextBlock
+                        <Button
                             Grid.Column="2"
+                            Classes="Icon"
+                            Command="{Binding ImportExampleFromTextCommand}"
+                            Content="{ic:FluentIcon Icon=TextBox}"
+                            ToolTip.Tip="从文本导入" />
+                        <TextBlock
+                            Grid.Column="3"
                             Classes="Description"
                             Text="通过向AI提供至少2条示例，可以提高正确率"
                             TextAlignment="Right" />
                     </Grid>
                     <DataGrid
+                        MaxHeight="200"
                         ItemsSource="{Binding Config.Examples}"
                         SelectedItem="{Binding SelectedExample}">
                         <DataGrid.Columns>
