@@ -25,6 +25,19 @@ public partial class LineByLineProcessorConfig : ConfigBase
 
     [ObservableProperty]
     private TextSource source = new TextSource();
+
+    [ObservableProperty]
+    private bool enableRetry = true;
+
+    [ObservableProperty]
+    private int maxRetryCount = 3;
+
+    [ObservableProperty]
+    private bool enableMajorityVote = false;
+
+    [ObservableProperty]
+    private int voteCount = 3;
+
     public override void Check()
     {
         CheckEmpty(Prompt, "要求");
@@ -42,11 +55,12 @@ public partial class LineByLineProcessorConfig : ConfigBase
         {
             if (string.IsNullOrWhiteSpace(Examples[i].Input))
             {
-                 throw new ArgumentException($"示例{i + 1}的输入为空");
+                throw new ArgumentException($"示例{i + 1}的输入为空");
             }
+
             if (string.IsNullOrWhiteSpace(Examples[i].Output))
             {
-                 throw new ArgumentException($"示例{i + 1}的输出为空");
+                throw new ArgumentException($"示例{i + 1}的输出为空");
             }
         }
     }

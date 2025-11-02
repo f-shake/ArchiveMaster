@@ -19,7 +19,7 @@
     x:Name="root"
     d:DesignHeight="450"
     d:DesignWidth="800"
-    x:DataType="vm:TextRewriterViewModel"
+    x:DataType="vm:LineByLineProcessorViewModel"
     ExecuteButtonContent="处理"
     mc:Ignorable="d">
     <v:TwoStepPanelBase.ConfigsContent>
@@ -52,9 +52,49 @@
                     </DockPanel>
                 </ct:FormItem>
 
-                <CheckBox
-                    Content="跳过空行"
-                    IsChecked="{Binding Config.SkipEmptyLine}" />
+                <ct:FormItem Label="选项：">
+                    <ct:WrapFormItemGroup>
+                        <CheckBox
+                            Content="跳过空行"
+                            IsChecked="{Binding Config.SkipEmptyLine}" />
+                        <StackPanel Orientation="Horizontal">
+                            <CheckBox
+                                Content="出错时重试"
+                                IsChecked="{Binding Config.EnableRetry}" />
+
+                            <Slider
+                                Width="96"
+                                Classes="ThumbLabel"
+                                IsSnapToTickEnabled="True"
+                                IsVisible="{Binding Config.EnableRetry}"
+                                LargeChange="1"
+                                Maximum="5"
+                                Minimum="2"
+                                SmallChange="1"
+                                TickFrequency="1"
+                                Value="{Binding Config.MaxRetryCount}" />
+                            <TextBlock Text="次" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <CheckBox
+                                Content="投票机制"
+                                IsChecked="{Binding Config.EnableMajorityVote}" />
+
+                            <Slider
+                                Width="96"
+                                Classes="ThumbLabel"
+                                IsSnapToTickEnabled="True"
+                                IsVisible="{Binding Config.EnableMajorityVote}"
+                                LargeChange="2"
+                                Maximum="7"
+                                Minimum="3"
+                                SmallChange="2"
+                                TickFrequency="2"
+                                Value="{Binding Config.EnableMajorityVote}" />
+                            <TextBlock Text="次" />
+                        </StackPanel>
+                    </ct:WrapFormItemGroup>
+                </ct:FormItem>
             </ct:StackFormItemGroup>
             <gb:GroupBox Header="示例">
                 <DockPanel VerticalSpacing="8">

@@ -15,6 +15,7 @@ using DocumentFormat.OpenXml.Bibliography;
 using DocumentFormat.OpenXml.InkML;
 using FzLib.Collections;
 using Microsoft.Extensions.AI;
+using Microsoft.VisualBasic.FileIO;
 
 namespace ArchiveMaster.Services;
 
@@ -29,7 +30,7 @@ public partial class LineByLineProcessorService(AppConfig appConfig)
     //3、AI多次检查，如果有错误，则重新调用AI，直到没有错误为止
     //4、AI多次检查，避免单次误判
     public ObservableCollection<LineByLineItem> Items { get; } = new ObservableCollection<LineByLineItem>();
-    
+
     public override async Task ExecuteAsync(CancellationToken ct = default)
     {
         LlmCallerService llm = new LlmCallerService(AI);
@@ -49,50 +50,77 @@ public partial class LineByLineProcessorService(AppConfig appConfig)
             var chunks = Items.Chunk(Config.MaxLineEachCall);
             int processed = 0;
 
-            //使用StringBuilder记录当前行的内容。当遇到换行符或一次回答完毕后，将内容写入Items[processed + index].Output中。
-            StringBuilder str = new StringBuilder(1000);
+            int chunkIndex = 0;
+            int chunkCount = (Items.Count + Config.MaxLineEachCall - 1) / Config.MaxLineEachCall;
             foreach (var chunk in chunks)
             {
-                int index = 0;
-                await foreach (var r in llm.CallStreamAsync(GetSystemPrompt(chunk.Length),
-                                   string.Join('\n', chunk.Select(x => $"【{x.Index}】{x.Input}")), ct: ct))
+                int retryCount = Config.EnableRetry ? Config.MaxRetryCount : 0;
+                NotifyMessage($"正在处理第{++chunkIndex}个分块，共{chunkCount}个分块");
+
+                while (true)
                 {
-                    foreach (var c in r)
+                    try
                     {
-                        if (c == '\n') //AI使用\n作为换行符
+                        await ProcessSingleChunkAsync(llm, chunk, processed, ct);
+                        processed += chunk.Length;
+                    }
+                    catch (AiUnexpectedFormatException ex)
+                    {
+                        retryCount--;
+                        if (retryCount <= 0)
                         {
-                            CompleteLine();
-                            index++;
-                        }
-                        else
-                        {
-                            str.Append(c);
+                            throw;
                         }
                     }
-                }
-
-                CompleteLine();
-
-                if (index != chunk.Length - 1)
-                {
-                    throw new Exception($"向AI发送了{chunk.Length}行输入，但收到了{index}行输出。请检查AI模型是否正常运行");
-                }
-
-                processed += chunk.Length;
-                continue;
-
-                void CompleteLine()
-                {
-                    if (processed + index >= Items.Count)
-                    {
-                        throw new Exception("AI返回的行数超过了输入的行数。");
-                    }
-
-                    Items[processed + index].Output = indexPrefix.Replace(str.ToString(), string.Empty);
-                    str.Clear();
                 }
             }
         }, ct);
+    }
+
+    private async Task ProcessSingleChunkAsync(LlmCallerService llm, LineByLineItem[] chunk, int processed,
+        CancellationToken ct)
+    {
+        //使用StringBuilder记录当前行的内容。当遇到换行符或一次回答完毕后，将内容写入Items[processed + index].Output中。
+        StringBuilder str = new StringBuilder(1000);
+        int index = 0;
+
+        await foreach (var r in llm.CallStreamAsync(GetSystemPrompt(chunk.Length),
+                           string.Join('\n', chunk.Select(x => $"【{x.Index}】{x.Input}")), ct: ct))
+        {
+            foreach (var c in r)
+            {
+                if (c == '\n') //AI使用\n作为换行符
+                {
+                    CompleteLine();
+                    index++;
+                }
+                else
+                {
+                    str.Append(c);
+                }
+            }
+        }
+
+        CompleteLine();
+
+        if (index != chunk.Length - 1)
+        {
+            throw new AiUnexpectedFormatException(
+                $"向AI发送了{chunk.Length}行输入，但收到了{index}行输出。请检查AI模型是否正常运行");
+        }
+
+        void CompleteLine()
+        {
+            if (processed + index >= Items.Count)
+            {
+                throw new AiUnexpectedFormatException($"AI返回的总行数（{processed + index}）超过了输入的行数。");
+            }
+
+            Items[processed + index].Output = indexPrefix.Replace(str.ToString(), string.Empty);
+            str.Clear();
+
+            NotifyProgress(processed + index, Items.Count);
+        }
     }
 
     public override IEnumerable<SimpleFileInfo> GetInitializedFiles()
@@ -150,7 +178,7 @@ public partial class LineByLineProcessorService(AppConfig appConfig)
         if (Config.Examples.Any(p => !string.IsNullOrWhiteSpace(p.Explain)))
         {
             sb.AppendLine("【示例解释】：");
-            
+
             foreach (var item in Config.Examples.Where(p => !string.IsNullOrWhiteSpace(p.Explain)))
             {
                 sb.AppendLine($"【{item.Index}】{item.Explain}");

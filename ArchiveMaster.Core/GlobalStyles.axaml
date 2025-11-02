@@ -19,6 +19,29 @@
         </ResourceDictionary>
     </Styles.Resources>
 
+    <Style Selector="Slider.ThumbLabel">
+        <Style Selector="^ /template/ Thumb#thumb">
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <Border
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="{DynamicResource SliderThumbCornerRadius}">
+                        <Viewbox>
+                            <TextBlock
+                                Margin="2"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Foreground="{DynamicResource Foreground2}"
+                                Text="{Binding .}" />
+                        </Viewbox>
+                    </Border>
+                </ControlTemplate>
+            </Setter>
+        </Style>
+    </Style>
+
     <Style Selector="ic|FluentIcon">
         <Setter Property="Padding" Value="0" />
         <Setter Property="FontSize" Value="18" />
