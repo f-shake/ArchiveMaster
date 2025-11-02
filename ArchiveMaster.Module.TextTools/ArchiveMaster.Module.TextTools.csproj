@@ -34,6 +34,10 @@
       <DependentUpon>EncodingConverterPanel.axaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Views\LineByLineProcessorPanel.axaml.cs">
+      <DependentUpon>LineByLineProcessorPanel.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>

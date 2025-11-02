@@ -18,8 +18,7 @@ namespace ArchiveMaster.Services;
 public class TextRewriterService(AppConfig appConfig)
     : AiTwoStepServiceBase<TextRewriterConfig>(appConfig)
 {
-    public const int MAX_LENGTH = 300_000;
-    public const int MAX_REF_LENGTH = 10_000;
+    public const int MaxRefLength = 10_000;
 
     public event GenericEventHandler<LlmOutputItem> TextGenerated;
 
@@ -32,7 +31,7 @@ public class TextRewriterService(AppConfig appConfig)
             NotifyMessage("正在读取文本源");
             string text = (await Config.Source.GetPlainTextAsync(TextSourceReadUnit.Combined, ct)
                 .FirstOrDefaultAsync()).Text;
-            CheckTextSource(text, MAX_LENGTH, "文本源");
+            CheckTextSource(text, MaxLength, "文本源");
 
             NotifyMessage("正在调用AI进行处理");
 
@@ -55,19 +54,6 @@ public class TextRewriterService(AppConfig appConfig)
         throw new NotImplementedException();
     }
 
-    private void CheckTextSource(string text, int maxLength, string name)
-    {
-        if (string.IsNullOrWhiteSpace(text))
-        {
-            throw new ArgumentException($"{name}为空");
-        }
-
-        if (text.Length > maxLength)
-        {
-            throw new ArgumentOutOfRangeException(nameof(Config.Source),
-                $"{name}长度超过限制（{maxLength}），请缩减文本源长度。");
-        }
-    }
     private async Task<string> GetSystemPromptAsync(TextGenerationCategory type, CancellationToken ct)
     {
         var prompt = new StringBuilder();
@@ -81,7 +67,7 @@ public class TextRewriterService(AppConfig appConfig)
         {
             string referenceText = (await Config.ReferenceSource.GetPlainTextAsync(TextSourceReadUnit.Combined, ct)
                 .FirstOrDefaultAsync()).Text;
-            CheckTextSource(referenceText, MAX_REF_LENGTH, "参考文本");
+            CheckTextSource(referenceText, MaxRefLength, "参考文本");
             tempPrompt = tempPrompt.Replace(AiAgentAttribute.ReferenceTextPlaceholder, referenceText);
         }
 
