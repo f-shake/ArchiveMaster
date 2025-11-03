@@ -83,19 +83,11 @@
                     ColumnTimeIndex="1.4"
                     ItemsSource="{Binding MatchedFiles}">
                     <v:SimpleFileDataGrid.Columns>
-                        <DataGridTemplateColumn
-                            CanUserResize="False"
-                            Header="已加密">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <Ellipse
-                                        Width="8"
-                                        Height="8"
-                                        Fill="SkyBlue"
-                                        IsVisible="{Binding IsEncrypted}" />
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
+                        <v:DataGridLightColumn
+                            Fill="{DynamicResource Accent0}"
+                            Header="已加密"
+                            SortMemberPath="IsEncrypted"
+                            VisibleBinding="{Binding IsEncrypted}" />
                         <DataGridTextColumn
                             Binding="{Binding Hash}"
                             Header="文件Hash"

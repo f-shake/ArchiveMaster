@@ -196,24 +196,14 @@ public class SimpleFileDataGrid : DataGrid
 
     protected virtual DataGridColumn GetProcessStatusColumn()
     {
-        var column = new DataGridTemplateColumn
+        var column = new DataGridLightColumn()
         {
-            CanUserResize = false,
-            CanUserReorder = false,
             CanUserSort = false,
             Header = ColumnStatusHeader,
             MaxWidth = 200,
+            FillBinding = new Binding(nameof(SimpleFileInfo.Status)) { Converter = ProcessStatusColorConverter }
         };
 
-        var cellTemplate = new FuncDataTemplate<SimpleFileInfo>((value, namescope) => new Ellipse
-        {
-            Width = 8,
-            Height = 8,
-            [!Shape.FillProperty] = new Binding(nameof(SimpleFileInfo.Status))
-                { Converter = ProcessStatusColorConverter }
-        });
-
-        column.CellTemplate = cellTemplate;
         return column;
     }
 

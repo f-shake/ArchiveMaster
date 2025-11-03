@@ -76,20 +76,10 @@
                     Binding="{Binding Encoding.Encoding.EncodingName}"
                     Header="最佳编码"
                     IsReadOnly="True" />
-                <DataGridTemplateColumn
-                    CanUserResize="False"
+                <v:DataGridLightColumn
+                    Fill="{DynamicResource Foreground0}"
                     Header="BOM"
-                    SortMemberPath="Encoding.HasBOM">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <Ellipse
-                                Width="8"
-                                Height="8"
-                                Fill="{DynamicResource Foreground0}"
-                                IsVisible="{Binding Encoding.HasBOM}" />
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
+                    VisibleBinding="{Binding Encoding.HasBOM}" />
                 <DataGridTextColumn
                     Binding="{Binding Encoding.Confidence, StringFormat={}{0:P0}}"
                     Header="置信度"

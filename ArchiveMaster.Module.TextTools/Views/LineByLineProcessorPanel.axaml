@@ -195,20 +195,11 @@
                         Width="*"
                         Binding="{Binding Output}"
                         Header="结果" />
-                    <DataGridTemplateColumn
-                        CanUserResize="False"
+                    <v:DataGridLightColumn
+                        Fill="{DynamicResource Foreground0}"
                         Header="投票不一致"
-                        SortMemberPath="VoteResultNotInconsistent">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <Ellipse
-                                    Width="8"
-                                    Height="8"
-                                    Fill="{DynamicResource Foreground0}"
-                                    IsVisible="{Binding VoteResultNotInconsistent}" />
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
+                        SortMemberPath="VoteResultNotInconsistent"
+                        VisibleBinding="{Binding VoteResultNotInconsistent}" />
                     <DataGridTextColumn
                         Width="*"
                         Binding="{Binding Message}"

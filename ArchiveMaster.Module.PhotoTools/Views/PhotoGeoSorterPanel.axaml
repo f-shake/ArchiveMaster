@@ -41,20 +41,11 @@
             ColumnTimeIndex="-1"
             ItemsSource="{Binding Files}">
             <DataGrid.Columns>
-                <DataGridTemplateColumn
-                    CanUserResize="False"
+                <v:DataGridLightColumn
+                    Fill="{DynamicResource Foreground0}"
                     Header="匹配"
-                    SortMemberPath="IsMatched">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <Ellipse
-                                Width="8"
-                                Height="8"
-                                Fill="{DynamicResource Foreground0}"
-                                IsVisible="{Binding IsMatched}" />
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
+                    SortMemberPath="IsMatched"
+                    VisibleBinding="{Binding IsMatched}" />
                 <DataGridTextColumn
                     Binding="{Binding Longitude, StringFormat='0.000000'}"
                     Header="经度" />

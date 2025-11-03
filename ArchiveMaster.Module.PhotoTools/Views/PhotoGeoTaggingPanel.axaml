@@ -60,34 +60,11 @@
             ColumnTimeIndex="-1"
             ItemsSource="{Binding Files}">
             <DataGrid.Columns>
-                <DataGridTemplateColumn
-                    CanUserResize="False"
-                    Header="匹配"
-                    SortMemberPath="IsMatched">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <Ellipse
-                                Width="8"
-                                Height="8"
-                                Fill="{DynamicResource Foreground0}"
-                                IsVisible="{Binding IsMatched}" />
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-                <DataGridTemplateColumn
-                    CanUserResize="False"
+                <v:DataGridLightColumn
+                    Fill="{DynamicResource Foreground0}"
                     Header="已有坐标"
-                    SortMemberPath="AlreadyHasGps">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <Ellipse
-                                Width="8"
-                                Height="8"
-                                Fill="{DynamicResource Foreground0}"
-                                IsVisible="{Binding AlreadyHasGps}" />
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
+                    SortMemberPath="AlreadyHasGps"
+                    VisibleBinding="{Binding AlreadyHasGps}" />
                 <DataGridTextColumn
                     Binding="{Binding ExifTime}"
                     Header="Exif时间"

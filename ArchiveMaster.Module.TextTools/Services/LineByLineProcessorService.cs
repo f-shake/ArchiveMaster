@@ -16,6 +16,7 @@ using DocumentFormat.OpenXml.InkML;
 using FzLib.Collections;
 using Microsoft.Extensions.AI;
 using Microsoft.VisualBasic.FileIO;
+using Serilog;
 
 namespace ArchiveMaster.Services;
 
@@ -72,6 +73,7 @@ public partial class LineByLineProcessorService(AppConfig appConfig)
                         }
                         catch (AiUnexpectedFormatException ex)
                         {
+                            Log.Logger.Error(ex, "AI返回的格式不符合预期");
                             retryCount--;
                             if (retryCount <= 0)
                             {
