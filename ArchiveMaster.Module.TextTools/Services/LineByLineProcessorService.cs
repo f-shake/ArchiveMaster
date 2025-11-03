@@ -24,11 +24,6 @@ public partial class LineByLineProcessorService(AppConfig appConfig)
 {
     private Regex indexPrefix = GenerateIndexPrefix();
 
-    //下一步计划：
-    //1、示例支持文本框导入
-    //2、导出到文件、复制到剪切板
-    //3、AI多次检查，如果有错误，则重新调用AI，直到没有错误为止
-    //4、AI多次检查，避免单次误判
     public ObservableCollection<LineByLineItem> Items { get; } = new ObservableCollection<LineByLineItem>();
 
     public override async Task ExecuteAsync(CancellationToken ct = default)
@@ -37,90 +32,71 @@ public partial class LineByLineProcessorService(AppConfig appConfig)
 
         await Task.Run(async () =>
         {
+            //输出置空，投票数组初始化
             foreach (var item in Items)
             {
                 item.Output = "";
+                if (Config.EnableMajorityVote)
+                {
+                    item.EachVote = new string[Config.VoteCount];
+                }
             }
 
+            //给每个示例添加序号
             for (var i = 0; i < Config.Examples.Count; i++)
             {
                 Config.Examples[i].Index = i + 1;
             }
 
-            var chunks = Items.Chunk(Config.MaxLineEachCall);
-            int processed = 0;
-
-            int chunkIndex = 0;
-            int chunkCount = (Items.Count + Config.MaxLineEachCall - 1) / Config.MaxLineEachCall;
+            var chunks = Items.Chunk(Config.MaxLineEachCall);//分组
+            int processed = 0;//已经处理的行数（截止上一个chunk）
+            int chunkIndex = 0;//当前chunk的序号
+            int chunkCount = (Items.Count + Config.MaxLineEachCall - 1) / Config.MaxLineEachCall;//总chunk数
+            
             foreach (var chunk in chunks)
             {
-                int retryCount = Config.EnableRetry ? Config.MaxRetryCount : 0;
-                NotifyMessage($"正在处理第{++chunkIndex}个分块，共{chunkCount}个分块");
+                chunkIndex++;
+                
+                //设置投票索引数组，如果启用投票，则为0到VoteCount-1，否则为-1
+                var voteIndexes = Config.EnableMajorityVote ? Enumerable.Range(0, Config.VoteCount) : [-1];
 
-                while (true)
+                //循环每一轮投票
+                foreach (var voteIndex in voteIndexes)
                 {
-                    try
+                    NotifyCurrentMessage(chunkIndex, chunkCount, voteIndex);
+
+                    //重试机制
+                    int retryCount = Config.EnableRetry ? Config.MaxRetryCount : 0;
+                    while (retryCount > 0)
                     {
-                        await ProcessSingleChunkAsync(llm, chunk, processed, ct);
-                        processed += chunk.Length;
-                    }
-                    catch (AiUnexpectedFormatException ex)
-                    {
-                        retryCount--;
-                        if (retryCount <= 0)
+                        try
                         {
-                            throw;
+                            await ProcessSingleChunkAsync(llm, chunk, processed, voteIndex, ct);
+                            break;
+                        }
+                        catch (AiUnexpectedFormatException ex)
+                        {
+                            retryCount--;
+                            if (retryCount <= 0)
+                            {
+                                throw;
+                            }
                         }
                     }
                 }
+
+                //每一次投票结束（每一个chunk的末尾），如果启用投票，则处理投票结果
+                if (Config.EnableMajorityVote)
+                {
+                    foreach (var item in chunk)
+                    {
+                        ProcessVoteResult(item);
+                    }
+                }
+
+                processed += chunk.Length;
             }
         }, ct);
-    }
-
-    private async Task ProcessSingleChunkAsync(LlmCallerService llm, LineByLineItem[] chunk, int processed,
-        CancellationToken ct)
-    {
-        //使用StringBuilder记录当前行的内容。当遇到换行符或一次回答完毕后，将内容写入Items[processed + index].Output中。
-        StringBuilder str = new StringBuilder(1000);
-        int index = 0;
-
-        await foreach (var r in llm.CallStreamAsync(GetSystemPrompt(chunk.Length),
-                           string.Join('\n', chunk.Select(x => $"【{x.Index}】{x.Input}")), ct: ct))
-        {
-            foreach (var c in r)
-            {
-                if (c == '\n') //AI使用\n作为换行符
-                {
-                    CompleteLine();
-                    index++;
-                }
-                else
-                {
-                    str.Append(c);
-                }
-            }
-        }
-
-        CompleteLine();
-
-        if (index != chunk.Length - 1)
-        {
-            throw new AiUnexpectedFormatException(
-                $"向AI发送了{chunk.Length}行输入，但收到了{index}行输出。请检查AI模型是否正常运行");
-        }
-
-        void CompleteLine()
-        {
-            if (processed + index >= Items.Count)
-            {
-                throw new AiUnexpectedFormatException($"AI返回的总行数（{processed + index}）超过了输入的行数。");
-            }
-
-            Items[processed + index].Output = indexPrefix.Replace(str.ToString(), string.Empty);
-            str.Clear();
-
-            NotifyProgress(processed + index, Items.Count);
-        }
     }
 
     public override IEnumerable<SimpleFileInfo> GetInitializedFiles()
@@ -147,7 +123,6 @@ public partial class LineByLineProcessorService(AppConfig appConfig)
             });
         }
     }
-
 
     [GeneratedRegex(@"^【(\d+)】")]
     private static partial Regex GenerateIndexPrefix();
@@ -195,5 +170,130 @@ public partial class LineByLineProcessorService(AppConfig appConfig)
         //sb.AppendLine($"4. 用户将输入{count}条文本，请根据转换要求，生成{count}条输出。");
 
         return sb.ToString();
+    }
+
+    private void NotifyCurrentMessage(int chunkIndex, int chunkCount, int voteIndex)
+    {
+        var strMessage = new StringBuilder()
+            .Append("正在处理第")
+            .Append(chunkIndex)
+            .Append("个分块，共")
+            .Append(chunkCount)
+            .Append("个分块");
+        if (Config.EnableMajorityVote)
+        {
+            strMessage.Append("，正在进行第")
+                .Append(voteIndex + 1)
+                .Append("次投票");
+        }
+
+        NotifyMessage(strMessage.ToString());
+    }
+
+    private void NotifyCurrentProgress(int processed, int voteIndex, int indexInChunk, int countOfChunk)
+    {
+        int total = Config.EnableMajorityVote ? Config.VoteCount * Items.Count : Items.Count;
+        int current = Config.EnableMajorityVote
+            ? Config.VoteCount * processed + voteIndex * countOfChunk + indexInChunk + 1
+            : processed + indexInChunk + 1;
+        Debug.WriteLine($"{current}/{total}");
+        NotifyProgress(current, total);
+    }
+
+    private async Task ProcessSingleChunkAsync(LlmCallerService llm, LineByLineItem[] chunk, int processed,
+        int voteIndex, CancellationToken ct)
+    {
+        //使用StringBuilder记录当前行的内容。当遇到换行符或一次回答完毕后，将内容写入Items[processed + index].Output中。
+        StringBuilder str = new StringBuilder(1000);
+        int index = 0;
+
+        //调用AI
+        await foreach (var r in llm.CallStreamAsync(GetSystemPrompt(chunk.Length),
+                           string.Join('\n', chunk.Select(x => $"【{x.Index}】{x.Input}")), ct: ct))
+        {
+            foreach (var c in r)
+            {
+                if (c == '\n') //AI使用\n作为换行符
+                {
+                    CompleteLine();
+                    index++;
+                }
+                else
+                {
+                    str.Append(c);
+                }
+            }
+        }
+
+        CompleteLine();
+
+        if (index != chunk.Length - 1)
+        {
+            throw new AiUnexpectedFormatException(
+                $"向AI发送了{chunk.Length}行输入，但收到了{index}行输出。请检查AI模型是否正常运行");
+        }
+
+        void CompleteLine()
+        {
+            if (processed + index >= Items.Count)
+            {
+                throw new AiUnexpectedFormatException($"AI返回的总行数（{processed + index}）超过了输入的行数。");
+            }
+
+            var result = indexPrefix.Replace(str.ToString(), string.Empty);
+            var item = Items[processed + index];
+
+            //如果不启用投票，则直接将结果写入Output中，否则写入EachVote中
+            if (voteIndex == -1)
+            {
+                item.Output = result;
+            }
+            else
+            {
+                item.EachVote[voteIndex] = result;
+            }
+
+            str.Clear();
+
+            NotifyCurrentProgress(processed, voteIndex, index, chunk.Length);
+        }
+    }
+
+    private void ProcessVoteResult(LineByLineItem item)
+    {
+        //按结果进行分组，按票数排序
+        var groups = item.EachVote
+            .GroupBy(p => p)
+            .Select(p => new
+            {
+                p.Key,
+                Count = p.Count()
+            }).OrderByDescending(p => p.Count)
+            .ToList();
+
+        //将票数最多的结果写入Output中
+        item.Output = groups[0].Key;
+        if (groups.Count <= 1)
+        {
+            return;
+        }
+
+        //存在多个结果时，将结果写入Message中
+        StringBuilder str = new StringBuilder();
+        str.Append(Config.VoteCount)
+            .Append("次投票存在")
+            .Append(groups.Count)
+            .Append("个结果：");
+        foreach (var group in groups)
+        {
+            str.Append('“')
+                .Append(group.Key)
+                .Append('”')
+                .Append(group.Count)
+                .Append("次，");
+        }
+
+        str.Remove(str.Length - 1, 1);
+        item.Message = str.ToString();
     }
 }

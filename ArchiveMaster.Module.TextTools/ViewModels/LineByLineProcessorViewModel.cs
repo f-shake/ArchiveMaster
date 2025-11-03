@@ -5,6 +5,7 @@ using FzLib.Cryptography;
 using ArchiveMaster.Configs;
 using ArchiveMaster.Services;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -12,6 +13,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using ArchiveMaster.ViewModels.FileSystem;
 using FzLib.Avalonia.Dialogs;
+using FzLib.Collections;
 using FzLib.Text;
 using Serilog;
 
@@ -76,6 +78,7 @@ public partial class LineByLineProcessorViewModel(ViewModelServices services)
                 {
                     item.Explain = parts[2];
                 }
+
                 Config.Examples.Add(item);
             }
         }
@@ -86,11 +89,26 @@ public partial class LineByLineProcessorViewModel(ViewModelServices services)
     }
 
     [RelayCommand]
-    private void RemoveSelectedExample()
+    private void RemoveSelectedExample(IList items)
     {
-        if (SelectedExample != null)
+        if (items.Count > 0)
         {
-            Config.Examples.Remove(SelectedExample);
+            if (items.Count == 1)
+            {
+                Config.Examples.Remove(SelectedExample);
+            }
+            else
+            {
+                var temp = Config.Examples;
+                var itemList = items.Cast<LineByLineItem>().ToList();
+                Config.Examples = null;
+                foreach (var item in itemList)
+                {
+                    temp.Remove(item);
+                }
+
+                Config.Examples = temp;
+            }
         }
     }
 }

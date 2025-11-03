@@ -112,6 +112,7 @@
                             Grid.Column="1"
                             Classes="Icon"
                             Command="{Binding RemoveSelectedExampleCommand}"
+                            CommandParameter="{Binding #dgExamples.SelectedItems}"
                             Content="{ic:FluentIcon Icon=Delete}"
                             IsEnabled="{Binding SelectedExample, Converter={x:Static cvt:Converters.IsNotNull}}"
                             ToolTip.Tip="删除" />
@@ -128,9 +129,11 @@
                             TextAlignment="Right" />
                     </Grid>
                     <DataGrid
+                        x:Name="dgExamples"
                         MaxHeight="200"
                         ItemsSource="{Binding Config.Examples}"
-                        SelectedItem="{Binding SelectedExample}">
+                        SelectedItem="{Binding SelectedExample}"
+                        SelectedItems="">
                         <DataGrid.Columns>
                             <DataGridTextColumn
                                 Width="2*"
@@ -167,6 +170,10 @@
                     Width="*"
                     Binding="{Binding Output}"
                     Header="结果" />
+                <DataGridTextColumn
+                    Width="*"
+                    Binding="{Binding Message}"
+                    Header="信息" />
             </DataGrid.Columns>
         </DataGrid>
     </v:TwoStepPanelBase.ResultsContent>

@@ -4,6 +4,9 @@ namespace ArchiveMaster.ViewModels;
 
 public partial class LineByLineItem : ObservableObject
 {
+    [ObservableProperty]
+    private string[] eachVote;
+
     /// <summary>
     /// 解释说明（用于示例）
     /// </summary>
@@ -23,14 +26,14 @@ public partial class LineByLineItem : ObservableObject
     private string input = "";
 
     /// <summary>
-    /// 输出
-    /// </summary>
-    [ObservableProperty]
-    private string output = "";
-
-    /// <summary>
     /// 信息
     /// </summary>
     [ObservableProperty]
     private string message;
+
+    /// <summary>
+    /// 输出
+    /// </summary>
+    [ObservableProperty]
+    private string output = "";
 }
