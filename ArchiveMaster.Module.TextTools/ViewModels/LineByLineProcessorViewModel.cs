@@ -36,6 +36,15 @@ public partial class LineByLineProcessorViewModel(ViewModelServices services)
         return base.OnInitializedAsync();
     }
 
+    protected override async Task OnExecutedAsync(CancellationToken ct)
+    {
+        int problemCount = Results.Count(p => p.VoteResultNotInconsistent);
+        if (problemCount > 0)
+        {
+            await Services.Dialog.ShowWarningDialogAsync("投票结果不一致", $"存在{problemCount}项投票结果不一致，请检查");
+        }
+    }
+
     protected override void OnReset()
     {
         Results = null;
@@ -50,10 +59,23 @@ public partial class LineByLineProcessorViewModel(ViewModelServices services)
     }
 
     [RelayCommand]
+    private async Task CopyResultsAsync()
+    {
+        var text = string.Join(Environment.NewLine,
+            Results.Select(p => $"{p.Index}\t{p.Input}\t{p.Output}\t{p.Message}"));
+        await Services.Clipboard.SetTextAsync(text);
+    }
+
+    [RelayCommand]
     private async Task ImportExampleFromTextAsync()
     {
         var text = await Services.Dialog.ShowInputMultiLinesTextDialogAsync("从文本导入",
             "在此处粘贴表格文本，第一列为输入，第二列为输出，第三列（可选）为解释说明。列之前使用空格制表符或空格分隔。");
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            return;
+        }
+
         var lines = text.SplitLines();
         Config.Examples.Clear();
         try

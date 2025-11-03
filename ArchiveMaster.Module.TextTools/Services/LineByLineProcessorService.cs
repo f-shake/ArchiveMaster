@@ -35,11 +35,7 @@ public partial class LineByLineProcessorService(AppConfig appConfig)
             //输出置空，投票数组初始化
             foreach (var item in Items)
             {
-                item.Output = "";
-                if (Config.EnableMajorityVote)
-                {
-                    item.EachVote = new string[Config.VoteCount];
-                }
+                item.Initialize(Config.EnableMajorityVote ? Config.VoteCount : 0);
             }
 
             //给每个示例添加序号
@@ -48,15 +44,15 @@ public partial class LineByLineProcessorService(AppConfig appConfig)
                 Config.Examples[i].Index = i + 1;
             }
 
-            var chunks = Items.Chunk(Config.MaxLineEachCall);//分组
-            int processed = 0;//已经处理的行数（截止上一个chunk）
-            int chunkIndex = 0;//当前chunk的序号
-            int chunkCount = (Items.Count + Config.MaxLineEachCall - 1) / Config.MaxLineEachCall;//总chunk数
-            
+            var chunks = Items.Chunk(Config.MaxLineEachCall); //分组
+            int processed = 0; //已经处理的行数（截止上一个chunk）
+            int chunkIndex = 0; //当前chunk的序号
+            int chunkCount = (Items.Count + Config.MaxLineEachCall - 1) / Config.MaxLineEachCall; //总chunk数
+
             foreach (var chunk in chunks)
             {
                 chunkIndex++;
-                
+
                 //设置投票索引数组，如果启用投票，则为0到VoteCount-1，否则为-1
                 var voteIndexes = Config.EnableMajorityVote ? Enumerable.Range(0, Config.VoteCount) : [-1];
 
@@ -66,7 +62,7 @@ public partial class LineByLineProcessorService(AppConfig appConfig)
                     NotifyCurrentMessage(chunkIndex, chunkCount, voteIndex);
 
                     //重试机制
-                    int retryCount = Config.EnableRetry ? Config.MaxRetryCount : 0;
+                    int retryCount = Config.EnableRetry ? Config.MaxRetryCount : 1;
                     while (retryCount > 0)
                     {
                         try
@@ -295,5 +291,6 @@ public partial class LineByLineProcessorService(AppConfig appConfig)
 
         str.Remove(str.Length - 1, 1);
         item.Message = str.ToString();
+        item.VoteResultNotInconsistent = true;
     }
 }

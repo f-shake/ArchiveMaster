@@ -73,12 +73,15 @@
                                 SmallChange="1"
                                 TickFrequency="1"
                                 Value="{Binding Config.MaxRetryCount}" />
-                            <TextBlock Text="次" />
+                            <TextBlock
+                                IsVisible="{Binding Config.EnableRetry}"
+                                Text="次" />
                         </StackPanel>
                         <StackPanel Orientation="Horizontal">
                             <CheckBox
                                 Content="投票机制"
-                                IsChecked="{Binding Config.EnableMajorityVote}" />
+                                IsChecked="{Binding Config.EnableMajorityVote}"
+                                ToolTip.Tip="通过AI多次判断，提高置信度" />
 
                             <Slider
                                 Width="96"
@@ -91,7 +94,9 @@
                                 SmallChange="2"
                                 TickFrequency="2"
                                 Value="{Binding Config.EnableMajorityVote}" />
-                            <TextBlock Text="次" />
+                            <TextBlock
+                                IsVisible="{Binding Config.EnableMajorityVote}"
+                                Text="轮" />
                         </StackPanel>
                     </ct:WrapFormItemGroup>
                 </ct:FormItem>
@@ -155,26 +160,67 @@
     </v:TwoStepPanelBase.ConfigsContent>
 
     <v:TwoStepPanelBase.ResultsContent>
-        <DataGrid
-            IsReadOnly="True"
-            ItemsSource="{Binding Results}">
-            <DataGrid.Columns>
-                <DataGridTextColumn
-                    Binding="{Binding Index}"
-                    Header="序号" />
-                <DataGridTextColumn
-                    Width="*"
-                    Binding="{Binding Input}"
-                    Header="输入" />
-                <DataGridTextColumn
-                    Width="*"
-                    Binding="{Binding Output}"
-                    Header="结果" />
-                <DataGridTextColumn
-                    Width="*"
-                    Binding="{Binding Message}"
-                    Header="信息" />
-            </DataGrid.Columns>
-        </DataGrid>
+        <Grid RowDefinitions="*,8,Auto">
+            <DataGrid
+                IsReadOnly="True"
+                ItemsSource="{Binding Results}">
+                <DataGrid.RowDetailsTemplate>
+                    <DataTemplate>
+                        <ct:StackFormItemGroup Margin="8">
+                            <ct:FormItem
+                                Classes="BoldLabel"
+                                Content="{Binding Input}"
+                                Label="输入：" />
+                            <ct:FormItem
+                                Classes="BoldLabel"
+                                Content="{Binding Output}"
+                                Label="输出：" />
+                            <ct:FormItem
+                                Classes="BoldLabel"
+                                Content="{Binding Message}"
+                                IsVisible="{Binding Message, Converter={x:Static cvt:Converters.IsNotNull}}"
+                                Label="信息：" />
+                        </ct:StackFormItemGroup>
+                    </DataTemplate>
+                </DataGrid.RowDetailsTemplate>
+                <DataGrid.Columns>
+                    <DataGridTextColumn
+                        Binding="{Binding Index}"
+                        Header="序号" />
+                    <DataGridTextColumn
+                        Width="*"
+                        Binding="{Binding Input}"
+                        Header="输入" />
+                    <DataGridTextColumn
+                        Width="*"
+                        Binding="{Binding Output}"
+                        Header="结果" />
+                    <DataGridTemplateColumn
+                        CanUserResize="False"
+                        Header="投票不一致"
+                        SortMemberPath="VoteResultNotInconsistent">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Ellipse
+                                    Width="8"
+                                    Height="8"
+                                    Fill="{DynamicResource Foreground0}"
+                                    IsVisible="{Binding VoteResultNotInconsistent}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTextColumn
+                        Width="*"
+                        Binding="{Binding Message}"
+                        Header="信息" />
+                </DataGrid.Columns>
+            </DataGrid>
+            <Button
+                Grid.Row="2"
+                HorizontalAlignment="Right"
+                Classes="Icon"
+                Command="{Binding CopyResultsCommand}"
+                Content="{ic:FluentIcon Icon=Copy}" />
+        </Grid>
     </v:TwoStepPanelBase.ResultsContent>
 </v:TwoStepPanelBase>

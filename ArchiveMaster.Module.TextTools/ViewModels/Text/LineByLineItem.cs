@@ -36,4 +36,22 @@ public partial class LineByLineItem : ObservableObject
     /// </summary>
     [ObservableProperty]
     private string output = "";
+    
+    /// <summary>
+    /// 投票结果是否不一致
+    /// </summary>
+    [ObservableProperty]
+    private bool voteResultNotInconsistent;
+
+    public void Initialize(int voteCount)
+    {
+        if (voteCount > 0)
+        {
+            EachVote = new string[voteCount];
+        }
+
+        Output = "";
+        VoteResultNotInconsistent = false;
+        Message = "";
+    }
 }
