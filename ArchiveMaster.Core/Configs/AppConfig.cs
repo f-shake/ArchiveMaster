@@ -34,12 +34,19 @@ namespace ArchiveMaster.Configs
     /// </remarks>
     public class AppConfig
     {
-        public const string DEFAULT_PRESET = "默认";
+        public const string ConfigBackupExtension = ".bak";
 
-        private const string CONFIG_FILE = "configs.json";
-        private const string JKEY_GLOBALS = "Globals";
-        private const string JKEY_GROUPS = "Groups";
-        private const string JKEY_MODULES = "Modules";
+        public const string DefaultPresetName = "默认";
+
+        public const string NextStartLoadConfigExtension = ".load";
+
+        private const string ConfigFileName = "configs.json";
+
+        private const string JkeyGlobals = "Globals";
+
+        private const string JkeyGroups = "Groups";
+
+        private const string JkeyModules = "Modules";
 
         private static readonly JsonSerializerOptions JsonOptions = new JsonSerializerOptions()
         {
@@ -67,6 +74,17 @@ namespace ArchiveMaster.Configs
         /// </summary>
         private Dictionary<string, string> currentPresets = new Dictionary<string, string>();
 
+        public AppConfig() : this(ConfigFileName)
+        {
+        }
+
+        public AppConfig(string path)
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(path);
+            ConfigPath = Path.GetFullPath(path);
+        }
+
+        public string ConfigPath { get; }
         public Exception LoadError { get; private set; }
 
         public void ClearAllPassword()
@@ -83,7 +101,7 @@ namespace ArchiveMaster.Configs
             return currentPresets.TryGetValue(groupName, out string value) ? value : GetPresets(groupName)[0];
         }
 
-        public T GetOrCreateConfig<T>(string key, string preset = DEFAULT_PRESET) where T : new()
+        public T GetOrCreateConfig<T>(string key, string preset = DefaultPresetName) where T : new()
         {
             ArgumentException.ThrowIfNullOrEmpty(key);
             ConfigItem configItem = configs.FirstOrDefault(p => p.Key == key && p.Preset == preset);
@@ -109,7 +127,7 @@ namespace ArchiveMaster.Configs
             return (T)configItem.Config;
         }
 
-        public T GetOrCreateConfigWithDefaultKey<T>(string preset = DEFAULT_PRESET) where T : new()
+        public T GetOrCreateConfigWithDefaultKey<T>(string preset = DefaultPresetName) where T : new()
         {
             return GetOrCreateConfig<T>(typeof(T).Name, preset);
         }
@@ -133,7 +151,7 @@ namespace ArchiveMaster.Configs
                 .ToList();
             if (presets.Count == 0)
             {
-                presets.Add(DEFAULT_PRESET);
+                presets.Add(DefaultPresetName);
             }
 
             return presets.AsReadOnly();
@@ -143,23 +161,29 @@ namespace ArchiveMaster.Configs
         {
             try
             {
-                if (!File.Exists(CONFIG_FILE))
+                if (File.Exists(ConfigPath + NextStartLoadConfigExtension))
+                {
+                    File.Replace(ConfigPath + NextStartLoadConfigExtension, ConfigPath,
+                        ConfigPath + ConfigBackupExtension);
+                }
+
+                if (!File.Exists(ConfigPath))
                 {
                     return;
                 }
 
-                var json = JsonNode.Parse(File.ReadAllText(CONFIG_FILE));
+                var json = JsonNode.Parse(File.ReadAllText(ConfigPath));
                 if (json is not JsonObject jobj)
                 {
                     throw new Exception("配置文件内不是Json Object");
                 }
 
-                GlobalConfigs.Instance = jobj.ContainsKey(JKEY_GLOBALS)
-                    ? (jobj[JKEY_GLOBALS].Deserialize<GlobalConfigs>(JsonOptions) ?? new GlobalConfigs())
+                GlobalConfigs.Instance = jobj.ContainsKey(JkeyGlobals)
+                    ? (jobj[JkeyGlobals].Deserialize<GlobalConfigs>(JsonOptions) ?? new GlobalConfigs())
                     : new GlobalConfigs();
 
                 //迁移旧版本配置文件
-                if (!jobj.ContainsKey(JKEY_MODULES) && !jobj.ContainsKey(JKEY_GROUPS))
+                if (!jobj.ContainsKey(JkeyModules) && !jobj.ContainsKey(JkeyGroups))
                 {
                     try
                     {
@@ -171,24 +195,24 @@ namespace ArchiveMaster.Configs
                     }
                 }
 
-                if (!jobj.ContainsKey(JKEY_MODULES))
+                if (!jobj.ContainsKey(JkeyModules))
                 {
-                    throw new Exception($"配置文件内不包含{JKEY_MODULES}");
+                    throw new Exception($"配置文件内不包含{JkeyModules}");
                 }
 
-                if (!jobj.ContainsKey(JKEY_GROUPS))
+                if (!jobj.ContainsKey(JkeyGroups))
                 {
-                    throw new Exception($"配置文件内不包含{JKEY_GROUPS}");
+                    throw new Exception($"配置文件内不包含{JkeyGroups}");
                 }
 
-                if (jobj[JKEY_GROUPS] is not JsonObject jg)
+                if (jobj[JkeyGroups] is not JsonObject jg)
                 {
-                    throw new Exception($"配置文件内的{JKEY_GROUPS}不是Json Object");
+                    throw new Exception($"配置文件内的{JkeyGroups}不是Json Object");
                 }
 
-                if (jobj[JKEY_MODULES] is not JsonArray jm)
+                if (jobj[JkeyModules] is not JsonArray jm)
                 {
-                    throw new Exception($"配置文件内的{JKEY_MODULES}不是Json Array");
+                    throw new Exception($"配置文件内的{JkeyModules}不是Json Array");
                 }
 
                 ParseModules(jm);
@@ -207,6 +231,20 @@ namespace ArchiveMaster.Configs
             }
         }
 
+        public void LoadNextStart(string bakConfigPath)
+        {
+            var tempConfig = new AppConfig(bakConfigPath);
+            try
+            {
+                tempConfig.Initialize();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"加载备份配置文件{bakConfigPath}失败：{ex.Message}", ex);
+            }
+
+            File.Copy(bakConfigPath, ConfigPath + NextStartLoadConfigExtension, true);
+        }
         public void RegisterConfig(ConfigMetadata config)
         {
             ArgumentNullException.ThrowIfNull(config);
@@ -243,6 +281,29 @@ namespace ArchiveMaster.Configs
             }
         }
 
+        public void Save()
+        {
+            Save(ConfigPath);
+        }
+
+        public void Save(string configFilePath)
+        {
+            try
+            {
+                var json = JsonSerializer.Serialize(new Dictionary<string, object>
+                {
+                    [JkeyModules] = configs,
+                    [JkeyGroups] = currentPresets,
+                    [JkeyGlobals] = GlobalConfigs.Instance
+                }, JsonOptions);
+                File.WriteAllText(configFilePath, json);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "保存配置失败");
+            }
+        }
+
         public void SaveBackground()
         {
             try
@@ -254,25 +315,6 @@ namespace ArchiveMaster.Configs
                 Log.Logger.Error(ex, "后台保存配置失败");
             }
         }
-
-        public void Save()
-        {
-            try
-            {
-                var json = JsonSerializer.Serialize(new Dictionary<string, object>
-                {
-                    [JKEY_MODULES] = configs,
-                    [JKEY_GROUPS] = currentPresets,
-                    [JKEY_GLOBALS] = GlobalConfigs.Instance
-                }, JsonOptions);
-                File.WriteAllText(CONFIG_FILE, json);
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "保存配置失败");
-            }
-        }
-
         public void SetCurrentPreset(string groupName, string preset)
         {
             ArgumentException.ThrowIfNullOrEmpty(groupName);
@@ -326,8 +368,8 @@ namespace ArchiveMaster.Configs
             var root = new JsonObject();
             var jModules = new JsonArray();
             var jGroups = new JsonObject();
-            root.Add(JKEY_MODULES, jModules);
-            root.Add(JKEY_GROUPS, jGroups);
+            root.Add(JkeyModules, jModules);
+            root.Add(JkeyGroups, jGroups);
             foreach (var oldConfig in jobj)
             {
                 var key = oldConfig.Key;
@@ -356,7 +398,7 @@ namespace ArchiveMaster.Configs
                 }
                 else
                 {
-                    MigrateConfigItem(key, DEFAULT_PRESET, content);
+                    MigrateConfigItem(key, DefaultPresetName, content);
                 }
             }
 
@@ -404,11 +446,11 @@ namespace ArchiveMaster.Configs
         {
             foreach (var (c, p) in EnumerateProperties())
             {
-                if (p.PropertyType.IsClass 
+                if (p.PropertyType.IsClass
                     && p.GetValue(c.Config) is null
-                    && !p.PropertyType.Namespace.StartsWith("System"))//如果是Class且为null，就创建一个实例
+                    && !p.PropertyType.Namespace.StartsWith("System")) //如果是Class且为null，就创建一个实例
                 {
-                    if (p.PropertyType.GetConstructor(Type.EmptyTypes) is ConstructorInfo)//需要有无参构造函数
+                    if (p.PropertyType.GetConstructor(Type.EmptyTypes) is ConstructorInfo) //需要有无参构造函数
                     {
                         p.SetValue(c.Config, Activator.CreateInstance(p.PropertyType));
                     }
