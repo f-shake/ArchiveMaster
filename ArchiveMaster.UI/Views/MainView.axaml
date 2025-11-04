@@ -114,21 +114,41 @@
                                                 Classes="Menu"
                                                 ItemsSource="{Binding Panels}"
                                                 SelectionChanged="SelectingItemsControl_OnSelectionChanged">
+                                                <ListBox.Styles>
+                                                    <Style Selector="ListBoxItem">
+                                                        <Setter Property="ClipToBounds" Value="False" />
+                                                    </Style>
+                                                </ListBox.Styles>
                                                 <ListBox.ItemTemplate>
                                                     <DataTemplate>
                                                         <Grid
-                                                            Background="Transparent"
-                                                            ColumnDefinitions="0,0,Auto,12,*"
+                                                            ClipToBounds="False"
+                                                            ColumnDefinitions="Auto,8,*"
                                                             ToolTip.Tip="{Binding Description}">
                                                             <Svg
-                                                                Grid.Column="2"
                                                                 Width="20"
                                                                 Height="20"
                                                                 Css=".icon { fill: #FF0000; }"
                                                                 Path="{Binding IconUri}" />
                                                             <TextBlock
-                                                                Grid.Column="4"
+                                                                Grid.Column="2"
                                                                 Text="{Binding Title}" />
+                                                            <Border
+                                                                Width="14"
+                                                                Height="14"
+                                                                Background="{DynamicResource AccentB3}"
+                                                                CornerRadius="7"
+                                                                IsVisible="{Binding UseAi}"
+                                                                RenderTransform="translate(8px,-8px)">
+                                                                <TextBlock
+                                                                    Padding="0"
+                                                                    HorizontalAlignment="Center"
+                                                                    VerticalAlignment="Center"
+                                                                    FontSize="8"
+                                                                    Foreground="White"
+                                                                    RenderTransform="translate(-0.1px,0)"
+                                                                    Text="AI" />
+                                                            </Border>
                                                         </Grid>
                                                     </DataTemplate>
                                                 </ListBox.ItemTemplate>
