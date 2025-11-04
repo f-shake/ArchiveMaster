@@ -58,6 +58,7 @@ public partial class LineByLineProcessorService(AppConfig appConfig)
                 var voteIndexes = Config.EnableMajorityVote ? Enumerable.Range(0, Config.VoteCount) : [-1];
 
                 //循环每一轮投票
+                //TODO:并行改造
                 foreach (var voteIndex in voteIndexes)
                 {
                     NotifyCurrentMessage(chunkIndex, chunkCount, voteIndex);
@@ -84,9 +85,10 @@ public partial class LineByLineProcessorService(AppConfig appConfig)
                 }
 
                 //每一次投票结束（每一个chunk的末尾），如果启用投票，则处理投票结果
-                if (Config.EnableMajorityVote)
+                foreach (var item in chunk)
                 {
-                    foreach (var item in chunk)
+                    item.Complete = true;
+                    if (Config.EnableMajorityVote)
                     {
                         ProcessVoteResult(item);
                     }
@@ -241,12 +243,10 @@ public partial class LineByLineProcessorService(AppConfig appConfig)
             var result = indexPrefix.Replace(str.ToString(), string.Empty);
             var item = Items[processed + index];
 
-            //如果不启用投票，则直接将结果写入Output中，否则写入EachVote中
-            if (voteIndex == -1)
-            {
-                item.Output = result;
-            }
-            else
+
+            item.Output = result;
+            //如果启用投票，写入EachVote中
+            if (voteIndex >= 0)
             {
                 item.EachVote[voteIndex] = result;
             }

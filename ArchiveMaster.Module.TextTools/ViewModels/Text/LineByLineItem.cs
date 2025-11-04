@@ -5,6 +5,9 @@ namespace ArchiveMaster.ViewModels;
 public partial class LineByLineItem : ObservableObject
 {
     [ObservableProperty]
+    private bool complete;
+    
+    [ObservableProperty]
     private string[] eachVote;
 
     /// <summary>

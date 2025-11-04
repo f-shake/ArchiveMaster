@@ -197,9 +197,11 @@
                         Header="结果" />
                     <v:DataGridLightColumn
                         Fill="{DynamicResource Foreground0}"
-                        Header="投票不一致"
+                        FillBinding="{Binding VoteResultNotInconsistent, Converter={x:Static vm:LineByLineProcessorViewModel.VoteBrushConverter}}"
+                        Header="投票"
+                        IsVisible="{Binding Config.EnableMajorityVote}"
                         SortMemberPath="VoteResultNotInconsistent"
-                        VisibleBinding="{Binding VoteResultNotInconsistent}" />
+                        VisibleBinding="{Binding Complete}" />
                     <DataGridTextColumn
                         Width="*"
                         Binding="{Binding Message}"

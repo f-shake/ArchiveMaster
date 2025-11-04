@@ -41,7 +41,7 @@ namespace ArchiveMaster.Views
             }
 
             var pickerOptions = FilePickerOptionsBuilder.Create()
-                .AddFilter("所有文本文档", "txt", /* "doc",*/ "docx", "xlsx", "md", "pdf", "txt")
+                .AddFilter("支持的格式", "txt", /* "doc",*/ "docx", "xlsx", "md", "pdf", "txt")
                 .AddFilter("Word文档", /*"doc",*/ "docx")
                 .AddFilter("Excel表格", "xlsx")
                 .AddFilter("PDF文档", /*"doc",*/ "pdf")

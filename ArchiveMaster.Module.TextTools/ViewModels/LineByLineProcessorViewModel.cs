@@ -12,6 +12,8 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using ArchiveMaster.ViewModels.FileSystem;
+using Avalonia.Data.Converters;
+using Avalonia.Media;
 using FzLib.Avalonia.Dialogs;
 using FzLib.Collections;
 using FzLib.Text;
@@ -30,6 +32,9 @@ public partial class LineByLineProcessorViewModel(ViewModelServices services)
 
     public override bool EnableRepeatExecute => true;
 
+    public static IValueConverter VoteBrushConverter =>
+        new FuncValueConverter<bool, IBrush>(b => b ? Brushes.Red : Brushes.Green);
+    
     protected override Task OnInitializedAsync()
     {
         Results = Service.Items;
