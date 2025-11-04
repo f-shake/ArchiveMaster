@@ -2,6 +2,7 @@
 using System.Text;
 using ArchiveMaster.ViewModels;
 using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Spreadsheet;
 // using NPOI.XWPF.UserModel;
 using DocumentFormat.OpenXml.Wordprocessing;
 using FzLib.Collections;
@@ -47,6 +48,7 @@ public static class TextSourceExtensions
                 var lines = Path.GetExtension(file.File) switch
                 {
                     ".docx" => file.ReadDocxAsync(perParagraph, ct),
+                    ".xlsx" => file.ReadXlsxAsync(perParagraph, ct),
                     // ".doc" => file.ReadDocAsync(ct: ct),
                     ".md" => file.ReadMarkdownAsync(perParagraph, ct),
                     ".pdf" => file.ReadPdfAsync(perParagraph, ct),
@@ -148,6 +150,86 @@ public static class TextSourceExtensions
         if (!perParagraph)
         {
             yield return str.ToString();
+        }
+    }
+
+    private static async IAsyncEnumerable<string> ReadXlsxAsync(this DocFile file,
+        bool perParagraph,
+        [EnumeratorCancellation]
+        CancellationToken ct = default)
+    {
+        await using var stream = File.OpenRead(file.File);
+
+        using SpreadsheetDocument excelDoc = SpreadsheetDocument.Open(stream, false);
+        if (excelDoc.WorkbookPart == null)
+        {
+            yield break;
+        }
+
+        var sharedStrings = excelDoc.WorkbookPart.SharedStringTablePart?.SharedStringTable;
+
+        var sheets = excelDoc.WorkbookPart.Workbook.Sheets;
+        if (sheets == null)
+        {
+            yield break;
+        }
+
+        StringBuilder str = new StringBuilder();
+        foreach (var sheet in sheets.Elements<Sheet>())
+        {
+            if (sheet.Id == null || !sheet.Id.HasValue)
+            {
+                continue;
+            }
+
+            var worksheetPart = (WorksheetPart)excelDoc.WorkbookPart.GetPartById(sheet.Id);
+            var rows = worksheetPart.Worksheet.Descendants<Row>();
+            foreach (var row in rows)
+            {
+                foreach (var cell in row.Elements<Cell>())
+                {
+                    AppendCellValue(cell);
+                    str.Append('\t');
+                }
+
+                str.Remove(str.Length - 1, 1);
+                if (perParagraph)
+                {
+                    yield return str.ToString();
+                    str.Clear();
+                }
+                else
+                {
+                    str.AppendLine();
+                }
+            }
+        }
+
+        if (!perParagraph)
+        {
+            yield return str.ToString();
+        }
+
+        void AppendCellValue(Cell cell)
+        {
+            if (cell == null)
+            {
+                return;
+            }
+
+            string value = cell.CellValue?.InnerText;
+            if (cell.DataType != null && cell.DataType == CellValues.SharedString)
+            {
+                if (int.TryParse(value, out int index) && sharedStrings != null)
+                {
+                    str.Append(sharedStrings.ElementAt(index).InnerText);
+                }
+            }
+
+            if (value != null)
+            {
+                str.Append(value);
+            }
         }
     }
 

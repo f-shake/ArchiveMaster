@@ -7,6 +7,7 @@ using Avalonia;
 using Avalonia.Input.Platform;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
+using FzLib.Avalonia.Controls;
 using FzLib.Avalonia.Dialogs;
 using FzLib.Avalonia.Services;
 using FzLib.Collections;
@@ -40,8 +41,9 @@ namespace ArchiveMaster.Views
             }
 
             var pickerOptions = FilePickerOptionsBuilder.Create()
-                .AddFilter("所有文本文档", "txt", /* "doc",*/ "docx", "md", "pdf", "txt")
+                .AddFilter("所有文本文档", "txt", /* "doc",*/ "docx", "xlsx", "md", "pdf", "txt")
                 .AddFilter("Word文档", /*"doc",*/ "docx")
+                .AddFilter("Excel表格", "xlsx")
                 .AddFilter("PDF文档", /*"doc",*/ "pdf")
                 .AddFilter("Markdown文档", "md")
                 .AddFilter("纯文本", "txt")
@@ -83,18 +85,23 @@ namespace ArchiveMaster.Views
             var button = sender as Button;
             if (button?.DataContext is DocFile file)
             {
-                try
+                var sources = new TextSource() { Files = { file } };
+                string result = null;
+                await HostServices.GetRequiredService<IProgressOverlayService>()
+                    .WithOverlayAsync(
+                        () => Task.Run(async () =>
+                            result = (await sources.GetPlainTextAsync().FirstOrDefaultAsync()).Text),
+                        ex => HostServices.GetRequiredService<IDialogService>()
+                            .ShowErrorDialogAsync("打开文件失败", $"无法打开文件：{file.File}", ex.ToString()), "正在打开文件");
+                if (string.IsNullOrEmpty(result))
                 {
-                    var sources = new TextSource() { Files = { file } };
-                    DocFilePart result = await sources.GetPlainTextAsync().FirstAsync();
-
                     await HostServices.GetRequiredService<IDialogService>()
-                        .ShowOkDialogAsync("打开文件成功", $"成功打开文件：{file.File}", result.Text);
+                        .ShowWarningDialogAsync("文件为空", $"成功打开文件：{file.File}，但文件为空");
                 }
-                catch (Exception ex)
+                else
                 {
                     await HostServices.GetRequiredService<IDialogService>()
-                        .ShowErrorDialogAsync("打开文件失败", $"无法打开文件：{file.File}", ex.ToString());
+                        .ShowOkDialogAsync("打开文件成功", $"成功打开文件：{file.File}", result);
                 }
             }
         }
