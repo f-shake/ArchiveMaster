@@ -130,7 +130,7 @@
                         <TextBlock
                             Grid.Column="3"
                             Classes="Description"
-                            Text="通过向AI提供至少2条示例，可以提高正确率"
+                            Text="通过向AI提供输出样例，可以提高正确率"
                             TextAlignment="Right" />
                     </Grid>
                     <DataGrid
@@ -187,6 +187,13 @@
                     <DataGridTextColumn
                         Binding="{Binding Index}"
                         Header="序号" />
+                    <v:DataGridLightColumn
+                        Fill="{DynamicResource Foreground0}"
+                        FillBinding="{Binding VoteResultNotInconsistent, Converter={x:Static vm:LineByLineProcessorViewModel.VoteBrushConverter}}"
+                        Header="投票"
+                        IsVisible="{Binding Config.EnableMajorityVote}"
+                        SortMemberPath="VoteResultNotInconsistent"
+                        VisibleBinding="{Binding Complete}" />
                     <DataGridTextColumn
                         Width="*"
                         Binding="{Binding Input}"
@@ -195,13 +202,7 @@
                         Width="*"
                         Binding="{Binding Output}"
                         Header="结果" />
-                    <v:DataGridLightColumn
-                        Fill="{DynamicResource Foreground0}"
-                        FillBinding="{Binding VoteResultNotInconsistent, Converter={x:Static vm:LineByLineProcessorViewModel.VoteBrushConverter}}"
-                        Header="投票"
-                        IsVisible="{Binding Config.EnableMajorityVote}"
-                        SortMemberPath="VoteResultNotInconsistent"
-                        VisibleBinding="{Binding Complete}" />
+
                     <DataGridTextColumn
                         Width="*"
                         Binding="{Binding Message}"

@@ -193,7 +193,7 @@ public partial class LineByLineProcessorService(AppConfig appConfig)
             .Append("个分块");
         if (Config.EnableMajorityVote)
         {
-            strMessage.Append("，正在并行")
+            strMessage.Append("；正在并行")
                 .Append(Config.VoteCount)
                 .Append("次投票");
         }

@@ -8,6 +8,7 @@ using ArchiveMaster.ViewModels;
 using ArchiveMaster.ViewModels.FileSystem;
 using DocumentFormat.OpenXml.Bibliography;
 using DocumentFormat.OpenXml.InkML;
+using FzLib.Text;
 using Microsoft.Extensions.AI;
 using Serilog;
 
@@ -246,7 +247,7 @@ public class TypoCheckerService(AppConfig appConfig)
                 new ChatOptions { ResponseFormat = ChatResponseFormat.Json }, ct);
 #endif
             yield return new LlmOutputItem(result);
-            var lines = result.Split(['\n', '\r'], StringSplitOptions.RemoveEmptyEntries);
+            var lines = result.SplitLines();
             int startLine = 0;
             for (int i = 0; i < lines.Length; i++)
             {

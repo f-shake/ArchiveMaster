@@ -67,7 +67,8 @@ public partial class LineByLineProcessorViewModel(ViewModelServices services)
     private async Task CopyResultsAsync()
     {
         var text = string.Join(Environment.NewLine,
-            Results.Select(p => $"{p.Index}\t{p.Input}\t{p.Output}\t{p.Message}"));
+            Results.Select(p => $"{p.Index}\t{(p.VoteResultNotInconsistent?"不一致":"一致")}\t{p.Input}\t{p.Output}\t{p.Message}"));
+        text = $"序号\t投票\t输入\t输出\t说明{Environment.NewLine}{text}";
         await Services.Clipboard.SetTextAsync(text);
     }
 
