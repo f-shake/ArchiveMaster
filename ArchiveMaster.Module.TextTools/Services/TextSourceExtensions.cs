@@ -168,15 +168,18 @@ public static class TextSourceExtensions
 
         var sharedStrings = excelDoc.WorkbookPart.SharedStringTablePart?.SharedStringTable;
 
+        ct.ThrowIfCancellationRequested();
         var sheets = excelDoc.WorkbookPart.Workbook.Sheets;
         if (sheets == null)
         {
             yield break;
         }
+        ct.ThrowIfCancellationRequested();
 
         StringBuilder str = new StringBuilder();
         foreach (var sheet in sheets.Elements<Sheet>())
         {
+            ct.ThrowIfCancellationRequested();
             if (sheet.Id == null || !sheet.Id.HasValue)
             {
                 continue;
@@ -186,6 +189,7 @@ public static class TextSourceExtensions
             var rows = worksheetPart.Worksheet.Descendants<Row>();
             foreach (var row in rows)
             {
+                ct.ThrowIfCancellationRequested();
                 foreach (var cell in row.Elements<Cell>())
                 {
                     AppendCellValue(cell);

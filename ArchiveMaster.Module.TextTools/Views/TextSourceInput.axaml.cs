@@ -87,12 +87,24 @@ namespace ArchiveMaster.Views
             {
                 var sources = new TextSource() { Files = { file } };
                 string result = null;
+                bool canceled = false;
                 await HostServices.GetRequiredService<IProgressOverlayService>()
                     .WithOverlayAsync(
-                        () => Task.Run(async () =>
-                            result = (await sources.GetPlainTextAsync().FirstOrDefaultAsync()).Text),
+                        ct => Task.Run(async () =>
+                            result = (await sources.GetPlainTextAsync(TextSourceReadUnit.Combined, ct)
+                                .FirstOrDefaultAsync()).Text, ct),
+                        () =>
+                        {
+                            canceled = true;
+                            return Task.CompletedTask;
+                        },
                         ex => HostServices.GetRequiredService<IDialogService>()
-                            .ShowErrorDialogAsync("打开文件失败", $"无法打开文件：{file.File}", ex.ToString()), "正在打开文件");
+                            .ShowErrorDialogAsync("打开文件失败", $"无法打开文件：{file.File}", ex.ToString()),
+                        "正在打开文件");
+                if (canceled)
+                {
+                    return;
+                }
                 if (string.IsNullOrEmpty(result))
                 {
                     await HostServices.GetRequiredService<IDialogService>()

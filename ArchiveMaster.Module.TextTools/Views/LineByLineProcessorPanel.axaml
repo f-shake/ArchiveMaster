@@ -101,7 +101,7 @@
                     </ct:WrapFormItemGroup>
                 </ct:FormItem>
             </ct:StackFormItemGroup>
-            <gb:GroupBox Header="示例">
+            <gb:GroupBox Header="样例">
                 <DockPanel VerticalSpacing="8">
                     <Grid
                         Margin="0,0,8,0"
