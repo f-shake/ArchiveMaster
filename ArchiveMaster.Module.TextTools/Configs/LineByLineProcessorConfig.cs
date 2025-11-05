@@ -46,10 +46,10 @@ public partial class LineByLineProcessorConfig : ConfigBase
             throw new ArgumentException("文本源为空");
         }
 
-        if (Examples == null || Examples.Count < 2)
-        {
-            throw new ArgumentException("至少需要提供2个示例");
-        }
+        // if (Examples == null || Examples.Count < 2)
+        // {
+        //     throw new ArgumentException("至少需要提供2个示例");
+        // }
 
         for (int i = 0; i < Examples.Count; i++)
         {

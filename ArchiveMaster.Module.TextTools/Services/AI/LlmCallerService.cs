@@ -52,6 +52,10 @@ public class LlmCallerService
         {
             response = await chatClient.GetResponseAsync([sys, user], options, ct);
         }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
         catch (Exception ex)
         {
             throw new Exception($"AI模型调用失败（{ex.Message}）", ex);
@@ -59,6 +63,7 @@ public class LlmCallerService
 
         Debug.WriteLine($"AI回答：{response.Text}");
         Log.Logger.Information("AI回答：{ResponseText}", response.Text);
+        Debug.WriteLine("AI调用完成");
         return response.Text;
     }
 
@@ -94,6 +99,7 @@ public class LlmCallerService
         }
 
         Log.Logger.Information(str.ToString());
+        Debug.WriteLine("AI流式调用完成");
     }
 
     private void LogPrompt(string systemPrompt, string userPrompt, bool stream)
