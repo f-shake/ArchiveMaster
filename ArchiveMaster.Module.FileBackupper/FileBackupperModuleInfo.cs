@@ -26,6 +26,8 @@ namespace ArchiveMaster
 
         public string ModuleName => "实时备份服务";
         public string ModuleDescription => "解决定时备份目录文件到其他物理磁盘，实现文件历史版本控制的需求";
+        
+        public string HelpFileName { get; } = "backup.md";
 
         public int Order => 5;
         public IList<Type> SingletonServices { get; } = [typeof(BackupService)];

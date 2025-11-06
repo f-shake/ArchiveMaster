@@ -32,6 +32,7 @@ namespace ArchiveMaster
 
         public string ModuleName => "文本工具";
         public string ModuleDescription => "对文本或文本文件进行相关处理";
+        public string HelpFileName { get; } = "text.md";
 
 #if DEBUG
         public int Order => -1;

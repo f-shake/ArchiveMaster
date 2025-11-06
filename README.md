@@ -191,7 +191,7 @@
 
 1. `git clone https://github.com/f-shake/ArchiveMaster.git`，将源代码下载至本地。
 2. 编辑`Directory.Build.props`：
-   1. 将`UseLocalFzLib`设置为`false。`
+   1. 将`UseLocalFzLib`设置为`false`。
    2. 调整`OutputDir`，或将`SpecialOutputDir`设置为`false`。
 3. 在`build`目录中按需执行PowerShell脚本，或在IDE中重新生成解决方案。
 
@@ -207,7 +207,7 @@
 
 ### 新增工具
 
-一个工具，在界面上表现为主页上的一个按钮，在实现中表现为一组同前缀的View、ViewModel、Service、Config。一般来说，步骤如下：
+一个工具，在界面上表现为主页上的一个标签页，在实现中表现为一组同前缀的View、ViewModel、Service、Config组成的类的集合。一般来说，步骤如下：
 
 1. 创建一个配置类，继承并实现`ConfigBase`，用于保存配置
 2. 创建一个服务类，继承并实现`ServiceBase`，用于工具的具体逻辑实现。大多数工具可以分为初始化和执行两步，这类工具可以继承并实现`TwoStepServiceBase`，实现`InitializeAsync`和`ExecuteAsync`时，应确保不会占用长期主线程。

@@ -33,6 +33,8 @@ namespace ArchiveMaster
 
         public string ModuleName => "文件目录工具";
         public string ModuleDescription => "解决对文件和目录进行批量操作的需求";
+        
+        public string HelpFileName { get; } = "files.md";
 
         public int Order => 1;
         public IList<Type> SingletonServices { get; }

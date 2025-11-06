@@ -13,6 +13,7 @@ namespace ArchiveMaster
         public IList<ConfigMetadata> Configs { get; }
         public string ModuleName { get; }
         public string ModuleDescription { get; }
+        public string HelpFileName { get; }
         public int Order { get; }
         public IList<Type> SingletonServices { get; }
         public IList<Type> TransientServices { get; }

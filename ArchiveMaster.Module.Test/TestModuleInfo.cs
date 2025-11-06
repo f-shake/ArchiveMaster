@@ -5,7 +5,6 @@ using Avalonia;
 using Avalonia.Controls;
 using CommunityToolkit.Mvvm.Messaging;
 using FzLib.Avalonia.Dialogs;
-
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -27,6 +26,7 @@ namespace ArchiveMaster
     {
         private readonly string baseUrl = "avares://ArchiveMaster.Module.Test/Assets/";
         public IList<Type> BackgroundServices { get; }
+
         public IList<ConfigMetadata> Configs =>
         [
             new ConfigMetadata(typeof(FileCopyTestConfig))
@@ -34,6 +34,7 @@ namespace ArchiveMaster
 
         public string ModuleName => "测试";
         public string ModuleDescription => "测试";
+        public string HelpFileName { get; } = null;
 
         public int Order => -100;
         public IList<Type> SingletonServices { get; }
@@ -42,6 +43,7 @@ namespace ArchiveMaster
         [
             typeof(FileCopyTestService),
         ];
+
         public ToolPanelGroupInfo Views => new ToolPanelGroupInfo()
         {
             Panels =

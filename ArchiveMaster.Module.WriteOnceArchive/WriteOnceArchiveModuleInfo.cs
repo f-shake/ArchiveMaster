@@ -22,6 +22,8 @@ namespace ArchiveMaster
         public string ModuleName => "动态固存备份";
         public string ModuleDescription => "解决将动态更新目录中的定期文件备份到多个容量有限、写入后不可修改介质（如光盘、一次性磁带）的需求";
 
+        public string HelpFileName { get; } = "writeOnce.md";
+        
         public int Order => 4;
         public IList<Type> SingletonServices { get; }
 

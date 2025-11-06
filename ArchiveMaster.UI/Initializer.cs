@@ -17,6 +17,7 @@ using ArchiveMaster.ViewModels;
 using ArchiveMaster.Views;
 using Avalonia;
 using Avalonia.Controls;
+using CommunityToolkit.Mvvm.Input;
 using FzLib.Application.Startup;
 using FzLib.Avalonia.DependencyInjection;
 using FzLib.Avalonia.Dialogs;
@@ -25,6 +26,7 @@ using FzLib.Programming;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
+using Serilog;
 
 namespace ArchiveMaster;
 
@@ -45,7 +47,7 @@ public static class Initializer
     public static IModuleInfo[] ModuleInitializers { get; } =
     [
 #if DEBUG
-      
+
 #else
 #endif
         new FileToolsModuleInfo(),
@@ -79,7 +81,7 @@ public static class Initializer
             .AsReadOnly();
     }
 
-    public static void Initialize( )
+    public static void Initialize()
     {
         if (AppHost != null)
         {
@@ -166,7 +168,7 @@ public static class Initializer
                 {
                     if (!typeof(IBackgroundService).IsAssignableFrom(type))
                     {
-                        throw new Exception($"后台服务{type.Name}没有实现{nameof(IBackgroundService)}接口");
+                        throw new Exception($"后台服务{type?.Name}没有实现{nameof(IBackgroundService)}接口");
                     }
 
                     services.AddSingleton(typeof(IHostedService), s => ActivatorUtilities.CreateInstance(s, type));
@@ -185,8 +187,14 @@ public static class Initializer
                     services.AddTransient(service);
                 }
 
+                var views = moduleInitializer.Views;
+                if (views == null)
+                {
+                    Log.Warning("模块{ModuleInitializerModuleName}没有定义视图", moduleInitializer.ModuleName);
+                    throw new Exception($"模块{moduleInitializer.ModuleName}没有定义视图");
+                }
                 //注册视图和视图模型
-                foreach (var panel in moduleInitializer.Views?.Panels ?? [])
+                foreach (var panel in views.Panels ?? [])
                 {
                     services.AddTransient(panel.ViewType, s =>
                     {
@@ -197,7 +205,29 @@ public static class Initializer
                     services.AddTransient(panel.ViewModelType);
                 }
 
-                viewsWithOrder.Add((moduleInitializer.Order, moduleInitializer.Views));
+                if (moduleInitializer.HelpFileName != null)
+                {
+                    var command = new RelayCommand(() =>
+                    {
+                        try
+                        {
+                            string url =
+                                $"https://github.com/f-shake/ArchiveMaster/blob/master/helps/{moduleInitializer.HelpFileName}";
+                            Process.Start(new ProcessStartInfo(url)
+                            {
+                                UseShellExecute = true
+                            });
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.Error(ex, "打开帮助URL失败");
+                        }
+                    });                    
+
+                    views.MenuItems.Add(new ModuleMenuItemInfo("在线帮助", command));
+                }
+
+                viewsWithOrder.Add((moduleInitializer.Order, views));
             }
             catch (Exception ex)
             {
