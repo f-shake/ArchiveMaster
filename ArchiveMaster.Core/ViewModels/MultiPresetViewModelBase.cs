@@ -182,8 +182,8 @@ public abstract partial class MultiPresetViewModelBase<TConfig> : ViewModelBase 
             Services.AppConfig.RemovePreset<TConfig>(typeof(TConfig).Name, name);
             if (PresetNames.Count == 0)
             {
-                PresetNames.Add(AppConfig.DEFAULT_PRESET);
-                PresetName = AppConfig.DEFAULT_PRESET;
+                PresetNames.Add(AppConfig.DefaultPresetName);
+                PresetName = AppConfig.DefaultPresetName;
             }
             else
             {

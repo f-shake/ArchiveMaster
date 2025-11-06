@@ -1,0 +1,220 @@
+<v:TwoStepPanelBase
+    x:Class="ArchiveMaster.Views.LineByLineProcessorPanel"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:b="using:ArchiveMaster.Behaviors"
+    xmlns:c="using:ArchiveMaster.Configs"
+    xmlns:collections="clr-namespace:System.Collections;assembly=System.Runtime"
+    xmlns:ct="using:FzLib.Avalonia.Controls"
+    xmlns:cvt="using:ArchiveMaster.Converters"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:e="using:ArchiveMaster.Enums"
+    xmlns:gb="using:GroupBox.Avalonia.Controls"
+    xmlns:ic="clr-namespace:FluentIcons.Avalonia.MarkupExtensions;assembly=FluentIcons.Avalonia"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:me="using:FzLib.Avalonia.MarkupExtensions"
+    xmlns:sys="clr-namespace:System;assembly=System.Runtime"
+    xmlns:v="using:ArchiveMaster.Views"
+    xmlns:vm="using:ArchiveMaster.ViewModels"
+    x:Name="root"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    x:DataType="vm:LineByLineProcessorViewModel"
+    ExecuteButtonContent="处理"
+    mc:Ignorable="d">
+    <v:TwoStepPanelBase.ConfigsContent>
+        <UniformGrid
+            ColumnSpacing="16"
+            Columns="2"
+            Rows="1">
+            <ct:StackFormItemGroup>
+                <ct:FormItem Label="文本源：">
+                    <v:TextSourceInput Source="{Binding Config.Source}" />
+                </ct:FormItem>
+                <ct:FormItem Label="转换要求：">
+                    <TextBox Text="{Binding Config.Prompt}" />
+                </ct:FormItem>
+                <ct:FormItem
+                    Description="较长的文本需要分段提供给AI。分段越短，正确率越高，但耗时会更长"
+                    Label="每次提交行数：">
+                    <DockPanel HorizontalSpacing="8">
+                        <TextBlock
+                            Width="72"
+                            DockPanel.Dock="Right"
+                            Text="{Binding Config.MaxLineEachCall, StringFormat='{}{0}行'}"
+                            TextAlignment="Right" />
+                        <Slider
+                            IsSnapToTickEnabled="True"
+                            Maximum="500"
+                            Minimum="10"
+                            TickFrequency="10"
+                            Value="{Binding Config.MaxLineEachCall}" />
+                    </DockPanel>
+                </ct:FormItem>
+
+                <ct:FormItem Label="选项：">
+                    <ct:WrapFormItemGroup>
+                        <CheckBox
+                            Content="跳过空行"
+                            IsChecked="{Binding Config.SkipEmptyLine}" />
+                        <StackPanel Orientation="Horizontal">
+                            <CheckBox
+                                Content="出错时重试"
+                                IsChecked="{Binding Config.EnableRetry}" />
+
+                            <Slider
+                                Width="96"
+                                Classes="ThumbLabel"
+                                IsSnapToTickEnabled="True"
+                                IsVisible="{Binding Config.EnableRetry}"
+                                LargeChange="1"
+                                Maximum="5"
+                                Minimum="2"
+                                SmallChange="1"
+                                TickFrequency="1"
+                                Value="{Binding Config.MaxRetryCount}" />
+                            <TextBlock
+                                IsVisible="{Binding Config.EnableRetry}"
+                                Text="次" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <CheckBox
+                                Content="投票机制"
+                                IsChecked="{Binding Config.EnableMajorityVote}"
+                                ToolTip.Tip="通过AI多次判断，提高置信度" />
+
+                            <Slider
+                                Width="96"
+                                Classes="ThumbLabel"
+                                IsSnapToTickEnabled="True"
+                                IsVisible="{Binding Config.EnableMajorityVote}"
+                                LargeChange="2"
+                                Maximum="7"
+                                Minimum="3"
+                                SmallChange="2"
+                                TickFrequency="2"
+                                Value="{Binding Config.EnableMajorityVote}" />
+                            <TextBlock
+                                IsVisible="{Binding Config.EnableMajorityVote}"
+                                Text="轮" />
+                        </StackPanel>
+                    </ct:WrapFormItemGroup>
+                </ct:FormItem>
+            </ct:StackFormItemGroup>
+            <gb:GroupBox Header="样例">
+                <DockPanel VerticalSpacing="8">
+                    <Grid
+                        Margin="0,0,8,0"
+                        ColumnDefinitions="Auto,Auto,Auto,*"
+                        ColumnSpacing="8"
+                        DockPanel.Dock="Bottom">
+                        <Button
+                            Classes="Icon"
+                            Command="{Binding AddExampleCommand}"
+                            Content="{ic:FluentIcon Icon=Add}"
+                            ToolTip.Tip="新增" />
+                        <Button
+                            Grid.Column="1"
+                            Classes="Icon"
+                            Command="{Binding RemoveSelectedExampleCommand}"
+                            CommandParameter="{Binding #dgExamples.SelectedItems}"
+                            Content="{ic:FluentIcon Icon=Delete}"
+                            IsEnabled="{Binding SelectedExample, Converter={x:Static cvt:Converters.IsNotNull}}"
+                            ToolTip.Tip="删除" />
+                        <Button
+                            Grid.Column="2"
+                            Classes="Icon"
+                            Command="{Binding ImportExampleFromTextCommand}"
+                            Content="{ic:FluentIcon Icon=TextBox}"
+                            ToolTip.Tip="从文本导入" />
+                        <TextBlock
+                            Grid.Column="3"
+                            Classes="Description"
+                            Text="通过向AI提供输出样例，可以提高正确率"
+                            TextAlignment="Right" />
+                    </Grid>
+                    <DataGrid
+                        x:Name="dgExamples"
+                        MaxHeight="200"
+                        ItemsSource="{Binding Config.Examples}"
+                        SelectedItem="{Binding SelectedExample}"
+                        SelectedItems="">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn
+                                Width="2*"
+                                Binding="{Binding Input}"
+                                Header="输入" />
+                            <DataGridTextColumn
+                                Width="*"
+                                Binding="{Binding Output}"
+                                Header="输出" />
+                            <DataGridTextColumn
+                                Width="2*"
+                                Binding="{Binding Explain}"
+                                Header="解释（可选）" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </DockPanel>
+            </gb:GroupBox>
+        </UniformGrid>
+    </v:TwoStepPanelBase.ConfigsContent>
+
+    <v:TwoStepPanelBase.ResultsContent>
+        <Grid RowDefinitions="*,8,Auto">
+            <DataGrid
+                IsReadOnly="True"
+                ItemsSource="{Binding Results}">
+                <DataGrid.RowDetailsTemplate>
+                    <DataTemplate>
+                        <ct:StackFormItemGroup Margin="8">
+                            <ct:FormItem
+                                Classes="BoldLabel"
+                                Content="{Binding Input}"
+                                Label="输入：" />
+                            <ct:FormItem
+                                Classes="BoldLabel"
+                                Content="{Binding Output}"
+                                Label="输出：" />
+                            <ct:FormItem
+                                Classes="BoldLabel"
+                                Content="{Binding Message}"
+                                IsVisible="{Binding Message, Converter={x:Static cvt:Converters.IsNotNull}}"
+                                Label="信息：" />
+                        </ct:StackFormItemGroup>
+                    </DataTemplate>
+                </DataGrid.RowDetailsTemplate>
+                <DataGrid.Columns>
+                    <DataGridTextColumn
+                        Binding="{Binding Index}"
+                        Header="序号" />
+                    <v:DataGridLightColumn
+                        Fill="{DynamicResource Foreground0}"
+                        FillBinding="{Binding VoteResultNotInconsistent, Converter={x:Static vm:LineByLineProcessorViewModel.VoteBrushConverter}}"
+                        Header="投票"
+                        IsVisible="{Binding Config.EnableMajorityVote}"
+                        SortMemberPath="VoteResultNotInconsistent"
+                        VisibleBinding="{Binding Complete}" />
+                    <DataGridTextColumn
+                        Width="*"
+                        Binding="{Binding Input}"
+                        Header="输入" />
+                    <DataGridTextColumn
+                        Width="*"
+                        Binding="{Binding Output}"
+                        Header="结果" />
+
+                    <DataGridTextColumn
+                        Width="*"
+                        Binding="{Binding Message}"
+                        Header="信息" />
+                </DataGrid.Columns>
+            </DataGrid>
+            <Button
+                Grid.Row="2"
+                HorizontalAlignment="Right"
+                Classes="Icon"
+                Command="{Binding CopyResultsCommand}"
+                Content="{ic:FluentIcon Icon=Copy}" />
+        </Grid>
+    </v:TwoStepPanelBase.ResultsContent>
+</v:TwoStepPanelBase>

@@ -13,13 +13,14 @@ public class ToolPanelGroupInfo
 
 public class ToolPanelInfo
 {
-    public ToolPanelInfo(Type viewType, Type viewModelType, string title, string description, string iconUri = null)
+    public ToolPanelInfo(Type viewType, Type viewModelType, string title, string description, string iconUri,bool useAi=false)
     {
         ViewType = viewType;
         ViewModelType = viewModelType;
         Title = title;
         Description = description;
         IconUri = iconUri;
+        UseAi = useAi;
     }
 
     private ToolPanelInfo()
@@ -28,6 +29,7 @@ public class ToolPanelInfo
     public string Description { get; private set; }
 
     public string IconUri { get; private set; }
+    public bool UseAi { get; }
 
     public PanelBase PanelInstance { get; set; }
 

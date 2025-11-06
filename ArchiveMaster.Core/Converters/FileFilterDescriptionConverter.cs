@@ -2,6 +2,7 @@
 using FzLib.IO;
 using System.Globalization;
 using System.Text;
+using FzLib.Text;
 
 namespace ArchiveMaster.Converters
 {
@@ -56,7 +57,7 @@ namespace ArchiveMaster.Converters
                 }
 
                 // 处理多行内容（只显示第一行）
-                string firstLine = value.Split(['\n', '\r'], StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
+                string firstLine = value.SplitLines().FirstOrDefault();
 
                 if (firstLine != value)
                 {

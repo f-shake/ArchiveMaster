@@ -6,4 +6,7 @@
         <ResourceInclude Source="Views/FileDataGridStyle.axaml" />
         <ResourceInclude Source="Views/PanelStyles.axaml" />
     </ResourceDictionary.MergedDictionaries>
+
+    <GridLength x:Key="SliderPreContentMargin">6</GridLength>
+    <GridLength x:Key="SliderPostContentMargin">6</GridLength>
 </ResourceDictionary>

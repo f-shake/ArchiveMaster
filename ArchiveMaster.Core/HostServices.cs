@@ -1,4 +1,4 @@
-using Avalonia;
+ï»¿using Avalonia;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -47,7 +47,7 @@ public static class HostServices
     {
         if (Provider != null)
         {
-            throw new InvalidOperationException("ÒÑ¾­¾­¹ı³õÊ¼»¯");
+            throw new InvalidOperationException("å·²ç»ç»è¿‡åˆå§‹åŒ–");
         }
 
         Provider = services ?? throw new ArgumentNullException();

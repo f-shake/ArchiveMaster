@@ -19,10 +19,30 @@
         </ResourceDictionary>
     </Styles.Resources>
 
-    <Style Selector="ic|FluentIcon">
-        <Setter Property="Padding" Value="0" />
-        <Setter Property="FontSize" Value="18" />
+    <Style Selector="Slider.ThumbLabel">
+        <Style Selector="^ /template/ Thumb#thumb">
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <Border
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="{DynamicResource SliderThumbCornerRadius}">
+                        <Viewbox>
+                            <TextBlock
+                                Margin="2"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Foreground="{DynamicResource Foreground2}"
+                                Text="{Binding .}" />
+                        </Viewbox>
+                    </Border>
+                </ControlTemplate>
+            </Setter>
+        </Style>
     </Style>
+
+
 
     <Style Selector="ctrl|WrapFormItemGroup CheckBox">
         <Setter Property="VerticalAlignment" Value="Bottom" />
@@ -74,11 +94,19 @@
             <Setter Property="Width" Value="120" />
         </Style>
         <Style Selector="^.Icon">
-            <Setter Property="Padding" Value="4" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Height" Value="32" />
+            <Setter Property="Width" Value="32" />
             <Setter Property="Background" Value="Transparent" />
             <Style Selector="^:disabled /template/ ContentPresenter#PART_ContentPresenter">
                 <Setter Property="Background" Value="Transparent" />
                 <Setter Property="Opacity" Value="0.5" />
+            </Style>
+            <Style Selector="^ ic|FluentIcon">
+                <Setter Property="Padding" Value="0" />
+                <Setter Property="FontSize" Value="18" />
             </Style>
         </Style>
         <Style Selector="^.Transparent">

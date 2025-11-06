@@ -60,6 +60,7 @@ namespace ArchiveMaster.Configs
             }
 
             CheckEmpty(Password, "密码");
+            CheckEmpty(Password.Password, "密码");
             if (KeySize is not (128 or 192 or 256))
             {
                 throw new Exception("密钥长度应当为128、192或256");

@@ -8,19 +8,11 @@ namespace ArchiveMaster.Services;
 public class TextEncryptionService(TextEncryptionConfig config, AppConfig appConfig)
     : ServiceBase(appConfig)
 {
-    public const int MAX_LENGTH = 300_000;
+    public const int MaxLength = 300_000;
     
     public TextEncryptionConfig Config { get; } = config;
 
     public string ProcessedText { get; private set; }
-
-    private void CheckStringLength(StringBuilder str)
-    {
-        if (str.Length > MAX_LENGTH)
-        {
-            throw new Exception($"文本长度超过限制（{MAX_LENGTH}）");
-        }
-    }
 
     public async Task DecryptAsync(TextSource source, CancellationToken ct = default)
     {
@@ -71,6 +63,13 @@ public class TextEncryptionService(TextEncryptionConfig config, AppConfig appCon
         ProcessedText = str.ToString();
     }
 
+    private void CheckStringLength(StringBuilder str)
+    {
+        if (str.Length > MaxLength)
+        {
+            throw new Exception($"文本长度超过限制（{MaxLength}）");
+        }
+    }
     private IEnumerable<(string part, bool? isEncrypted)> SplitIntoEncryptedAndUnencryptedText(string text)
     {
         if (string.IsNullOrEmpty(text))

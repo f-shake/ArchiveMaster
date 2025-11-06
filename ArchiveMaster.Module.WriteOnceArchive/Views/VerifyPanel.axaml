@@ -187,20 +187,11 @@
                     RowDetailsTemplate="{x:Null}"
                     RowDetailsVisibilityMode="Collapsed">
                     <v:SimpleFileDataGrid.Columns>
-                        <DataGridTemplateColumn
-                            CanUserResize="False"
+                        <v:DataGridLightColumn
+                            Fill="{DynamicResource Accent0}"
                             Header="已加密"
-                            SortMemberPath="IsEncrypted">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <Ellipse
-                                        Width="8"
-                                        Height="8"
-                                        Fill="SkyBlue"
-                                        IsVisible="{Binding IsEncrypted}" />
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
+                            SortMemberPath="IsEncrypted"
+                            VisibleBinding="{Binding IsEncrypted}" />
                         <DataGridTemplateColumn Header="存在的问题">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>

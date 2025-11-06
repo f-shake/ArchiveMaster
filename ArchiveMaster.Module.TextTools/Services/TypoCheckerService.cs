@@ -8,6 +8,7 @@ using ArchiveMaster.ViewModels;
 using ArchiveMaster.ViewModels.FileSystem;
 using DocumentFormat.OpenXml.Bibliography;
 using DocumentFormat.OpenXml.InkML;
+using FzLib.Text;
 using Microsoft.Extensions.AI;
 using Serilog;
 
@@ -16,8 +17,6 @@ namespace ArchiveMaster.Services;
 public class TypoCheckerService(AppConfig appConfig)
     : AiTwoStepServiceBase<TypoCheckerConfig>(appConfig)
 {
-    public const int MAX_LENGTH = 300_000;
-
     public const string SYSTEM_PROMPT = """
                                         你是一个错别字检查机器人，检查用户输入的语段是否存在错误。需要检查的内容包括：
                                         1.错别字（包括中文和英文等）；
@@ -248,7 +247,7 @@ public class TypoCheckerService(AppConfig appConfig)
                 new ChatOptions { ResponseFormat = ChatResponseFormat.Json }, ct);
 #endif
             yield return new LlmOutputItem(result);
-            var lines = result.Split(['\n', '\r'], StringSplitOptions.RemoveEmptyEntries);
+            var lines = result.SplitLines();
             int startLine = 0;
             for (int i = 0; i < lines.Length; i++)
             {
@@ -329,9 +328,9 @@ public class TypoCheckerService(AppConfig appConfig)
 
     private void CheckStringLength(StringBuilder str)
     {
-        if (str.Length > MAX_LENGTH)
+        if (str.Length > MaxLength)
         {
-            throw new Exception($"文本长度超过限制（{MAX_LENGTH}）");
+            throw new Exception($"文本长度超过限制（{MaxLength}）");
         }
     }
 

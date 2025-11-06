@@ -38,6 +38,7 @@ public partial class TextRewriterViewModel(ViewModelServices services)
         Service.TextGenerated += (sender, e) => Result += e.Value;
         return base.OnExecutingAsync(ct);
     }
+
     protected override void OnReset()
     {
         Result = "";
