@@ -34,7 +34,7 @@ public partial class LineByLineProcessorViewModel(ViewModelServices services)
 
     public static IValueConverter VoteBrushConverter =>
         new FuncValueConverter<bool, IBrush>(b => b ? Brushes.Red : Brushes.Green);
-    
+
     protected override Task OnInitializedAsync()
     {
         Results = Service.Items;
@@ -67,7 +67,8 @@ public partial class LineByLineProcessorViewModel(ViewModelServices services)
     private async Task CopyResultsAsync()
     {
         var text = string.Join(Environment.NewLine,
-            Results.Select(p => $"{p.Index}\t{(p.VoteResultNotInconsistent?"不一致":"一致")}\t{p.Input}\t{p.Output}\t{p.Message}"));
+            Results.Select(p =>
+                $"{p.Index}\t{(p.VoteResultNotInconsistent ? "不一致" : "一致")}\t{p.Input.Replace('\t', ' ')}\t{p.Output.Replace('\t', ' ')}\t{p.Message}"));
         text = $"序号\t投票\t输入\t输出\t说明{Environment.NewLine}{text}";
         await Services.Clipboard.SetTextAsync(text);
     }
@@ -88,11 +89,7 @@ public partial class LineByLineProcessorViewModel(ViewModelServices services)
         {
             foreach (var line in lines)
             {
-                var parts = line.Split('\t', StringSplitOptions.RemoveEmptyEntries);
-                if (parts.Length == 1)
-                {
-                    parts = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-                }
+                var parts = line.Split(['\t', ' '], StringSplitOptions.RemoveEmptyEntries);
 
                 if (parts.Length is not (2 or 3))
                 {
