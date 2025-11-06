@@ -12,6 +12,7 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using ArchiveMaster.ViewModels.FileSystem;
+using ArchiveMaster.Views;
 using Avalonia.Data.Converters;
 using Avalonia.Media;
 using FzLib.Avalonia.Dialogs;
@@ -76,40 +77,25 @@ public partial class LineByLineProcessorViewModel(ViewModelServices services)
     [RelayCommand]
     private async Task ImportExampleFromTextAsync()
     {
-        var text = await Services.Dialog.ShowInputMultiLinesTextDialogAsync("从文本导入",
-            "在此处粘贴表格文本，第一列为输入，第二列为输出，第三列（可选）为解释说明。列之前使用空格制表符或空格分隔。");
-        if (string.IsNullOrWhiteSpace(text))
+        var dialog=new TextToTableDialog("在此处粘贴表格文本，第一列为输入，第二列为输出，第三列（可选）为解释说明。",
+            [2, 3]);
+        var result=await Services.Dialog.ShowCustomDialogAsync<List<string[]>>(dialog);
+        if (result is null)
         {
             return;
         }
 
-        var lines = text.SplitLines();
         Config.Examples.Clear();
-        try
+        foreach (var line in result)
         {
-            foreach (var line in lines)
+            LineByLineItem item = new LineByLineItem();
+            item.Input = line[0];
+            item.Output = line[1];
+            if (line.Length == 3)
             {
-                var parts = line.Split(['\t', ' '], StringSplitOptions.RemoveEmptyEntries);
-
-                if (parts.Length is not (2 or 3))
-                {
-                    throw new Exception("列的数量应当为2或3");
-                }
-
-                LineByLineItem item = new LineByLineItem();
-                item.Input = parts[0];
-                item.Output = parts[1];
-                if (parts.Length == 3)
-                {
-                    item.Explain = parts[2];
-                }
-
-                Config.Examples.Add(item);
+                item.Explain = line[2];
             }
-        }
-        catch (Exception ex)
-        {
-            await Services.Dialog.ShowErrorDialogAsync("导入失败", ex);
+            Config.Examples.Add(item);
         }
     }
 

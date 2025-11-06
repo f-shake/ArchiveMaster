@@ -1,0 +1,43 @@
+<dialog:DialogHost
+    x:Class="ArchiveMaster.Views.TextToTableDialog"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ct="using:FzLib.Avalonia.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:dialog="using:FzLib.Avalonia.Dialogs"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:sys="using:System"
+    xmlns:vm="using:ArchiveMaster.ViewModels"
+    Title="请输入需要转为表格的文本"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    CloseButtonContent="取消"
+    PrimaryButtonContent="确定"
+    mc:Ignorable="d">
+    <Grid
+        RowDefinitions="Auto,Auto,Auto,Auto"
+        RowSpacing="8">
+        <TextBlock x:Name="tbkMessage" />
+        <TextBox
+            x:Name="txt"
+            Grid.Row="1"
+            AcceptsReturn="True"
+            AcceptsTab="True"
+            MaxLines="10"
+            MinLines="3" />
+        <ct:FormItem
+            Grid.Row="2"
+            Label="列分隔符：">
+            <ct:RadioButtonGroup x:Name="separator">
+                <sys:String>制表符（\t）</sys:String>
+                <sys:String>空格（ ）</sys:String>
+                <sys:String>半角逗号（,）</sys:String>
+                <sys:String>全角逗号（，）</sys:String>
+            </ct:RadioButtonGroup>
+        </ct:FormItem>
+        <TextBlock
+            x:Name="tbkWarning"
+            Grid.Row="3"
+            Foreground="Red" />
+    </Grid>
+</dialog:DialogHost>

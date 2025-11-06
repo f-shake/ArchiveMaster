@@ -38,6 +38,10 @@
       <DependentUpon>LineByLineProcessorPanel.axaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Views\TextToTableDialog.axaml.cs">
+      <DependentUpon>SettingDialog.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>
