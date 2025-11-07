@@ -209,12 +209,14 @@
                         Header="信息" />
                 </DataGrid.Columns>
             </DataGrid>
-            <Button
+            <v:ConvertTableToTextButton
                 Grid.Row="2"
                 HorizontalAlignment="Right"
                 Classes="Icon"
-                Command="{Binding CopyResultsCommand}"
-                Content="{ic:FluentIcon Icon=Copy}" />
+                Content="{ic:FluentIcon Icon=Copy}"
+                ItemType="{x:Type vm:LineByLineItem}"
+                ItemsSource="{Binding Results}"
+                Properties="{Binding TableProperties}" />
         </Grid>
     </v:TwoStepPanelBase.ResultsContent>
 </v:TwoStepPanelBase>

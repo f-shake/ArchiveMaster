@@ -11,7 +11,11 @@ namespace ArchiveMaster.Views;
 
 public partial class TextToTableDialog : DialogHost
 {
-    public HashSet<int> AllowedColumns { get; }
+    public HashSet<int> AllowedColumns { get; init; } = [];
+
+    public TextToTableDialog()
+    {
+    }
 
     public TextToTableDialog(string message, ICollection<int> allowedColumns)
     {
@@ -26,7 +30,8 @@ public partial class TextToTableDialog : DialogHost
     }
 
     protected override void OnPrimaryButtonClick()
-    { var text = (txt.Text ?? "").Trim();
+    {
+        var text = (txt.Text ?? "").Trim();
         if (text.Length == 0)
         {
             tbkMessage.Text = "请输入文本";
@@ -39,7 +44,7 @@ public partial class TextToTableDialog : DialogHost
         foreach (var line in linesText)
         {
             var parts = line.Split(separator);
-            if (AllowedColumns.Contains(parts.Length))
+            if (AllowedColumns.Count == 0 || AllowedColumns.Contains(parts.Length))
             {
                 lines.Add(parts);
             }
@@ -49,6 +54,7 @@ public partial class TextToTableDialog : DialogHost
                 return;
             }
         }
+
         Close(lines);
     }
 

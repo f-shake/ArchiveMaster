@@ -11,6 +11,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using ArchiveMaster.Models;
 using ArchiveMaster.ViewModels.FileSystem;
 using ArchiveMaster.Views;
 using Avalonia.Data.Converters;
@@ -31,16 +32,18 @@ public partial class LineByLineProcessorViewModel(ViewModelServices services)
     [ObservableProperty]
     private LineByLineItem selectedExample;
 
-    public override bool EnableRepeatExecute => true;
-
     public static IValueConverter VoteBrushConverter =>
         new FuncValueConverter<bool, IBrush>(b => b ? Brushes.Red : Brushes.Green);
 
-    protected override Task OnInitializedAsync()
-    {
-        Results = Service.Items;
-        return base.OnInitializedAsync();
-    }
+    public override bool EnableRepeatExecute => true;
+    public List<PropertyFieldInfo> TableProperties { get; } =
+    [
+        new PropertyFieldInfo(nameof(LineByLineItem.Index), "序号"),
+        new PropertyFieldInfo(nameof(LineByLineItem.VoteResultNotInconsistent), "投票", v => ((bool)v) ? "不一致" : "一致"),
+        new PropertyFieldInfo(nameof(LineByLineItem.Input), "输入"),
+        new PropertyFieldInfo(nameof(LineByLineItem.Output), "输出"),
+        new PropertyFieldInfo(nameof(LineByLineItem.Message), "说明")
+    ];
 
     protected override async Task OnExecutedAsync(CancellationToken ct)
     {
@@ -51,6 +54,11 @@ public partial class LineByLineProcessorViewModel(ViewModelServices services)
         }
     }
 
+    protected override Task OnInitializedAsync()
+    {
+        Results = Service.Items;
+        return base.OnInitializedAsync();
+    }
     protected override void OnReset()
     {
         Results = null;
@@ -73,13 +81,12 @@ public partial class LineByLineProcessorViewModel(ViewModelServices services)
         text = $"序号\t投票\t输入\t输出\t说明{Environment.NewLine}{text}";
         await Services.Clipboard.SetTextAsync(text);
     }
-
     [RelayCommand]
     private async Task ImportExampleFromTextAsync()
     {
-        var dialog=new TextToTableDialog("在此处粘贴表格文本，第一列为输入，第二列为输出，第三列（可选）为解释说明。",
+        var dialog = new TextToTableDialog("在此处粘贴表格文本，第一列为输入，第二列为输出，第三列（可选）为解释说明。",
             [2, 3]);
-        var result=await Services.Dialog.ShowCustomDialogAsync<List<string[]>>(dialog);
+        var result = await Services.Dialog.ShowCustomDialogAsync<List<string[]>>(dialog);
         if (result is null)
         {
             return;
@@ -95,6 +102,7 @@ public partial class LineByLineProcessorViewModel(ViewModelServices services)
             {
                 item.Explain = line[2];
             }
+
             Config.Examples.Add(item);
         }
     }
