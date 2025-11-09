@@ -21,6 +21,7 @@
             Text="{Binding $parent[UserControl].Result}" />
         <TextBlock
             Grid.Row="2"
+            Classes="Description"
             Text="{Binding $parent[UserControl].Message}" />
         <Button
             Grid.Row="2"
