@@ -22,69 +22,6 @@ namespace ArchiveMaster.Services
         public Dictionary<string, List<string>> LocalDirectories { get; private set; }
         public List<SyncFileInfo> UpdateFiles { get; private set; }
 
-        public static string GetNoDuplicateDirectory(string path, string suffixFormat = " ({i})")
-        {
-            if (!Directory.Exists(path))
-            {
-                return path;
-            }
-
-            if (!suffixFormat.Contains("{i}"))
-            {
-                throw new ArgumentException("后缀应包含“{i}”以表示索引");
-            }
-
-            int num = 2;
-            string directoryName = Path.GetDirectoryName(path);
-            string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(path);
-            string extension = Path.GetExtension(path);
-            string text;
-            while (true)
-            {
-                text = Path.Combine(directoryName,
-                    fileNameWithoutExtension + suffixFormat.Replace("{i}", num.ToString()) + extension);
-                if (!Directory.Exists(text))
-                {
-                    break;
-                }
-
-                num++;
-            }
-
-            return text;
-        }
-
-        public static string GetNoDuplicateFile(string path, string suffixFormat = " ({i})")
-        {
-            if (!File.Exists(path))
-            {
-                return path;
-            }
-
-            if (!suffixFormat.Contains("{i}"))
-            {
-                throw new ArgumentException("后缀应包含“{i}”以表示索引");
-            }
-
-            int num = 2;
-            string directoryName = Path.GetDirectoryName(path);
-            string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(path);
-            string extension = Path.GetExtension(path);
-            string text;
-            while (true)
-            {
-                text = Path.Combine(directoryName,
-                    fileNameWithoutExtension + suffixFormat.Replace("{i}", num.ToString()) + extension);
-                if (!File.Exists(text))
-                {
-                    break;
-                }
-
-                num++;
-            }
-
-            return text;
-        }
 
         public Task DeleteEmptyDirectoriesAsync()
         {
@@ -292,11 +229,6 @@ namespace ArchiveMaster.Services
             }, ct);
         }
 
-        private static bool IsDirectory(string path)
-        {
-            FileAttributes attr = File.GetAttributes(path);
-            return attr.HasFlag(FileAttributes.Directory);
-        }
 
         private void AnalyzeEmptyDirectories(CancellationToken ct)
         {
@@ -382,54 +314,19 @@ namespace ArchiveMaster.Services
 
         private void Delete(string rootDir, string filePath)
         {
-            Debug.Assert(IsDirectory(filePath) || true);
             if (!filePath.StartsWith(rootDir))
             {
                 throw new ArgumentException("文件不在目录中");
             }
 
-            switch (Config.DeleteMode)
-            {
-                case DeleteMode.Delete:
-                    if (IsDirectory(filePath))
-                    {
-                        Directory.Delete(filePath, true);
-                    }
-                    else
-                    {
-                        File.Delete(filePath);
-                    }
-
-                    break;
-                case DeleteMode.MoveToDeletedFolder:
-                    string relative = Path.GetRelativePath(rootDir, filePath);
-                    string deletedFolder = Path.Combine(Path.GetPathRoot(filePath), Config.DeleteDir,
-                        createTime.ToString("yyyyMMdd-HHmmss"),
-                        rootDir.Replace(":\\", "#").Replace('\\', '#').Replace('/', '#'));
-                    string target = Path.Combine(deletedFolder, relative);
-                    string dir = Path.GetDirectoryName(target);
-                    if (!Directory.Exists(dir))
-                    {
-                        Directory.CreateDirectory(dir);
-                    }
-
-                    if (IsDirectory(filePath))
-                    {
-                        Directory.Move(filePath, GetNoDuplicateDirectory(target));
-                    }
-                    else
-                    {
-                        File.Move(filePath, GetNoDuplicateFile(target));
-                    }
-
-                    break;
-
-                case DeleteMode.RecycleBinPrefer:
-                    FileHelper.DeleteByConfig(filePath);
-                    break;
-                default:
-                    throw new InvalidEnumArgumentException();
-            }
+            string relative = Path.GetRelativePath(rootDir, filePath); //文件关于备份根目录的相对路径
+            string absRootDir = Path.GetPathRoot(filePath); //文件的绝对根目录（如，"C:\","/"）
+            string absRelative = Path.GetRelativePath(absRootDir, rootDir); //备份目录关于根目录的相对路径
+            string backupPathDir = absRelative
+                .Replace('\\', GlobalConfigs.Instance.FlattenPathSeparatorReplacement)
+                .Replace('/', GlobalConfigs.Instance.FlattenPathSeparatorReplacement);
+            string specialRelativePath = Path.Combine(backupPathDir, relative);
+            FileHelper.DeleteByConfig(filePath, specialRelativePath);
         }
     }
 }

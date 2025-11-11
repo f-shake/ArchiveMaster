@@ -5,10 +5,10 @@ namespace ArchiveMaster.Enums
     public enum DeleteMode
     {
         [Description("直接删除")]
-        Delete,
+        DeleteDirectly,
         [Description("移动到删除文件夹")]
-        MoveToDeletedFolder,
-        [Description("优先删除到回收站")]
+        MoveToSpecialFolder,
+        [Description("优先删除到回收站（较慢）")]
         RecycleBinPrefer
     }
 }

@@ -3,102 +3,124 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:ct="using:FzLib.Avalonia.Controls"
+    xmlns:cvt="using:ArchiveMaster.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:dialog="using:FzLib.Avalonia.Dialogs"
+    xmlns:enums="clr-namespace:ArchiveMaster.Enums;assembly=ArchiveMaster.Core"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:me="clr-namespace:FzLib.Avalonia.MarkupExtensions;assembly=FzLib.Avalonia"
     xmlns:sys="using:System"
     xmlns:vm="using:ArchiveMaster.ViewModels"
     Title="设置"
     Width="450"
+    Height="540"
     d:DesignHeight="450"
     d:DesignWidth="800"
     PrimaryButtonContent="完成"
     mc:Ignorable="d">
-    <ScrollViewer
-        HorizontalScrollBarVisibility="Disabled"
-        VerticalScrollBarVisibility="Auto">
-        <StackPanel Orientation="Vertical">
-            <HeaderedContentControl
-                Classes="GroupBox"
-                Header="调试">
-                <ct:WrapFormItemGroup>
+    <TabControl>
+        <TabControl.Resources>
+            <x:Double x:Key="TabItemMinHeight">36</x:Double>
+        </TabControl.Resources>
+        <TabControl.Styles>
+            <Style Selector="TabItem">
+                <Setter Property="FontSize" Value="18" />
+                <Setter Property="Margin" Value="0,0,0,12" />
+            </Style>
+        </TabControl.Styles>
+        <TabItem Header="调试">
+            <ct:WrapFormItemGroup>
+                <CheckBox
+                    x:Name="chkDebug"
+                    Content="调试模式"
+                    IsChecked="{Binding Configs.DebugMode}" />
+                <ct:FormItem
+                    IsVisible="{Binding #chkDebug.IsChecked}"
+                    Label="循环延迟（毫秒）：">
+                    <Slider
+                        Width="120"
+                        Classes="ThumbLabel"
+                        IsSnapToTickEnabled="True"
+                        LargeChange="50"
+                        Maximum="100"
+                        Minimum="10"
+                        SmallChange="10"
+                        TickFrequency="10"
+                        Value="{Binding Path=Configs.DebugModeLoopDelay}" />
+                </ct:FormItem>
+            </ct:WrapFormItemGroup>
+        </TabItem>
+
+        <TabItem Header="程序和界面">
+            <StackPanel Orientation="Vertical">
+                <CheckBox
+                    Command="{Binding SetAutoStartCommand}"
+                    CommandParameter="{Binding $self.IsChecked, Mode=OneWay}"
+                    Content="开机自启"
+                    IsChecked="{Binding IsAutoStart}" />
+
+                <ct:FormItem Description="重启界面后应用">
                     <CheckBox
-                        x:Name="chkDebug"
-                        Content="调试模式"
-                        IsChecked="{Binding Configs.DebugMode}" />
-                    <ct:FormItem
-                        IsVisible="{Binding #chkDebug.IsChecked}"
-                        Label="循环延迟（毫秒）：">
-                        <Slider
-                            Width="120"
-                            Classes="ThumbLabel"
-                            IsSnapToTickEnabled="True"
-                            LargeChange="50"
-                            Maximum="100"
-                            Minimum="10"
-                            SmallChange="10"
-                            TickFrequency="10"
-                            Value="{Binding Path=Configs.DebugModeLoopDelay}" />
-                    </ct:FormItem>
-                </ct:WrapFormItemGroup>
-            </HeaderedContentControl>
+                        Content="平滑滚动"
+                        IsChecked="{Binding Configs.IsSmoothScrollingEnabled}" />
+                </ct:FormItem>
+            </StackPanel>
+        </TabItem>
 
-            <HeaderedContentControl
-                Classes="GroupBox"
-                Header="程序和界面">
-                <StackPanel Orientation="Vertical">
-                    <CheckBox
-                        Command="{Binding SetAutoStartCommand}"
-                        CommandParameter="{Binding $self.IsChecked, Mode=OneWay}"
-                        Content="开机自启"
-                        IsChecked="{Binding IsAutoStart}" />
+        <TabItem Header="文件和目录">
+            <StackPanel Orientation="Vertical">
+                <ct:FormItem Header="文件删除模式">
+                    <ComboBox
+                        x:Name="cbbDeleteMode"
+                        HorizontalAlignment="Stretch"
+                        DisplayMemberBinding="{Binding ., Converter={x:Static cvt:Converters.Description}}"
+                        ItemsSource="{me:EnumValues enums:DeleteMode}"
+                        SelectedItem="{Binding Configs.DeleteMode}" />
+                </ct:FormItem>
+                <ct:FormItem
+                    Header="删除文件夹名"
+                    IsVisible="{Binding #cbbDeleteMode.SelectedItem, Converter={x:Static cvt:Converters.EqualWithParameter}, ConverterParameter=MoveToSpecialFolder}">
+                    <TextBox
+                        x:Name="txtDeleteFolder"
+                        HorizontalAlignment="Stretch"
+                        Text="{Binding Configs.SpecialDeleteFolderName}" />
+                </ct:FormItem>
+                <TextBlock
+                    Classes="Description"
+                    IsVisible="{Binding #cbbDeleteMode.SelectedItem, Converter={x:Static cvt:Converters.EqualWithParameter}, ConverterParameter=MoveToSpecialFolder}"
+                    TextWrapping="Wrap">
+                    <Run Text="文件将被删除到根目录下的该文件夹中。例如，在Windows中，一个C:\file.txt文件删除后，将被移动到C:\" /><Run Text="{Binding #txtDeleteFolder.Text}" /><Run Text="\[工具名]\file.txt中；*nix下，/usr/file.txt文件删除后，将被移动到/" /><Run Text="{Binding #txtDeleteFolder.Text}" /><Run Text="/[工具名]/file.txt中。" />
+                </TextBlock>
+                <ct:FormItem Header="目录编码分隔符">
+                    <ComboBox
+                        HorizontalAlignment="Stretch"
+                        SelectedItem="{Binding Path=Configs.FlattenPathSeparatorReplacement}">
+                        <sys:Char>-</sys:Char>
+                        <sys:Char>_</sys:Char>
+                        <sys:Char>%</sys:Char>
+                        <sys:Char>.</sys:Char>
+                        <sys:Char>#</sys:Char>
+                        <sys:Char>@</sys:Char>
+                        <sys:Char>&#32;</sys:Char>
+                    </ComboBox>
+                </ct:FormItem>
+                <TextBlock
+                    Classes="Description"
+                    Text="将多级目录路径按指定层级转换为扁平化格式时，使用分隔符代替斜杠"
+                    TextWrapping="Wrap" />
+            </StackPanel>
+        </TabItem>
 
-                    <ct:FormItem Description="重启界面后应用">
-                        <CheckBox
-                            Content="平滑滚动"
-                            IsChecked="{Binding Configs.IsSmoothScrollingEnabled}" />
-                    </ct:FormItem>
-                </StackPanel>
-            </HeaderedContentControl>
+        <TabItem Header="导入和导出">
+            <StackPanel>
+                <Button
+                    Command="{Binding ExportConfigsCommand}"
+                    Content="导出配置" />
+                <Button
+                    Command="{Binding ImportConfigsCommand}"
+                    Content="导入配置" />
+            </StackPanel>
+        </TabItem>
 
-            <HeaderedContentControl
-                Classes="GroupBox"
-                Header="文件和目录">
-                <StackPanel Orientation="Vertical">
-                    <CheckBox
-                        Content="优先删除文件到回收站"
-                        IsChecked="{Binding Configs.PreferDeleteToRecycleBin}" />
-
-                    <ct:FormItem
-                        Description="将多级目录路径按指定层级转换为扁平化格式时，使用分隔符代替斜杠"
-                        Header="目录编码分隔符">
-                        <ComboBox
-                            HorizontalAlignment="Stretch"
-                            SelectedItem="{Binding Path=Configs.FlattenPathSeparatorReplacement}">
-                            <sys:Char>-</sys:Char>
-                            <sys:Char>_</sys:Char>
-                            <sys:Char>%</sys:Char>
-                            <sys:Char>.</sys:Char>
-                            <sys:Char>#</sys:Char>
-                            <sys:Char>@</sys:Char>
-                            <sys:Char>&#32;</sys:Char>
-                        </ComboBox>
-                    </ct:FormItem>
-                </StackPanel>
-            </HeaderedContentControl>
-
-            <HeaderedContentControl
-                Classes="GroupBox"
-                Header="导入和导出">
-                <StackPanel Orientation="Horizontal">
-                    <Button
-                        Command="{Binding ExportConfigsCommand}"
-                        Content="导出配置" />
-                    <Button
-                        Command="{Binding ImportConfigsCommand}"
-                        Content="导入配置" />
-                </StackPanel>
-            </HeaderedContentControl>
-        </StackPanel>
-    </ScrollViewer>
+    </TabControl>
 </dialog:DialogHost>
