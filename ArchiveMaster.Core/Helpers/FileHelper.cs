@@ -5,6 +5,7 @@ using ArchiveMaster.ViewModels.FileSystem;
 using Avalonia.Platform.Storage;
 using FzLib.Cryptography;
 using FzLib.IO;
+using Serilog;
 
 namespace ArchiveMaster.Helpers;
 
@@ -40,67 +41,75 @@ public static class FileHelper
         string callerCs = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
-        switch (GlobalConfigs.Instance.DeleteMode)
+        try
         {
-            case DeleteMode.RecycleBinPrefer:
-                try
-                {
-                    FileDeleteHelper.DeleteToRecycleBin(path);
-                }
-                catch
-                {
+            switch (GlobalConfigs.Instance.DeleteMode)
+            {
+                case DeleteMode.RecycleBinPrefer:
+                    try
+                    {
+                        FileDeleteHelper.DeleteToRecycleBin(path);
+                    }
+                    catch
+                    {
+                        FileDeleteHelper.DirectlyDelete(path);
+                    }
+
+                    break;
+                case DeleteMode.DeleteDirectly:
                     FileDeleteHelper.DirectlyDelete(path);
-                }
+                    break;
+                case DeleteMode.MoveToSpecialFolder:
+                    string toolName = callerCs == null
+                        ? "未知"
+                        : Path.GetFileNameWithoutExtension(callerCs);
+                    string rootDir = Path.GetPathRoot(path);
+                    if (string.IsNullOrWhiteSpace(GlobalConfigs.Instance.SpecialDeleteFolderName))
+                    {
+                        throw new InvalidOperationException("未指定删除文件夹");
+                    }
 
-                break;
-            case DeleteMode.DeleteDirectly:
-                FileDeleteHelper.DirectlyDelete(path);
-                break;
-            case DeleteMode.MoveToSpecialFolder:
-                string toolName = callerCs == null
-                    ? "未知"
-                    : Path.GetFileNameWithoutExtension(callerCs).Replace("Service", "");
-                string rootDir = Path.GetPathRoot(path);
-                if (string.IsNullOrWhiteSpace(GlobalConfigs.Instance.SpecialDeleteFolderName))
-                {
-                    throw new InvalidOperationException("未指定删除文件夹");
-                }
+                    if (rootDir == null)
+                    {
+                        throw new InvalidOperationException($"无法找到文件{path}的根目录");
+                    }
 
-                if (rootDir == null)
-                {
-                    throw new InvalidOperationException($"无法找到文件{path}的根目录");
-                }
+                    string target = Path.Combine(Path.GetPathRoot(path),
+                        GlobalConfigs.Instance.SpecialDeleteFolderName,
+                        toolName);
 
-                string target = Path.Combine(Path.GetPathRoot(path),
-                    GlobalConfigs.Instance.SpecialDeleteFolderName,
-                    toolName);
+                    if (!string.IsNullOrWhiteSpace(specialDeletedFileRelativePath))
+                    {
+                        target = Path.Combine(target, specialDeletedFileRelativePath);
+                    }
+                    else
+                    {
+                        var relativePath = Path.GetRelativePath(rootDir, path);
+                        target = Path.Combine(target, relativePath);
+                    }
 
-                if (!string.IsNullOrWhiteSpace(specialDeletedFileRelativePath))
-                {
-                    target = Path.Combine(target, specialDeletedFileRelativePath);
-                }
-                else
-                {
-                    var relativePath = Path.GetRelativePath(rootDir, path);
-                    target = Path.Combine(target, relativePath);
-                }
+                    string targetDir = Path.GetDirectoryName(target);
+                    Directory.CreateDirectory(targetDir);
 
-                string targetDir = Path.GetDirectoryName(target);
-                Directory.CreateDirectory(targetDir);
+                    if (IsDirectory(path))
+                    {
+                        Directory.Move(path, GetNoDuplicateDirectory(target));
+                    }
+                    else
+                    {
+                        File.Move(path, GetNoDuplicateFile(target));
+                    }
 
-                if (IsDirectory(path))
-                {
-                    Directory.Move(path, GetNoDuplicateDirectory(target));
-                }
-                else
-                {
-                    File.Move(path, GetNoDuplicateFile(target));
-                }
-
-                break;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(GlobalConfigs.Instance.DeleteMode),
-                    GlobalConfigs.Instance.DeleteMode, null);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(GlobalConfigs.Instance.DeleteMode),
+                        GlobalConfigs.Instance.DeleteMode, null);
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "删除文件时出错");
+            throw new IOException($"删除文件时出错：{ex.Message}", ex);
         }
     }
 

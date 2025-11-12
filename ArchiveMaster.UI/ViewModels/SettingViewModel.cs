@@ -1,6 +1,10 @@
 ﻿using System;
+using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using ArchiveMaster.Configs;
+using ArchiveMaster.Enums;
+using Avalonia.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using FzLib.Application.Startup;
@@ -60,7 +64,6 @@ public partial class SettingViewModel : ObservableObject
         }
     }
 
-
     [RelayCommand]
     private void SetAutoStart(bool autoStart)
     {
@@ -77,5 +80,26 @@ public partial class SettingViewModel : ObservableObject
         {
             StartupManager.DisableStartup();
         }
+    }
+
+    public bool OnClosing()
+    {
+        if (Configs.DeleteMode == DeleteMode.MoveToSpecialFolder)
+        {
+            if (string.IsNullOrWhiteSpace(Configs.SpecialDeleteFolderName))
+            {
+                //故意不用异步
+                Services.Dialog.ShowErrorDialogAsync("未指定删除文件夹", "请指定删除文件夹");
+                return false;
+            }
+            if (Path.GetInvalidFileNameChars().Any(p => Configs.SpecialDeleteFolderName.Contains(p)))
+            {
+                Services.Dialog.ShowErrorDialogAsync("文件夹名称包含非法字符", "文件夹名称包含非法字符，请修改后再保存",
+                    $"非法字符包括：{string.Join(",", Path.GetInvalidFileNameChars())}");
+                return false;
+            }
+        }
+
+        return true;
     }
 }

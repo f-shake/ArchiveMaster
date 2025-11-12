@@ -16,7 +16,6 @@ public partial class DbService
         var query = db.Files
             .Where(p => p.RawFileRelativePath == relativePath)
             .Where(p => p.Type == FileRecordType.Created || p.Type == FileRecordType.Modified)
-            .Where(p => p.Type == FileRecordType.Created || p.Type == FileRecordType.Modified)
             .Where(p => !p.IsDeleted)
             .Include(p => p.Snapshot)
             .Where(p => p.Snapshot.EndTime > default(DateTime))
@@ -125,7 +124,14 @@ public partial class DbService
     public BackupFileEntity GetSameFile(DateTime time, long length, string sha1)
     {
         Initialize();
+        //20251112：
+        //一直发现每次整理文件会有很多丢失文件。检查后发现，可能是由于此处代码与整理文件代码筛选条件不一致导致的。
+        //此处原本会搜索所有文件，即便快照已经删除；而整理文件处，不考虑。
+        //这会导致在备份时，原本应当备份的文件，被误以为已有物理文件存在，因而跳过备份。
         var query = db.Files
+            .Include(p => p.Snapshot)
+            .Where(p => p.Snapshot.IsDeleted == false)
+            .Where(p => p.Snapshot.EndTime > default(DateTime))
             .Where(p => p.BackupFileName != null)
             .Where(p => p.Time == time)
             .Where(p => p.Length == length);
@@ -137,20 +143,20 @@ public partial class DbService
         return query.FirstOrDefault();
     }
 
-    public async Task<(IList<FileInfo> RedundantFiles, IList<BackupFileEntity> LostFiles)> CheckFilesAsync(
-        CancellationToken cancellationToken)
+    public async Task<BackupFilesCheckResult> CheckFilesAsync(
+        CancellationToken ct)
     {
         var lostFiles = new List<BackupFileEntity>();
         List<FileInfo> redundantFiles = null;
-        var diskFileLength = Guid.NewGuid().ToString("N").Length;
+        var diskFileLength = Guid.NewGuid().ToString("N").Length; //32
         await Task.Run(() =>
         {
             var diskFiles = new DirectoryInfo(BackupTask.BackupDir)
                 .EnumerateFiles("*", FileEnumerateExtension.GetEnumerationOptions())
-                .ApplyFilter(cancellationToken)
+                .ApplyFilter(ct)
                 .Where(p => p.Name.Length == diskFileLength)
                 .ToList();
-
+            ct.ThrowIfCancellationRequested();
             var query = db.Files
                 .Include(p => p.Snapshot)
                 .Where(p => p.IsDeleted == false)
@@ -161,22 +167,39 @@ public partial class DbService
             var dbFiles = query.ToList();
 
             var diskFileName2FileInfo = diskFiles.ToDictionary(p => p.Name);
-            var dbFileName2Entity = dbFiles.GroupBy(p => p.BackupFileName).ToDictionary(p=>p.Key,p=>p.FirstOrDefault());
+            var dbFileName2Entity =
+                dbFiles.GroupBy(p => p.BackupFileName).ToDictionary(p => p.Key, p => p.ToList());
 
             foreach (var key in dbFileName2Entity.Keys)
             {
-                if (diskFileName2FileInfo.ContainsKey(key))
+                if (!diskFileName2FileInfo.Remove(key))
                 {
-                    diskFileName2FileInfo.Remove(key);
-                }
-                else
-                {
-                    lostFiles.Add(dbFileName2Entity[key]);
+                    lostFiles.AddRange(dbFileName2Entity[key]);
                 }
             }
 
             redundantFiles = diskFileName2FileInfo.Values.ToList();
-        }, cancellationToken);
-        return (redundantFiles, lostFiles);
+        }, ct);
+        return new BackupFilesCheckResult(redundantFiles, lostFiles);
+    }
+
+    public async Task DeleteRedundantFilesAndRemoveLostFileItemsAsync(BackupFilesCheckResult checkResult)
+    {
+        //20251112：
+        //原本删除文件的基础上，新增了对丢失文件记录的处理，使其恢复到不包含物理文件的状态。
+        foreach (var file in checkResult.RedundantFiles)
+        {
+            FileHelper.DeleteByConfig(file.FullName);
+        }
+
+        foreach (var item in checkResult.LostFileItems)
+        {
+            //物理备份文件丢失，那么备份记录中相关的内容也删除
+            item.Hash = null;
+            item.BackupFileName = null;
+            db.Entry(item).State = EntityState.Modified;
+        }
+
+        await db.SaveChangesAsync();
     }
 }

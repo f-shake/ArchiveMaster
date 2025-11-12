@@ -69,7 +69,7 @@ public partial class BackupManageCenterViewModel
     {
         if (value is BackupFile)
         {
-            await Services.ProgressOverlay.WithOverlayAsync(async ()=>await LoadFileHistoryAsync(value),
+            await Services.ProgressOverlay.WithOverlayAsync(async () => await LoadFileHistoryAsync(value),
                 ex => Services.Dialog.ShowErrorDialogAsync("加载文件历史记录失败", ex),
                 "正在加载文件历史记录");
         }
@@ -178,36 +178,30 @@ public partial class BackupManageCenterViewModel
     [RelayCommand]
     private async Task OrganizeFilesAsync()
     {
-        (IList<FileInfo> RedundantFiles, IList<BackupFileEntity> LostFiles) issuedFiles = ([], []);
-        await Services.ProgressOverlay.WithOverlayAsync(async () =>
-            {
-                await using var db = new DbService(SelectedTask);
-                issuedFiles = await db.CheckFilesAsync(default);
-            },
+        BackupFilesCheckResult issuedFiles = null;
+        await using var db = new DbService(SelectedTask);
+        await Services.ProgressOverlay.WithOverlayAsync(async ct => { issuedFiles = await db.CheckFilesAsync(ct); },
+            null,
             ex => Services.Dialog.ShowErrorDialogAsync("整理文件失败", ex),
             "正在整理文件");
-        if (issuedFiles.RedundantFiles.Count + issuedFiles.LostFiles.Count == 0)
+        if (issuedFiles.RedundantFiles.Count + issuedFiles.LostFileItems.Count == 0)
         {
             await Services.Dialog.ShowOkDialogAsync("检查文件", "不存在多余或丢失的备份文件");
             return;
         }
 
         var result = await Services.Dialog.ShowYesNoDialogAsync("检查文件",
-            $"存在{issuedFiles.RedundantFiles.Count}个多余文件；{Environment.NewLine}存在{issuedFiles.LostFiles.Count}个丢失的备份文件{Environment.NewLine}是否删除多余文件？",
+            $"存在{issuedFiles.RedundantFiles.Count}个多余文件；{Environment.NewLine}存在{issuedFiles.LostFileItems.Count}个丢失备份文件的记录{Environment.NewLine}是否删除多余文件并修复数据库？",
             $"多余文件（在备份文件夹中存在但数据库中不存在的文件）：{Environment.NewLine}"
             + string.Join(Environment.NewLine, issuedFiles.RedundantFiles.Select(p => p.Name))
             + $"{Environment.NewLine}{Environment.NewLine}丢失文件（被数据库记录但无物理文件，会导致恢复失败）：{Environment.NewLine}"
-            + string.Join(Environment.NewLine, issuedFiles.LostFiles.Select(p => p.RawFileRelativePath)));
+            + string.Join(Environment.NewLine,
+                issuedFiles.LostFileItems.Select(p => $"{p.RawFileRelativePath}，快照编号：{p.SnapshotId}")));
 
         if (true.Equals(result))
         {
-            await Services.ProgressOverlay.WithOverlayAsync(() => Task.Run(() =>
-                {
-                    foreach (var file in issuedFiles.RedundantFiles)
-                    {
-                        FileHelper.DeleteByConfig(file.FullName);
-                    }
-                }),
+            await Services.ProgressOverlay.WithOverlayAsync(
+                () => Task.Run(async () => { await db.DeleteRedundantFilesAndRemoveLostFileItemsAsync(issuedFiles); }),
                 ex => Services.Dialog.ShowErrorDialogAsync("删除多余文件失败", ex),
                 "正在删除多余文件");
         }
