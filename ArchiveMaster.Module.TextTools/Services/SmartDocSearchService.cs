@@ -101,7 +101,20 @@ namespace ArchiveMaster.Services
             foreach (var (item, index) in RandomSelect(SearchResults, Config.AiConcludeMaxCount)
                          .Select((item, index) => (item, index)))
             {
-                prompt.AppendLine($"第{index + 1}条搜索结果：");
+                prompt.Append('第')
+                    .Append(index + 1)
+                    .Append("条搜索结果");
+                if (item.Source != null)
+                {
+                    prompt.Append('(')
+                        .Append("来源：")
+                        .Append(Path.GetFileName(item.Source))
+                        .Append(')');
+                }
+
+                prompt.Append('：')
+                    .AppendLine();
+
                 prompt.AppendLine(item.Context);
             }
 

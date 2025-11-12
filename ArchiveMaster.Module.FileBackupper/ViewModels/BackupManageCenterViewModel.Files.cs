@@ -203,7 +203,7 @@ public partial class BackupManageCenterViewModel
             await Services.ProgressOverlay.WithOverlayAsync(
                 () => Task.Run(async () => { await db.DeleteRedundantFilesAndRemoveLostFileItemsAsync(issuedFiles); }),
                 ex => Services.Dialog.ShowErrorDialogAsync("删除多余文件失败", ex),
-                "正在删除多余文件");
+                "正在整理文件");
         }
     }
 

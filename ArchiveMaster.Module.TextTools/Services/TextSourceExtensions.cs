@@ -12,6 +12,7 @@ using UglyToad.PdfPig;
 using UglyToad.PdfPig.DocumentLayoutAnalysis.TextExtractor;
 using UglyToad.PdfPig.DocumentLayoutAnalysis.WordExtractor;
 using UtfUnknown;
+using Table = DocumentFormat.OpenXml.Wordprocessing.Table;
 
 namespace ArchiveMaster.Services;
 
@@ -134,16 +135,45 @@ public static class TextSourceExtensions
         }
 
         StringBuilder str = new StringBuilder();
-        foreach (var para in body.Elements<Paragraph>())
+        foreach (var element in body.Elements())
         {
             ct.ThrowIfCancellationRequested();
-            if (perParagraph)
+            if (element is Paragraph para)
             {
-                yield return para.InnerText;
+                if (perParagraph)
+                {
+                    yield return para.InnerText;
+                }
+                else
+                {
+                    str.AppendLine(para.InnerText);
+                }
+            }
+            else if (element is Table table)
+            {
+                foreach (var row in table.Elements<TableRow>())
+                {
+                    string rowText = string.Join('\t', row.Elements<TableCell>().Select(p=>p.InnerText));
+                    if (perParagraph)
+                    {
+                        yield return rowText;
+                    }
+                    else
+                    {
+                        str.AppendLine(rowText);
+                    }
+                }
             }
             else
             {
-                str.AppendLine(para.InnerText);
+                if (perParagraph)
+                {
+                    yield return element.InnerText;
+                }
+                else
+                {
+                    str.AppendLine(element.InnerText);
+                }
             }
         }
 
@@ -174,6 +204,7 @@ public static class TextSourceExtensions
         {
             yield break;
         }
+
         ct.ThrowIfCancellationRequested();
 
         StringBuilder str = new StringBuilder();
