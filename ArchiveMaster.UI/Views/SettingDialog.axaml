@@ -89,7 +89,7 @@
                     Classes="Description"
                     IsVisible="{Binding #cbbDeleteMode.SelectedItem, Converter={x:Static cvt:Converters.EqualWithParameter}, ConverterParameter=MoveToSpecialFolder}"
                     TextWrapping="Wrap">
-                    <Run Text="文件将被删除到根目录下的该文件夹中。例如，在Windows中，一个C:\file.txt文件删除后，将被移动到C:\" /><Run Text="{Binding #txtDeleteFolder.Text}" /><Run Text="\[工具名]\file.txt中；*nix下，/usr/file.txt文件删除后，将被移动到/" /><Run Text="{Binding #txtDeleteFolder.Text}" /><Run Text="/[工具名]/file.txt中。" />
+                    <Run Text="文件将被删除到根目录下的该文件夹中。例如，在Windows中，一个C:\file.txt文件删除后，将被移动到C:\" /><Run Text="{Binding #txtDeleteFolder.Text}" /><Run Text="\[工具名]\file.txt中；*nix下（慎用），/usr/file.txt文件删除后，将被移动到/" /><Run Text="{Binding #txtDeleteFolder.Text}" /><Run Text="/[工具名]/file.txt中。" />
                 </TextBlock>
                 <ct:FormItem Header="目录编码分隔符">
                     <ComboBox

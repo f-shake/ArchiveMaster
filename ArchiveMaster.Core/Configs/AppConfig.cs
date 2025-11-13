@@ -180,7 +180,7 @@ namespace ArchiveMaster.Configs
 
                 GlobalConfigs.Instance = jobj.ContainsKey(JkeyGlobals)
                     ? (jobj[JkeyGlobals].Deserialize<GlobalConfigs>(JsonOptions) ?? new GlobalConfigs())
-                    : new GlobalConfigs();
+                    : GlobalConfigs.GetEmptyInstance();
 
                 //迁移旧版本配置文件
                 if (!jobj.ContainsKey(JkeyModules) && !jobj.ContainsKey(JkeyGroups))

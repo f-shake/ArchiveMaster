@@ -92,10 +92,10 @@ public partial class SettingViewModel : ObservableObject
                 Services.Dialog.ShowErrorDialogAsync("未指定删除文件夹", "请指定删除文件夹");
                 return false;
             }
-            if (Path.GetInvalidFileNameChars().Any(p => Configs.SpecialDeleteFolderName.Contains(p)))
+            if (Path.GetInvalidPathChars().Any(p => Configs.SpecialDeleteFolderName.Contains(p)))
             {
                 Services.Dialog.ShowErrorDialogAsync("文件夹名称包含非法字符", "文件夹名称包含非法字符，请修改后再保存",
-                    $"非法字符包括：{string.Join(",", Path.GetInvalidFileNameChars())}");
+                    $"非法字符包括：{string.Join(",", Path.GetInvalidPathChars())}");
                 return false;
             }
         }

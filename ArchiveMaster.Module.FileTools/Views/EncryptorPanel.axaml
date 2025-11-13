@@ -84,7 +84,7 @@
             <ct:FormItem Label="操作：">
                 <ct:RadioButtonGroup SelectedIndex="{Binding IsEncrypting, Converter={x:Static c:Converters.BoolZeroOne}}">
                     <ListBoxItem Content="解密" />
-                    <ListBoxItem Content="解密" />
+                    <ListBoxItem Content="加密" />
                 </ct:RadioButtonGroup>
             </ct:FormItem>
         </ct:StackFormItemGroup>
