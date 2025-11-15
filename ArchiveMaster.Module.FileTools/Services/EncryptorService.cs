@@ -76,7 +76,7 @@ namespace ArchiveMaster.Services
                             File.SetAttributes(file.Path, FileAttributes.Normal);
                         }
 
-                        FileHelper.DeleteByConfig(file.Path);
+                        FileHelper.DeleteByConfig(file.Path, "文件加密解密_源目录");
                     }
                 }, ct, FilesLoopOptions.Builder().AutoApplyStatus().AutoApplyFileLengthProgress().Build());
             }, ct);
@@ -86,6 +86,7 @@ namespace ArchiveMaster.Services
         {
             return ProcessingFiles.Cast<SimpleFileInfo>();
         }
+
         public override async Task InitializeAsync(CancellationToken ct)
         {
             InitializeAes();
@@ -176,7 +177,7 @@ namespace ArchiveMaster.Services
                             File.SetAttributes(path, FileAttributes.Normal);
                         }
 
-                        FileHelper.DeleteByConfig(path);
+                        FileHelper.DeleteByConfig(path, "文件加密解密_被替换的目标文件");
                         break;
 
                     case FilenameDuplicationPolicy.Skip:

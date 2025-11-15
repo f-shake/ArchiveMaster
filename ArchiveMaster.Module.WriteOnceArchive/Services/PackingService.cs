@@ -173,13 +173,13 @@ namespace ArchiveMaster.Services
                 string packageDir = Path.Combine(Config.TargetDir, package.Index.ToString());
                 if (Directory.Exists(packageDir))
                 {
-                    FileHelper.DeleteByConfig(packageDir);
+                    FileHelper.DeleteByConfig(packageDir, "动态固存备份_删除旧包");
                 }
 
                 var iso = Path.Combine(Config.TargetDir, package.Index + ".iso");
                 if (File.Exists(iso))
                 {
-                    FileHelper.DeleteByConfig(iso);
+                    FileHelper.DeleteByConfig(iso, "动态固存备份_删除旧ISO");
                 }
 
                 if (Config.PackingType != PackingType.ISO)

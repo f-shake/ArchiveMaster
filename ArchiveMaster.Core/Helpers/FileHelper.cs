@@ -36,9 +36,8 @@ public static class FileHelper
     };
 
     public static void DeleteByConfig(string path,
-        string specialDeletedFileRelativePath = null,
-        [CallerFilePath]
-        string callerCs = null)
+        string toolName,
+        string specialDeletedFileRelativePath = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
         try
@@ -60,9 +59,6 @@ public static class FileHelper
                     FileDeleteHelper.DirectlyDelete(path);
                     break;
                 case DeleteMode.MoveToSpecialFolder:
-                    string toolName = callerCs == null
-                        ? "未知"
-                        : GetFileNameWithoutExtension(callerCs);//代码在Windows中写的，导致Linux下无法使用\分割得到文件名
                     string rootDir = Path.GetPathRoot(path);
                     if (string.IsNullOrWhiteSpace(GlobalConfigs.Instance.SpecialDeleteFolderName))
                     {
@@ -113,24 +109,6 @@ public static class FileHelper
         }
     }
 
-    private static string GetFileNameWithoutExtension(string path)
-    {
-        var parts= path.Split(['/', '\\'], StringSplitOptions.RemoveEmptyEntries);
-        if (parts.Length == 0)
-        {
-            return "";
-        }
-
-        var name = parts[^1];
-        var nameParts= name.Split('.', StringSplitOptions.RemoveEmptyEntries);
-        if (nameParts.Length == 0)
-        {
-            return name;
-        }
-
-        return nameParts[0];
-    }
-    
     public static string GetNoDuplicateDirectory(string path, string suffixFormat = " ({i})")
     {
         if (!Directory.Exists(path))

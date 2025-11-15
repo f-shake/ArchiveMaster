@@ -31,25 +31,6 @@
             <ctrl:FormItem Label="密码（若备份文件被加密）：">
                 <v:PasswordBox Password="{Binding Config.Password}" />
             </ctrl:FormItem>
-
-            <ctrl:FormItem Label="被删除文件：">
-                <DockPanel>
-                    <ctrl:RadioButtonGroup
-                        DisplayMemberBinding="{Binding ., Converter={x:Static cvt:Converters.Description}}"
-                        DockPanel.Dock="Left"
-                        ItemsSource="{Binding DeleteModes}"
-                        SelectedItem="{Binding Config.DeleteMode}" />
-                    <ctrl:FormItem
-                        Margin="8,0,0,0"
-                        IsVisible="{Binding Config.DeleteMode, Converter={x:Static cvt:Converters.EqualWithParameter}, ConverterParameter=MoveToDeletedFolder}"
-                        Label="移动到:"
-                        LabelWidth="NaN">
-                        <TextBox Text="{Binding Config.DeleteDir}" />
-                    </ctrl:FormItem>
-                </DockPanel>
-            </ctrl:FormItem>
-
-
         </ctrl:StackFormItemGroup>
     </v:TwoStepPanelBase.ConfigsContent>
     <v:TwoStepPanelBase.ResultsContent>

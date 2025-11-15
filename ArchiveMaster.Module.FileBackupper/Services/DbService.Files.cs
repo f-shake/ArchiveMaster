@@ -189,7 +189,7 @@ public partial class DbService
         //原本删除文件的基础上，新增了对丢失文件记录的处理，使其恢复到不包含物理文件的状态。
         foreach (var file in checkResult.RedundantFiles)
         {
-            FileHelper.DeleteByConfig(file.FullName);
+            FileHelper.DeleteByConfig(file.FullName, "实时备份服务");
         }
 
         foreach (var item in checkResult.LostFileItems)

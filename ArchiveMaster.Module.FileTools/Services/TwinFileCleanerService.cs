@@ -25,7 +25,7 @@ namespace ArchiveMaster.Services
             return TryForFilesAsync(files, (file, s) =>
             {
                 NotifyMessage($"正在删除{s.GetFileNumberMessage()}：{file.Name}");
-                FileHelper.DeleteByConfig(file.Path);
+                FileHelper.DeleteByConfig(file.Path, "附属文件清理");
             }, ct, FilesLoopOptions.Builder().AutoApplyStatus().AutoApplyFileNumberProgress().Build());
         }
 

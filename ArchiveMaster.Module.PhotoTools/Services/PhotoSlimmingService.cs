@@ -46,7 +46,7 @@ namespace ArchiveMaster.Services
                 {
                     if (Directory.Exists(Config.DistDir))
                     {
-                        FileHelper.DeleteByConfig(Config.DistDir);
+                        FileHelper.DeleteByConfig(Config.DistDir, "照片瘦身_清理目标目录");
                     }
                 }
 
@@ -71,8 +71,10 @@ namespace ArchiveMaster.Services
 
         public override Task InitializeAsync(CancellationToken ct)
         {
-            rCopy = new Regex(@$"\.({string.Join('|', Config.CopyDirectlyExtensions.Trimmed)})$", RegexOptions.IgnoreCase);
-            rCompress = new Regex(@$"\.({string.Join('|', Config.CompressExtensions.Trimmed)})$", RegexOptions.IgnoreCase);
+            rCopy = new Regex(@$"\.({string.Join('|', Config.CopyDirectlyExtensions.Trimmed)})$",
+                RegexOptions.IgnoreCase);
+            rCompress = new Regex(@$"\.({string.Join('|', Config.CompressExtensions.Trimmed)})$",
+                RegexOptions.IgnoreCase);
 
             CompressFiles = new SlimmingFilesInfo(Config.SourceDir);
             CopyFiles = new SlimmingFilesInfo(Config.SourceDir);
@@ -91,15 +93,7 @@ namespace ArchiveMaster.Services
             TryForFiles(DeleteFiles.ProcessingFiles, (file, s) =>
             {
                 NotifyMessage($"（第一步，共三步）正在删除{s.GetFileNumberMessage()}：{file.Name}");
-
-                if (file.IsDir)
-                {
-                    FileHelper.DeleteByConfig(file.Path);
-                }
-                else
-                {
-                    FileHelper.DeleteByConfig(file.Path);
-                }
+                FileHelper.DeleteByConfig(file.Path, "照片瘦身_需要删除的文件");
             }, ct, FilesLoopOptions.Builder().AutoApplyStatus().AutoApplyFileNumberProgress().Build());
         }
 
@@ -111,7 +105,7 @@ namespace ArchiveMaster.Services
                 string distPath = GetDistPath(file.Path, Config.OutputFormat, out _);
                 if (File.Exists(distPath))
                 {
-                    FileHelper.DeleteByConfig(distPath);
+                    FileHelper.DeleteByConfig(distPath, "照片瘦身_被替换的压缩后文件");
                 }
 
                 string dir = Path.GetDirectoryName(distPath)!;
@@ -168,7 +162,7 @@ namespace ArchiveMaster.Services
                 string distPath = GetDistPath(file.Path, null, out string subPath);
                 if (File.Exists(distPath))
                 {
-                    FileHelper.DeleteByConfig(distPath);
+                    FileHelper.DeleteByConfig(distPath, "照片瘦身_被替换的复制后文件");
                 }
 
                 string dir = Path.GetDirectoryName(distPath)!;

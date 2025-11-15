@@ -56,7 +56,7 @@ namespace ArchiveMaster.Services
                                     progress: s.CreateFileProgressReporter("正在移动文件"),
                                     cancellationToken: ct);
                                 File.SetLastWriteTime(targetPath, File.GetLastWriteTime(file.Path));
-                                FileHelper.DeleteByConfig(file.Path);
+                                FileHelper.DeleteByConfig(file.Path, "文件筛选操作_被替换的目标文件");
                                 break;
                             case FileFilterOperationType.HardLink:
                                 HardLinkCreator.CreateHardLink(targetPath, file.Path);
@@ -65,7 +65,7 @@ namespace ArchiveMaster.Services
                                 File.CreateSymbolicLink(targetPath, file.Path);
                                 break;
                             case FileFilterOperationType.Delete:
-                                FileHelper.DeleteByConfig(file.Path);
+                                FileHelper.DeleteByConfig(file.Path, "文件筛选操作_删除");
                                 break;
                             case FileFilterOperationType.Hash:
                                 file.Success(await FileHashHelper.ComputeHashStringAsync(file.Path, Config.HashType,

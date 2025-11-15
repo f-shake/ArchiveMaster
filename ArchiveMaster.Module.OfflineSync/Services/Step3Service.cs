@@ -326,7 +326,7 @@ namespace ArchiveMaster.Services
                 .Replace('\\', GlobalConfigs.Instance.FlattenPathSeparatorReplacement)
                 .Replace('/', GlobalConfigs.Instance.FlattenPathSeparatorReplacement);
             string specialRelativePath = Path.Combine(backupPathDir, relative);
-            FileHelper.DeleteByConfig(filePath, specialRelativePath);
+            FileHelper.DeleteByConfig(filePath,"异地备份离线同步", specialRelativePath);
         }
     }
 }
