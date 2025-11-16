@@ -35,77 +35,109 @@ public static class FileHelper
                        """
     };
 
+    private static void TryDirectlyDelete(string path)
+    {
+        try
+        {
+            FileDeleteHelper.DirectlyDelete(path);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "删除文件{Path}时出错", path);
+            throw new IOException($"删除文件{path}时出错：{ex.Message}", ex);
+        }
+    }
+
+    private static void TryDeleteToRecycleBin(string path)
+    {
+        try
+        {
+            FileDeleteHelper.DeleteToRecycleBin(path);
+        }
+        catch (Exception ex1)
+        {
+            Log.Error(ex1, "删除文件{Path}到回收站时出错", path);
+            try
+            {
+                FileDeleteHelper.DirectlyDelete(path);
+            }
+            catch (Exception ex2)
+            {
+                Log.Error(ex2, "删除文件{Path}时出错", path);
+                throw new IOException($"无法删除到回收站，也无法直接删除文件{path}：{ex2.Message}", ex2);
+            }
+        }
+    }
+
+    private static void TryDeleteToSpecialFolder(string path, string toolName, string specialDeletedFileRelativePath)
+    {
+        try
+        {
+            string rootDir = Path.GetPathRoot(path);
+            if (string.IsNullOrWhiteSpace(GlobalConfigs.Instance.SpecialDeleteFolderName))
+            {
+                throw new InvalidOperationException("未指定删除文件夹");
+            }
+
+            if (rootDir == null)
+            {
+                throw new InvalidOperationException($"无法找到文件{path}的根目录");
+            }
+
+            string target = Path.Combine(Path.GetPathRoot(path),
+                GlobalConfigs.Instance.SpecialDeleteFolderName,
+                toolName);
+
+            if (!string.IsNullOrWhiteSpace(specialDeletedFileRelativePath))
+            {
+                target = Path.Combine(target, specialDeletedFileRelativePath);
+            }
+            else
+            {
+                var relativePath = Path.GetRelativePath(rootDir, path);
+                target = Path.Combine(target, relativePath);
+            }
+
+            string targetDir = Path.GetDirectoryName(target);
+            Directory.CreateDirectory(targetDir);
+
+            if (IsDirectory(path))
+            {
+                Directory.Move(path, GetNoDuplicateDirectory(target));
+            }
+            else
+            {
+                File.Move(path, GetNoDuplicateFile(target));
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "移动文件{Path}到指定删除文件夹时出错", path);
+            throw new IOException($"移动文件{path}到指定删除文件夹时出错：{ex.Message}", ex);
+        }
+    }
+
     public static void DeleteByConfig(string path,
         string toolName,
         string specialDeletedFileRelativePath = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
-        try
+
+        switch (GlobalConfigs.Instance.DeleteMode)
         {
-            switch (GlobalConfigs.Instance.DeleteMode)
-            {
-                case DeleteMode.RecycleBinPrefer:
-                    try
-                    {
-                        FileDeleteHelper.DeleteToRecycleBin(path);
-                    }
-                    catch
-                    {
-                        FileDeleteHelper.DirectlyDelete(path);
-                    }
+            case DeleteMode.RecycleBinPrefer:
+                TryDeleteToRecycleBin(path);
 
-                    break;
-                case DeleteMode.DeleteDirectly:
-                    FileDeleteHelper.DirectlyDelete(path);
-                    break;
-                case DeleteMode.MoveToSpecialFolder:
-                    string rootDir = Path.GetPathRoot(path);
-                    if (string.IsNullOrWhiteSpace(GlobalConfigs.Instance.SpecialDeleteFolderName))
-                    {
-                        throw new InvalidOperationException("未指定删除文件夹");
-                    }
-
-                    if (rootDir == null)
-                    {
-                        throw new InvalidOperationException($"无法找到文件{path}的根目录");
-                    }
-
-                    string target = Path.Combine(Path.GetPathRoot(path),
-                        GlobalConfigs.Instance.SpecialDeleteFolderName,
-                        toolName);
-
-                    if (!string.IsNullOrWhiteSpace(specialDeletedFileRelativePath))
-                    {
-                        target = Path.Combine(target, specialDeletedFileRelativePath);
-                    }
-                    else
-                    {
-                        var relativePath = Path.GetRelativePath(rootDir, path);
-                        target = Path.Combine(target, relativePath);
-                    }
-
-                    string targetDir = Path.GetDirectoryName(target);
-                    Directory.CreateDirectory(targetDir);
-
-                    if (IsDirectory(path))
-                    {
-                        Directory.Move(path, GetNoDuplicateDirectory(target));
-                    }
-                    else
-                    {
-                        File.Move(path, GetNoDuplicateFile(target));
-                    }
-
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(GlobalConfigs.Instance.DeleteMode),
-                        GlobalConfigs.Instance.DeleteMode, null);
-            }
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, "删除文件时出错");
-            throw new IOException($"删除文件时出错：{ex.Message}", ex);
+                break;
+            case DeleteMode.DeleteDirectly:
+                TryDirectlyDelete(path);
+                break;
+            case DeleteMode.MoveToSpecialFolder:
+                TryDeleteToSpecialFolder(path, toolName, specialDeletedFileRelativePath);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(GlobalConfigs.Instance.DeleteMode),
+                    GlobalConfigs.Instance.DeleteMode, null);
         }
     }
 
