@@ -98,13 +98,18 @@ namespace ArchiveMaster.Views
                             canceled = true;
                             return Task.CompletedTask;
                         },
-                        ex => HostServices.GetRequiredService<IDialogService>()
-                            .ShowErrorDialogAsync("打开文件失败", $"无法打开文件：{file.File}", ex.ToString()),
+                        async ex =>
+                        {
+                            await HostServices.GetRequiredService<IDialogService>()
+                                .ShowErrorDialogAsync("打开文件失败", $"无法打开文件：{file.File}", ex.ToString());
+                            canceled = true;
+                        },
                         "正在打开文件");
                 if (canceled)
                 {
                     return;
                 }
+
                 if (string.IsNullOrEmpty(result))
                 {
                     await HostServices.GetRequiredService<IDialogService>()

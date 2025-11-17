@@ -49,7 +49,7 @@ namespace ArchiveMaster.Services
                         }
                         else
                         {
-                            FileHelper.DeleteByConfig(targetFile);
+                            FileHelper.DeleteByConfig(targetFile,"动态固存备份_被替换的重建文件");
                         }
                     }
 

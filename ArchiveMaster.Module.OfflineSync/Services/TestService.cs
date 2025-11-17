@@ -112,7 +112,6 @@ namespace ArchiveMaster.Services
                 OfflineSyncStep3Config c3 = new OfflineSyncStep3Config()
                 {
                     PatchDir = c2.PatchDir,
-                    DeleteMode = DeleteMode.MoveToDeletedFolder,
                 };
                 Step3Service u3 = new Step3Service(appConfig) { Config = c3 };
                 await u3.InitializeAsync();

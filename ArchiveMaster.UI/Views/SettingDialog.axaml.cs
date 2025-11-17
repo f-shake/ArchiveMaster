@@ -16,6 +16,12 @@ public partial class SettingDialog : DialogHost
 
     protected override void OnPrimaryButtonClick()
     {
-        Close();
+        if (DataContext is SettingViewModel vm)
+        {
+            if (vm.OnClosing())
+            {
+                Close();
+            }
+        }
     }
 }

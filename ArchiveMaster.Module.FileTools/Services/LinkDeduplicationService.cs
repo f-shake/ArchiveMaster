@@ -22,7 +22,7 @@ public class LinkDeduplicationService(AppConfig appConfig)
                 foreach (var file in group.SubFiles.Skip(1))
                 {
                     NotifyMessage($"正在创建硬链接{s.GetFileNumberMessage()}：{file.RelativePath}");
-                    FileHelper.DeleteByConfig(file.Path);
+                    FileHelper.DeleteByConfig(file.Path, "硬链接去重");
                     HardLinkCreator.CreateHardLink(file.Path, sourceFile.Path);
                     file.Success();
                 }
@@ -34,6 +34,7 @@ public class LinkDeduplicationService(AppConfig appConfig)
     {
         return TreeRoot.Flatten();
     }
+
     public override Task InitializeAsync(CancellationToken ct)
     {
         List<LinkDeduplicationFileInfo> files = new List<LinkDeduplicationFileInfo>();
@@ -51,7 +52,8 @@ public class LinkDeduplicationService(AppConfig appConfig)
             NotifyMessage("正在计算文件Hash");
             await TryForFilesAsync(files, async (f, s) =>
             {
-                string hash = await FileHashHelper.ComputeHashStringAsync(f.Path, Config.HashType, cancellationToken: ct,
+                string hash = await FileHashHelper.ComputeHashStringAsync(f.Path, Config.HashType,
+                    cancellationToken: ct,
                     progress: s.CreateFileProgressReporter("正在计算Hash"));
                 f.Hash = hash;
                 if (!hash2File.TryAdd(hash, f))
