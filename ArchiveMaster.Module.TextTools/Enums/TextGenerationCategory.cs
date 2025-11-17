@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel;
-using ArchiveMaster.Attributes;
 
 namespace ArchiveMaster.Enums;
 
@@ -16,6 +15,9 @@ public enum TextGenerationCategory
 
     [Description("文本评价")]
     TextEvaluation,
+    
+    [Description("文本修正")]
+    TextCorrection,
 
     [Description("自定义")]
     Custom

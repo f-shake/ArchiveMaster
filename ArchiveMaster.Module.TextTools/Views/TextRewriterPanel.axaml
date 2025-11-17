@@ -57,6 +57,11 @@
                         SelectedItem="{Binding Config.ContentTransformationType}" />
                     <ct:RadioButtonGroup
                         DisplayMemberBinding="{Binding ., Converter={StaticResource AiAgentConverter}, ConverterParameter=Name}"
+                        IsVisible="{Binding Config.Category, Converter={x:Static cvt:Converters.EqualWithParameter}, ConverterParameter=TextCorrection}"
+                        ItemsSource="{me:EnumValues e:TextCorrectionType}"
+                        SelectedItem="{Binding Config.TextCorrectionType}" />
+                    <ct:RadioButtonGroup
+                        DisplayMemberBinding="{Binding ., Converter={StaticResource AiAgentConverter}, ConverterParameter=Name}"
                         IsVisible="{Binding Config.Category, Converter={x:Static cvt:Converters.EqualWithParameter}, ConverterParameter=TextEvaluation}"
                         ItemsSource="{me:EnumValues e:TextEvaluationType}"
                         SelectedItem="{Binding Config.TextEvaluationType}" />

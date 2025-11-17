@@ -126,8 +126,8 @@ namespace ArchiveMaster.Services
             }
 
             var removeThink = LlmCallerService.RemoveThink(string.Concat(result));
-            string plainText = Markdown.ToPlainText(removeThink);
-            return plainText;
+            // string plainText = Markdown.ToPlainText(removeThink);
+            return removeThink;
         }
 
         private async Task<List<TextSearchResult>> GetSearchResultAsync(CancellationToken ct)
