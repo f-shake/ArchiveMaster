@@ -1,5 +1,9 @@
 ﻿using System.Diagnostics;
+using System.Text.Encodings.Web;
+using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Text.Unicode;
+using FzLib.IO;
 
 namespace ArchiveMaster.ViewModels.FileSystem
 {
@@ -62,6 +66,7 @@ namespace ArchiveMaster.ViewModels.FileSystem
         }
 
         public TreeBuildType BuildType { get; private set; }
+
         /// <summary>
         /// 是否已展开（UI）
         /// </summary>
@@ -210,36 +215,46 @@ namespace ArchiveMaster.ViewModels.FileSystem
 
             Parent?.UpdateCheckedStateFromChildren();
         }
+
         #region 枚举已有文件创建
 
-        public static TreeDirInfo BuildTree(string rootDir)
+        public static TreeDirInfo BuildTree(string rootDir, FileFilterRule filter = null)
         {
             TreeDirInfo root = new TreeDirInfo(new DirectoryInfo(rootDir), rootDir, null, 0, 0);
-            EnumerateDirsAndFiles(root, CancellationToken.None);
+            FileFilterHelper filterHelper = filter is { IsEnabled: true } ? new FileFilterHelper(filter) : null;
+            EnumerateDirsAndFiles(root, filterHelper, CancellationToken.None);
             return root;
         }
 
         public static async Task<TreeDirInfo> BuildTreeAsync(string rootDir,
+            FileFilterRule filter = null,
             CancellationToken cancellationToken = default)
         {
             TreeDirInfo root = new TreeDirInfo(new DirectoryInfo(rootDir), rootDir, null, 0, 0);
-            await Task.Run(() => EnumerateDirsAndFiles(root, cancellationToken), cancellationToken);
+            FileFilterHelper filterHelper = filter is { IsEnabled: true } ? new FileFilterHelper(filter) : null;
+            await Task.Run(() => EnumerateDirsAndFiles(root, filterHelper, cancellationToken), cancellationToken);
             return root;
         }
 
-        private static int EnumerateDirs(TreeDirInfo parentDir, int initialIndex, CancellationToken cancellationToken)
+        private static int EnumerateDirs(TreeDirInfo parentDir, int initialIndex, FileFilterHelper filter,
+            CancellationToken cancellationToken)
         {
             int index = initialIndex;
             int count = 0;
             foreach (var dir in (parentDir.FileSystemInfo as DirectoryInfo).EnumerateDirectories())
             {
                 cancellationToken.ThrowIfCancellationRequested();
+                if (filter != null && !filter.IsMatched(dir))
+                {
+                    continue;
+                }
+
                 var childDir = new TreeDirInfo(dir, parentDir.TopDirectory, parentDir, parentDir.Depth + 1, index++);
                 parentDir.AddSub(childDir);
 
                 try
                 {
-                    EnumerateDirsAndFiles(childDir, cancellationToken);
+                    EnumerateDirsAndFiles(childDir, filter, cancellationToken);
                 }
                 catch (UnauthorizedAccessException)
                 {
@@ -256,20 +271,27 @@ namespace ArchiveMaster.ViewModels.FileSystem
             return index;
         }
 
-        private static void EnumerateDirsAndFiles(TreeDirInfo dir, CancellationToken cancellationToken)
+        private static void EnumerateDirsAndFiles(TreeDirInfo dir, FileFilterHelper filter,
+            CancellationToken cancellationToken)
         {
-            int tempIndex = EnumerateDirs(dir, 0, cancellationToken);
-            EnumerateFiles(dir, tempIndex, cancellationToken);
+            int tempIndex = EnumerateDirs(dir, 0, filter, cancellationToken);
+            EnumerateFiles(dir, tempIndex, filter, cancellationToken);
         }
 
-        private static int EnumerateFiles(TreeDirInfo parentDir, int initialIndex, CancellationToken cancellationToken)
+        private static int EnumerateFiles(TreeDirInfo parentDir, int initialIndex, FileFilterHelper filter,
+            CancellationToken cancellationToken)
         {
             int index = initialIndex;
             int count = 0;
-            foreach (var dir in (parentDir.FileSystemInfo as DirectoryInfo).EnumerateFiles())
+            foreach (var file in (parentDir.FileSystemInfo as DirectoryInfo).EnumerateFiles())
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                var childFile = new TreeFileInfo(dir, parentDir.TopDirectory, parentDir, parentDir.Depth + 1, index++);
+                if (filter != null && !filter.IsMatched(file))
+                {
+                    continue;
+                }
+
+                var childFile = new TreeFileInfo(file, parentDir.TopDirectory, parentDir, parentDir.Depth + 1, index++);
                 parentDir.AddSub(childFile);
                 count++;
             }
@@ -470,6 +492,76 @@ namespace ArchiveMaster.ViewModels.FileSystem
             list.AddRange(subDirs.Where(dir => dir.Name.Contains(fileName)));
             subDirs.ForEach(p => p.SearchInternal(fileName, list));
             list.AddRange(subFiles.Where(file => file.Name.Contains(fileName)));
+        }
+
+        #endregion
+
+        #region JSON序列化
+
+        public string ToJson()
+        {
+            return JsonSerializer.Serialize(this, new JsonSerializerOptions()
+            {
+                Encoder = JavaScriptEncoder.Create(UnicodeRanges.All),
+                WriteIndented = true,
+                MaxDepth = 64,
+            });
+        }
+
+        public static TreeDirInfo FromJson(string json)
+        {
+            var tree= JsonSerializer.Deserialize<TreeDirInfo>(json, new JsonSerializerOptions()
+            {
+                Converters = { new TreeDirInfoConverter() }
+            });
+            RepairParent(tree);
+            return tree;
+        }
+
+        private static void RepairParent(TreeDirInfo node)
+        {
+            foreach (var subDir in node.SubDirs)
+            {
+                subDir.Parent = node;
+                RepairParent(subDir);
+            }
+            foreach (var subFile in node.SubFiles)
+            {
+                subFile.Parent = node;
+            }
+        }
+
+        class TreeDirInfoConverter : JsonConverter<TreeDirInfo>
+        {
+            public override TreeDirInfo Read(ref Utf8JsonReader reader, Type typeToConvert,
+                JsonSerializerOptions options)
+            {
+                using JsonDocument doc = JsonDocument.ParseValue(ref reader);
+                var root = doc.RootElement;
+
+                // 反序列化其他属性
+                var treeDirInfo = root.Deserialize<TreeDirInfo>(); //不提供options，否则会无限循环（Converters）
+
+                // 获取 JSON 中的子目录和子文件信息
+                treeDirInfo.subDirs =
+                    JsonSerializer.Deserialize<List<TreeDirInfo>>(root.GetProperty("SubDirs").GetRawText(), options);
+                treeDirInfo.subFiles =
+                    JsonSerializer.Deserialize<List<TreeFileInfo>>(root.GetProperty("SubFiles").GetRawText(), options);
+
+                // 合并 SubDirs 和 SubFiles 到 Subs 中
+                treeDirInfo.subs = treeDirInfo.subDirs.Cast<TreeFileDirInfo>()
+                    .Concat(treeDirInfo.subFiles.Cast<TreeFileDirInfo>()).ToList();
+
+                // 构建subDirsDic
+                treeDirInfo.subDirsDic = treeDirInfo.subDirs.ToDictionary(p => p.Name);
+
+                return treeDirInfo;
+            }
+
+            public override void Write(Utf8JsonWriter writer, TreeDirInfo value, JsonSerializerOptions options)
+            {
+                JsonSerializer.Serialize(writer, value, options);
+            }
         }
 
         #endregion

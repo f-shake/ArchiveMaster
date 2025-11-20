@@ -1,29 +1,45 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using FzLib.IO;
 
 namespace ArchiveMaster.Configs;
 
 public partial class DirStructureCloneConfig : ConfigBase
 {
     [ObservableProperty]
-    private string sourceDir;
+    private string sourceDirOrFile;
 
     [ObservableProperty]
-    private string targetDir;
+    private bool inputStructureFile;
 
     [ObservableProperty]
-    private string targetFile;
+    private FileFilterRule filter = new FileFilterRule();
+
+    [ObservableProperty]
+    private string targetDirOrFile;
+
+    [ObservableProperty]
+    private bool exportStructureFile;
 
     public override void Check()
     {
-        CheckDir(SourceDir, "源目录");
-        if (!string.IsNullOrWhiteSpace(TargetDir) && !OperatingSystem.IsWindows())
+        CheckEmpty(SourceDirOrFile, "源目录");
+        if (!File.Exists(SourceDirOrFile) && !Directory.Exists(SourceDirOrFile))
         {
-            throw new Exception("稀疏文件目前仅支持Windows");
+            throw new Exception($"源目录或文件不存在: {SourceDirOrFile}");
         }
 
-        if (string.IsNullOrWhiteSpace(TargetDir) && string.IsNullOrWhiteSpace(TargetFile))
+        if (ExportStructureFile)
         {
-            throw new Exception($"稀疏文件目录或结构文件至少填写一项");
+            CheckEmpty(TargetDirOrFile, "输出结构文件");
+        }
+        else
+        {
+            if (!OperatingSystem.IsWindows())
+            {
+                throw new Exception("稀疏文件目前仅支持Windows");
+            }
+
+            CheckEmpty(TargetDirOrFile, "输出目录");
         }
     }
 }
