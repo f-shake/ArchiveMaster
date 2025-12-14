@@ -233,6 +233,7 @@ namespace ArchiveMaster.Services
         private void AnalyzeEmptyDirectories(CancellationToken ct)
         {
             DeletingDirectories = new List<SyncFileInfo>();
+            string[] systemFiles = ["thumbs.db", "thumb.db", ".DS_Store", "desktop.ini"];
 
             foreach (var topDir in LocalDirectories.Keys)
             {
@@ -241,24 +242,49 @@ namespace ArchiveMaster.Services
                     continue;
                 }
 
+                //20251214更新
+                //原来存在一个BUG，假设异地目录中有A目录，下面有B目录，B目录下有文件，A目录下仅有B目录而无文件。
+                //如果A目录恰好在Step2中被加入黑名单，那么它将不会出现在LocalDirectories[topDir]中。
+                //此时，原来的算法会查找A目录下有无顶级文件，发现没有，则会误删A目录。
+                //本次更新尝试修复了这些问题，首先检查子目录，如果子目录包含文件，会将该子目录的所有父目录标记为包含文件，
+                //当后续检查到该目录时，会跳过该目录的检查。
+                //这还同时增加了检查空目录的速度，因为如果某个目录下没有文件，则该目录的所有子目录也一定没有文件，因此可以直接跳过检查。
                 HashSet<string> deletingDirsInThisTopDir = new HashSet<string>();
+                HashSet<string> dirsContainingFiles = new HashSet<string>();
                 foreach (var offsiteSubDir in Directory
                              .EnumerateDirectories(topDir, "*", SearchOption.AllDirectories)
+                             .OrderByDescending(p => p.Length) //从最长路径开始，确保先检查子目录
                              .ToList())
                 {
                     ct.ThrowIfCancellationRequested();
-                    if (!LocalDirectories[topDir]
-                            .Contains(Path.GetRelativePath(topDir, offsiteSubDir))) //本地已经没有远程的这个目录了
+                    if (LocalDirectories[topDir].Contains(Path.GetRelativePath(topDir, offsiteSubDir)))
                     {
-                        if (!Directory.EnumerateFiles(offsiteSubDir).Any()) //并且远程的这个目录是空的
+                        //确保本地已经没有远程的这个目录了
+                        continue;
+                    }
+
+                    if (dirsContainingFiles.Contains(offsiteSubDir))
+                    {
+                        //该目录的某个子目录包含文件，因此该目录不可以删除。
+                        //通过剪枝，避免重复检查
+                        continue;
+                    }
+
+                    var allFiles = Directory.EnumerateFiles(offsiteSubDir);
+                    if (!allFiles.Any() //并且远程的这个目录是空的
+                        || allFiles.All(p =>
+                            systemFiles.Contains(Path.GetFileName(p), StringComparer.OrdinalIgnoreCase))) //或者仅有缩略图
+                    {
+                        deletingDirsInThisTopDir.Add(offsiteSubDir);
+                    }
+                    else
+                    {
+                        var tempDir = offsiteSubDir;
+                        while (tempDir != null && tempDir.Length > topDir.Length && tempDir != topDir) //直到找到顶层目录
                         {
-                            deletingDirsInThisTopDir.Add(offsiteSubDir);
-                        }
-                        else if (!Directory.EnumerateFiles(offsiteSubDir).Skip(1).Any() //目录里只有缩略图
-                                 && Path.GetFileName(Directory.EnumerateFiles(offsiteSubDir).First()).ToLower() ==
-                                 "thumbs.db")
-                        {
-                            deletingDirsInThisTopDir.Add(offsiteSubDir);
+                            //当前，offsiteSubDir是包含文件的目录，因此它的父目录也应该包含文件，不可以删除
+                            tempDir = Path.GetDirectoryName(tempDir);
+                            dirsContainingFiles.Add(tempDir);
                         }
                     }
                 }
@@ -268,7 +294,7 @@ namespace ArchiveMaster.Services
                 foreach (var dir1 in deletingDirsInThisTopDir.ToList()) //外层循环，dir1为内层空目录
                 {
                     ct.ThrowIfCancellationRequested();
-                    foreach (var dir2 in deletingDirsInThisTopDir) //内曾循环，dir2为外层空目录
+                    foreach (var dir2 in deletingDirsInThisTopDir) //内层循环，dir2为外层空目录
                     {
                         if (dir1 == dir2)
                         {
@@ -326,7 +352,7 @@ namespace ArchiveMaster.Services
                 .Replace('\\', GlobalConfigs.Instance.FlattenPathSeparatorReplacement)
                 .Replace('/', GlobalConfigs.Instance.FlattenPathSeparatorReplacement);
             string specialRelativePath = Path.Combine(backupPathDir, relative);
-            FileHelper.DeleteByConfig(filePath,"异地备份离线同步", specialRelativePath);
+            FileHelper.DeleteByConfig(filePath, "异地备份离线同步", specialRelativePath);
         }
     }
 }

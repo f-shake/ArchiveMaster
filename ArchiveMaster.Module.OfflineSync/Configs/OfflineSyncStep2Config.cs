@@ -60,6 +60,7 @@ namespace ArchiveMaster.Configs
             {
                 throw new Exception("只有导出模式设置为“复制”时，才支持备份文件加密");
             }
+            CheckEmpty(PatchDir, "导出补丁目录");
         }
     }
 }
