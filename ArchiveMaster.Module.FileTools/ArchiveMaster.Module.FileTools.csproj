@@ -29,6 +29,10 @@
       <DependentUpon>LinkDeduplicationPanel.axaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Views\FileReadabilityScannerPanel.axaml.cs">
+      <DependentUpon>FileReadabilityScannerPanel.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>

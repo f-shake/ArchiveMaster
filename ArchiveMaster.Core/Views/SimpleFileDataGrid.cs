@@ -198,10 +198,10 @@ public class SimpleFileDataGrid : DataGrid
     {
         var column = new DataGridLightColumn()
         {
-            CanUserSort = false,
             Header = ColumnStatusHeader,
             MaxWidth = 200,
-            FillBinding = new Binding(nameof(SimpleFileInfo.Status)) { Converter = ProcessStatusColorConverter }
+            FillBinding = new Binding(nameof(SimpleFileInfo.Status)) { Converter = ProcessStatusColorConverter },
+            SortMemberPath = nameof(SimpleFileInfo.Status)
         };
 
         return column;
