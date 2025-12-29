@@ -4,7 +4,7 @@
     xmlns:ctrl="using:FzLib.Avalonia.Controls"
     xmlns:cvt="using:ArchiveMaster.Converters"
     xmlns:fs="clr-namespace:ArchiveMaster.ViewModels.FileSystem"
-    xmlns:ic="using:FluentIcons.Avalonia.MarkupExtensions"
+    xmlns:ic="using:FluentIcons.Avalonia.Markup"
     xmlns:v="using:ArchiveMaster.Views">
     <SolidColorBrush
         x:Key="DataGridCellFocusVisualPrimaryBrush"

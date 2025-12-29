@@ -1,2 +1,0 @@
-dotnet publish ArchiveMaster.UI.Desktop -c Release --self-contained false -r osx-x64 -p:PublishSingleFile=true -o ./Publish/macos-x64
-mv -Force ./Publish/macos-x64/ArchiveMaster.UI.Desktop ./Publish/macos-x64/ArchiveMaster

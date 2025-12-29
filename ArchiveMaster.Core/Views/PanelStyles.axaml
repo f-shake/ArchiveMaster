@@ -5,7 +5,7 @@
     xmlns:cfg="clr-namespace:ArchiveMaster.Configs"
     xmlns:cvt="clr-namespace:ArchiveMaster.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:ic="using:FluentIcons.Avalonia.MarkupExtensions"
+    xmlns:ic="using:FluentIcons.Avalonia.Markup"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:sys="clr-namespace:System;assembly=System.Runtime"
     xmlns:v="using:ArchiveMaster.Views"

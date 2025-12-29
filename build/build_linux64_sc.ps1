@@ -1,2 +1,0 @@
-dotnet publish ArchiveMaster.UI.Desktop -c Release -r linux-x64 --self-contained -p:PublishSingleFile=true -o ./Publish/linux-x64-sc
-mv -Force ./Publish/linux-x64-sc/ArchiveMaster.UI.Desktop ./Publish/linux-x64-sc/ArchiveMaster
