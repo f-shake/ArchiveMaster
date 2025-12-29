@@ -14,14 +14,17 @@ using System.Diagnostics;
 using ArchiveMaster.Helpers;
 using ArchiveMaster.ViewModels;
 using ArchiveMaster.ViewModels.FileSystem;
+using FzLib.IO;
 
 namespace ArchiveMaster.Services
 {
     public class PhotoSlimmingService(AppConfig appConfig) : TwoStepServiceBase<PhotoSlimmingConfig>(appConfig)
     {
         private ConcurrentBag<string> errorMessages;
-        private Regex rCompress;
-        private Regex rCopy;
+
+        private FileFilterHelper compressFilterHelper;
+
+        private FileFilterHelper copyDirectlyFilterHelper;
 
         public enum TaskType
         {
@@ -71,11 +74,8 @@ namespace ArchiveMaster.Services
 
         public override Task InitializeAsync(CancellationToken ct)
         {
-            rCopy = new Regex(@$"\.({string.Join('|', Config.CopyDirectlyExtensions.Trimmed)})$",
-                RegexOptions.IgnoreCase);
-            rCompress = new Regex(@$"\.({string.Join('|', Config.CompressExtensions.Trimmed)})$",
-                RegexOptions.IgnoreCase);
-
+            compressFilterHelper = new FileFilterHelper(Config.CompressFilter);
+            copyDirectlyFilterHelper = new FileFilterHelper(Config.CopyDirectlyFilter);
             CompressFiles = new SlimmingFilesInfo(Config.SourceDir);
             CopyFiles = new SlimmingFilesInfo(Config.SourceDir);
             DeleteFiles = new SlimmingFilesInfo(Config.SourceDir);
@@ -256,14 +256,13 @@ namespace ArchiveMaster.Services
             NotifyMessage("正在搜索目录");
             var files = new DirectoryInfo(Config.SourceDir)
                 .EnumerateFiles("*", SearchOption.AllDirectories)
-                .ApplyFilter(ct, Config.Filter)
                 .Select(p => new SimpleFileInfo(p, Config.SourceDir));
 
             TryForFiles(files, (file, s) =>
             {
                 NotifyMessage($"正在查找文件{s.GetFileNumberMessage()}");
 
-                if (rCompress.IsMatch(file.Name))
+                if (compressFilterHelper.IsMatched(file))
                 {
                     if (NeedProcess(TaskType.Compress, file))
                     {
@@ -274,7 +273,7 @@ namespace ArchiveMaster.Services
                         CompressFiles.AddSkipped(file);
                     }
                 }
-                else if (rCopy.IsMatch(file.Name))
+                else if (copyDirectlyFilterHelper.IsMatched(file))
                 {
                     if (NeedProcess(TaskType.Copy, file))
                     {

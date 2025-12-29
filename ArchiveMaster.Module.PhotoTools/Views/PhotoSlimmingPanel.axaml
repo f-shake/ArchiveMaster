@@ -7,6 +7,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:gb="using:GroupBox.Avalonia.Controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:sys="clr-namespace:System;assembly=System.Runtime"
     xmlns:v="using:ArchiveMaster.Views"
     xmlns:vm="clr-namespace:ArchiveMaster.ViewModels"
     d:DesignHeight="450"
@@ -19,9 +20,17 @@
                 <ct:FormItem Label="源目录：">
                     <v:FilePickerTextBox
                         FileNames="{Binding Config.SourceDir}"
-                        Filter="{Binding Config.Filter}"
-                        IsFilterBarVisible="True"
                         Type="OpenFolder" />
+                </ct:FormItem>
+                <ct:FormItem Label=" ">
+                    <v:FileFilterBar
+                        Filter="{Binding Config.CopyDirectlyFilter}"
+                        OpenPanelButtonContent="筛选需要复制的文件" />
+                </ct:FormItem>
+                <ct:FormItem Label=" ">
+                    <v:FileFilterBar
+                        Filter="{Binding Config.CompressFilter}"
+                        OpenPanelButtonContent="筛选需要压缩的文件" />
                 </ct:FormItem>
                 <ct:FormItem Label="目标目录：">
                     <v:FilePickerTextBox
@@ -60,23 +69,6 @@
                             IsChecked="{Binding Config.SkipIfExist}" />
                     </ct:WrapFormItemGroup>
                 </ct:FormItem>
-                <ct:FormItem Label="压缩和复制：">
-                    <ct:WrapFormItemGroup>
-                        <ct:FormItem Header="复制后缀名">
-                            <ct:StringListEditor
-                                MaxWidth="400"
-                                HorizontalAlignment="Center"
-                                ItemsSource="{Binding Config.CopyDirectlyExtensions}" />
-                        </ct:FormItem>
-
-                        <ct:FormItem Header="压缩后缀名">
-                            <ct:StringListEditor
-                                MaxWidth="400"
-                                HorizontalAlignment="Center"
-                                ItemsSource="{Binding Config.CompressExtensions}" />
-                        </ct:FormItem>
-                    </ct:WrapFormItemGroup>
-                </ct:FormItem>
                 <ct:FormItem Label="图像压缩：">
                     <ct:WrapFormItemGroup>
                         <ct:FormItem Header="最大长边像素">
@@ -96,20 +88,30 @@
                                 Value="{Binding Config.MaxShortSize}" />
                         </ct:FormItem>
                         <ct:FormItem Header="压缩后类型">
-                            <TextBox
-                                Width="120"
-                                Text="{Binding Config.OutputFormat}" />
+                            <ComboBox
+                                Width="96"
+                                SelectedItem="{Binding Config.OutputFormat}">
+                                <ComboBox.Items>
+                                    <sys:String>JPG</sys:String>
+                                    <sys:String>JPEG</sys:String>
+                                    <sys:String>HEIF</sys:String>
+                                    <sys:String>HEIC</sys:String>
+                                    <sys:String>AVIF</sys:String>
+                                    <sys:String>WebP</sys:String>
+                                </ComboBox.Items>
+                            </ComboBox>
+
                         </ct:FormItem>
                         <ct:FormItem
                             Header="图像质量（%）"
                             IsVisible="{Binding}">
-                            <NumericUpDown
+                            <Slider
                                 Width="120"
-                                FormatString="0"
-                                Increment="10"
+                                Classes="ThumbLabel"
+                                IsSnapToTickEnabled="True"
                                 Maximum="100"
                                 Minimum="10"
-                                Watermark="10%—100%"
+                                TickFrequency="10"
                                 Value="{Binding Config.Quality}" />
                         </ct:FormItem>
                         <ct:FormItem Header="处理线程数">

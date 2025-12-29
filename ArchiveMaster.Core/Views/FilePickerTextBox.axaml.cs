@@ -29,7 +29,8 @@ public partial class FilePickerTextBox : UserControl
         AvaloniaProperty.Register<FilePickerTextBox, string>(nameof(FileNames), defaultBindingMode: BindingMode.TwoWay);
 
     public static readonly StyledProperty<FileFilterRule> FilterProperty =
-        AvaloniaProperty.Register<FilePickerTextBox, FileFilterRule>(nameof(Filter));
+        FileFilterBar.FilterProperty.AddOwner<FilePickerTextBox>();
+    //AvaloniaProperty.Register<FilePickerTextBox, FileFilterRule>(nameof(Filter));
 
     public static readonly StyledProperty<bool> IsFilterBarVisibleProperty =
         AvaloniaProperty.Register<FilePickerTextBox, bool>(nameof(IsFilterBarVisible));
@@ -292,12 +293,6 @@ public partial class FilePickerTextBox : UserControl
         return false;
     }
 
-    private void FileFilterPopup_Closed(object sender, EventArgs e)
-    {
-        var binding = BindingOperations.GetBindingExpressionBase(tbkFilterDescription, TextBlock.TextProperty);
-        binding?.UpdateTarget();
-    }
-
     private async void TestButton_Click(object sender, RoutedEventArgs e)
     {
         var progress = HostServices.GetRequiredService<IProgressOverlayService>();
@@ -358,7 +353,7 @@ public partial class FilePickerTextBox : UserControl
             {
                 await HostServices.GetRequiredService<IDialogService>().ShowErrorDialogAsync("测试失败", ex);
             },
-            initialMessage:"正在筛选指定目录中的文件");
+            initialMessage: "正在筛选指定目录中的文件");
 
         if (ok)
         {

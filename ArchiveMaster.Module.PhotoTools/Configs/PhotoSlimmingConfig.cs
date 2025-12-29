@@ -22,14 +22,20 @@ namespace ArchiveMaster.Configs
         /// 需要压缩的文件的后缀名
         /// </summary>
         [ObservableProperty]
-        private ObservableStringList compressExtensions = [];
+        private FileFilterRule compressFilter = new FileFilterRule()
+        {
+            IncludeFiles = string.Join(Environment.NewLine, "*.jpg", "*.jpeg")
+        };
 
         /// <summary>
         /// 直接复制的文件的后缀名
         /// </summary>
         [ObservableProperty]
-        private ObservableStringList copyDirectlyExtensions =
-            ["png", "gpx", "doc", "docx", "ppt", "pptx", "xls", "xlsx", "pdf"];
+        private FileFilterRule copyDirectlyFilter = new FileFilterRule()
+        {
+            IncludeFiles = string.Join(Environment.NewLine,
+                "*.png", "*.gpx", "*.doc", "*.docx", "*.ppt", "*.pptx", "*.xls", "*.xlsx", "*.pdf")
+        };
 
         /// <summary>
         /// 源目录
@@ -42,12 +48,6 @@ namespace ArchiveMaster.Configs
         /// </summary>
         [ObservableProperty]
         private string distDir = @"C:\目标\目录";
-
-        /// <summary>
-        /// 筛选
-        /// </summary>
-        [ObservableProperty]
-        private FileFilterRule filter = new FileFilterRule();
 
         /// <summary>
         /// 修复文件修改时间时，最大可接受的Exif和修改时间的时间差（秒）
@@ -126,7 +126,7 @@ namespace ArchiveMaster.Configs
             CheckEmpty(OutputFormat, "图片输出格式");
             CheckEmpty(FolderNameTemplate, "文件夹名模板");
             CheckEmpty(FileNameTemplate, "文件名模板");
-            
+
             if (!FolderNameTemplate.Contains(PhotoSlimmingConfig.FolderNamePlaceholder))
             {
                 throw new Exception("文件夹名模板不包含文件夹名占位符");
