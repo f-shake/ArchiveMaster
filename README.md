@@ -193,7 +193,18 @@
 2. 编辑`Directory.Build.props`：
    1. 将`UseLocalFzLib`设置为`false`。
    2. 调整`OutputDir`，或将`SpecialOutputDir`设置为`false`。
-3. 在`build`目录中按需执行PowerShell脚本，或在IDE中重新生成解决方案。
+3. 执行`build.ps1`PowerShell脚本，或在IDE中重新生成解决方案。`build.ps1`提供若干开关，可组合使用：
+
+   | 参数              | 说明                |
+   | --------------- | ----------------- |
+   | `-w`            | Windows (win-x64) |
+   | `-l`            | Linux (linux-x64) |
+   | `-m`            | macOS (osx-x64)   |
+   | `-all`          | 所有平台              |
+   | `-s`            | 自包含发布             |
+   | `-c`            | 单文件压缩（仅自包含）       |
+   | `-noSingleFile` | 禁用单文件发布           |
+
 
 ## 模块
 
