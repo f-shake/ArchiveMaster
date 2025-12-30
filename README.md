@@ -201,7 +201,7 @@
 
 一个模块表现为一个`dll`。步骤如下：
 
-1. 创建一个项目（或复制已有项目并清空），名称前缀约定为`ArchiveMaster.Module.`，`TargetFramework`为`net8.0`，`RootNamespace`为`ArchiveMaster`
+1. 创建一个项目（或复制已有项目并清空），名称前缀约定为`ArchiveMaster.Module.`，`TargetFramework`为`net10.0`，`RootNamespace`为`ArchiveMaster`
 2. 新增并实现一个或多个工具
 3. 新建一个类，实现`IModuleInfo`，声明模块基本信息
 

@@ -135,6 +135,7 @@ namespace ArchiveMaster.Services
                 }).Build());
 
                 NotifyMessage($"正在查找空目录");
+                NotifyProgressIndeterminate();
                 AnalyzeEmptyDirectories(ct);
             }, ct);
         }

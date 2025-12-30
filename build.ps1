@@ -82,7 +82,7 @@ foreach ($target in $targets) {
     if ($target -eq "win-x64" -and -not $noSingleFile) {
         $exePath = Join-Path $outputDir "ArchiveMaster.UI.Desktop.exe"
         if (Test-Path $exePath) {
-            $exeName = if ($s) { "ArchiveMaster_sc.exe" } else { "ArchiveMaster.exe" }
+            $exeName = if ($s) { "ArchiveMaster.exe" } else { "ArchiveMaster.exe" }
             Move-Item -Force $exePath (Join-Path $outputDir $exeName)
         }
     }

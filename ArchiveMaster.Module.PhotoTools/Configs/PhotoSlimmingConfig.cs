@@ -89,7 +89,7 @@ namespace ArchiveMaster.Configs
         /// 压缩后的文件输出类型/扩展名
         /// </summary>
         [ObservableProperty]
-        private string outputFormat = "jpg";
+        private string outputFormat = "JPG";
 
         /// <summary>
         /// 最深文件层级，例如设置为2，相对路径为D1/D2/D3/D4/File.ext，则目标相对路径将改为D1/D2/D3-D4-File.ext
