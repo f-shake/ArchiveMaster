@@ -90,15 +90,27 @@
                         <ct:FormItem Header="压缩后类型">
                             <ComboBox
                                 Width="96"
-                                SelectedItem="{Binding Config.OutputFormat}">
-                                <ComboBox.Items>
-                                    <sys:String>JPG</sys:String>
-                                    <sys:String>JPEG</sys:String>
-                                    <sys:String>HEIF</sys:String>
-                                    <sys:String>HEIC</sys:String>
-                                    <sys:String>AVIF</sys:String>
-                                    <sys:String>WebP</sys:String>
-                                </ComboBox.Items>
+                                ItemsSource="{Binding SupportedImageFormats}"
+                                SelectedValue="{Binding Config.CompressImageFormat}"
+                                SelectedValueBinding="{Binding Format}">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid RowDefinitions="Auto,4,Auto">
+                                            <TextBlock Text="{Binding Format}" />
+                                            <TextBlock
+                                                Grid.Row="2"
+                                                Width="200"
+                                                Classes="Description"
+                                                Text="{Binding Description}"
+                                                TextWrapping="Wrap" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                                <ComboBox.SelectionBoxItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Format}" />
+                                    </DataTemplate>
+                                </ComboBox.SelectionBoxItemTemplate>
                             </ComboBox>
 
                         </ct:FormItem>

@@ -7,6 +7,7 @@ using ArchiveMaster.ViewModels;
 using CommunityToolkit.Mvvm.ComponentModel;
 using FzLib.IO;
 using FzLib.Text;
+using ImageMagick;
 
 namespace ArchiveMaster.Configs
 {
@@ -24,7 +25,7 @@ namespace ArchiveMaster.Configs
         [ObservableProperty]
         private FileFilterRule compressFilter = new FileFilterRule()
         {
-            IncludeFiles = string.Join(Environment.NewLine, "*.jpg", "*.jpeg")
+            IncludeFiles = string.Join(Environment.NewLine, "*.jpg", "*.jpeg", "*.heic", "*.heif", "*.bmp")
         };
 
         /// <summary>
@@ -89,7 +90,7 @@ namespace ArchiveMaster.Configs
         /// 压缩后的文件输出类型/扩展名
         /// </summary>
         [ObservableProperty]
-        private string outputFormat = "JPG";
+        private MagickFormat compressImageFormat = MagickFormat.Jpg;
 
         /// <summary>
         /// 最深文件层级，例如设置为2，相对路径为D1/D2/D3/D4/File.ext，则目标相对路径将改为D1/D2/D3-D4-File.ext
@@ -123,7 +124,6 @@ namespace ArchiveMaster.Configs
         {
             CheckDir(SourceDir, "源目录");
             CheckEmpty(DistDir, "目标目录");
-            CheckEmpty(OutputFormat, "图片输出格式");
             CheckEmpty(FolderNameTemplate, "文件夹名模板");
             CheckEmpty(FileNameTemplate, "文件名模板");
 

@@ -102,7 +102,7 @@ namespace ArchiveMaster.Services
             TryForFiles(CompressFiles.ProcessingFiles, (file, s) =>
             {
                 NotifyMessage($"（第二步，共三步）正在压缩{s.GetFileNumberMessage()}：{file.Name}");
-                string distPath = GetDistPath(file.Path, Config.OutputFormat, out _);
+                string distPath = GetDistPath(file.Path, Config.CompressImageFormat.ToString().ToLower(), out _);
                 if (File.Exists(distPath))
                 {
                     FileHelper.DeleteByConfig(distPath, "照片瘦身_被替换的压缩后文件");
@@ -136,7 +136,7 @@ namespace ArchiveMaster.Services
                     }
 
                     image.Quality = (uint)Config.Quality;
-                    image.Write(distPath);
+                    image.Write(distPath, Config.CompressImageFormat);
                 }
 
                 File.SetLastWriteTime(distPath, file.Time);
@@ -239,7 +239,8 @@ namespace ArchiveMaster.Services
 
 
             var distFile =
-                new FileInfo(GetDistPath(file.Path, type is TaskType.Copy ? null : Config.OutputFormat, out _));
+                new FileInfo(GetDistPath(file.Path,
+                    type is TaskType.Copy ? null : Config.CompressImageFormat.ToString().ToLower(), out _));
 
             if (distFile.Exists && (type is TaskType.Compress ||
                                     file.Length == distFile.Length && file.Time == distFile.LastWriteTime))
@@ -299,7 +300,7 @@ namespace ArchiveMaster.Services
             ISet<string> desiredDistFiles = CopyFiles.SkippedFiles
                 .Select(file => GetDistPath(file.Path, null, out _))
                 .Concat(CompressFiles.SkippedFiles
-                    .Select(file => GetDistPath(file.Path, Config.OutputFormat, out _)))
+                    .Select(file => GetDistPath(file.Path, Config.CompressImageFormat.ToString().ToLower(), out _)))
                 .ToFrozenSet();
 
             foreach (var file in Directory

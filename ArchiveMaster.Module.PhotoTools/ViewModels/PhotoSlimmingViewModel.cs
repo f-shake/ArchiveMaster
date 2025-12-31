@@ -1,7 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
-
 using FzLib.Cryptography;
 using Mapster;
 using ArchiveMaster.Configs;
@@ -14,9 +13,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using ArchiveMaster.ViewModels.FileSystem;
 using FzLib.Avalonia.Dialogs;
+using ImageMagick;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ArchiveMaster.ViewModels;
+
 public partial class PhotoSlimmingViewModel(ViewModelServices services)
     : TwoStepViewModelBase<PhotoSlimmingService, PhotoSlimmingConfig>(services)
 {
@@ -34,6 +35,11 @@ public partial class PhotoSlimmingViewModel(ViewModelServices services)
 
     [ObservableProperty]
     private ObservableCollection<string> errorMessages;
+
+    public List<IMagickFormatInfo> SupportedImageFormats { get; } = MagickNET.SupportedFormats
+        .Where(p => p.SupportsReading)
+        .Where(p => p.SupportsWriting)
+        .ToList();
 
     protected override Task OnExecutedAsync(CancellationToken ct)
     {
@@ -64,6 +70,7 @@ public partial class PhotoSlimmingViewModel(ViewModelServices services)
 
         return base.OnInitializingAsync();
     }
+
     protected override void OnReset()
     {
         CopyFiles = null;
