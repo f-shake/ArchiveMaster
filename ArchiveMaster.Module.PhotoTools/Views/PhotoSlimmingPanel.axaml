@@ -26,14 +26,14 @@
                         Type="OpenFolder" />
                 </ct:FormItem>
                 <ct:FormItem Label=" ">
-                    <v:FileFilterBar
-                        Filter="{Binding Config.CopyDirectlyFilter}"
-                        OpenPanelButtonContent="选择需要复制的文件" />
-                </ct:FormItem>
-                <ct:FormItem Label=" ">
-                    <v:FileFilterBar
-                        Filter="{Binding Config.CompressFilter}"
-                        OpenPanelButtonContent="选择需要压缩的文件" />
+                    <StackPanel Spacing="-4">
+                        <v:FileFilterBar
+                            Filter="{Binding Config.CopyDirectlyFilter}"
+                            OpenPanelButtonContent="选择需要复制的文件" />
+                        <v:FileFilterBar
+                            Filter="{Binding Config.CompressFilter}"
+                            OpenPanelButtonContent="选择需要压缩的文件" />
+                    </StackPanel>
                 </ct:FormItem>
                 <ct:FormItem Label="目标目录：">
                     <v:FilePickerTextBox
@@ -178,7 +178,7 @@
                 <DataGridTemplateColumn
                     CanUserResize="False"
                     Header="类型"
-                    SortMemberPath="UpdateType">
+                    SortMemberPath="SlimmingTaskType">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <TextBlock

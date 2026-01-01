@@ -127,7 +127,7 @@ namespace ArchiveMaster.Services
                         case ExportMode.Copy:
                             copy:
                             int tryCount = 10;
-                            
+
                             while (--tryCount > 0)
                             {
                                 if (File.Exists(destFile))
@@ -138,10 +138,10 @@ namespace ArchiveMaster.Services
                                 try
                                 {
                                     await CopyFileAsync(sourceFile, destFile,
-                                            s.CreateFileProgressReporter("正在复制", 
-                                                p => length + p.ProcessedBytes,
-                                                () => totalLength,
-                                                p => Path.GetFileName(p.SourceFilePath))
+                                        s.CreateFileProgressReporter("正在复制",
+                                            p => length + p.ProcessedBytes,
+                                            () => totalLength,
+                                            p => Path.GetFileName(p.SourceFilePath))
                                         , ct);
                                     tryCount = 0;
                                 }
@@ -237,12 +237,17 @@ namespace ArchiveMaster.Services
                     }
                 }
 
+                //========== 正式开始处理各目录 ==========
                 //枚举本地文件，寻找离线快照中是否存在相同文件
+                double dirIndex = 0;
+                double dirCount = Config.MatchingDirs.Count;
                 foreach (var localAndOffsiteDir in Config.MatchingDirs)
                 {
+                    // =========== 1.处理本地文件，构建字典 ===========
                     var localDir = new DirectoryInfo(localAndOffsiteDir.LocalDir);
                     var offsiteDir = new DirectoryInfo(localAndOffsiteDir.OffsiteDir);
                     NotifyMessage($"正在查找：{offsiteDir}→{localDir}");
+                    NotifyProgress(dirIndex, dirCount);
                     var localFileList = localDir
                         .EnumerateFiles("*", FileEnumerateExtension.GetEnumerationOptions())
                         .ApplyFilter(ct)
@@ -298,8 +303,8 @@ namespace ArchiveMaster.Services
                             .GroupBy(p => p.Time).ToDictionary(p => p.Key, p => p.ToList());
                     }
 
-                    int index = 0;
-                    //开始对比文件
+                    int fileIndex = 0;
+                    // =========== 2. 开始进行对比 ============
                     /*
                         这段代码主要用于比对本地文件与异地快照文件，判断文件的变化类型（新增、修改、移动/重命名或无变化），并将需要同步的文件信息添加到 UpdateFiles 列表中。整体流程如下：
 
@@ -316,12 +321,15 @@ namespace ArchiveMaster.Services
                         - 否则，认为是新增文件，创建 SyncFileInfo，标记为 Add，并添加到 UpdateFiles。
                         5. 最终结果：所有需要同步的文件（新增、修改、移动/重命名）都会被收集到 UpdateFiles，供后续同步或生成脚本使用。
                     */
+                    dirIndex += 1.0 / 3; //搜索阶段占1/3的进度
                     foreach (var file in localFileList)
                     {
                         ct.ThrowIfCancellationRequested();
 
                         string relativePath = Path.GetRelativePath(localDir.FullName, file.FullName);
-                        NotifyMessage($"正在比对（{++index}/{localFileList.Count}）：{relativePath}");
+                        NotifyMessage($"正在比对（{++fileIndex}/{localFileList.Count}）：{relativePath}");
+                        //当前的进度，是目录的进度，加上压缩为1/3的文件的进度
+                        NotifyProgress((dirIndex + 1.0 / 3 * fileIndex / localFileList.Count), dirCount);
                         localFiles.Add(Path.Combine(localDir.Name, relativePath), 0);
 
                         if (!filter.IsMatched(file))
@@ -331,6 +339,7 @@ namespace ArchiveMaster.Services
 
                         if (offsitePath2File.TryGetValue(relativePath, out var offsiteFile)) //路径相同，说明是没有变化或者文件被修改
                         {
+                            // ====== 2.1. 文件未发生变化 ======
                             if ((offsiteFile.Time - file.LastWriteTime).Duration().TotalSeconds <
                                 Config.MaxTimeToleranceSecond
                                 && offsiteFile.Length == file.Length) //文件没有发生改动
@@ -338,7 +347,7 @@ namespace ArchiveMaster.Services
                                 continue;
                             }
 
-                            //文件发生改变
+                            // ====== 2.2. 文件被修改 ======
                             var newFile = new SyncFileInfo()
                             {
                                 Path = Path.Combine(offsiteTopDirectory, relativePath),
@@ -357,6 +366,7 @@ namespace ArchiveMaster.Services
                         }
                         else //新增文件或文件被移动或重命名
                         {
+                            // ====== 2.3. 文件被移动或重命名 ======
                             var time = Config.MaxTimeToleranceSecond > 0
                                 ? file.LastWriteTime.TruncateToSecond()
                                 : file.LastWriteTime;
@@ -410,8 +420,9 @@ namespace ArchiveMaster.Services
                                 localFiles.TryAdd(Path.Combine(offsiteDir.Name, offsiteMovedFile.RelativePath),
                                     0); //如果被移动了，那么不需要进行删除判断，所以要把异地的文件地址也加入进去。
                             }
-                            else //新增文件
+                            else
                             {
+                                // ====== 2.4. 新增文件 ======
                                 var newFile = new SyncFileInfo()
                                 {
                                     Path = Path.Combine(offsiteTopDirectory, relativePath),
@@ -429,7 +440,9 @@ namespace ArchiveMaster.Services
                     ct.ThrowIfCancellationRequested();
 
 
+                    // =========== 3. 查找删除的文件 ============
                     NotifyMessage($"正在查找删除的文件:{offsiteDir}→{localDir}");
+                    dirIndex += 1.0 / 3; //枚举阶段占1/3的进度
                     List<string> localSubDirs = new List<string>();
                     foreach (var subDir in localDir.EnumerateDirectories("*", SearchOption.AllDirectories))
                     {
@@ -440,7 +453,7 @@ namespace ArchiveMaster.Services
                     LocalDirectories.Add(localAndOffsiteDir.OffsiteDir, localSubDirs);
 
                     //枚举异地快照，查找本地文件中不存在的文件
-                    index = 0;
+                    fileIndex = 0;
                     foreach (var file in offsiteTopDir2Files[offsiteTopDirectory])
                     {
                         var offsitePathWithTopDir =
@@ -452,13 +465,17 @@ namespace ArchiveMaster.Services
                         }
 
                         NotifyMessage(
-                            $"正在查找删除的文件（{++index} / {offsiteTopDir2Files[offsiteTopDirectory].Count}）:{offsiteDir}→{localDir}");
+                            $"正在查找删除的文件（{++fileIndex} / {offsiteTopDir2Files[offsiteTopDirectory].Count}）:{offsiteDir}→{localDir}");
+                        NotifyProgress(dirIndex + 1.0 / 3 * fileIndex / offsiteTopDir2Files[offsiteTopDirectory].Count,
+                            dirCount);
                         if (!localFiles.ContainsKey(offsitePathWithTopDir))
                         {
                             file.UpdateType = FileUpdateType.Delete;
                             UpdateFiles.Add(file);
                         }
                     }
+
+                    dirIndex += 1.0 / 3;
                 }
             }, ct);
         }

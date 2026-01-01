@@ -19,6 +19,40 @@ namespace ArchiveMaster.ViewModels
     public partial class Step2ViewModel(ViewModelServices services)
         : OfflineSyncViewModelBase<Step2Service, OfflineSyncStep2Config, FileSystem.SyncFileInfo>(services)
     {
+        private static readonly char[] LocalDirSplitter = ['|', '\r', '\n'];
+
+        protected override async Task OnExecutedAsync(CancellationToken ct)
+        {
+            if (Files.Any(p => p.Status == ProcessStatus.Error))
+            {
+                await Services.Dialog.ShowErrorDialogAsync("导出失败", "导出完成，但部分文件出现错误");
+            }
+        }
+
+        protected override Task OnExecutingAsync(CancellationToken ct)
+        {
+            if (Files.Count == 0)
+            {
+                throw new Exception("本地和异地没有差异");
+            }
+
+            return base.OnExecutingAsync(ct);
+        }
+
+        protected override Task OnInitializedAsync()
+        {
+            Files = new ObservableCollection<FileSystem.SyncFileInfo>(Service.UpdateFiles);
+            return base.OnInitializedAsync();
+        }
+
+        protected override async Task OnInitializingAsync()
+        {
+            if (Config.MatchingDirs is null or { Count: 0 })
+            {
+                await MatchDirectoriesAsync();
+            }
+        }
+
         [RelayCommand]
         private async Task BrowseLocalDirAsync()
         {
@@ -68,65 +102,30 @@ namespace ArchiveMaster.ViewModels
                 Config.PatchDir = folder;
             }
         }
-
-        protected override Task OnExecutingAsync(CancellationToken ct)
+        
+        private async Task MatchDirectoriesAsync()
         {
-            if (Files.Count == 0)
-            {
-                throw new Exception("本地和异地没有差异");
-            }
-
-            return base.OnExecutingAsync(ct);
+            string[] localSearchingDirs = string.IsNullOrWhiteSpace(Config.LocalDir)
+                ? []
+                : Config.LocalDir.Split(LocalDirSplitter, StringSplitOptions.RemoveEmptyEntries);
+            var dirs = await Step2Service.MatchLocalAndOffsiteDirsAsync(Config.OffsiteSnapshot,
+                localSearchingDirs);
+            Config.MatchingDirs = new ObservableCollection<LocalAndOffsiteDir>(dirs);
         }
-
-        protected override async Task OnExecutedAsync(CancellationToken ct)
-        {
-            if (Files.Any(p => p.Status == ProcessStatus.Error))
-            {
-                await Services.Dialog.ShowErrorDialogAsync("导出失败", "导出完成，但部分文件出现错误");
-            }
-        }
-
-        private static readonly char[] LocalDirSplitter = ['|', '\r', '\n'];
 
         [RelayCommand]
         private async Task MatchDirsAsync()
         {
-            try
+            if (!string.IsNullOrWhiteSpace(Config.OffsiteSnapshot) && File.Exists(Config.OffsiteSnapshot))
             {
-                await MatchDirectoriesAsync();
+                await Services.ProgressOverlay.WithOverlayAsync(async () => { await MatchDirectoriesAsync(); },
+                    async ex => await Services.Dialog.ShowErrorDialogAsync("匹配失败", ex),
+                    "正在匹配目录");
             }
-            catch (OperationCanceledException)
+            else
             {
+                Config.MatchingDirs = [];
             }
-            catch (Exception ex)
-            {
-                await Services.Dialog.ShowErrorDialogAsync("匹配失败", ex);
-            }
-        }
-
-        private async Task MatchDirectoriesAsync()
-        {
-            Config.Check();
-            string[] localSearchingDirs =
-                Config.LocalDir.Split(LocalDirSplitter, StringSplitOptions.RemoveEmptyEntries);
-            Config.MatchingDirs =
-                new ObservableCollection<LocalAndOffsiteDir>(await Step2Service
-                    .MatchLocalAndOffsiteDirsAsync(Config.OffsiteSnapshot, localSearchingDirs));
-        }
-
-        protected override async Task OnInitializingAsync()
-        {
-            if (Config.MatchingDirs is null or { Count: 0 })
-            {
-                await MatchDirectoriesAsync();
-            }
-        }
-
-        protected override Task OnInitializedAsync()
-        {
-            Files = new ObservableCollection<FileSystem.SyncFileInfo>(Service.UpdateFiles);
-            return base.OnInitializedAsync();
         }
     }
 }

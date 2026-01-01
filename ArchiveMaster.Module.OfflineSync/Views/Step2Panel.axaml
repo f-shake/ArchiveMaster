@@ -30,29 +30,9 @@
                 <ctrl:FormItem Label="异地快照文件：">
                     <v:FilePickerTextBox
                         FileNames="{Binding Config.OffsiteSnapshot}"
+                        FileSelectedCommand="{Binding MatchDirsCommand}"
                         StringFileTypeFilter="异地快照文件;*.os1;;"
                         Type="OpenFile" />
-                </ctrl:FormItem>
-
-                <ctrl:FormItem Label="本地搜索目录：">
-                    <Grid ColumnDefinitions="*,8,Auto">
-                        <TextBox
-                            AcceptsReturn="True"
-                            MaxLines="3"
-                            Text="{Binding Config.LocalDir}"
-                            Watermark="在选择的目录中搜索需要同步的目录；一行一项" />
-                        <StackPanel Grid.Column="2">
-                            <Button
-                                Classes="Long"
-                                Command="{Binding BrowseLocalDirCommand}"
-                                Content="添加.." />
-                            <Button
-                                HorizontalAlignment="Right"
-                                Classes="Primary Long"
-                                Command="{Binding MatchDirsCommand}"
-                                Content="1. 匹配目录" />
-                        </StackPanel>
-                    </Grid>
                 </ctrl:FormItem>
 
                 <ctrl:FormItem Label="导出补丁目录：">
@@ -62,53 +42,50 @@
                 </ctrl:FormItem>
 
                 <ctrl:FormItem Label="加密：">
-                    <Grid ColumnDefinitions="Auto,16,Auto,8,*">
+                    <Grid ColumnDefinitions="Auto,16,*">
                         <CheckBox
                             Content="加密备份文件"
                             IsChecked="{Binding Config.EnableEncryption}" />
-                        <TextBlock
+                        <v:PasswordBox
                             Grid.Column="2"
                             IsVisible="{Binding Config.EnableEncryption}"
-                            Text="密码：" />
-                        <v:PasswordBox
-                            Grid.Column="4"
-                            IsVisible="{Binding Config.EnableEncryption}"
-                            Password="{Binding Config.EncryptionPassword}" />
+                            Password="{Binding Config.EncryptionPassword}"
+                            Watermark="请输入密码" />
 
                     </Grid>
 
                 </ctrl:FormItem>
 
 
+                <ctrl:FormItem Label="筛选：">
+                    <v:FileFilterBar Filter="{Binding Config.Filter}" />
+                </ctrl:FormItem>
+
+                <ctrl:FormItem Label="导出方式：">
+                    <ctrl:RadioButtonGroup
+                        DisplayMemberBinding="{Binding ., Converter={x:Static cvt:Converters.Description}}"
+                        ItemsSource="{me:EnumValues e:ExportMode}"
+                        SelectedItem="{Binding Config.ExportMode}">
+                        <ToolTip.Tip>
+                            <TextBlock>
+                                <Run FontWeight="Bold">复制：</Run>
+                                <Run>将文件复制到导出目录中</Run>
+                                <LineBreak />
+                                <Run FontWeight="Bold">硬链接：</Run>
+                                <Run>若本地目录与导出目录位于同一个本地的NTFS分区，可以创建链接来快速导出</Run>
+                                <LineBreak />
+                                <Run FontWeight="Bold">硬链接优先：</Run>
+                                <Run>优先使用硬链接，若失败，则复制</Run>
+                                <LineBreak />
+                                <Run FontWeight="Bold">脚本：</Run>
+                                <Run>将会在导出目录生成.bat和.ps1脚本，将执行脚本可以将需要的文件复制到脚本所在目录</Run>
+                            </TextBlock>
+                        </ToolTip.Tip>
+                    </ctrl:RadioButtonGroup>
+                </ctrl:FormItem>
+
                 <ctrl:FormItem Label="选项：">
                     <ctrl:WrapFormItemGroup>
-                        <ctrl:FormItem Header="筛选">
-                            <v:FileFilterControl Filter="{Binding Config.Filter}" />
-                        </ctrl:FormItem>
-
-                        <ctrl:FormItem Header="导出方式">
-                            <ctrl:RadioButtonGroup
-                                DisplayMemberBinding="{Binding ., Converter={x:Static cvt:Converters.Description}}"
-                                ItemsSource="{me:EnumValues e:ExportMode}"
-                                SelectedItem="{Binding Config.ExportMode}">
-                                <ToolTip.Tip>
-                                    <TextBlock>
-                                        <Run FontWeight="Bold">复制：</Run>
-                                        <Run>将文件复制到导出目录中</Run>
-                                        <LineBreak />
-                                        <Run FontWeight="Bold">硬链接：</Run>
-                                        <Run>若本地目录与导出目录位于同一个本地的NTFS分区，可以创建链接来快速导出</Run>
-                                        <LineBreak />
-                                        <Run FontWeight="Bold">硬链接优先：</Run>
-                                        <Run>优先使用硬链接，若失败，则复制</Run>
-                                        <LineBreak />
-                                        <Run FontWeight="Bold">脚本：</Run>
-                                        <Run>将会在导出目录生成.bat和.ps1脚本，将执行脚本可以将需要的文件复制到脚本所在目录</Run>
-                                    </TextBlock>
-                                </ToolTip.Tip>
-                            </ctrl:RadioButtonGroup>
-                        </ctrl:FormItem>
-
                         <ctrl:FormItem
                             Header="修改时间阈值（秒）"
                             ToolTip.Tip="本地与异地的对应文件，若修改时间之差小于该值，则标识为同一文件">
@@ -119,7 +96,7 @@
                         </ctrl:FormItem>
 
                         <CheckBox
-                            Content="检查移动文件时，允许文件名不同"
+                            Content="移动文件时忽略文件名"
                             IsChecked="{Binding Config.CheckMoveIgnoreFileName}"
                             ToolTip.Tip="若勾选，则在判断文件移动时，只要文件的大小和修改时间一致，就认为是同一文件，此时可以避免重命名的文件被识别为删除+新增；否则，还需要确保文件名一致，此时对于重命名的文件会被识别为删除+新增" />
                     </ctrl:WrapFormItemGroup>
@@ -133,23 +110,46 @@
                 Grid.Column="2"
                 Height="{Binding #configs.Bounds.Height, Mode=OneWay}"
                 Header="目录匹配">
-                <DataGrid
-                    AutoGenerateColumns="False"
-                    CanUserReorderColumns="True"
-                    ItemsSource="{Binding Config.MatchingDirs}"
-                    VerticalScrollBarVisibility="Auto">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn
-                            Width="*"
-                            Binding="{Binding OffsiteDir}"
-                            Header="异地目录"
-                            IsReadOnly="True" />
-                        <DataGridTextColumn
-                            Width="*"
-                            Binding="{Binding LocalDir}"
-                            Header="本地目录" />
-                    </DataGrid.Columns>
-                </DataGrid>
+                <Grid RowDefinitions="Auto,8,*">
+                    <ctrl:FormItem>
+                        <Grid ColumnDefinitions="*,8,Auto">
+                            <TextBox
+                                AcceptsReturn="True"
+                                MaxLines="3"
+                                Text="{Binding Config.LocalDir}"
+                                Watermark="在此搜索本地目录&#10;一行表示一个目录" />
+                            <StackPanel Grid.Column="2">
+                                <Button
+                                    Classes="Long"
+                                    Command="{Binding BrowseLocalDirCommand}"
+                                    Content="添加.." />
+                                <Button
+                                    HorizontalAlignment="Right"
+                                    Classes="Primary Long"
+                                    Command="{Binding MatchDirsCommand}"
+                                    Content="1. 自动匹配" />
+                            </StackPanel>
+                        </Grid>
+                    </ctrl:FormItem>
+                    <DataGrid
+                        Grid.Row="2"
+                        AutoGenerateColumns="False"
+                        CanUserReorderColumns="True"
+                        ItemsSource="{Binding Config.MatchingDirs}"
+                        VerticalScrollBarVisibility="Auto">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn
+                                Width="*"
+                                Binding="{Binding OffsiteDir}"
+                                Header="异地目录"
+                                IsReadOnly="True" />
+                            <DataGridTextColumn
+                                Width="*"
+                                Binding="{Binding LocalDir}"
+                                Header="本地目录" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
             </gb:GroupBox>
 
         </Grid>

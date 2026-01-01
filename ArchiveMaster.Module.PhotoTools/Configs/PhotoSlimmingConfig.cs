@@ -14,6 +14,16 @@ namespace ArchiveMaster.Configs
     public partial class PhotoSlimmingConfig : ConfigBase
     {
         /// <summary>
+        /// 文件名占位符
+        /// </summary>
+        public const string FileNamePlaceholder = "{FileName}";
+
+        /// <summary>
+        /// 文件夹名占位符
+        /// </summary>
+        public const string FolderNamePlaceholder = "{FolderName}";
+
+        /// <summary>
         /// 是否在处理前清空目标目录
         /// </summary>
         [ObservableProperty]
@@ -25,8 +35,15 @@ namespace ArchiveMaster.Configs
         [ObservableProperty]
         private FileFilterRule compressFilter = new FileFilterRule()
         {
-            IncludeFiles = string.Join(Environment.NewLine, "*.jpg", "*.jpeg", "*.heic", "*.heif", "*.bmp")
+            IncludeFiles = string.Join(Environment.NewLine, "*.jpg", "*.jpeg", "*.heic", "*.heif", "*.bmp", "*.png",
+                "*.gif", "*.tiff", "*.tif")
         };
+
+        /// <summary>
+        /// 压缩后的文件输出类型/扩展名
+        /// </summary>
+        [ObservableProperty]
+        private MagickFormat compressImageFormat = MagickFormat.Jpg;
 
         /// <summary>
         /// 直接复制的文件的后缀名
@@ -34,21 +51,33 @@ namespace ArchiveMaster.Configs
         [ObservableProperty]
         private FileFilterRule copyDirectlyFilter = new FileFilterRule()
         {
-            IncludeFiles = string.Join(Environment.NewLine,
-                "*.png", "*.gpx", "*.doc", "*.docx", "*.ppt", "*.pptx", "*.xls", "*.xlsx", "*.pdf")
+            IncludeFiles = string.Join(Environment.NewLine, "*.gpx", "*.doc", "*.docx", "*.ppt", "*.pptx", "*.xls",
+                "*.xlsx", "*.pdf")
         };
 
         /// <summary>
-        /// 源目录
+        /// 最深文件层级，例如设置为2，相对路径为D1/D2/D3/D4/File.ext，则目标相对路径将改为D1/D2/D3-D4-File.ext
         /// </summary>
         [ObservableProperty]
-        private string sourceDir = @"C:\源\目录";
+        private int deepestLevel = 10000;
 
         /// <summary>
         /// 目标目录
         /// </summary>
         [ObservableProperty]
         private string distDir = @"C:\目标\目录";
+
+        /// <summary>
+        /// 目标文件名模板
+        /// </summary>
+        [ObservableProperty]
+        private string fileNameTemplate = FileNamePlaceholder;
+
+        /// <summary>
+        /// 目标文件夹名模板
+        /// </summary>
+        [ObservableProperty]
+        private string folderNameTemplate = FolderNamePlaceholder;
 
         /// <summary>
         /// 修复文件修改时间时，最大可接受的Exif和修改时间的时间差（秒）
@@ -81,45 +110,15 @@ namespace ArchiveMaster.Configs
         private bool skipIfExist = true;
 
         /// <summary>
+        /// 源目录
+        /// </summary>
+        [ObservableProperty]
+        private string sourceDir = @"C:\源\目录";
+        /// <summary>
         /// 并行线程数（针对压缩和文件修改时间修复）
         /// </summary>
         [ObservableProperty]
         private int thread = 4;
-
-        /// <summary>
-        /// 压缩后的文件输出类型/扩展名
-        /// </summary>
-        [ObservableProperty]
-        private MagickFormat compressImageFormat = MagickFormat.Jpg;
-
-        /// <summary>
-        /// 最深文件层级，例如设置为2，相对路径为D1/D2/D3/D4/File.ext，则目标相对路径将改为D1/D2/D3-D4-File.ext
-        /// </summary>
-        [ObservableProperty]
-        private int deepestLevel = 10000;
-
-        /// <summary>
-        /// 文件名占位符
-        /// </summary>
-        public const string FileNamePlaceholder = "{FileName}";
-
-        /// <summary>
-        /// 文件夹名占位符
-        /// </summary>
-        public const string FolderNamePlaceholder = "{FolderName}";
-
-        /// <summary>
-        /// 目标文件夹名模板
-        /// </summary>
-        [ObservableProperty]
-        private string folderNameTemplate = FolderNamePlaceholder;
-
-        /// <summary>
-        /// 目标文件名模板
-        /// </summary>
-        [ObservableProperty]
-        private string fileNameTemplate = FileNamePlaceholder;
-
         public override void Check()
         {
             CheckDir(SourceDir, "源目录");

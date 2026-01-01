@@ -10,7 +10,7 @@
             BasedOn="{StaticResource {x:Type MenuItem}}"
             TargetType="MenuItem">
             <Setter Property="Header" Value="{Binding Header}" />
-            <Setter Property="Command" Value="{Binding Command}" />
+            <Setter Property="Command" Value="{Binding TextChangedCommand}" />
         </ControlTheme>
     </Styles.Resources>
 

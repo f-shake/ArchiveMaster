@@ -12,6 +12,7 @@ using FzLib.Avalonia.Dialogs;
 using FzLib.IO;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Windows.Input;
 using ArchiveMaster.ViewModels.FileSystem;
 using FzLib.Avalonia.Controls;
 
@@ -28,8 +29,12 @@ public partial class FilePickerTextBox : UserControl
     public static readonly StyledProperty<string> FileNamesProperty =
         AvaloniaProperty.Register<FilePickerTextBox, string>(nameof(FileNames), defaultBindingMode: BindingMode.TwoWay);
 
+    public static readonly StyledProperty<ICommand> FileSelectedCommandProperty =
+        AvaloniaProperty.Register<FilePickerTextBox, ICommand>(
+            nameof(FileSelectedCommand));
+
     public static readonly StyledProperty<FileFilterRule> FilterProperty =
-        FileFilterBar.FilterProperty.AddOwner<FilePickerTextBox>();
+            FileFilterBar.FilterProperty.AddOwner<FilePickerTextBox>();
     //AvaloniaProperty.Register<FilePickerTextBox, FileFilterRule>(nameof(Filter));
 
     public static readonly StyledProperty<bool> IsFilterBarVisibleProperty =
@@ -50,14 +55,19 @@ public partial class FilePickerTextBox : UserControl
             o => o.SuggestedStartLocation,
             (o, v) => o.SuggestedStartLocation = v);
 
+    public static readonly StyledProperty<ICommand> TextChangedCommandProperty =
+        AvaloniaProperty.Register<FilePickerTextBox, ICommand>(
+            nameof(TextChangedCommand));
+
     public static readonly StyledProperty<string> TitleProperty =
-        AvaloniaProperty.Register<FilePickerTextBox, string>(nameof(Title));
+            AvaloniaProperty.Register<FilePickerTextBox, string>(nameof(Title));
 
     public static readonly StyledProperty<string> WatermarkProperty =
         TextBox.WatermarkProperty.AddOwner<FilePickerTextBox>();
-
     private string saveFileDefaultExtension = default;
+
     private string saveFileSuggestedFileName = default;
+
     private string suggestedStartLocation = default;
 
     public FilePickerTextBox()
@@ -92,6 +102,11 @@ public partial class FilePickerTextBox : UserControl
         set => SetValue(FileNamesProperty, value);
     }
 
+    public ICommand FileSelectedCommand
+    {
+        get => GetValue(FileSelectedCommandProperty);
+        set => SetValue(FileSelectedCommandProperty, value);
+    }
     public List<FilePickerFileType> FileTypeFilter { get; set; }
 
     public FileFilterRule Filter
@@ -112,7 +127,6 @@ public partial class FilePickerTextBox : UserControl
         set => SetAndRaise(SaveFileDefaultExtensionProperty, ref saveFileDefaultExtension, value);
     }
 
-
     public string SaveFileSuggestedFileName
     {
         get => saveFileSuggestedFileName;
@@ -132,20 +146,24 @@ public partial class FilePickerTextBox : UserControl
         set => SetAndRaise(SuggestedStartLocationProperty, ref suggestedStartLocation, value);
     }
 
+    public ICommand TextChangedCommand
+    {
+        get => GetValue(TextChangedCommandProperty);
+        set => SetValue(TextChangedCommandProperty, value);
+    }
     public string Title
     {
         get => this.GetValue(TitleProperty);
         set => SetValue(TitleProperty, value);
     }
 
+    public PickerType Type { get; set; } = PickerType.OpenFile;
+
     public string Watermark
     {
         get => GetValue(WatermarkProperty);
         set => SetValue(WatermarkProperty, value);
     }
-
-    public PickerType Type { get; set; } = PickerType.OpenFile;
-
     public void DragEnter(object sender, DragEventArgs e)
     {
         if (CanDrop(e))
@@ -209,7 +227,10 @@ public partial class FilePickerTextBox : UserControl
                 if (openFiles != null && openFiles.Count > 0)
                 {
                     FileNames = string.Join(Environment.NewLine, openFiles.Select(p => p.GetPath()));
-                    var a = openFiles[0].TryGetLocalPath();
+                    if (FileSelectedCommand?.CanExecute(FileNames) == true)
+                    {
+                        FileSelectedCommand.Execute(FileNames);
+                    }
                 }
 
                 break;
@@ -223,6 +244,10 @@ public partial class FilePickerTextBox : UserControl
                 if (folders != null && folders.Count > 0)
                 {
                     FileNames = string.Join(Environment.NewLine, folders.Select(p => p.GetPath()));
+                    if (FileSelectedCommand?.CanExecute(FileNames) == true)
+                    {
+                        FileSelectedCommand.Execute(FileNames);
+                    }
                 }
 
                 break;
@@ -239,6 +264,10 @@ public partial class FilePickerTextBox : UserControl
                 if (saveFiles != null)
                 {
                     FileNames = saveFiles.GetPath();
+                    if (FileSelectedCommand?.CanExecute(FileNames) == true)
+                    {
+                        FileSelectedCommand.Execute(FileNames);
+                    }
                 }
 
                 break;
@@ -291,6 +320,14 @@ public partial class FilePickerTextBox : UserControl
         }
 
         return false;
+    }
+
+    private void OnTextChanged(object sender, TextChangedEventArgs e)
+    {
+        if (TextChangedCommand?.CanExecute(FileNames) == true)
+        {
+            TextChangedCommand.Execute(FileNames);
+        }
     }
 
     private async void TestButton_Click(object sender, RoutedEventArgs e)
