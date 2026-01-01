@@ -33,7 +33,7 @@
     <PackageVersion Include="FzLib" Version="$(FzLibVersion)" />
     <PackageVersion Include="Irihi.Ursa" Version="1.6.0" />
     <PackageVersion Include="Irihi.Ursa.Themes.Semi" Version="1.6.0.2" />
-    <PackageVersion Include="Magick.NET-Q16-AnyCPU" Version="14.10.0" />
+    <PackageVersion Include="Magick.NET-Q16-AnyCPU" Version="14.10.1" />
     <PackageVersion Include="MetadataExtractor" Version="2.9.0" />
     <PackageVersion Include="BinToss.GroupBox.Avalonia" Version="1.0.0" />
     <PackageVersion Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.3.10" />

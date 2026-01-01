@@ -462,7 +462,7 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
             }
             else
             {
-                await Services.Dialog.ShowOkDialogAsync("操作已取消", "操作已被用户取消", ex.ToString());
+                //await Services.Dialog.ShowOkDialogAsync("操作已取消", "操作已被用户取消", ex.ToString());
             }
 
             Log.Information(ex, "任务取消");

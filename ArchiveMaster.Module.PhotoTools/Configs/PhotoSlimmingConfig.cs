@@ -126,6 +126,10 @@ namespace ArchiveMaster.Configs
             CheckEmpty(DistDir, "目标目录");
             CheckEmpty(FolderNameTemplate, "文件夹名模板");
             CheckEmpty(FileNameTemplate, "文件名模板");
+            if (CopyDirectlyFilter.IsEnabled == false && CompressFilter.IsEnabled == false)
+            {
+                throw new Exception("欲复制的文件和欲压缩的文件至少选择一项");
+            }
 
             if (!FolderNameTemplate.Contains(PhotoSlimmingConfig.FolderNamePlaceholder))
             {

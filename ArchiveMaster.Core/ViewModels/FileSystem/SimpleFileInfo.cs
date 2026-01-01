@@ -85,7 +85,7 @@ namespace ArchiveMaster.ViewModels.FileSystem
                 s => s.Path.GetHashCode());
 
         [JsonIgnore]
-        public bool Exists => File.Exists(Path);
+        public bool ExistsFile => File.Exists(Path);
 
         [JsonIgnore]
         public string Message => message;

@@ -29,7 +29,7 @@ public class GlobalConfigs
 
     public static GlobalConfigs GetEmptyInstance()
     {
-        string name = "AM回收站";
+        string name = $"{nameof(ArchiveMaster)}回收站";
         var instance = new GlobalConfigs();
         if (OperatingSystem.IsMacOS() || OperatingSystem.IsLinux())
         {
