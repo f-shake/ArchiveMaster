@@ -80,15 +80,17 @@ namespace ArchiveMaster.Services
             return Files;
         }
 
-        public override Task InitializeAsync(CancellationToken ct)
+        public override async Task InitializeAsync(CancellationToken ct)
         {
             Files = new List<SlimmingFilesInfo>();
 
-            return Task.Run(() =>
+            await Task.Run(() =>
             {
                 SearchCopyingAndCompressingFiles(ct);
                 SearchDeletingFiles(ct);
             }, ct);
+
+            Files = Files.OrderBy(p => p.SlimmingTaskType).ToList();
         }
 
 

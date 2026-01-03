@@ -32,12 +32,14 @@
             </DataTemplate>
         </Grid.Resources>
         <ToggleSwitch
+            VerticalAlignment="Center"
             IsChecked="{Binding #root.Filter.IsEnabled}"
             OffContentTemplate="{StaticResource SwitchContent}"
             OnContentTemplate="{StaticResource SwitchContent}" />
         <TextBlock
             x:Name="tbkFilterDescription"
             Grid.Column="2"
+            VerticalAlignment="Center"
             Text="{Binding #root.Filter, Converter={x:Static cvt:Converters.FileFilter}}"
             TextTrimming="CharacterEllipsis">
             <Interaction.Behaviors>
