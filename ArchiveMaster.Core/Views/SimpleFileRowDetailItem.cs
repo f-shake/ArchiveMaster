@@ -1,6 +1,11 @@
-﻿using Avalonia.Data.Converters;
+﻿using Avalonia.Collections;
+using Avalonia.Data.Converters;
 
 namespace ArchiveMaster.Views;
+
+public class SimpleFileRowDetailItemCollection : AvaloniaList<SimpleFileRowDetailItem>
+{
+}
 
 public class SimpleFileRowDetailItem
 {

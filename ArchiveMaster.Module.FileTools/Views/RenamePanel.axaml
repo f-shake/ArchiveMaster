@@ -114,6 +114,13 @@
                 ColumnStatusIndex="1"
                 ColumnTimeIndex="-1"
                 ItemsSource="{Binding Files}">
+                <v:SimpleFileDataGrid.AppendSimpleFileRowDetailItems>
+                    <v:SimpleFileRowDetailItemCollection>
+                        <v:SimpleFileRowDetailItem
+                            BindingPath="NewName"
+                            Label="新文件名：" />
+                    </v:SimpleFileRowDetailItemCollection>
+                </v:SimpleFileDataGrid.AppendSimpleFileRowDetailItems>
                 <DataGrid.Columns>
                     <DataGridTemplateColumn CanUserResize="False">
                         <DataGridTemplateColumn.CellTemplate>
@@ -141,7 +148,7 @@
                     </DataGridTemplateColumn>
                     <DataGridTemplateColumn
                         CanUserResize="False"
-                        Header="为避免重复，已添加后缀">
+                        Header="已处理重名">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock

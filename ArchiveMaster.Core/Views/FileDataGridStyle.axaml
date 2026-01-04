@@ -48,52 +48,6 @@
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
-                    <!--  <Grid  -->
-                    <!--  ColumnDefinitions="Auto,8,*"  -->
-                    <!--  RowDefinitions="Auto,8,Auto,8,Auto,8,Auto">  -->
-                    <!--     <Grid.Styles> -->
-                    <!--         <Style Selector="TextBlock.Title"> -->
-                    <!--             <Setter Property="FontWeight" Value="Bold" /> -->
-                    <!--         </Style> -->
-                    <!--     </Grid.Styles> -->
-                    <!--  <TextBlock  -->
-                    <!--  Classes="Title"  -->
-                    <!--  Text="文件名：" />  -->
-                    <!--  <SelectableTextBlock  -->
-                    <!--  Grid.Column="2"  -->
-                    <!--  Text="{Binding Name}"  -->
-                    <!--  TextWrapping="Wrap" />  -->
-                    <!--    -->
-                    <!--  <TextBlock  -->
-                    <!--  Grid.Row="2"  -->
-                    <!--  Classes="Title"  -->
-                    <!--  Text="绝对路径：" />  -->
-                    <!--  <SelectableTextBlock  -->
-                    <!--  Grid.Row="2"  -->
-                    <!--  Grid.Column="2"  -->
-                    <!--  Text="{Binding Path}"  -->
-                    <!--  TextWrapping="Wrap" />  -->
-                    <!--  <TextBlock  -->
-                    <!--  Grid.Row="4"  -->
-                    <!--  Classes="Title"  -->
-                    <!--  Text="相对路径：" />  -->
-                    <!--  <SelectableTextBlock  -->
-                    <!--  Grid.Row="4"  -->
-                    <!--  Grid.Column="2"  -->
-                    <!--  Text="{Binding RelativePath}"  -->
-                    <!--  TextWrapping="Wrap" />  -->
-                    <!--    -->
-                    <!--  <TextBlock  -->
-                    <!--  Grid.Row="6"  -->
-                    <!--  Classes="Title"  -->
-                    <!--  Text="信息：" />  -->
-                    <!--  <SelectableTextBlock  -->
-                    <!--  Grid.Row="6"  -->
-                    <!--  Grid.Column="2"  -->
-                    <!--  Text="{Binding Message}"  -->
-                    <!--  TextWrapping="Wrap" />  -->
-                    <!--    -->
-                    <!-- </Grid> -->
                 </Border>
             </DataTemplate>
         </Setter>
