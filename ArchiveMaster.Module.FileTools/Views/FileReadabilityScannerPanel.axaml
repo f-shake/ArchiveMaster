@@ -1,0 +1,53 @@
+<v:TwoStepPanelBase
+    x:Class="ArchiveMaster.Views.FileReadabilityScannerPanel"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ct="using:FzLib.Avalonia.Controls"
+    xmlns:cvt="using:ArchiveMaster.Converters"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:v="using:ArchiveMaster.Views"
+    xmlns:vm="clr-namespace:ArchiveMaster.ViewModels"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    x:DataType="vm:FileReadabilityScannerViewModel"
+    mc:Ignorable="d">
+    <v:TwoStepPanelBase.ConfigsContent>
+        <ct:StackFormItemGroup>
+            <ct:FormItem Label="目录：">
+                <v:FilePickerTextBox
+                    FileNames="{Binding Config.Dir}"
+                    Filter="{Binding Config.Filter}"
+                    IsFilterBarVisible="True"
+                    Type="OpenFolder" />
+            </ct:FormItem>
+
+        </ct:StackFormItemGroup>
+    </v:TwoStepPanelBase.ConfigsContent>
+    <v:TwoStepPanelBase.ResultsContent>
+        <v:SimpleFileDataGrid
+            ColumnLengthIndex="4"
+            ColumnPathIndex="5"
+            ColumnTimeIndex="-1"
+            ItemsSource="{Binding Files}">
+            <DataGrid.Columns>
+                <v:DataGridLightColumn
+                    FillBinding="{Binding IsReadable, Converter={x:Static vm:FileReadabilityScannerViewModel.FileReadableBrushConverter}}"
+                    Header="文件可读"
+                    SortMemberPath="IsReadable" />
+                <DataGridTextColumn
+                    Binding="{Binding BitZeroCount}"
+                    Header="比特为0数量"
+                    IsReadOnly="True" />
+                <DataGridTextColumn
+                    Binding="{Binding BitOneCount}"
+                    Header="比特为1数量"
+                    IsReadOnly="True" />
+                <DataGridTextColumn
+                    Binding="{Binding Ratio}"
+                    Header="比特比例"
+                    IsReadOnly="True" />
+            </DataGrid.Columns>
+        </v:SimpleFileDataGrid>
+    </v:TwoStepPanelBase.ResultsContent>
+</v:TwoStepPanelBase>

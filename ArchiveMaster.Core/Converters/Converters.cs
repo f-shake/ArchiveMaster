@@ -94,5 +94,5 @@ public static class Converters
     public static readonly FilePropertyConverter FileName = new()
         { PropertyType = FilePropertyConverter.FilePropertyType.Name };
 
-    // public static readonly  PasswordConverter Password = new();
+    public static StringToBindingConverter StringToBinding = new();
 }

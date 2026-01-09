@@ -12,25 +12,7 @@ namespace ArchiveMaster.Configs
     public partial class OfflineSyncStep2Config : ConfigBase
     {
         [ObservableProperty]
-        private FileFilterRule filter = new FileFilterRule();
-
-        [ObservableProperty]
-        private ExportMode exportMode = ExportMode.Copy;
-
-        [ObservableProperty]
         private bool checkMoveIgnoreFileName = true;
-
-        [ObservableProperty]
-        private string localDir;
-
-        [ObservableProperty]
-        private int maxTimeToleranceSecond = 3;
-
-        [ObservableProperty]
-        private string patchDir;
-
-        [ObservableProperty]
-        private string offsiteSnapshot;
 
         [ObservableProperty]
         private bool enableEncryption;
@@ -39,18 +21,29 @@ namespace ArchiveMaster.Configs
         private SecurePassword encryptionPassword = new();
 
         [ObservableProperty]
+        private ExportMode exportMode = ExportMode.Copy;
+
+        [ObservableProperty]
+        private FileFilterRule filter = new FileFilterRule();
+        [ObservableProperty]
+        private string localDir;
+
+        [ObservableProperty]
         [property: JsonIgnore]
         private ObservableCollection<LocalAndOffsiteDir> matchingDirs;
 
-        partial void OnOffsiteSnapshotChanged(string value)
-        {
-            MatchingDirs = null;
-        }
+        [ObservableProperty]
+        private int maxTimeToleranceSecond = 3;
 
+        [ObservableProperty]
+        private string offsiteSnapshot;
+
+        [ObservableProperty]
+        private string patchDir;
+        
         public override void Check()
         {
             CheckFile(OffsiteSnapshot, "异地快照文件");
-            CheckEmpty(LocalDir, "本地搜索目录");
             if (EnableEncryption && string.IsNullOrWhiteSpace(EncryptionPassword))
             {
                 throw new Exception("已启动备份文件加密，但密码为空");
@@ -60,6 +53,7 @@ namespace ArchiveMaster.Configs
             {
                 throw new Exception("只有导出模式设置为“复制”时，才支持备份文件加密");
             }
+            CheckEmpty(PatchDir, "导出补丁目录");
         }
     }
 }

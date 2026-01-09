@@ -3,6 +3,7 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:c="using:ArchiveMaster.Converters"
+    xmlns:cfz="using:FzLib.Avalonia.Converters"
     xmlns:ctrl="clr-namespace:FzLib.Avalonia.Controls;assembly=FzLib.Avalonia"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -15,26 +16,65 @@
     mc:Ignorable="d">
     <v:TwoStepPanelBase.ConfigsContent>
         <ctrl:StackFormItemGroup>
-            <ctrl:FormItem Label="模板目录：">
-                <v:FilePickerTextBox
-                    FileNames="{Binding Config.SourceDir}"
-                    Type="OpenFolder" />
+            <ctrl:StackFormItemGroup.Resources>
+                <cfz:BoolToStringConverter
+                    x:Key="DescriptionStringConverter"
+                    FalseString="生成一个新的目录，目录中文件与模板一致，但占用空间为0"
+                    TrueString="导出为一个包含文件基本信息的JSON文件" />
+            </ctrl:StackFormItemGroup.Resources>
+            <ctrl:FormItem Label="模板：">
+                <Grid ColumnDefinitions="Auto,8,*">
+                    <ctrl:RadioButtonGroup
+                        VerticalAlignment="Top"
+                        SelectedIndex="{Binding Config.InputStructureFile, Converter={x:Static c:Converters.BoolZeroOne}}">
+                        <ListBoxItem Content="目录" />
+                        <ListBoxItem Content="结构文件" />
+                    </ctrl:RadioButtonGroup>
+                    <v:FilePickerTextBox
+                        Grid.Column="2"
+                        FileNames="{Binding Config.SourceDirOrFile}"
+                        Filter="{Binding Config.Filter}"
+                        IsFilterBarVisible="True"
+                        IsVisible="{Binding !Config.InputStructureFile}"
+                        Type="OpenFolder"
+                        Watermark="选择一个作为模板的目录" />
+                    <v:FilePickerTextBox
+                        Grid.Column="2"
+                        FileNames="{Binding Config.SourceDirOrFile}"
+                        IsVisible="{Binding Config.InputStructureFile}"
+                        StringFileTypeFilter="JSON文件;*.json;application/json;"
+                        Type="OpenFile"
+                        Watermark="选择由本工具导出的结构文件" />
+                </Grid>
             </ctrl:FormItem>
+
             <ctrl:FormItem
-                Description="生成一个新的目录，目录中文件与模板一致，但大小为0"
-                Label="稀疏文件目录导出：">
-                <v:FilePickerTextBox
-                    FileNames="{Binding Config.TargetDir}"
-                    Type="OpenFolder" />
-            </ctrl:FormItem>
-            <ctrl:FormItem
-                Description="导出为一个包含文件基本信息的JSON文件"
-                Label="结构文件导出：">
-                <v:FilePickerTextBox
-                    FileNames="{Binding Config.TargetFile}"
-                    SaveFileSuggestedFileName="目录结构.json"
-                    StringFileTypeFilter="JSON文件;*.json;application/json;"
-                    Type="SaveFile" />
+                Description="{Binding Config.ExportStructureFile, Converter={StaticResource DescriptionStringConverter}}"
+                Label="导出：">
+
+                <Grid ColumnDefinitions="Auto,8,*">
+                    <ctrl:RadioButtonGroup
+                        DockPanel.Dock="Left"
+                        SelectedIndex="{Binding Config.ExportStructureFile, Converter={x:Static c:Converters.BoolZeroOne}}">
+                        <ListBoxItem Content="稀疏文件目录" />
+                        <ListBoxItem Content="结构文件" />
+                    </ctrl:RadioButtonGroup>
+                    <v:FilePickerTextBox
+                        Grid.Column="2"
+                        FileNames="{Binding Config.TargetDirOrFile}"
+                        IsVisible="{Binding !Config.ExportStructureFile}"
+                        Type="OpenFolder" />
+                    <v:FilePickerTextBox
+                        Grid.Column="2"
+                        FileNames="{Binding Config.TargetDirOrFile}"
+                        IsVisible="{Binding Config.ExportStructureFile}"
+                        SaveFileSuggestedFileName="目录结构.json"
+                        StringFileTypeFilter="JSON文件;*.json;application/json;"
+                        Type="SaveFile" />
+                </Grid>
+
+                <!--  Description="生成一个新的目录，目录中文件与模板一致，但大小为0"  -->
+                <!--  Description="导出为一个包含文件基本信息的JSON文件"  -->
             </ctrl:FormItem>
         </ctrl:StackFormItemGroup>
     </v:TwoStepPanelBase.ConfigsContent>

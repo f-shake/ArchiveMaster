@@ -1,59 +1,37 @@
-﻿namespace ArchiveMaster.ViewModels.FileSystem
+﻿using ArchiveMaster.Enums;
+using CommunityToolkit.Mvvm.ComponentModel;
+
+namespace ArchiveMaster.ViewModels.FileSystem
 {
-    public class SlimmingFilesInfo
+    public partial class SlimmingFilesInfo : SimpleFileInfo
     {
-        private List<SimpleFileInfo> processingFiles = new List<SimpleFileInfo>();
+        [ObservableProperty]
+        private SlimmingTaskType slimmingTaskType;
 
-        private IList<string> processingFilesRelativePaths;
+        [ObservableProperty]
+        private SimpleFileInfo distFile;
 
-        private string rootDir;
 
-        private List<SimpleFileInfo> skippedFiles = new List<SimpleFileInfo>();
-
-        public SlimmingFilesInfo(string rootDir)
+        public SlimmingFilesInfo(FileInfo file, string rootDir, SlimmingTaskType slimmingTaskType, SimpleFileInfo distFile)
+            : base(file, rootDir)
         {
-            this.rootDir = rootDir;
-        }
-
-        public IReadOnlyList<SimpleFileInfo> ProcessingFiles => processingFiles.AsReadOnly();
-
-        public long ProcessingFilesLength { get; private set; } = 0;
-
-        public IList<string> ProcessingFilesRelativePaths => processingFilesRelativePaths ??
-                                                             throw new Exception(
-                                                                 $"还未调用{nameof(CreateRelativePathsAsync)}方法");
-
-        public IReadOnlyList<SimpleFileInfo> SkippedFiles => skippedFiles.AsReadOnly();
-
-        public void Add(SimpleFileInfo file)
-        {
-            processingFiles.Add(file);
-            if (!file.IsDir)
+            SlimmingTaskType = slimmingTaskType;
+            DistFile = distFile;
+            if (slimmingTaskType == SlimmingTaskType.Skip)
             {
-                ProcessingFilesLength += file.Length;
+                IsChecked = false;
             }
         }
 
-        public void AddSkipped(SimpleFileInfo file)
+        public SlimmingFilesInfo(SimpleFileInfo file, SlimmingTaskType slimmingTaskType, SimpleFileInfo distFile) :
+            base(file)
         {
-            skippedFiles.Add(file);
-        }
-
-        public void Clear()
-        {
-            processingFiles = null;
-            skippedFiles = null;
-            ProcessingFilesLength = 0;
-        }
-
-        public Task CreateRelativePathsAsync()
-        {
-            return Task.Run(() =>
+            SlimmingTaskType = slimmingTaskType;
+            DistFile = distFile;
+            if (slimmingTaskType == SlimmingTaskType.Skip)
             {
-                processingFilesRelativePaths = processingFiles
-                    .Select(p =>p.RelativePath + (p.IsDir ? Path.DirectorySeparatorChar : ""))
-                    .ToList();
-            });
+                IsChecked = false;
+            }
         }
     }
 }

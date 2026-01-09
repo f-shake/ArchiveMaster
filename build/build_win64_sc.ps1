@@ -1,2 +1,0 @@
-dotnet publish ArchiveMaster.UI.Desktop -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -o ./Publish/win-x64-sc
-mv -Force ./Publish/win-x64-sc/ArchiveMaster.UI.Desktop.exe ./Publish/win-x64-sc/ArchiveMaster.exe

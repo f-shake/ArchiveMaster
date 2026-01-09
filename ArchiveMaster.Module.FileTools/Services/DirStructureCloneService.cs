@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Text.Encodings.Web;
@@ -24,7 +25,14 @@ namespace ArchiveMaster.Services
         {
             await Task.Run(() =>
             {
-                if (!string.IsNullOrWhiteSpace(Config.TargetDir))
+                if (Config.ExportStructureFile)
+                {
+                    NotifyMessage($"正在创建目录结构文件");
+                    NotifyProgressIndeterminate();
+                    var json = RootDir.ToJson();
+                    File.WriteAllText(Config.TargetDirOrFile, json);
+                }
+                else
                 {
                     var flatten = RootDir.Flatten().ToList();
                     TryForFiles(flatten, (file, s) =>
@@ -34,21 +42,9 @@ namespace ArchiveMaster.Services
                         {
                             throw new PlatformNotSupportedException("仅支持Windows系统");
                         }
+
                         CreateSparseFile(file);
                     }, ct, FilesLoopOptions.Builder().AutoApplyFileNumberProgress().AutoApplyStatus().Build());
-                }
-
-                if (!string.IsNullOrWhiteSpace(Config.TargetFile))
-                {
-                    NotifyMessage($"正在创建目录结构文件");
-                    NotifyProgressIndeterminate();
-                    var json = JsonSerializer.Serialize(RootDir, new JsonSerializerOptions()
-                    {
-                        Encoder = JavaScriptEncoder.Create(UnicodeRanges.All),
-                        WriteIndented = true,
-                        MaxDepth = 64,
-                    });
-                    File.WriteAllText(Config.TargetFile, json);
                 }
             }, ct);
         }
@@ -57,13 +53,22 @@ namespace ArchiveMaster.Services
         {
             return RootDir.Flatten();
         }
+
         public override async Task InitializeAsync(CancellationToken ct)
         {
             List<SimpleFileInfo> files = new List<SimpleFileInfo>();
 
             NotifyMessage("正在枚举文件");
             NotifyProgressIndeterminate();
-            RootDir = await TreeDirInfo.BuildTreeAsync(Config.SourceDir, ct);
+            if (Config.InputStructureFile)
+            {
+                var json = await File.ReadAllTextAsync(Config.SourceDirOrFile, ct);
+                RootDir = TreeDirInfo.FromJson(json);
+            }
+            else
+            {
+                RootDir = await TreeDirInfo.BuildTreeAsync(Config.SourceDirOrFile, Config.Filter, ct);
+            }
         }
 
         [DllImport("Kernel32.dll", SetLastError = true, CharSet = CharSet.Auto)]
@@ -101,12 +106,10 @@ namespace ArchiveMaster.Services
         [SupportedOSPlatform("windows")]
         private void CreateSparseFile(SimpleFileInfo file)
         {
-            string newPath = Path.Combine(Config.TargetDir, file.RelativePath);
+            Debug.Assert(OperatingSystem.IsWindows() && !Config.ExportStructureFile);
+            string newPath = Path.Combine(Config.TargetDirOrFile, file.RelativePath);
             FileInfo newFile = new FileInfo(newPath);
-            if (!newFile.Directory.Exists)
-            {
-                newFile.Directory.Create();
-            }
+            newFile.Directory.Create();
 
             using (FileStream fs = File.Create(newPath))
             {

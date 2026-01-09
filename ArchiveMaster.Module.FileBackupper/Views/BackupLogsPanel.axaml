@@ -5,7 +5,7 @@
     xmlns:c="using:ArchiveMaster.Converters"
     xmlns:cvt="using:ArchiveMaster.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:ic="using:FluentIcons.Avalonia.MarkupExtensions"
+    xmlns:ic="using:FluentIcons.Avalonia.Markup"
     xmlns:l="using:Microsoft.Extensions.Logging"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:me="using:FzLib.Avalonia.MarkupExtensions"

@@ -90,101 +90,22 @@
     <v:TwoStepPanelBase.ResultsContent>
         <Grid RowDefinitions="*,8,Auto">
             <v:SimpleFileDataGrid ItemsSource="{Binding Files}">
-                <v:SimpleFileDataGrid.RowDetailsTemplate>
-                    <DataTemplate>
-                        <Border Padding="8">
-                            <Border.Styles>
-                                <Style Selector="TextBox">
-                                    <Setter Property="Background" Value="Transparent" />
-                                    <Setter Property="BorderThickness" Value="0" />
-                                </Style>
-                            </Border.Styles>
-                            <Grid
-                                ColumnDefinitions="Auto,8,*"
-                                RowDefinitions="Auto,8,Auto,8,Auto,8,Auto,8,Auto,8,Auto,8,Auto,8,Auto">
-                                <Grid.Styles>
-                                    <Style Selector="TextBlock.Title">
-                                        <Setter Property="FontWeight" Value="Bold" />
-                                    </Style>
-                                </Grid.Styles>
-                                <TextBlock
-                                    Classes="Title"
-                                    Text="文件名：" />
-                                <SelectableTextBlock
-                                    Grid.Column="2"
-                                    Text="{Binding Name}" />
-
-                                <TextBlock
-                                    Grid.Row="2"
-                                    Classes="Title"
-                                    Text="绝对路径：" />
-                                <SelectableTextBlock
-                                    Grid.Row="2"
-                                    Grid.Column="2"
-                                    Text="{Binding Path}"
-                                    TextWrapping="Wrap" />
-
-                                <TextBlock
-                                    Grid.Row="4"
-                                    Classes="Title"
-                                    Text="相对路径：" />
-                                <SelectableTextBlock
-                                    Grid.Row="4"
-                                    Grid.Column="2"
-                                    Text="{Binding RelativePath}"
-                                    TextWrapping="Wrap" />
-
-                                <TextBlock
-                                    Grid.Row="6"
-                                    Classes="Title"
-                                    Text="命令行：" />
-                                <SelectableTextBlock
-                                    Grid.Row="6"
-                                    Grid.Column="2"
-                                    Text="{Binding CommandLine}"
-                                    TextWrapping="Wrap" />
-
-                                <TextBlock
-                                    Grid.Row="8"
-                                    Classes="Title"
-                                    Text="自动创建目录：" />
-                                <SelectableTextBlock
-                                    Grid.Row="8"
-                                    Grid.Column="2"
-                                    Text="{Binding AutoCreateDir}"
-                                    TextWrapping="Wrap" />
-
-                                <TextBlock
-                                    Grid.Row="10"
-                                    Classes="Title"
-                                    Text="进程输出：" />
-                                <SelectableTextBlock
-                                    Grid.Row="10"
-                                    Grid.Column="2"
-                                    Text="{Binding ProcessOutput}"
-                                    TextWrapping="Wrap" />
-                                <TextBlock
-                                    Grid.Row="12"
-                                    Classes="Title"
-                                    Text="进程错误：" />
-                                <SelectableTextBlock
-                                    Grid.Row="12"
-                                    Grid.Column="2"
-                                    Text="{Binding ProcessError}"
-                                    TextWrapping="Wrap" />
-                                <TextBlock
-                                    Grid.Row="14"
-                                    Classes="Title"
-                                    Text="信息：" />
-                                <SelectableTextBlock
-                                    Grid.Row="14"
-                                    Grid.Column="2"
-                                    Text="{Binding Message}" />
-
-                            </Grid>
-                        </Border>
-                    </DataTemplate>
-                </v:SimpleFileDataGrid.RowDetailsTemplate>
+                <v:SimpleFileDataGrid.AppendSimpleFileRowDetailItems>
+                    <v:SimpleFileRowDetailItemCollection>
+                        <v:SimpleFileRowDetailItem
+                            BindingPath="CommandLine"
+                            Label="命令行：" />
+                        <v:SimpleFileRowDetailItem
+                            BindingPath="AutoCreateDir"
+                            Label="自动创建目录：" />
+                        <v:SimpleFileRowDetailItem
+                            BindingPath="ProcessOutput"
+                            Label="进程输出：" />
+                        <v:SimpleFileRowDetailItem
+                            BindingPath="ProcessError"
+                            Label="进程错误：" />
+                    </v:SimpleFileRowDetailItemCollection>
+                </v:SimpleFileDataGrid.AppendSimpleFileRowDetailItems>
             </v:SimpleFileDataGrid>
             <TextBlock
                 Grid.Row="2"

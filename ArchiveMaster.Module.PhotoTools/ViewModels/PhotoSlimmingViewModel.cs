@@ -1,7 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
-
 using FzLib.Cryptography;
 using Mapster;
 using ArchiveMaster.Configs;
@@ -12,11 +11,14 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading;
 using System.Threading.Tasks;
+using ArchiveMaster.Enums;
 using ArchiveMaster.ViewModels.FileSystem;
 using FzLib.Avalonia.Dialogs;
+using ImageMagick;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ArchiveMaster.ViewModels;
+
 public partial class PhotoSlimmingViewModel(ViewModelServices services)
     : TwoStepViewModelBase<PhotoSlimmingService, PhotoSlimmingConfig>(services)
 {
@@ -24,51 +26,45 @@ public partial class PhotoSlimmingViewModel(ViewModelServices services)
     private bool canCancel;
 
     [ObservableProperty]
-    private SlimmingFilesInfo compressFiles;
+    [NotifyPropertyChangedFor(nameof(DeletingFilesCount),
+        nameof(CopyingFilesCount),
+        nameof(CompressingFilesCount),
+        nameof(SkippingFilesCount),
+        nameof(CopyingFilesLength),
+        nameof(CompressingFilesLength))]
+    private ObservableCollection<SlimmingFilesInfo> files;
 
-    [ObservableProperty]
-    private SlimmingFilesInfo copyFiles;
+    public int DeletingFilesCount => Files?.Count(p => p.SlimmingTaskType == SlimmingTaskType.Delete) ?? 0;
+    public int CopyingFilesCount => Files?.Count(p => p.SlimmingTaskType == SlimmingTaskType.Copy) ?? 0;
+    public int CompressingFilesCount => Files?.Count(p => p.SlimmingTaskType == SlimmingTaskType.Compress) ?? 0;
+    public int SkippingFilesCount => Files?.Count(p => p.SlimmingTaskType == SlimmingTaskType.Skip) ?? 0;
 
-    [ObservableProperty]
-    private SlimmingFilesInfo deleteFiles;
+    public long CopyingFilesLength =>
+        Files?.Where(p => p.SlimmingTaskType == SlimmingTaskType.Copy)?.Select(p => p.Length)?.Sum() ?? 0;
 
-    [ObservableProperty]
-    private ObservableCollection<string> errorMessages;
+    public long CompressingFilesLength =>
+        Files?.Where(p => p.SlimmingTaskType == SlimmingTaskType.Compress)?.Select(p => p.Length)?.Sum() ?? 0;
 
-    protected override Task OnExecutedAsync(CancellationToken ct)
+    public List<MagickFormat> SupportedImageFormats { get; } = MagickNET.SupportedFormats
+        .Where(p => p.SupportsReading)
+        .Where(p => p.SupportsWriting)
+        .Select(p => p.Format)
+        .ToList();
+
+    protected override Task OnInitializedAsync()
     {
-        ErrorMessages = new ObservableCollection<string>(Service.ErrorMessages);
-        return base.OnExecutedAsync(ct);
+        Files = new ObservableCollection<SlimmingFilesInfo>(Service.Files);
+        return base.OnInitializedAsync();
     }
 
-    protected override async Task OnInitializedAsync()
-    {
-        Progress = -1;
-        Message = "正在生成统计信息";
-        Progress = Double.NaN;
-        await Service.CopyFiles.CreateRelativePathsAsync();
-        await Service.CompressFiles.CreateRelativePathsAsync();
-        await Service.DeleteFiles.CreateRelativePathsAsync();
-        CopyFiles = Service.CopyFiles;
-        CompressFiles = Service.CompressFiles;
-        DeleteFiles = Service.DeleteFiles;
-        ErrorMessages = new ObservableCollection<string>(Service.ErrorMessages);
-    }
-
-    protected override Task OnInitializingAsync()
-    {
-        if (Config == null)
-        {
-            throw new ArgumentException("请先选择配置");
-        }
-
-        return base.OnInitializingAsync();
-    }
     protected override void OnReset()
     {
-        CopyFiles = null;
-        CompressFiles = null;
-        DeleteFiles = null;
-        ErrorMessages = null;
+        Files = null;
+    }
+
+    [RelayCommand]
+    private void SelectCompressFormat(MagickFormat format)
+    {
+        Config.CompressImageFormat = format;
     }
 }

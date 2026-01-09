@@ -25,6 +25,10 @@ public partial class TextRewriterConfig : ConfigBase
     [ObservableProperty]
     private ExpressionOptimizationType expressionOptimizationType;
 
+    [NotifyPropertyChangedFor(nameof(CurrentMode))]
+    [ObservableProperty]
+    private TextCorrectionType textCorrectionType;
+
     [property: JsonIgnore]
     [ObservableProperty]
     private string extraAiPrompt;
@@ -79,6 +83,7 @@ public partial class TextRewriterConfig : ConfigBase
             TextGenerationCategory.StructuralAdjustment => StructuralAdjustmentType,
             TextGenerationCategory.ContentTransformation => ContentTransformationType,
             TextGenerationCategory.TextEvaluation => TextEvaluationType,
+            TextGenerationCategory.TextCorrection => TextCorrectionType,
             TextGenerationCategory.Custom => CustomType,
             _ => throw new ArgumentOutOfRangeException()
         };
@@ -92,6 +97,7 @@ public partial class TextRewriterConfig : ConfigBase
             or nameof(ExpressionOptimizationType)
             or nameof(StructuralAdjustmentType)
             or nameof(ContentTransformationType)
+            or nameof(TextCorrectionType)
             or nameof(TextEvaluationType))
         {
             ModeChanged?.Invoke(this, EventArgs.Empty);

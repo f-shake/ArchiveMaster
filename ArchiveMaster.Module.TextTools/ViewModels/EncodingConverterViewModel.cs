@@ -27,10 +27,13 @@ public partial class EncodingConverterViewModel(ViewModelServices services)
     private ObservableCollection<EncodingFilesGroup> groups;
 
     public List<string> EncodingNames { get; } = Encoding.GetEncodings().Select(p => p.Name).ToList();
+
     protected override Task OnInitializedAsync()
     {
         Files = new ObservableCollection<EncodingFileInfo>(Service.Files);
-        var groups = Files.GroupBy(p => p.Encoding.Encoding)
+        var groups = Files
+            .Where(p => p.Encoding != null)
+            .GroupBy(p => p.Encoding.Encoding)
             .Select(p => new EncodingFilesGroup(p.Key, p));
         Groups = new ObservableCollection<EncodingFilesGroup>(groups);
         return base.OnInitializedAsync();

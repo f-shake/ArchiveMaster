@@ -1,0 +1,67 @@
+<UserControl
+    x:Class="ArchiveMaster.Views.FileFilterBar"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:cvt="clr-namespace:ArchiveMaster.Converters"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:v="clr-namespace:ArchiveMaster.Views"
+    xmlns:views="clr-namespace:ArchiveMaster.Views"
+    x:Name="root"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    DragDrop.AllowDrop="True"
+    mc:Ignorable="d">
+
+    <Grid ColumnDefinitions="Auto,8,*">
+        <Grid.Resources>
+            <DataTemplate x:Key="SwitchContent">
+                <Button
+                    VerticalAlignment="Center"
+                    Classes="Link">
+                    <ContentPresenter Content="{Binding #root.OpenPanelButtonContent}" />
+                    <Button.Flyout>
+                        <v:PopupFlyout
+                            Closed="FileFilterPopup_Closed"
+                            OverlayDismissEventPassThrough="True">
+                            <v:FileFilterPanel Filter="{Binding #root.Filter}" />
+                        </v:PopupFlyout>
+                    </Button.Flyout>
+
+                </Button>
+            </DataTemplate>
+        </Grid.Resources>
+        <ToggleSwitch
+            VerticalAlignment="Center"
+            IsChecked="{Binding #root.Filter.IsEnabled}"
+            OffContentTemplate="{StaticResource SwitchContent}"
+            OnContentTemplate="{StaticResource SwitchContent}" />
+        <TextBlock
+            x:Name="tbkFilterDescription"
+            Grid.Column="2"
+            VerticalAlignment="Center"
+            Text="{Binding #root.Filter, Converter={x:Static cvt:Converters.FileFilter}}"
+            TextTrimming="CharacterEllipsis">
+            <Interaction.Behaviors>
+                <DataTrigger
+                    Binding="{Binding #root.Filter.IsEnabled}"
+                    Value="False">
+                    <DataTrigger.Actions>
+                        <ChangePropertyAction
+                            PropertyName="Opacity"
+                            Value="0.5" />
+                    </DataTrigger.Actions>
+                </DataTrigger>
+                <DataTrigger
+                    Binding="{Binding #root.Filter.IsEnabled}"
+                    Value="True">
+                    <DataTrigger.Actions>
+                        <ChangePropertyAction
+                            PropertyName="Opacity"
+                            Value="1.0" />
+                    </DataTrigger.Actions>
+                </DataTrigger>
+            </Interaction.Behaviors>
+        </TextBlock>
+    </Grid>
+</UserControl>

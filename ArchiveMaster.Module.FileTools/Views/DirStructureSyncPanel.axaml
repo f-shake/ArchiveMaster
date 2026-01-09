@@ -22,90 +22,77 @@
             x:DataType="fileSystem:MatchingFileInfo">
             <Grid
                 Margin="8"
-                ColumnDefinitions="*,16,*">
-                <Grid
-                    ColumnDefinitions="Auto,16,Auto"
-                    RowDefinitions="Auto,8,Auto,8,Auto,8,Auto,8,Auto">
-
-                    <TextBlock
-                        Grid.ColumnSpan="999"
-                        FontWeight="Bold"
-                        Text="模板文件信息" />
-
-                    <TextBlock
-                        Grid.Row="2"
-                        Text="文件名" />
-                    <SelectableTextBlock
-                        Grid.Row="2"
-                        Grid.Column="2"
-                        Text="{Binding Template.Name}" />
-
-                    <TextBlock
-                        Grid.Row="4"
-                        Text="相对路径" />
-                    <SelectableTextBlock
-                        Grid.Row="4"
-                        Grid.Column="2"
-                        Text="{Binding Template.Path}" />
-
-                    <TextBlock
-                        Grid.Row="6"
-                        Text="文件大小" />
-                    <SelectableTextBlock
-                        Grid.Row="6"
-                        Grid.Column="2"
-                        Text="{Binding Template.Length, Converter={x:Static cvt:Converters.FileLength}}" />
-
-                    <TextBlock
-                        Grid.Row="8"
-                        Text="修改时间" />
-                    <SelectableTextBlock
-                        Grid.Row="8"
-                        Grid.Column="2"
-                        Text="{Binding Template.Time, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}" />
-                </Grid>
-                <Grid
+                ColumnDefinitions="*,16,*"
+                RowDefinitions="Auto,8,Auto,8,Auto,8,Auto,8,Auto">
+                <Grid.Styles>
+                    <Style Selector="SelectableTextBlock">
+                        <Setter Property="TextWrapping" Value="Wrap" />
+                    </Style>
+                    <Style Selector="ctrl|FormItem">
+                        <Setter Property="LabelWidth" Value="72" />
+                        <Setter Property="LabelTemplate">
+                            <Setter.Value>
+                                <DataTemplate>
+                                    <TextBlock
+                                        FontWeight="Bold"
+                                        Text="{Binding .}" />
+                                </DataTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </Grid.Styles>
+                <TextBlock
+                    FontWeight="Bold"
+                    Text="模板文件信息" />
+                <TextBlock
                     Grid.Column="2"
-                    ColumnDefinitions="Auto,16,Auto"
-                    RowDefinitions="Auto,8,Auto,8,Auto,8,Auto,8,Auto">
+                    FontWeight="Bold"
+                    Text="源文件信息" />
+                <ctrl:FormItem
+                    Grid.Row="2"
+                    Label="文件名：">
+                    <SelectableTextBlock Text="{Binding Template.Name}" />
+                </ctrl:FormItem>
+                <ctrl:FormItem
+                    Grid.Row="4"
+                    Label="相对路径：">
+                    <SelectableTextBlock Text="{Binding Template.Path}" />
+                </ctrl:FormItem>
+                <ctrl:FormItem
+                    Grid.Row="6"
+                    Label="文件大小：">
+                    <SelectableTextBlock Text="{Binding Template.Length, Converter={x:Static cvt:Converters.FileLength}}" />
+                </ctrl:FormItem>
+                <ctrl:FormItem
+                    Grid.Row="8"
+                    Label="修改时间：">
+                    <SelectableTextBlock Text="{Binding Template.Time, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}" />
+                </ctrl:FormItem>
 
-                    <TextBlock
-                        Grid.ColumnSpan="999"
-                        FontWeight="Bold"
-                        Text="源文件信息" />
-
-                    <TextBlock
-                        Grid.Row="2"
-                        Text="文件名" />
-                    <SelectableTextBlock
-                        Grid.Row="2"
-                        Grid.Column="2"
-                        Text="{Binding Name}" />
-
-                    <TextBlock
-                        Grid.Row="4"
-                        Text="相对路径" />
-                    <SelectableTextBlock
-                        Grid.Row="4"
-                        Grid.Column="2"
-                        Text="{Binding Path}" />
-
-                    <TextBlock
-                        Grid.Row="6"
-                        Text="文件大小" />
-                    <SelectableTextBlock
-                        Grid.Row="6"
-                        Grid.Column="2"
-                        Text="{Binding Length, Mode=OneWay, Converter={x:Static c:Converters.FileLength}}" />
-
-                    <TextBlock
-                        Grid.Row="8"
-                        Text="修改时间" />
-                    <SelectableTextBlock
-                        Grid.Row="8"
-                        Grid.Column="2"
-                        Text="{Binding Time, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}" />
-                </Grid>
+                <ctrl:FormItem
+                    Grid.Row="2"
+                    Grid.Column="2"
+                    Label="文件名：">
+                    <SelectableTextBlock Text="{Binding Name}" />
+                </ctrl:FormItem>
+                <ctrl:FormItem
+                    Grid.Row="4"
+                    Grid.Column="2"
+                    Label="相对路径：">
+                    <SelectableTextBlock Text="{Binding Path}" />
+                </ctrl:FormItem>
+                <ctrl:FormItem
+                    Grid.Row="6"
+                    Grid.Column="2"
+                    Label="文件大小：">
+                    <SelectableTextBlock Text="{Binding Length, Converter={x:Static cvt:Converters.FileLength}}" />
+                </ctrl:FormItem>
+                <ctrl:FormItem
+                    Grid.Row="8"
+                    Grid.Column="2"
+                    Label="修改时间：">
+                    <SelectableTextBlock Text="{Binding Time, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}" />
+                </ctrl:FormItem>
             </Grid>
         </DataTemplate>
     </v:TwoStepPanelBase.Resources>

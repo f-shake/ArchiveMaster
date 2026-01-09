@@ -5,10 +5,14 @@
     xmlns:ct="using:FzLib.Avalonia.Controls"
     xmlns:cvt="using:ArchiveMaster.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:enums="clr-namespace:ArchiveMaster.Enums"
     xmlns:gb="using:GroupBox.Avalonia.Controls"
+    xmlns:im="using:ImageMagick"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:sys="clr-namespace:System;assembly=System.Runtime"
     xmlns:v="using:ArchiveMaster.Views"
     xmlns:vm="clr-namespace:ArchiveMaster.ViewModels"
+    x:Name="root"
     d:DesignHeight="450"
     d:DesignWidth="800"
     x:DataType="vm:PhotoSlimmingViewModel"
@@ -19,9 +23,17 @@
                 <ct:FormItem Label="源目录：">
                     <v:FilePickerTextBox
                         FileNames="{Binding Config.SourceDir}"
-                        Filter="{Binding Config.Filter}"
-                        IsFilterBarVisible="True"
                         Type="OpenFolder" />
+                </ct:FormItem>
+                <ct:FormItem Label=" ">
+                    <StackPanel Spacing="-4">
+                        <v:FileFilterBar
+                            Filter="{Binding Config.CopyDirectlyFilter}"
+                            OpenPanelButtonContent="选择需要复制的文件" />
+                        <v:FileFilterBar
+                            Filter="{Binding Config.CompressFilter}"
+                            OpenPanelButtonContent="选择需要压缩的文件" />
+                    </StackPanel>
                 </ct:FormItem>
                 <ct:FormItem Label="目标目录：">
                     <v:FilePickerTextBox
@@ -60,23 +72,6 @@
                             IsChecked="{Binding Config.SkipIfExist}" />
                     </ct:WrapFormItemGroup>
                 </ct:FormItem>
-                <ct:FormItem Label="压缩和复制：">
-                    <ct:WrapFormItemGroup>
-                        <ct:FormItem Header="复制后缀名">
-                            <ct:StringListEditor
-                                MaxWidth="400"
-                                HorizontalAlignment="Center"
-                                ItemsSource="{Binding Config.CopyDirectlyExtensions}" />
-                        </ct:FormItem>
-
-                        <ct:FormItem Header="压缩后缀名">
-                            <ct:StringListEditor
-                                MaxWidth="400"
-                                HorizontalAlignment="Center"
-                                ItemsSource="{Binding Config.CompressExtensions}" />
-                        </ct:FormItem>
-                    </ct:WrapFormItemGroup>
-                </ct:FormItem>
                 <ct:FormItem Label="图像压缩：">
                     <ct:WrapFormItemGroup>
                         <ct:FormItem Header="最大长边像素">
@@ -95,30 +90,72 @@
                                 Minimum="10"
                                 Value="{Binding Config.MaxShortSize}" />
                         </ct:FormItem>
-                        <ct:FormItem Header="压缩后类型">
-                            <TextBox
-                                Width="120"
-                                Text="{Binding Config.OutputFormat}" />
+                        <ct:FormItem Header="{Binding .}">
+                            <ct:FormItem.HeaderTemplate>
+                                <DataTemplate>
+                                    <StackPanel
+                                        Orientation="Horizontal"
+                                        Spacing="8">
+                                        <TextBlock Text="输出格式" />
+                                        <Button
+                                            Padding="0"
+                                            Classes="Link"
+                                            Content="..">
+                                            <Button.Flyout>
+                                                <MenuFlyout>
+                                                    <MenuItem
+                                                        Command="{Binding #root.DataContext.SelectCompressFormatCommand}"
+                                                        CommandParameter="{x:Static im:MagickFormat.Jpg}"
+                                                        Cursor="Arrow"
+                                                        Header="{x:Static im:MagickFormat.Jpg}" />
+                                                    <MenuItem
+                                                        Command="{Binding #root.DataContext.SelectCompressFormatCommand}"
+                                                        CommandParameter="{x:Static im:MagickFormat.WebP}"
+                                                        Cursor="Arrow"
+                                                        Header="{x:Static im:MagickFormat.WebP}" />
+                                                    <MenuItem
+                                                        Command="{Binding #root.DataContext.SelectCompressFormatCommand}"
+                                                        CommandParameter="{x:Static im:MagickFormat.Avif}"
+                                                        Cursor="Arrow"
+                                                        Header="{x:Static im:MagickFormat.Avif}" />
+                                                    <MenuItem
+                                                        Command="{Binding #root.DataContext.SelectCompressFormatCommand}"
+                                                        CommandParameter="{x:Static im:MagickFormat.Jxl}"
+                                                        Cursor="Arrow"
+                                                        Header="{x:Static im:MagickFormat.Jxl}" />
+                                                </MenuFlyout>
+
+                                            </Button.Flyout>
+                                        </Button>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ct:FormItem.HeaderTemplate>
+                            <AutoCompleteBox
+                                Width="96"
+                                ItemsSource="{Binding SupportedImageFormats}"
+                                SelectedItem="{Binding Config.CompressImageFormat}" />
+
                         </ct:FormItem>
                         <ct:FormItem
                             Header="图像质量（%）"
                             IsVisible="{Binding}">
-                            <NumericUpDown
-                                Width="120"
-                                FormatString="0"
-                                Increment="10"
+                            <Slider
+                                Width="96"
+                                Classes="ThumbLabel"
+                                IsSnapToTickEnabled="True"
                                 Maximum="100"
                                 Minimum="10"
-                                Watermark="10%—100%"
+                                TickFrequency="10"
                                 Value="{Binding Config.Quality}" />
                         </ct:FormItem>
                         <ct:FormItem Header="处理线程数">
-                            <NumericUpDown
-                                Width="120"
-                                FormatString="0"
-                                Increment="1"
-                                Maximum="16"
+                            <Slider
+                                Width="96"
+                                Classes="ThumbLabel"
+                                IsSnapToTickEnabled="True"
+                                Maximum="8"
                                 Minimum="1"
+                                TickFrequency="1"
                                 Value="{Binding Config.Thread}" />
                         </ct:FormItem>
                     </ct:WrapFormItemGroup>
@@ -130,83 +167,83 @@
 
     </v:TwoStepPanelBase.ConfigsContent>
     <v:TwoStepPanelBase.ResultsContent>
-        <Grid
-            Grid.Row="6"
-            ColumnDefinitions="*,8,*,8,*,8,*">
-            <Grid.Styles>
-                <Style Selector="ListBox">
-                    <Setter Property="ItemTemplate">
-                        <Setter.Value>
-                            <DataTemplate>
-                                <TextBlock
-                                    Text="{Binding .}"
-                                    TextWrapping="Wrap" />
-                            </DataTemplate>
-                        </Setter.Value>
-                    </Setter>
-                </Style>
-            </Grid.Styles>
-            <gb:GroupBox Header="待复制">
-                <Grid RowDefinitions="*,8,Auto">
-                    <ListBox ItemsSource="{Binding CopyFiles.ProcessingFilesRelativePaths}" />
-                    <TextBlock
-                        Grid.Row="2"
-                        IsVisible="{Binding CopyFiles, Converter={x:Static cvt:Converters.IsNotNull}}">
-                        <Run Text="共" />
-                        <Run Text="{Binding CopyFiles.ProcessingFiles.Count}" />
-                        <Run Text="个文件，跳过" />
-                        <Run Text="{Binding CopyFiles.SkippedFiles.Count}" />
-                        <Run Text="个文件" />
-                    </TextBlock>
-                </Grid>
-            </gb:GroupBox>
-            <gb:GroupBox
-                Grid.Column="2"
-                Header="待压缩">
-                <Grid RowDefinitions="*,8,Auto">
-                    <ListBox ItemsSource="{Binding CompressFiles.ProcessingFilesRelativePaths}" />
-                    <TextBlock
-                        Grid.Row="2"
-                        IsVisible="{Binding CompressFiles, Converter={x:Static cvt:Converters.IsNotNull}}">
-                        <Run Text="共" />
-                        <Run Text="{Binding CompressFiles.ProcessingFiles.Count}" />
-                        <Run Text="个文件，跳过" />
-                        <Run Text="{Binding CompressFiles.SkippedFiles.Count}" />
-                        <Run Text="个文件" />
-                    </TextBlock>
-                </Grid>
-            </gb:GroupBox>
-            <gb:GroupBox
-                Grid.Column="4"
-                Header="待删除">
-                <Grid RowDefinitions="*,8,Auto">
-                    <ListBox ItemsSource="{Binding DeleteFiles.ProcessingFilesRelativePaths}" />
-                    <TextBlock
-                        Grid.Row="2"
-                        IsVisible="{Binding DeleteFiles, Converter={x:Static cvt:Converters.IsNotNull}}">
-                        <Run Text="共" />
-                        <Run Text="{Binding DeleteFiles.ProcessingFiles.Count}" />
-                        <Run Text="个文件，跳过" />
-                        <Run Text="{Binding DeleteFiles.SkippedFiles.Count}" />
-                        <Run Text="个文件" />
-                    </TextBlock>
-                </Grid>
-            </gb:GroupBox>
-            <gb:GroupBox
-                Grid.Column="6"
-                Header="错误信息">
-                <Grid RowDefinitions="*,8,Auto">
-                    <ListBox ItemsSource="{Binding ErrorMessages}" />
-                    <TextBlock
-                        Grid.Row="2"
-                        IsVisible="{Binding ErrorMessages, Converter={x:Static cvt:Converters.IsNotNull}}">
-                        <Run Text="共" />
-                        <Run Text="{Binding ErrorMessages.Count}" />
-                        <Run Text="条信息" />
-                    </TextBlock>
-                </Grid>
-            </gb:GroupBox>
+        <v:SimpleFileDataGrid
+            ColumnLengthIndex="5"
+            ColumnNameIndex="1.5"
+            ColumnPathIndex="4"
+            ColumnTimeIndex="6"
+            ItemsSource="{Binding Files}"
+            ShowCount="False">
+            <DataGrid.Columns>
+                <DataGridTemplateColumn
+                    CanUserResize="False"
+                    Header="类型"
+                    SortMemberPath="SlimmingTaskType">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock
+                                Margin="16,0"
+                                VerticalAlignment="Center"
+                                Text="{Binding SlimmingTaskType, Converter={x:Static cvt:Converters.Description}}">
+                                <Interaction.Behaviors>
+                                    <DataTriggerBehavior
+                                        Binding="{Binding SlimmingTaskType}"
+                                        Value="{x:Static enums:SlimmingTaskType.Copy}">
+                                        <ChangePropertyAction
+                                            PropertyName="Foreground"
+                                            Value="Green" />
+                                    </DataTriggerBehavior>
+                                    <DataTriggerBehavior
+                                        Binding="{Binding SlimmingTaskType}"
+                                        Value="{x:Static enums:SlimmingTaskType.Delete}">
+                                        <ChangePropertyAction
+                                            PropertyName="Foreground"
+                                            Value="Red" />
+                                    </DataTriggerBehavior>
+                                    <DataTriggerBehavior
+                                        Binding="{Binding SlimmingTaskType}"
+                                        Value="{x:Static enums:SlimmingTaskType.Compress}">
+                                        <ChangePropertyAction
+                                            PropertyName="Foreground"
+                                            Value="Orange" />
+                                    </DataTriggerBehavior>
+                                    <DataTriggerBehavior
+                                        Binding="{Binding SlimmingTaskType}"
+                                        Value="{x:Static enums:SlimmingTaskType.Skip}">
+                                        <ChangePropertyAction
+                                            PropertyName="Foreground"
+                                            Value="Gray" />
+                                    </DataTriggerBehavior>
+                                </Interaction.Behaviors>
+                            </TextBlock>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTextColumn
+                    Binding="{Binding DistFile.RelativePath}"
+                    Header="目标文件位置"
+                    IsReadOnly="True" />
+            </DataGrid.Columns>
 
-        </Grid>
+            <v:SimpleFileDataGrid.Footer>
+                <TextBlock
+                    Margin="8,0"
+                    VerticalAlignment="Center">
+                    <Run Text="共复制文件" />
+                    <Run Text="{Binding CopyingFilesCount, Mode=OneWay}" />
+                    <Run Text="个（" />
+                    <Run Text="{Binding CopyingFilesLength, Mode=OneWay, Converter={x:Static cvt:Converters.FileLength}}" />
+                    <Run Text="），压缩文件" />
+                    <Run Text="{Binding CompressingFilesCount, Mode=OneWay}" />
+                    <Run Text="个（" />
+                    <Run Text="{Binding CompressingFilesLength, Mode=OneWay, Converter={x:Static cvt:Converters.FileLength}}" />
+                    <Run Text="），删除文件" />
+                    <Run Text="{Binding DeletingFilesCount, Mode=OneWay}" />
+                    <Run Text="个，跳过文件" />
+                    <Run Text="{Binding SkippingFilesCount, Mode=OneWay}" />
+                    <Run Text="个" />
+                </TextBlock>
+            </v:SimpleFileDataGrid.Footer>
+        </v:SimpleFileDataGrid>
     </v:TwoStepPanelBase.ResultsContent>
 </v:TwoStepPanelBase>

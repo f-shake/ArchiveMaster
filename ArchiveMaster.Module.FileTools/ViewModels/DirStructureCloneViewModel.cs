@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Threading.Tasks;
 using ArchiveMaster.Configs;
 using ArchiveMaster.Services;
@@ -9,8 +10,7 @@ using FzLib.Avalonia.Dialogs;
 
 namespace ArchiveMaster.ViewModels;
 
-public partial class
-    DirStructureCloneViewModel(ViewModelServices services)
+public partial class DirStructureCloneViewModel(ViewModelServices services)
     : TwoStepViewModelBase<DirStructureCloneService, DirStructureCloneConfig>(services)
 {
     [ObservableProperty]
@@ -37,5 +37,30 @@ public partial class
     protected override void OnReset()
     {
         TreeFiles = null;
+    }
+
+    protected override void OnCurrentConfigChanged(DirStructureCloneConfig oldConfig, DirStructureCloneConfig newConfig)
+    {
+        if (oldConfig != null)
+        {
+            oldConfig.PropertyChanged -= ConfigOnPropertyChanged;
+        }
+
+        if (newConfig != null)
+        {
+            newConfig.PropertyChanged += ConfigOnPropertyChanged;
+        }
+
+        void ConfigOnPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(DirStructureCloneConfig.InputStructureFile))
+            {
+                (sender as DirStructureCloneConfig).SourceDirOrFile = null;
+            }
+            else if (e.PropertyName == nameof(DirStructureCloneConfig.ExportStructureFile))
+            {
+                (sender as DirStructureCloneConfig).TargetDirOrFile = null;
+            }
+        }
     }
 }

@@ -29,6 +29,7 @@ namespace ArchiveMaster
             new ConfigMetadata(typeof(BatchCommandLineConfig)),
             new ConfigMetadata(typeof(LinkDeduplicationConfig)),
             new ConfigMetadata(typeof(FileFilterOperationConfig)),
+            new ConfigMetadata(typeof(FileReadabilityScannerConfig)),
         ];
 
         public string ModuleName => "文件目录工具";
@@ -51,6 +52,7 @@ namespace ArchiveMaster
             typeof(BatchCommandLineService),
             typeof(LinkDeduplicationService),
             typeof(FileFilterOperationService),
+            typeof(FileReadabilityScannerService),
         ];
 
         public ToolPanelGroupInfo Views => new ToolPanelGroupInfo()
@@ -78,6 +80,8 @@ namespace ArchiveMaster
                     "通过硬链接替换重复文件，节省磁盘空间", baseUrl + "link.svg"),
                 new ToolPanelInfo(typeof(FileFilterOperationPanel), typeof(FileFilterOperationViewModel), "文件筛选操作",
                     "对筛选后的文件进行复制、移动、删除操作", baseUrl + "filter.svg"),
+                new ToolPanelInfo(typeof(FileReadabilityScannerPanel), typeof(FileReadabilityScannerViewModel), "文件可读性检测",
+                    "检查文件是否可以完整读取，并提供二进制比特的分布", baseUrl + "read.svg"),
 
             },
             GroupName = ModuleName,
