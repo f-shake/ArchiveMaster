@@ -2,14 +2,9 @@
     x:Class="ArchiveMaster.Views.DuplicateFileCleanupPanel"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:c="using:ArchiveMaster.Converters"
-    xmlns:cr="clr-namespace:System.Security.Cryptography;assembly=mscorlib"
     xmlns:ct="clr-namespace:FzLib.Avalonia.Controls;assembly=FzLib.Avalonia"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:enums="using:ArchiveMaster.Enums"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:me="using:FzLib.Avalonia.MarkupExtensions"
-    xmlns:sys="clr-namespace:System;assembly=mscorlib"
     xmlns:v="using:ArchiveMaster.Views"
     xmlns:vm="using:ArchiveMaster.ViewModels"
     d:DesignHeight="600"
@@ -21,21 +16,16 @@
             <ct:FormItem Label="待清理目录：">
                 <v:FilePickerTextBox
                     FileNames="{Binding Config.CleaningDir}"
-                    Type="OpenFolder" />
+                    Type="OpenFolder"
+                    Watermark="要清理重复文件的目录（这里的文件可能会被删除）" />
             </ct:FormItem>
             <ct:FormItem
                 Description="若待清理目录下的某文件，在参考目录下也找到了相同的文件，则将删除待清理目录下的该文件。"
                 Label="参考目录：">
                 <v:FilePickerTextBox
                     FileNames="{Binding Config.ReferenceDir}"
-                    Type="OpenFolder" />
-            </ct:FormItem>
-            <ct:FormItem
-                Description="为了防止误删，文件将被移动到指定位置，需要手动进行删除。"
-                Label="删除文件位置：">
-                <v:FilePickerTextBox
-                    FileNames="{Binding Config.RecycleBin}"
-                    Type="OpenFolder" />
+                    Type="OpenFolder"
+                    Watermark="用于判断是否重复的参考目录（不会删除文件）" />
             </ct:FormItem>
 
             <ct:FormItem Label="匹配条件：">
@@ -62,6 +52,9 @@
                     <DataGridTextColumn
                         Binding="{Binding RelativePath}"
                         Header="相对路径" />
+                    <DataGridTextColumn
+                        Binding="{Binding Path}"
+                        Header="绝对路径" />
                 </v:TreeFileDataGrid.Columns>
             </v:TreeFileDataGrid>
         </Grid>
