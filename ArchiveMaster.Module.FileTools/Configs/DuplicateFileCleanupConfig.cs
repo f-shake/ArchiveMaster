@@ -22,13 +22,9 @@ public partial class DuplicateFileCleanupConfig : ConfigBase
     [ObservableProperty]
     private int timeToleranceSecond;
 
-    [ObservableProperty]
-    private string recycleBin;
-
     public override void Check()
     {
         CheckDir(CleaningDir, "待清理目录");
         CheckDir(ReferenceDir, "参考目录");
-        CheckDir(RecycleBin, "删除文件位置");
     }
 }

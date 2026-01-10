@@ -39,28 +39,13 @@ namespace ArchiveMaster.Services
                     }
                 }
 
-                NotifyMessage("正在将文件移动到回收站");
-                int index = 0;
-                foreach (var group in DuplicateGroups.SubDirs)
+                NotifyMessage("正在删除文件");
+                var files = DuplicateGroups.SubDirs.SelectMany(p => p.SubFiles.CheckedOnly()).ToList();
+                TryForFiles(files, (file, s) =>
                 {
-                    NotifyMessage($"正在删除与“{group.Name}”相同的文件");
-                    foreach (var file in group.SubFiles.CheckedOnly())
-                    {
-                        try
-                        {
-                            var distPath = Path.Combine(Config.RecycleBin, file.RelativePath);
-                            Directory.CreateDirectory(Path.GetDirectoryName(distPath));
-                            File.Move(file.Path, distPath);
-                            file.Success();
-                        }
-                        catch (Exception ex)
-                        {
-                            file.Error(ex);
-                        }
-                    }
-
-                    NotifyProgress(1.0 * index++ / DuplicateGroups.SubFolderCount);
-                }
+                    NotifyMessage($"正在删除文件{s.GetFileNumberMessage()}：{file.RelativePath}");
+                    FileHelper.DeleteByConfig(file.Path, "重复文件清理");
+                }, ct, FilesLoopOptions.Builder().AutoApplyFileNumberProgress().AutoApplyStatus().Build());
             }, ct);
         }
 
