@@ -184,7 +184,7 @@ public class App : Application
             }
             else //关了窗口，重新开一个新的
             {
-                if (!isMainWindowOpened)
+                if (!isMainWindowOpened && Initializer.IsInitialized)
                 {
                     SetNewMainWindow(desktop).Show();
                 }

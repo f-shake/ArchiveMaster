@@ -42,6 +42,7 @@ public static class Initializer
     private static bool stopped = false;
     private static List<ToolPanelGroupInfo> views = new List<ToolPanelGroupInfo>();
     public static IHost AppHost { get; private set; }
+    public static bool IsInitialized { get; private set; }
 
 #if !DYNAMIC_DLL
     public static IModuleInfo[] ModuleInitializers { get; } =
@@ -83,7 +84,7 @@ public static class Initializer
 
     public static void Initialize()
     {
-        if (AppHost != null)
+        if (IsInitialized)
         {
             throw new InvalidOperationException("已经初始化");
         }
@@ -112,6 +113,7 @@ public static class Initializer
         AppHost = builder.Build();
         HostServices.Initialize(AppHost.Services);
         AppHost.Start();
+        IsInitialized = true;
     }
 
     public static Task StopAsync()
@@ -193,6 +195,7 @@ public static class Initializer
                     Log.Warning("模块{ModuleInitializerModuleName}没有定义视图", moduleInitializer.ModuleName);
                     throw new Exception($"模块{moduleInitializer.ModuleName}没有定义视图");
                 }
+
                 //注册视图和视图模型
                 foreach (var panel in views.Panels ?? [])
                 {
@@ -222,7 +225,7 @@ public static class Initializer
                         {
                             Log.Error(ex, "打开帮助URL失败");
                         }
-                    });                    
+                    });
 
                     views.MenuItems.Add(new ModuleMenuItemInfo("在线帮助", command));
                 }
