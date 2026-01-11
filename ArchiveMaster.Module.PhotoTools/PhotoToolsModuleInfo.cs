@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using ArchiveMaster.Models;
 using ArchiveMaster.Services;
@@ -25,6 +26,8 @@ namespace ArchiveMaster
             new ConfigMetadata(typeof(PhotoGeoTaggingConfig)),
             new ConfigMetadata(typeof(PhotoGeoSorterConfig)),
         ];
+
+        public IList<JsonConverter> JsonConverters { get; }
 
         public string ModuleName => "照片工具";
         public string ModuleDescription => "解决根据照片元数据分类或更新照片元数据的需求";

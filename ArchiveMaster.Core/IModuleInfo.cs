@@ -1,4 +1,5 @@
-﻿using ArchiveMaster.Configs;
+﻿using System.Text.Json.Serialization;
+using ArchiveMaster.Configs;
 using ArchiveMaster.Models;
 using ArchiveMaster.ViewModels;
 using Avalonia;
@@ -11,6 +12,7 @@ namespace ArchiveMaster
     {
         public IList<Type> BackgroundServices { get; }
         public IList<ConfigMetadata> Configs { get; }
+        public IList<JsonConverter> JsonConverters { get; }
         public string ModuleName { get; }
         public string ModuleDescription { get; }
         public string HelpFileName { get; }

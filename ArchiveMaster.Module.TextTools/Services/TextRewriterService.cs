@@ -1,6 +1,7 @@
 ﻿using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json.Nodes;
+using ArchiveMaster.AiAgents;
 using ArchiveMaster.Attributes;
 using ArchiveMaster.Configs;
 using ArchiveMaster.Enums;
@@ -20,10 +21,17 @@ public class TextRewriterService(AppConfig appConfig)
 {
     public const int MaxRefLength = 10_000;
 
+    public AiAgentBase AiAgent { get; set; }
+
     public event GenericEventHandler<LlmOutputItem> TextGenerated;
 
     public override async Task ExecuteAsync(CancellationToken ct = default)
     {
+        if (AiAgent == null)
+        {
+            throw new InvalidOperationException("请设置AI智能体");
+        }
+
         StringBuilder str = new StringBuilder();
 
         await Task.Run(async () =>
@@ -35,7 +43,7 @@ public class TextRewriterService(AppConfig appConfig)
 
             NotifyMessage("正在调用AI进行处理");
 
-            var prompt = await GetSystemPromptAsync(Config.Category, ct);
+            var prompt = await GetSystemPromptAsync(ct);
             var ai = new LlmCallerService(AI);
             await foreach (var output in ai.CallStreamAsync(prompt, text, ct: ct))
             {
@@ -54,40 +62,17 @@ public class TextRewriterService(AppConfig appConfig)
         throw new NotImplementedException();
     }
 
-    private async Task<string> GetSystemPromptAsync(TextGenerationCategory type, CancellationToken ct)
+    private async Task<string> GetSystemPromptAsync(CancellationToken ct)
     {
         var prompt = new StringBuilder();
         prompt.AppendLine("你是一个文本处理机器人。");
-        (var attr, var e) = Config.GetCurrentAgent();
+        prompt.AppendLine(await AiAgent.BuildSystemPromptAsync(ct));
 
-        var tempPrompt = attr.SystemPrompt;
-
-        //处理参考文本（如仿写中的参考文本）
-        if (attr.NeedReferenceText)
-        {
-            string referenceText = (await Config.ReferenceSource.GetPlainTextAsync(TextSourceReadUnit.Combined, ct)
-                .FirstOrDefaultAsync()).Text;
-            CheckTextSource(referenceText, MaxRefLength, "参考文本");
-            tempPrompt = tempPrompt.Replace(AiAgentAttribute.ReferenceTextPlaceholder, referenceText);
-        }
-
-        //处理额外信息（如翻译中的目标语言）
-        if (attr.NeedExtraInformation)
-        {
-            if (string.IsNullOrWhiteSpace(Config.ExtraInformation))
-            {
-                throw new ArgumentNullException(nameof(Config.ExtraInformation), $"请指定{attr.ExtraInformationLabel}");
-            }
-
-            tempPrompt = tempPrompt.Replace(AiAgentAttribute.ExtraInformationPlaceholder, Config.ExtraInformation);
-        }
-
-        prompt.AppendLine(tempPrompt);
 
         //处理额外提示
-        if (type != TextGenerationCategory.Custom && !string.IsNullOrWhiteSpace(Config.ExtraAiPrompt))
+        if (AiAgent.CanUserSetExtraPrompt && !string.IsNullOrWhiteSpace(AiAgent.ExtraPrompt))
         {
-            prompt.AppendLine($"用户的额外要求：{Config.ExtraAiPrompt}");
+            prompt.AppendLine($"额外要求：{AiAgent.ExtraPrompt}");
         }
 
         //增加其他要求

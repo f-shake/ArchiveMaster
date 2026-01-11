@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using ArchiveMaster.Models;
 using ArchiveMaster.Services;
@@ -31,6 +32,8 @@ namespace ArchiveMaster
             new ConfigMetadata(typeof(FileFilterOperationConfig)),
             new ConfigMetadata(typeof(FileReadabilityScannerConfig)),
         ];
+
+        public IList<JsonConverter> JsonConverters { get; }
 
         public string ModuleName => "文件目录工具";
         public string ModuleDescription => "解决对文件和目录进行批量操作的需求";

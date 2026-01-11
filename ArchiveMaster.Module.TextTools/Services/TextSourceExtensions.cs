@@ -18,90 +18,97 @@ namespace ArchiveMaster.Services;
 
 public static class TextSourceExtensions
 {
-    public static async IAsyncEnumerable<DocFilePart> GetPlainTextAsync(this TextSource source,
-        TextSourceReadUnit readUnit = TextSourceReadUnit.PerFile,
-        [EnumeratorCancellation]
-        CancellationToken ct = default)
+    extension(TextSource source)
     {
-        ArgumentNullException.ThrowIfNull(source);
-
-        StringBuilder combined = new StringBuilder();
-        if (source.FromFile)
+        public async Task<string> GetCombinedPlainTextAsync(CancellationToken ct = default)
         {
-            foreach (var file in source.Files)
+            return (await source.GetPlainTextAsync(TextSourceReadUnit.Combined, ct).FirstOrDefaultAsync()).Text;
+        }
+
+        public async IAsyncEnumerable<DocFilePart> GetPlainTextAsync(TextSourceReadUnit readUnit = TextSourceReadUnit.PerFile,
+            [EnumeratorCancellation]
+            CancellationToken ct = default)
+        {
+            ArgumentNullException.ThrowIfNull(source);
+
+            StringBuilder combined = new StringBuilder();
+            if (source.FromFile)
             {
-                ct.ThrowIfCancellationRequested();
-
-                if (file.File == null || !File.Exists(file.File))
+                foreach (var file in source.Files)
                 {
-                    throw new FileNotFoundException(file.File);
+                    ct.ThrowIfCancellationRequested();
+
+                    if (file.File == null || !File.Exists(file.File))
+                    {
+                        throw new FileNotFoundException(file.File);
+                    }
+
+                    switch (new FileInfo(file.File).Length)
+                    {
+                        case <= 0:
+                            throw new InvalidOperationException($"文件{file.File}的大小为0");
+                        case > 1024 * 1024 * 1024:
+                            throw new InvalidOperationException($"文件{file.File}的大小超过1GB");
+                    }
+
+                    bool perParagraph = readUnit == TextSourceReadUnit.PerParagraph;
+                    var lines = Path.GetExtension(file.File) switch
+                    {
+                        ".docx" => file.ReadDocxAsync(perParagraph, ct),
+                        ".xlsx" => file.ReadXlsxAsync(perParagraph, ct),
+                        // ".doc" => file.ReadDocAsync(ct: ct),
+                        ".md" => file.ReadMarkdownAsync(perParagraph, ct),
+                        ".pdf" => file.ReadPdfAsync(perParagraph, ct),
+                        _ => file.ReadTxtAsync(perParagraph, ct)
+                    };
+
+                    switch (readUnit)
+                    {
+                        case TextSourceReadUnit.PerFile:
+                        case TextSourceReadUnit.PerParagraph:
+                        {
+                            await foreach (var line in lines.WithCancellation(ct))
+                            {
+                                yield return new DocFilePart(file.File, line);
+                            }
+
+                            break;
+                        }
+                        case TextSourceReadUnit.Combined:
+                        {
+                            combined.AppendLine(await lines.FirstAsync());
+
+                            break;
+                        }
+
+                        default:
+                            throw new ArgumentOutOfRangeException(nameof(readUnit), readUnit, null);
+                    }
                 }
 
-                switch (new FileInfo(file.File).Length)
+                if (readUnit == TextSourceReadUnit.Combined)
                 {
-                    case <= 0:
-                        throw new InvalidOperationException($"文件{file.File}的大小为0");
-                    case > 1024 * 1024 * 1024:
-                        throw new InvalidOperationException($"文件{file.File}的大小超过1GB");
+                    yield return new DocFilePart(null, combined.ToString());
                 }
-
-                bool perParagraph = readUnit == TextSourceReadUnit.PerParagraph;
-                var lines = Path.GetExtension(file.File) switch
-                {
-                    ".docx" => file.ReadDocxAsync(perParagraph, ct),
-                    ".xlsx" => file.ReadXlsxAsync(perParagraph, ct),
-                    // ".doc" => file.ReadDocAsync(ct: ct),
-                    ".md" => file.ReadMarkdownAsync(perParagraph, ct),
-                    ".pdf" => file.ReadPdfAsync(perParagraph, ct),
-                    _ => file.ReadTxtAsync(perParagraph, ct)
-                };
-
+            }
+            else
+            {
                 switch (readUnit)
                 {
                     case TextSourceReadUnit.PerFile:
+                    case TextSourceReadUnit.Combined:
+                        yield return new DocFilePart(null, source.Text);
+                        break;
                     case TextSourceReadUnit.PerParagraph:
-                    {
-                        await foreach (var line in lines.WithCancellation(ct))
+                        foreach (var line in source.Text.SplitLines())
                         {
-                            yield return new DocFilePart(file.File, line);
+                            yield return new DocFilePart(null, line);
                         }
 
                         break;
-                    }
-                    case TextSourceReadUnit.Combined:
-                    {
-                        combined.AppendLine(await lines.FirstAsync());
-
-                        break;
-                    }
-
                     default:
                         throw new ArgumentOutOfRangeException(nameof(readUnit), readUnit, null);
                 }
-            }
-
-            if (readUnit == TextSourceReadUnit.Combined)
-            {
-                yield return new DocFilePart(null, combined.ToString());
-            }
-        }
-        else
-        {
-            switch (readUnit)
-            {
-                case TextSourceReadUnit.PerFile:
-                case TextSourceReadUnit.Combined:
-                    yield return new DocFilePart(null, source.Text);
-                    break;
-                case TextSourceReadUnit.PerParagraph:
-                    foreach (var line in source.Text.SplitLines())
-                    {
-                        yield return new DocFilePart(null, line);
-                    }
-
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(readUnit), readUnit, null);
             }
         }
     }
@@ -153,7 +160,7 @@ public static class TextSourceExtensions
             {
                 foreach (var row in table.Elements<TableRow>())
                 {
-                    string rowText = string.Join('\t', row.Elements<TableCell>().Select(p=>p.InnerText));
+                    string rowText = string.Join('\t', row.Elements<TableCell>().Select(p => p.InnerText));
                     if (perParagraph)
                     {
                         yield return rowText;

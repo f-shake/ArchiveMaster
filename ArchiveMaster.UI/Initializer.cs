@@ -196,6 +196,12 @@ public static class Initializer
                     throw new Exception($"模块{moduleInitializer.ModuleName}没有定义视图");
                 }
 
+                //注册JsonConverter
+                foreach (var converter in moduleInitializer.JsonConverters ?? [])
+                {
+                    AppConfig.AddJsonConverter(converter);
+                }
+
                 //注册视图和视图模型
                 foreach (var panel in views.Panels ?? [])
                 {

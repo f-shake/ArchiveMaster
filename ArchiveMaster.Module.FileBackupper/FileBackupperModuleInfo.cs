@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using ArchiveMaster.Models;
 using ArchiveMaster.Services;
@@ -23,6 +24,8 @@ namespace ArchiveMaster
         [
             new ConfigMetadata(typeof(FileBackupperConfig)),
         ];
+
+        public IList<JsonConverter> JsonConverters { get; }
 
         public string ModuleName => "实时备份服务";
         public string ModuleDescription => "解决定时备份目录文件到其他物理磁盘，实现文件历史版本控制的需求";

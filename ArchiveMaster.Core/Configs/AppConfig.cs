@@ -8,6 +8,7 @@ using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Text.Json.Serialization;
 using System.Text.Unicode;
 using System.Threading.Tasks;
 using ArchiveMaster.Models;
@@ -157,6 +158,11 @@ namespace ArchiveMaster.Configs
             return presets.AsReadOnly();
         }
 
+        public static void AddJsonConverter(JsonConverter converter)
+        {
+            JsonOptions.Converters.Add(converter);
+        }
+
         public void Initialize()
         {
             try
@@ -245,6 +251,7 @@ namespace ArchiveMaster.Configs
 
             File.Copy(bakConfigPath, ConfigPath + NextStartLoadConfigExtension, true);
         }
+
         public void RegisterConfig(ConfigMetadata config)
         {
             ArgumentNullException.ThrowIfNull(config);
@@ -315,6 +322,7 @@ namespace ArchiveMaster.Configs
                 Log.Logger.Error(ex, "后台保存配置失败");
             }
         }
+
         public void SetCurrentPreset(string groupName, string preset)
         {
             ArgumentException.ThrowIfNullOrEmpty(groupName);
