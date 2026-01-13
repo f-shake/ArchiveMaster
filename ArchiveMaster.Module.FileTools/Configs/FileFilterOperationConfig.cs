@@ -17,18 +17,30 @@ namespace ArchiveMaster.Configs
         private FileFilterOperationType type = FileFilterOperationType.Copy;
 
         [ObservableProperty]
-        private FileFilterRule filter = new FileFilterRule();
+        private FileFilterRule pathFilter = new FileFilterRule();
 
         [ObservableProperty]
-        private FileFilterOperationTargetFileNameMode targetFileNameMode = FileFilterOperationTargetFileNameMode.PreserveDirectoryStructure;
+        private DateTime? earliestTime = null;
 
         [ObservableProperty]
-        private HashAlgorithmType hashType=HashAlgorithmType.SHA256;
+        private DateTime? latestTime =null;
+
+        [ObservableProperty]
+        private long? minLength = null;
+
+        [ObservableProperty]
+        private long? maxLength = null;
+
+        [ObservableProperty]
+        private FileFilterOperationTargetFileNameMode targetFileNameMode =
+            FileFilterOperationTargetFileNameMode.PreserveDirectoryStructure;
+
+        [ObservableProperty]
+        private HashAlgorithmType hashType = HashAlgorithmType.SHA256;
 
         public override void Check()
         {
             CheckEmpty(SourceDirs, "源程序");
-            CheckEmpty(Filter, "筛选器");
             if (Type is FileFilterOperationType.Copy or FileFilterOperationType.Move)
             {
                 CheckEmpty(TargetDir, "目标目录");

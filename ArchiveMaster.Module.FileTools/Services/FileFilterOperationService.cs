@@ -95,7 +95,11 @@ namespace ArchiveMaster.Services
                     NotifyMessage($"正在搜索目录{sourceDir}下的文件");
                     var tempFiles = new DirectoryInfo(sourceDir)
                         .EnumerateFiles("*", FileEnumerateExtension.GetEnumerationOptions())
-                        .ApplyFilter(ct, Config.Filter)
+                        .ApplyFilter(ct, Config.PathFilter)
+                        .Where(p => (!Config.EarliestTime.HasValue || p.LastWriteTime >= Config.EarliestTime.Value)
+                                    && (!Config.LatestTime.HasValue || p.LastWriteTime <= Config.LatestTime.Value)
+                                    && (!Config.MinLength.HasValue || p.Length >= Config.MinLength.Value)
+                                    && (!Config.MaxLength.HasValue || p.Length <= Config.MaxLength.Value))
                         .Select(p => GetTargetFile(sourceDir, p));
                     files.AddRange(tempFiles);
                 }
