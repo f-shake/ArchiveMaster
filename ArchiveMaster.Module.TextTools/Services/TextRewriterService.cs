@@ -23,6 +23,8 @@ public class TextRewriterService(AppConfig appConfig)
 
     public AiAgentBase AiAgent { get; set; }
 
+    public string Result { get;private set; }
+    
     public event GenericEventHandler<LlmOutputItem> TextGenerated;
 
     public override async Task ExecuteAsync(CancellationToken ct = default)
@@ -45,10 +47,13 @@ public class TextRewriterService(AppConfig appConfig)
 
             var prompt = await GetSystemPromptAsync(ct);
             var ai = new LlmCallerService(AI);
+            StringBuilder result = new StringBuilder();
             await foreach (var output in ai.CallStreamAsync(prompt, text, ct: ct))
             {
                 TextGenerated?.Invoke(this, new GenericEventArgs<LlmOutputItem>(output));
+                result.Append(output);
             }
+            Result = result.ToString();
         }, ct);
     }
 
@@ -77,7 +82,8 @@ public class TextRewriterService(AppConfig appConfig)
 
         //增加其他要求
         prompt.AppendLine("要求输出的时候，仅输出结果，不要输出其他内容。");
-        prompt.AppendLine("输出格式上，要完全符合用户输入的语段，不要添加额外的内容，绝对不要输出MarkDown格式（用户输入Markdown除外）。");
+        prompt.AppendLine("输出格式上，要完全符合用户输入的语段，不要添加额外的内容。" +
+                          "若有必要输出MarkDown，只能包含标题、粗体、斜体三种样式，不要输出表格。");
         return prompt.ToString();
     }
 }

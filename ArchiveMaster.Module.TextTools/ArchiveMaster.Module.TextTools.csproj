@@ -42,6 +42,10 @@
       <DependentUpon>SettingDialog.axaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Views\AiChatPanel.axaml.cs">
+      <DependentUpon>AiChatPanel.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>

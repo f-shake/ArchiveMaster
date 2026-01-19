@@ -11,7 +11,9 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using ArchiveMaster.AiAgents;
+using ArchiveMaster.Enums;
 using ArchiveMaster.ViewModels.FileSystem;
+using Avalonia.Collections;
 using FzLib.Avalonia.Dialogs;
 using Serilog;
 
@@ -21,7 +23,7 @@ public partial class TextRewriterViewModel(ViewModelServices services)
     : AiTwoStepViewModelBase<TextRewriterService, TextRewriterConfig>(services)
 {
     [ObservableProperty]
-    private string result = "";
+    private AiConversation aiConversation;
 
     protected override void OnConfigChanged()
     {
@@ -29,33 +31,17 @@ public partial class TextRewriterViewModel(ViewModelServices services)
         InitializeAiAgents();
     }
 
-    private static string GetAiAgentGroupDescription(string groupName)
-    {
-        return groupName switch
+    private static readonly Dictionary<string, (string Description, int Order)>
+        AiAgentGroupMap = new()
         {
-            nameof(ArchiveMaster.AiAgents.ContentTransformation) => "内容转换",
-            nameof(ArchiveMaster.AiAgents.ExpressionOptimization) => "表达优化",
-            nameof(ArchiveMaster.AiAgents.StructuralAdjustment) => "结构调整",
-            nameof(ArchiveMaster.AiAgents.TextCorrection) => "文本纠错",
-            nameof(ArchiveMaster.AiAgents.TextEvaluation) => "文本评价",
-            nameof(ArchiveMaster.AiAgents.Custom) => "自定义",
-            _ => throw new ArgumentOutOfRangeException()
+            [nameof(AiAgents.ContentTransformation)] = ("内容转换", 3),
+            [nameof(AiAgents.ExpressionOptimization)] = ("表达优化", 1),
+            [nameof(AiAgents.StructuralAdjustment)] = ("结构调整", 2),
+            [nameof(AiAgents.TextCorrection)] = ("文本纠错", 5),
+            [nameof(AiAgents.TextEvaluation)] = ("文本评价", 4),
+            [nameof(AiAgents.Custom)] = ("自定义", 6),
         };
-    }
 
-    private static int GetAiAgentGroupOrder(string groupName)
-    {
-        return groupName switch
-        {
-            nameof(ArchiveMaster.AiAgents.ContentTransformation) => 3,
-            nameof(ArchiveMaster.AiAgents.ExpressionOptimization) => 1,
-            nameof(ArchiveMaster.AiAgents.StructuralAdjustment) => 2,
-            nameof(ArchiveMaster.AiAgents.TextCorrection) => 5,
-            nameof(ArchiveMaster.AiAgents.TextEvaluation) => 4,
-            nameof(ArchiveMaster.AiAgents.Custom) => 6,
-            _ => throw new ArgumentOutOfRangeException()
-        };
-    }
 
     private void InitializeAiAgents()
     {
@@ -71,9 +57,9 @@ public partial class TextRewriterViewModel(ViewModelServices services)
             .ToList();
         var groups = aiAgentTypes.GroupBy(t => t.Namespace.Split('.')[^1]);
 
-        foreach (var group in groups.OrderBy(g => GetAiAgentGroupOrder(g.Key)))
+        foreach (var group in groups.OrderBy(g => AiAgentGroupMap[g.Key].Order))
         {
-            var aiAgentGroup = new AiAgentGroup(group.Key, GetAiAgentGroupDescription(group.Key));
+            var aiAgentGroup = new AiAgentGroup(group.Key, AiAgentGroupMap[group.Key].Description);
             foreach (var type in group)
             {
                 if (configType2AiAgent.TryGetValue(type, out var agent))
@@ -107,20 +93,26 @@ public partial class TextRewriterViewModel(ViewModelServices services)
 
     protected override Task OnExecutedAsync(CancellationToken ct)
     {
-        Result = LlmCallerService.RemoveThink(Result);
+        // Result = LlmCallerService.RemoveThink(Result);
+        var result = LlmCallerService.RemoveThink(Service.Result);
+        var inlines=SimpleMarkdownParser.ParseSimpleMarkdown(result);
+        AiConversation.Messages[0] = new AiChatMessage(AiChatMessageSender.System)
+            { Inlines = new AvaloniaList<InlineItem>(inlines) };
         return base.OnExecutedAsync(ct);
     }
 
     protected override Task OnExecutingAsync(CancellationToken ct)
     {
         Service.AiAgent = SelectedAiAgent;
-        Result = "";
-        Service.TextGenerated += (sender, e) => Result += e.Value;
+        AiConversation = new AiConversation();
+        AiConversation.Messages.Add(new AiChatMessage(AiChatMessageSender.System));
+
+        Service.TextGenerated += (sender, e) => AiConversation.Messages[0].AddInline(e.Value);
         return base.OnExecutingAsync(ct);
     }
 
     protected override void OnReset()
     {
-        Result = "";
+        AiConversation = null;
     }
 }

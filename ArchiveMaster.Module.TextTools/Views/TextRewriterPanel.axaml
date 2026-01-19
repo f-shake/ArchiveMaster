@@ -43,36 +43,10 @@
                     SelectedItem="{Binding SelectedAiAgent}" />
             </ct:FormItem>
 
-
-            <!-- <ct:FormItem Label="自定义："> -->
-            <!--  <UniformGrid  -->
-            <!--  ColumnSpacing="8"  -->
-            <!--  Rows="1">  -->
-            <!--  <ct:FormItem  -->
-            <!--  Header="额外提示词"  -->
-            <!--  IsVisible="{Binding Config.Category, Converter={x:Static cvt:Converters.NotEqualWithParameter}, ConverterParameter=Custom}">  -->
-            <!--             <TextBox Text="{Binding Config.ExtraAiPrompt}" /> -->
-            <!--         </ct:FormItem> -->
-            <!--    -->
-            <!--  <ct:FormItem  -->
-            <!--  Header="{Binding Config.CurrentMode, Converter={StaticResource AiAgentConverter}, ConverterParameter=ExtraInformationLabel}"  -->
-            <!--  IsVisible="{Binding Config.CurrentMode, Converter={StaticResource AiAgentConverter}, ConverterParameter=NeedExtraInformation}">  -->
-            <!--             <TextBox Text="{Binding Config.ExtraInformation}" /> -->
-            <!--         </ct:FormItem> -->
-            <!--  <ct:FormItem  -->
-            <!--  Header="参考文本源"  -->
-            <!--  IsVisible="{Binding Config.CurrentMode, Converter={StaticResource AiAgentConverter}, ConverterParameter=NeedReferenceText}">  -->
-            <!--             <v:TextSourceInput Source="{Binding Config.ReferenceSource}" /> -->
-            <!--         </ct:FormItem> -->
-            <!--     </UniformGrid> -->
-            <!-- </ct:FormItem> -->
-
         </ct:StackFormItemGroup>
     </v:TwoStepPanelBase.ConfigsContent>
 
     <v:TwoStepPanelBase.ResultsContent>
-        <v:ResultTextBox
-            Message="{Binding AI.Name, StringFormat='{}AI服务提供商：{0}'}"
-            Result="{Binding Result}" />
+        <v:AiChatPanel Conversation="{Binding AiConversation}" />
     </v:TwoStepPanelBase.ResultsContent>
 </v:TwoStepPanelBase>
