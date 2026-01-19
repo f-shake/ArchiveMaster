@@ -27,6 +27,16 @@ namespace ArchiveMaster.Views
         public static readonly StyledProperty<object> StopButtonContentProperty
             = AvaloniaProperty.Register<TwoStepPanelBase, object>(nameof(StopButtonContent), "取消");
 
+        public static readonly StyledProperty<bool> ShowBottomBarProperty =
+            AvaloniaProperty.Register<TwoStepPanelBase, bool>(
+                nameof(ShowBottomBar), true);
+
+        public bool ShowBottomBar
+        {
+            get => GetValue(ShowBottomBarProperty);
+            set => SetValue(ShowBottomBarProperty, value);
+        }
+
         private Grid bottomOneLine;
 
         private Grid bottomTwoLine;
@@ -34,7 +44,7 @@ namespace ArchiveMaster.Views
         private ScrollViewer configScrViewer;
 
         private Grid container;
-        
+
         public object ConfigsContent
         {
             get => GetValue(ConfigsContentProperty);
@@ -118,7 +128,6 @@ namespace ArchiveMaster.Views
             {
                 bottomTwoLine.IsVisible = !(bottomOneLine.IsVisible = Bounds.Width > 500);
             }
-            
         }
     }
 }

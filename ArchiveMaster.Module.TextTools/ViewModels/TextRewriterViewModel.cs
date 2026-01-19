@@ -20,7 +20,7 @@ using Serilog;
 namespace ArchiveMaster.ViewModels;
 
 public partial class TextRewriterViewModel(ViewModelServices services)
-    : AiTwoStepViewModelBase<TextRewriterService, TextRewriterConfig>(services)
+    : AiViewModelBase<TextRewriterConfig>(services)
 {
     [ObservableProperty]
     private AiConversation aiConversation;
@@ -87,21 +87,15 @@ public partial class TextRewriterViewModel(ViewModelServices services)
     [ObservableProperty]
     private AiAgentGroup selectedAiAgentGroup;
 
-    public override bool EnableInitialize => false;
-
-    public override bool EnableRepeatExecute => true;
-
-
-    protected override Task OnExecutingAsync(CancellationToken ct)
+    [RelayCommand(IncludeCancelCommand = true)]
+    private async Task RunAsync(CancellationToken ct)
     {
-        Service.AiAgent = SelectedAiAgent;
+        var service = HostServices.GetRequiredService<TextRewriterService>();
+        service.Config = Config;
+        service.AiAgent = SelectedAiAgent;
         AiConversation = new AiConversation();
-        Service.BindConversation(AiConversation);
-        return base.OnExecutingAsync(ct);
-    }
+        service.BindConversation(AiConversation);
 
-    protected override void OnReset()
-    {
-        AiConversation = null;
+        await service.ExecuteAsync(ct);
     }
 }

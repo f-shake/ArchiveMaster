@@ -17,14 +17,14 @@ using Microsoft.Extensions.AI;
 namespace ArchiveMaster.Services;
 
 public class TextRewriterService(AppConfig appConfig)
-    : AiTwoStepServiceBase<TextRewriterConfig>(appConfig)
+    : AiServiceBase<TextRewriterConfig>(appConfig)
 {
     public const int MaxRefLength = 10_000;
 
     public AiAgentBase AiAgent { get; set; }
 
 
-    public override async Task ExecuteAsync(CancellationToken ct = default)
+    public async Task ExecuteAsync(CancellationToken ct = default)
     {
         if (AiAgent == null)
         {
@@ -46,16 +46,7 @@ public class TextRewriterService(AppConfig appConfig)
             AiResult = await this.CallAiWithStreamAsync(prompt, text, null, true, ct);
         }, ct);
     }
-
-    public override IEnumerable<SimpleFileInfo> GetInitializedFiles()
-    {
-        return null;
-    }
-
-    public override Task InitializeAsync(CancellationToken ct = default)
-    {
-        throw new NotImplementedException();
-    }
+    
 
     private async Task<string> GetSystemPromptAsync(CancellationToken ct)
     {

@@ -2,12 +2,11 @@
 using ArchiveMaster.Events;
 using ArchiveMaster.Models;
 using ArchiveMaster.ViewModels;
-using Avalonia.Media;
 
 namespace ArchiveMaster.Services;
 
-public abstract class AiTwoStepServiceBase<TConfig>(AppConfig appConfig)
-    : TwoStepServiceBase<TConfig>(appConfig), IAiService
+public abstract class AiServiceBase<TConfig>(AppConfig appConfig)
+    : ServiceBase<TConfig>(appConfig), IAiService
     where TConfig : ConfigBase
 {
     public const int MaxLength = 300_000;
