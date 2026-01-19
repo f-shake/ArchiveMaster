@@ -116,7 +116,7 @@ namespace ArchiveMaster.Services
                 prompt.AppendLine(item.Context);
             }
 
-            return await CallAiWithStreamAsync(sys, prompt.ToString(), null,true, ct);
+            return await this.CallAiWithStreamAsync(sys, prompt.ToString(), null, true, ct);
         }
 
         private async Task<List<TextSearchResult>> GetSearchResultAsync(CancellationToken ct)

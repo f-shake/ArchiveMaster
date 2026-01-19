@@ -23,7 +23,6 @@ public class TextRewriterService(AppConfig appConfig)
 
     public AiAgentBase AiAgent { get; set; }
 
-    public string Result { get; private set; }
 
     public override async Task ExecuteAsync(CancellationToken ct = default)
     {
@@ -39,12 +38,12 @@ public class TextRewriterService(AppConfig appConfig)
             NotifyMessage("正在读取文本源");
             string text = (await Config.Source.GetPlainTextAsync(TextSourceReadUnit.Combined, ct)
                 .FirstOrDefaultAsync()).Text;
-            CheckTextSource(text, MaxLength, "文本源");
+            this.CheckTextSource(text, MaxLength, "文本源");
 
             NotifyMessage("正在调用AI进行处理");
 
             var prompt = await GetSystemPromptAsync(ct);
-            Result = await CallAiWithStreamAsync(prompt, text, null, true, ct);
+            AiResult = await this.CallAiWithStreamAsync(prompt, text, null, true, ct);
         }, ct);
     }
 

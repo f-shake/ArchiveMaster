@@ -12,35 +12,49 @@
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
+    <ScrollViewer>
+        <ItemsControl ItemsSource="{Binding $parent[UserControl].Conversation.Messages}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Panel>
+                        <!--  用户  -->
+                        <Border
+                            Margin="64,8,8,8"
+                            Padding="16,8"
+                            HorizontalAlignment="Right"
+                            Background="{DynamicResource AccentB2}"
+                            CornerRadius="8"
+                            IsVisible="{Binding Sender, Converter={x:Static cvt:Converters.EqualWithParameter}, ConverterParameter=User}">
+                            <SelectableTextBlock
+                                b:TextBlockInlinesBehavior.ItemsSource="{Binding Inlines}"
+                                TextWrapping="Wrap" />
+                        </Border>
 
-    <ItemsControl ItemsSource="{Binding $parent[UserControl].Conversation.Messages}">
-        <ItemsControl.ItemTemplate>
-            <DataTemplate>
-                <Panel>
-                    <!--  用户  -->
-                    <Border
-                        Background="{DynamicResource Background2}"
-                        IsVisible="{Binding Sender, Converter={x:Static cvt:Converters.EqualWithParameter}, ConverterParameter=User}">
-                        <SelectableTextBlock
-                            b:TextBlockInlinesBehavior.ItemsSource="{Binding Inlines}"
-                            TextWrapping="Wrap" />
-                    </Border>
+                        <!--  系统  -->
+                        <Border
+                            Margin="64,8,8,8"
+                            Padding="16,8"
+                            HorizontalAlignment="Right"
+                            Background="{DynamicResource Background2}"
+                            CornerRadius="8"
+                            IsVisible="{Binding Sender, Converter={x:Static cvt:Converters.EqualWithParameter}, ConverterParameter=System}">
+                            <SelectableTextBlock
+                                b:TextBlockInlinesBehavior.ItemsSource="{Binding Inlines}"
+                                Opacity="0.75"
+                                TextWrapping="Wrap" />
+                        </Border>
 
-                    <!--  系统  -->
-                    <Border IsVisible="{Binding Sender, Converter={x:Static cvt:Converters.EqualWithParameter}, ConverterParameter=System}">
-                        <SelectableTextBlock
-                            b:TextBlockInlinesBehavior.ItemsSource="{Binding Inlines}"
-                            TextWrapping="Wrap" />
-                    </Border>
-
-                    <!--  AI  -->
-                    <Border IsVisible="{Binding Sender, Converter={x:Static cvt:Converters.EqualWithParameter}, ConverterParameter=Assistant}">
-                        <SelectableTextBlock
-                            b:TextBlockInlinesBehavior.ItemsSource="{Binding Inlines}"
-                            TextWrapping="Wrap" />
-                    </Border>
-                </Panel>
-            </DataTemplate>
-        </ItemsControl.ItemTemplate>
-    </ItemsControl>
+                        <!--  AI  -->
+                        <Border
+                            Margin="16,8"
+                            IsVisible="{Binding Sender, Converter={x:Static cvt:Converters.EqualWithParameter}, ConverterParameter=Assistant}">
+                            <SelectableTextBlock
+                                b:TextBlockInlinesBehavior.ItemsSource="{Binding Inlines}"
+                                TextWrapping="Wrap" />
+                        </Border>
+                    </Panel>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </ScrollViewer>
 </UserControl>

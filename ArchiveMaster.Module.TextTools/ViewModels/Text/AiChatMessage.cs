@@ -1,5 +1,7 @@
-﻿using ArchiveMaster.Enums;
+﻿using System.Text;
+using ArchiveMaster.Enums;
 using Avalonia.Collections;
+using Avalonia.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace ArchiveMaster.ViewModels;
@@ -29,7 +31,40 @@ public partial class AiChatMessage : ObservableObject
 
     public void AddInline(InlineItem inline)
     {
+        if (isFrozen)
+        {
+            throw new InvalidOperationException("当前消息已冻结，无法修改");
+        }
+
         Inlines.Add(inline);
+    }
+
+    private bool isFrozen;
+
+    public void Freeze(bool fold, int maxLength = 50)
+    {
+        isFrozen = true;
+        if (fold)
+        {
+            StringBuilder str = new StringBuilder();
+            foreach (var inline in Inlines)
+            {
+                str.Append(inline.Text.Replace("\r", "").Replace("\n", ""));
+            }
+
+            Inlines.Clear();
+            if (str.Length > maxLength)
+            {
+                //前半部分
+                Inlines.Add(new InlineItem(str.ToString(0, maxLength / 2)));
+                Inlines.Add(new InlineItem("  ...  ", foreground: Brushes.Gray));
+                Inlines.Add(new InlineItem(str.ToString(str.Length - maxLength / 2, maxLength / 2)));
+            }
+            else
+            {
+                Inlines.Add(new InlineItem(str.ToString()));
+            }
+        }
     }
 
     public void AddInline(string message)

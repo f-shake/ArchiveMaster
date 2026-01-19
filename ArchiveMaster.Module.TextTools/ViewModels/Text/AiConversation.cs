@@ -12,6 +12,7 @@ public partial class AiConversation : ObservableObject
 
     [ObservableProperty]
     private bool canUserInput = false;
+    
 
 
     public AiChatMessage AddSystemMessage(string systemPrompt)
