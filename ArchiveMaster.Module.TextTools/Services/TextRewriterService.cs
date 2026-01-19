@@ -44,7 +44,6 @@ public class TextRewriterService(AppConfig appConfig)
             NotifyMessage("正在调用AI进行处理");
 
             var prompt = await GetSystemPromptAsync(ct);
-            var ai = new LlmCallerService(AI);
             Result = await CallAiWithStreamAsync(prompt, text, null, true, ct);
         }, ct);
     }

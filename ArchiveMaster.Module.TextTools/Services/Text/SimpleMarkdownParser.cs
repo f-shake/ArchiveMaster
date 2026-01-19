@@ -14,7 +14,7 @@ public static class SimpleMarkdownParser
 
         foreach (var line in lines)
         {
-            int fontSize = 12;
+            int fontSize = 0;
             string content = line;
 
             // ===== 1. 标题解析 =====

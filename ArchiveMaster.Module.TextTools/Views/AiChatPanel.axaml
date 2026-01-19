@@ -32,6 +32,13 @@
                             b:TextBlockInlinesBehavior.ItemsSource="{Binding Inlines}"
                             TextWrapping="Wrap" />
                     </Border>
+
+                    <!--  AI  -->
+                    <Border IsVisible="{Binding Sender, Converter={x:Static cvt:Converters.EqualWithParameter}, ConverterParameter=Assistant}">
+                        <SelectableTextBlock
+                            b:TextBlockInlinesBehavior.ItemsSource="{Binding Inlines}"
+                            TextWrapping="Wrap" />
+                    </Border>
                 </Panel>
             </DataTemplate>
         </ItemsControl.ItemTemplate>

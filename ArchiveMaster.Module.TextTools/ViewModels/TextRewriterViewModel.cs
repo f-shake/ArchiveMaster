@@ -91,23 +91,12 @@ public partial class TextRewriterViewModel(ViewModelServices services)
 
     public override bool EnableRepeatExecute => true;
 
-    protected override Task OnExecutedAsync(CancellationToken ct)
-    {
-        // Result = LlmCallerService.RemoveThink(Result);
-        var result = LlmCallerService.RemoveThink(Service.Result);
-        var inlines=SimpleMarkdownParser.ParseSimpleMarkdown(result);
-        AiConversation.Messages[0] = new AiChatMessage(AiChatMessageSender.System)
-            { Inlines = new AvaloniaList<InlineItem>(inlines) };
-        return base.OnExecutedAsync(ct);
-    }
 
     protected override Task OnExecutingAsync(CancellationToken ct)
     {
         Service.AiAgent = SelectedAiAgent;
         AiConversation = new AiConversation();
-        AiConversation.Messages.Add(new AiChatMessage(AiChatMessageSender.System));
-
-        Service.AiTextGenerate += (sender, e) => AiConversation.Messages[0].AddInline(e.Value);
+        Service.BindConversation(AiConversation);
         return base.OnExecutingAsync(ct);
     }
 

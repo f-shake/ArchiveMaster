@@ -15,6 +15,12 @@ public partial class AiChatMessage : ObservableObject
         Sender = sender;
     }
 
+    public AiChatMessage(AiChatMessageSender sender, string message)
+    {
+        Sender = sender;
+        AddInline(message);
+    }
+
     [ObservableProperty]
     private AiChatMessageSender sender;
 
@@ -34,5 +40,12 @@ public partial class AiChatMessage : ObservableObject
         }
 
         Inlines.Add(new InlineItem(message));
+    }
+
+    public void ReplaceWithFinalResponse(string text)
+    {
+        Inlines.Clear();
+        var inlines = SimpleMarkdownParser.ParseSimpleMarkdown(text);
+        Inlines.AddRange(inlines);
     }
 }
