@@ -21,8 +21,6 @@ namespace ArchiveMaster.Services
     public class SmartDocSearchService(AppConfig appConfig)
         : AiTwoStepServiceBase<SmartDocSearchConfig>(appConfig)
     {
-        public event GenericEventHandler<LlmOutputItem> AitStreamUpdate;
-
         public string AiConclude { get; private set; }
 
         public List<TextSearchResult> SearchResults { get; private set; }
@@ -90,7 +88,6 @@ namespace ArchiveMaster.Services
 
         private async Task<string> GetAiConcludeAsync(CancellationToken ct)
         {
-            LlmCallerService s = new LlmCallerService(AI);
             string sys = $"""
                           你是一个归纳总结机器人。当前，用户以“{string.Join(" ", Config.Keywords.Trimmed)}”为关键词，对一些文段进行了搜索，得到了一系列的结果，这些结果将在下面给出。
                           你需要根据这些结果，进行归纳总结。期望输出长度（字数）：{Config.ExpectedAiConcludeLength}，请严格遵守输出字数要求。
@@ -119,16 +116,7 @@ namespace ArchiveMaster.Services
                 prompt.AppendLine(item.Context);
             }
 
-            List<string> result = new List<string>();
-            await foreach (var part in s.CallStreamAsync(sys, prompt.ToString(), null, ct))
-            {
-                AitStreamUpdate?.Invoke(this, new GenericEventArgs<LlmOutputItem>(part));
-                result.Add(part);
-            }
-
-            var removeThink = LlmCallerService.RemoveThink(string.Concat(result));
-            // string plainText = Markdown.ToPlainText(removeThink);
-            return removeThink;
+            return await CallAiWithStreamAsync(sys, prompt.ToString(), null,true, ct);
         }
 
         private async Task<List<TextSearchResult>> GetSearchResultAsync(CancellationToken ct)

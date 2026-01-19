@@ -36,7 +36,7 @@ public partial class SmartDocSearchViewModel(ViewModelServices services)
     protected override Task OnExecutingAsync(CancellationToken ct)
     {
         AiConclude = "";
-        Service.AitStreamUpdate += (sender, e) => AiConclude += e.Value;
+        Service.AiTextGenerate += (sender, e) => AiConclude += e.Value;
         return base.OnExecutingAsync(ct);
     }
 

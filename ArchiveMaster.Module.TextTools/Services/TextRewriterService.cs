@@ -23,9 +23,7 @@ public class TextRewriterService(AppConfig appConfig)
 
     public AiAgentBase AiAgent { get; set; }
 
-    public string Result { get;private set; }
-    
-    public event GenericEventHandler<LlmOutputItem> TextGenerated;
+    public string Result { get; private set; }
 
     public override async Task ExecuteAsync(CancellationToken ct = default)
     {
@@ -47,13 +45,7 @@ public class TextRewriterService(AppConfig appConfig)
 
             var prompt = await GetSystemPromptAsync(ct);
             var ai = new LlmCallerService(AI);
-            StringBuilder result = new StringBuilder();
-            await foreach (var output in ai.CallStreamAsync(prompt, text, ct: ct))
-            {
-                TextGenerated?.Invoke(this, new GenericEventArgs<LlmOutputItem>(output));
-                result.Append(output);
-            }
-            Result = result.ToString();
+            Result = await CallAiWithStreamAsync(prompt, text, null, true, ct);
         }, ct);
     }
 

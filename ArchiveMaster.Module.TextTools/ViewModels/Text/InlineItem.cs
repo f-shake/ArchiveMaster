@@ -8,7 +8,8 @@ public class InlineItem
     {
     }
 
-    public InlineItem(string text, bool isBold = false, IBrush foreground = null, bool isItalic = false, int fontSize = 12)
+    public InlineItem(string text, bool isBold = false, IBrush foreground = null, bool isItalic = false,
+        int fontSize = 0)
     {
         Text = text;
         IsBold = isBold;

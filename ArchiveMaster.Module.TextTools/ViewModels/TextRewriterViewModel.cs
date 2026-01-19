@@ -107,7 +107,7 @@ public partial class TextRewriterViewModel(ViewModelServices services)
         AiConversation = new AiConversation();
         AiConversation.Messages.Add(new AiChatMessage(AiChatMessageSender.System));
 
-        Service.TextGenerated += (sender, e) => AiConversation.Messages[0].AddInline(e.Value);
+        Service.AiTextGenerate += (sender, e) => AiConversation.Messages[0].AddInline(e.Value);
         return base.OnExecutingAsync(ct);
     }
 

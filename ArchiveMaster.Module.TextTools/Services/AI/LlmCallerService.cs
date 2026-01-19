@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using ArchiveMaster.Configs;
+using ArchiveMaster.Events;
 using ArchiveMaster.Models;
 using Microsoft.Extensions.AI;
 using OllamaSharp;
@@ -65,6 +66,21 @@ public class LlmCallerService
         Log.Logger.Information("AI回答：{ResponseText}", response.Text);
         Debug.WriteLine("AI调用完成");
         return response.Text;
+    }
+
+    public async Task<string> CallWithStreamAsync(string systemPrompt, string userPrompt,
+        ChatOptions options = null,
+        GenericEventHandler<LlmOutputItem> onStreamUpdate = null,
+        CancellationToken ct = default)
+    {
+        List<string> result = new List<string>();
+        await foreach (var part in CallStreamAsync(systemPrompt, userPrompt, options, ct))
+        {
+            onStreamUpdate?.Invoke(this, new GenericEventArgs<LlmOutputItem>(part));
+            result.Add(part);
+        }
+
+        return string.Concat(result);
     }
 
     public async IAsyncEnumerable<string> CallStreamAsync(string systemPrompt, string userPrompt,
