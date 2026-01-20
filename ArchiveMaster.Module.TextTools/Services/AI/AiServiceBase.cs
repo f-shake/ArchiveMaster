@@ -25,22 +25,20 @@ public abstract class AiServiceBase<TConfig>(AppConfig appConfig)
         Conversation.SendMessageRequested += ConversationOnSendMessageRequested;
     }
 
-    private async void ConversationOnSendMessageRequested(object sender, EventArgs e)
+    private async void ConversationOnSendMessageRequested(object sender, GenericEventArgs<CancellationToken> e)
     {
-        if (isFirstCall)
+        if (Conversation.LastSystemMessage == null) //第一次
         {
-            isFirstCall = false;
-            (var systemPrompt, var userPrompt) = await GetFirstPromptAsync(CancellationToken.None);
+            (var systemPrompt, var userPrompt) = await GetFirstPromptAsync(e.Value);
 
             Conversation.AddSystemMessage(systemPrompt).Freeze(true);
             Conversation.AddUserMessage(userPrompt).Freeze(true);
-            await CallAiWithStreamAsync(Conversation.GetChatMessages(), NeedRemoveThink);
         }
         else
         {
             Conversation.AddUserMessage(Conversation.InputText).Freeze(true);
-            await CallAiWithStreamAsync(Conversation.GetChatMessages(), NeedRemoveThink);
         }
+        await CallAiWithStreamAsync(Conversation.GetChatMessages(), NeedRemoveThink, e.Value);
     }
 
 
@@ -72,12 +70,6 @@ public abstract class AiServiceBase<TConfig>(AppConfig appConfig)
         return result;
     }
 
-    private bool isFirstCall = true;
-
-    public void Reset()
-    {
-        isFirstCall = false;
-    }
 
     public AiConversation Conversation { get; private set; }
 

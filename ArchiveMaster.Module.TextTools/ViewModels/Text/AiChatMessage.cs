@@ -27,6 +27,8 @@ public partial class AiChatMessage : ObservableObject
     [ObservableProperty]
     private AiChatMessageSender sender;
 
+    public event EventHandler MessageAppended;
+
     [ObservableProperty]
     private AvaloniaList<InlineItem> inlines = new AvaloniaList<InlineItem>();
 
@@ -38,13 +40,15 @@ public partial class AiChatMessage : ObservableObject
         }
 
         Inlines.Add(inline);
+        MessageAppended?.Invoke(this, EventArgs.Empty);
     }
 
     private bool isFrozen;
 
     private ChatMessage chatMessage;
 
-    public ChatMessage ChatMessage => !isFrozen ? throw new InvalidOperationException("当前消息未冻结，无法获取ChatMessage") : chatMessage;
+    public ChatMessage ChatMessage =>
+        !isFrozen ? throw new InvalidOperationException("当前消息未冻结，无法获取ChatMessage") : chatMessage;
 
     public void Freeze(bool fold, int maxLength = 50)
     {

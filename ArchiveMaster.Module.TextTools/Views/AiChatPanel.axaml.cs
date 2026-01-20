@@ -16,7 +16,13 @@ namespace ArchiveMaster.Views
         {
             InitializeComponent();
             //自动滚动到最底部
-            // this.GetObservable(ResultProperty).Subscribe(r => { result.ScrollToLine(result.GetLineCount()-1); });
+            this.GetObservable(ConversationProperty).Subscribe(c =>
+            {
+                if (c != null)
+                {
+                    c.MessageAppended += (s, e) => { scr.ScrollToEnd(); };
+                }
+            });
         }
 
         public static readonly StyledProperty<AiConversation> ConversationProperty =
@@ -27,11 +33,6 @@ namespace ArchiveMaster.Views
         {
             get => GetValue(ConversationProperty);
             set => SetValue(ConversationProperty, value);
-        }
-
-        private void SendButton_OnClick(object sender, RoutedEventArgs e)
-        {
-            Conversation?.CallSendMessageRequested();
         }
     }
 }

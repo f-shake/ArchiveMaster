@@ -13,7 +13,7 @@
     d:DesignWidth="800"
     mc:Ignorable="d">
     <Grid RowDefinitions="*,8,Auto">
-        <ScrollViewer>
+        <ScrollViewer x:Name="scr">
             <ItemsControl ItemsSource="{Binding $parent[UserControl].Conversation.Messages}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
@@ -61,20 +61,35 @@
 
         <Grid
             Grid.Row="2"
+            Margin="8"
             ColumnDefinitions="*,8,Auto">
             <TextBox
                 IsEnabled="{Binding $parent[UserControl].Conversation.CanUserInput}"
                 Text="{Binding $parent[UserControl].Conversation.InputText}" />
-            <Button
-                Grid.Column="2"
-                Width="36"
-                Height="36"
-                Padding="0"
-                Classes="Primary"
-                Click="SendButton_OnClick"
-                Content="{ic:FluentIcon Icon=Send}"
-                CornerRadius="18"
-                IsEnabled="{Binding $parent[UserControl].Conversation.CanUserSend}" />
+            <Panel Grid.Column="2">
+                <Panel.Styles>
+                    <Style Selector="Button">
+                        <Setter Property="Width" Value="36" />
+                        <Setter Property="Height" Value="36" />
+                        <Setter Property="Padding" Value="0" />
+                        <Setter Property="CornerRadius" Value="18" />
+                    </Style>
+                </Panel.Styles>
+                <Button
+                    Classes="Primary"
+                    Command="{Binding $parent[UserControl].Conversation.SendCommand}"
+                    Content="{ic:FluentIcon Icon=Send}"
+                    Foreground="White"
+                    IsDefault="True"
+                    IsVisible="{Binding !$parent[UserControl].Conversation.SendCommand.IsRunning}" />
+                <Button
+                    Background="Red"
+                    Command="{Binding $parent[UserControl].Conversation.SendCancelCommand}"
+                    Content="{ic:FluentIcon Icon=Stop}"
+                    Foreground="White"
+                    IsDefault="True"
+                    IsVisible="{Binding $parent[UserControl].Conversation.SendCommand.IsRunning}" />
+            </Panel>
         </Grid>
     </Grid>
 </UserControl>

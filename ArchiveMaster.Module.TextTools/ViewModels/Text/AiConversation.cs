@@ -1,7 +1,10 @@
-﻿using ArchiveMaster.Enums;
+﻿using System.ComponentModel;
+using ArchiveMaster.Enums;
+using ArchiveMaster.Events;
 using ArchiveMaster.Services;
 using Avalonia.Collections;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.AI;
 
 namespace ArchiveMaster.ViewModels;
@@ -18,52 +21,64 @@ public partial class AiConversation : ObservableObject
     [ObservableProperty]
     private bool canUserInput;
 
+    public event EventHandler MessageAppended;
+
     [ObservableProperty]
     private string inputText;
 
-    [ObservableProperty]
-    private bool canUserSend;
+
+    private TaskCompletionSource sendTaskCompletionSource;
+
+    [RelayCommand(IncludeCancelCommand = true)]
+    private async Task SendAsync(CancellationToken ct)
+    {
+        sendTaskCompletionSource = new TaskCompletionSource();
+        OnBeginResponse(ct);
+        await sendTaskCompletionSource.Task;
+    }
+
+    private AiChatMessage AddMessage(AiChatMessageSender sender, string text = "")
+    {
+        var message = new AiChatMessage(sender, text);
+        Messages.Add(message);
+        message.MessageAppended += (s, e) => MessageAppended?.Invoke(s, e);
+        MessageAppended?.Invoke(this, EventArgs.Empty);
+        return message;
+    }
 
     public AiChatMessage AddSystemMessage(string systemPrompt)
     {
-        var message = new AiChatMessage(AiChatMessageSender.System, systemPrompt);
-        Messages.Add(message);
-        return message;
+        return AddMessage(AiChatMessageSender.System, systemPrompt);
     }
 
     public AiChatMessage AddUserMessage(string userPrompt)
     {
-        var message = new AiChatMessage(AiChatMessageSender.User, userPrompt);
-        Messages.Add(message);
-        return message;
+        return AddMessage(AiChatMessageSender.User, userPrompt);
     }
 
     public AiChatMessage AddAssistantMessage()
     {
-        var message = new AiChatMessage(AiChatMessageSender.Assistant);
-        Messages.Add(message);
-        return message;
+        return AddMessage(AiChatMessageSender.Assistant);
     }
 
-    public event EventHandler SendMessageRequested;
+    public event GenericEventHandler<CancellationToken> SendMessageRequested;
 
     public IList<ChatMessage> GetChatMessages()
     {
         return Messages.Select(x => x.ChatMessage).ToList();
     }
 
-    public void CallSendMessageRequested()
+    private void OnBeginResponse(CancellationToken ct)
     {
-        SendMessageRequested?.Invoke(this, EventArgs.Empty);
+        SendMessageRequested?.Invoke(this, new GenericEventArgs<CancellationToken>(ct));
         InputText = "";
         CanUserInput = false;
-        CanUserSend = false;
     }
 
     public void EndResponse()
     {
         CanUserInput = true;
-        CanUserSend = true;
+        sendTaskCompletionSource?.SetResult();
     }
 
     public AiChatMessage LastSystemMessage => Messages.LastOrDefault(x => x.Sender == AiChatMessageSender.System);
@@ -76,7 +91,6 @@ public partial class AiConversation : ObservableObject
     {
         Messages.Clear();
         CanUserInput = false;
-        CanUserSend = true;
         InputText = "（自动生成）";
     }
 }

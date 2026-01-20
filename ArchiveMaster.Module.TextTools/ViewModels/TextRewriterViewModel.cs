@@ -91,6 +91,7 @@ public partial class TextRewriterViewModel : AiViewModelBase<TextRewriterConfig>
     partial void OnSelectedAiAgentChanged(AiAgentBase value)
     {
         service.AiAgent = value;
+        AiConversation.Reset();
     }
 
     public TextRewriterViewModel(ViewModelServices services) : base(services)
