@@ -7,34 +7,38 @@ public static class AiServiceExtensions
 {
     extension(IAiService service)
     {
+        public async Task<string> CallAiWithStreamAsync(IEnumerable<ChatMessage> messages,
+            AiChatMessage assistantMessage, CancellationToken ct = default)
+        {
+            LlmCallerService s = new LlmCallerService(service.AI);
+            string result = await s.CallWithStreamAsync(messages, service.ChatOptions, (_, e) =>
+            {
+                service.OnAiTextGenerate(e.Value);
+                assistantMessage?.AddInline(e.Value);
+            }, ct: ct);
+
+            if (service.NeedRemoveThink)
+            {
+                result = LlmCallerService.RemoveThink(result);
+            }
+
+            return result;
+        }
+
         [Obsolete]
         public async Task<string> CallAiWithStreamAsync(string systemPrompt,
             string userPrompt, ChatOptions options,
             bool removeThink, CancellationToken ct = default)
         {
-            AiChatMessage assistantMessage = null;
-            if (service.Conversation != null)
-            {
-                service.Conversation.AddSystemMessage(systemPrompt).Freeze(true);
-                service.Conversation.AddUserMessage(userPrompt).Freeze(true);
-                assistantMessage = service.Conversation.AddAssistantMessage();
-            }
-
             LlmCallerService s = new LlmCallerService(service.AI);
-            var result = await s.CallWithStreamAsync(systemPrompt, userPrompt, options, (_, e) =>
-            {
-                service.OnAiTextGenerate(e.Value);
-                assistantMessage?.AddInline(e.Value);
-            }, ct);
-            assistantMessage?.Freeze(false);
-            
+            var result = await s.CallWithStreamAsync(systemPrompt, userPrompt, options,
+                (_, e) => { service.OnAiTextGenerate(e.Value); }, ct);
+
             if (removeThink)
             {
                 result = LlmCallerService.RemoveThink(result);
-                service.Conversation?.LastAssistantMessage.ReplaceWithFinalResponse(result);
             }
 
-            service.Conversation?.EndResponse();
 
             return result;
         }

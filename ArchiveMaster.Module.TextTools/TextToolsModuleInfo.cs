@@ -32,12 +32,11 @@ namespace ArchiveMaster
             new ConfigMetadata(typeof(LineByLineProcessorConfig)),
         ];
 
+        public string HelpFileName { get; } = "text.md";
         public IList<JsonConverter> JsonConverters { get; } = [new AiAgentListJsonConverter()];
 
-        public string ModuleName => "文本工具";
         public string ModuleDescription => "对文本或文本文件进行相关处理";
-        public string HelpFileName { get; } = "text.md";
-
+        public string ModuleName => "文本工具";
         public int Order => 3;
 
         public IList<Type> SingletonServices { get; }
@@ -50,6 +49,7 @@ namespace ArchiveMaster
             typeof(TextRewriterService),
             typeof(EncodingConverterService),
             typeof(LineByLineProcessorService),
+            typeof(AiConversation),
         ];
 
         public ToolPanelGroupInfo Views => new ToolPanelGroupInfo()

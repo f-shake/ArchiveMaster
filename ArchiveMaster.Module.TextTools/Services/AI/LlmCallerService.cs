@@ -93,13 +93,24 @@ public class LlmCallerService
     public async Task<string> CallWithStreamAsync(IEnumerable<ChatMessage> messages,
         ChatOptions options = null,
         GenericEventHandler<LlmOutputItem> onStreamUpdate = null,
+        bool throwOnCancel = false,
         CancellationToken ct = default)
     {
         List<string> result = new List<string>();
-        await foreach (var part in CallStreamAsync(messages, options, ct))
+        try
         {
-            onStreamUpdate?.Invoke(this, new GenericEventArgs<LlmOutputItem>(part));
-            result.Add(part);
+            await foreach (var part in CallStreamAsync(messages, options, ct))
+            {
+                onStreamUpdate?.Invoke(this, new GenericEventArgs<LlmOutputItem>(part));
+                result.Add(part);
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            if (throwOnCancel)
+            {
+                throw;
+            }
         }
 
         return string.Concat(result);

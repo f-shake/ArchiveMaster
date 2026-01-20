@@ -102,5 +102,6 @@ public partial class AiChatMessage : ObservableObject
         Inlines.Clear();
         var inlines = SimpleMarkdownParser.ParseSimpleMarkdown(text);
         Inlines.AddRange(inlines);
+        Freeze(false);
     }
 }

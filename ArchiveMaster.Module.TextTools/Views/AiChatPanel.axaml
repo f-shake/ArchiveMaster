@@ -81,6 +81,7 @@
                     Content="{ic:FluentIcon Icon=Send}"
                     Foreground="White"
                     IsDefault="True"
+                    IsEnabled="{Binding $parent[UserControl].Conversation.InputText, Converter={x:Static cvt:Converters.IsNotNull}}"
                     IsVisible="{Binding !$parent[UserControl].Conversation.SendCommand.IsRunning}" />
                 <Button
                     Background="Red"
@@ -88,7 +89,18 @@
                     Content="{ic:FluentIcon Icon=Stop}"
                     Foreground="White"
                     IsDefault="True"
-                    IsVisible="{Binding $parent[UserControl].Conversation.SendCommand.IsRunning}" />
+                    IsVisible="{Binding $parent[UserControl].Conversation.SendCommand.IsRunning}">
+                    <Button.Styles>
+                        <Style Selector="Button">
+                            <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                                <Setter Property="Background" Value="DarkRed" />
+                            </Style>
+                            <Style Selector="^:pressed /template/ ContentPresenter#PART_ContentPresenter">
+                                <Setter Property="Opacity" Value="0.7" />
+                            </Style>
+                        </Style>
+                    </Button.Styles>
+                </Button>
             </Panel>
         </Grid>
     </Grid>

@@ -3,6 +3,7 @@ using ArchiveMaster.Events;
 using ArchiveMaster.Models;
 using ArchiveMaster.ViewModels;
 using Avalonia.Media;
+using Microsoft.Extensions.AI;
 
 namespace ArchiveMaster.Services;
 
@@ -12,28 +13,26 @@ public abstract class AiTwoStepServiceBase<TConfig>(AppConfig appConfig)
 {
     public const int MaxLength = 300_000;
 
+    public event GenericEventHandler<LlmOutputItem> AiTextGenerate;
+
     public AiProviderConfig AI => AppConfig.GetOrCreateConfigWithDefaultKey<AiProvidersConfig>().CurrentProvider;
 
-    public event GenericEventHandler<LlmOutputItem> AiTextGenerate;
-    public string AiResult { get; protected set; }
-
-    public void BindConversation(AiConversation conversation)
-    {
-        Conversation = conversation;
-    }
+    public ChatOptions ChatOptions { get; }
 
     public AiConversation Conversation { get; private set; }
 
-    public void OnAiTextGenerate(LlmOutputItem e)
-    {
-        AiTextGenerate?.Invoke(this, new GenericEventArgs<LlmOutputItem>(e));
-    }
+    public bool NeedRemoveThink { get; }
+
+    protected AppConfig AppConfig { get; } = appConfig;
+
 
     public Task<(string SystemPrompt, string UserPrompt)> GetFirstPromptAsync(CancellationToken ct)
     {
         throw new NotImplementedException();
     }
 
-
-    protected AppConfig AppConfig { get; } = appConfig;
+    public void OnAiTextGenerate(LlmOutputItem e)
+    {
+        AiTextGenerate?.Invoke(this, new GenericEventArgs<LlmOutputItem>(e));
+    }
 }

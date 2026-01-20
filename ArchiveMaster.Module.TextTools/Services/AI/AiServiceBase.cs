@@ -11,75 +11,17 @@ public abstract class AiServiceBase<TConfig>(AppConfig appConfig)
     where TConfig : ConfigBase
 {
     public const int MaxLength = 300_000;
-    protected ChatOptions ChatOptions { get; } = null;
+    public event GenericEventHandler<LlmOutputItem> AiTextGenerate;
 
     public AiProviderConfig AI => AppConfig.GetOrCreateConfigWithDefaultKey<AiProvidersConfig>().CurrentProvider;
-
+    public ChatOptions ChatOptions { get; } = null;
     public bool NeedRemoveThink { get; } = true;
-    public event GenericEventHandler<LlmOutputItem> AiTextGenerate;
-    public string AiResult { get; protected set; }
+    protected AppConfig AppConfig { get; } = appConfig;
 
-    public void BindConversation(AiConversation conversation)
-    {
-        Conversation = conversation;
-        Conversation.SendMessageRequested += ConversationOnSendMessageRequested;
-    }
-
-    private async void ConversationOnSendMessageRequested(object sender, GenericEventArgs<CancellationToken> e)
-    {
-        if (Conversation.LastSystemMessage == null) //第一次
-        {
-            (var systemPrompt, var userPrompt) = await GetFirstPromptAsync(e.Value);
-
-            Conversation.AddSystemMessage(systemPrompt).Freeze(true);
-            Conversation.AddUserMessage(userPrompt).Freeze(true);
-        }
-        else
-        {
-            Conversation.AddUserMessage(Conversation.InputText).Freeze(true);
-        }
-        await CallAiWithStreamAsync(Conversation.GetChatMessages(), NeedRemoveThink, e.Value);
-    }
-
-
-    public async Task<string> CallAiWithStreamAsync(IEnumerable<ChatMessage> messages, bool removeThink,
-        CancellationToken ct = default)
-    {
-        AiChatMessage assistantMessage = null;
-        if (Conversation != null)
-        {
-            assistantMessage = Conversation.AddAssistantMessage();
-        }
-
-        LlmCallerService s = new LlmCallerService(AI);
-        var result = await s.CallWithStreamAsync(messages, ChatOptions, (_, e) =>
-        {
-            OnAiTextGenerate(e.Value);
-            assistantMessage?.AddInline(e.Value);
-        }, ct);
-        assistantMessage?.Freeze(false);
-
-        if (removeThink)
-        {
-            result = LlmCallerService.RemoveThink(result);
-            Conversation?.LastAssistantMessage.ReplaceWithFinalResponse(result);
-        }
-
-        Conversation?.EndResponse();
-
-        return result;
-    }
-
-
-    public AiConversation Conversation { get; private set; }
+    public abstract Task<(string SystemPrompt, string UserPrompt)> GetFirstPromptAsync(CancellationToken ct);
 
     public void OnAiTextGenerate(LlmOutputItem e)
     {
         AiTextGenerate?.Invoke(this, new GenericEventArgs<LlmOutputItem>(e));
     }
-
-    public abstract Task<(string SystemPrompt, string UserPrompt)> GetFirstPromptAsync(CancellationToken ct);
-
-
-    protected AppConfig AppConfig { get; } = appConfig;
 }

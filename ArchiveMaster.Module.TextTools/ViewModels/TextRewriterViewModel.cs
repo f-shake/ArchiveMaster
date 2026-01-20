@@ -21,15 +21,6 @@ namespace ArchiveMaster.ViewModels;
 
 public partial class TextRewriterViewModel : AiViewModelBase<TextRewriterConfig>
 {
-    private AiConversation AiConversation { get; } = new AiConversation();
-
-    protected override void OnConfigChanged()
-    {
-        base.OnConfigChanged();
-        InitializeAiAgents();
-        service.Config = Config;
-    }
-
     private static readonly Dictionary<string, (string Description, int Order)>
         AiAgentGroupMap = new()
         {
@@ -41,7 +32,31 @@ public partial class TextRewriterViewModel : AiViewModelBase<TextRewriterConfig>
             [nameof(AiAgents.Custom)] = ("自定义", 6),
         };
 
+    [ObservableProperty]
+    private ObservableCollection<AiAgentGroup> aiAgentGroups = new ObservableCollection<AiAgentGroup>();
 
+    [ObservableProperty]
+    private AiAgentBase selectedAiAgent;
+
+    [ObservableProperty]
+    private AiAgentGroup selectedAiAgentGroup;
+
+    private TextRewriterService service;
+    public TextRewriterViewModel(ViewModelServices services) : base(services)
+    {
+        AiConversation = HostServices.GetRequiredService<AiConversation>();
+        service = HostServices.GetRequiredService<TextRewriterService>();
+        AiConversation.BindService(service);
+    }
+
+    private AiConversation AiConversation { get; }
+
+    protected override void OnConfigChanged()
+    {
+        base.OnConfigChanged();
+        InitializeAiAgents();
+        service.Config = Config;
+    }
     private void InitializeAiAgents()
     {
         AiAgentGroups.Clear();
@@ -76,27 +91,10 @@ public partial class TextRewriterViewModel : AiViewModelBase<TextRewriterConfig>
             AiAgentGroups.Add(aiAgentGroup);
         }
     }
-
-    [ObservableProperty]
-    private ObservableCollection<AiAgentGroup> aiAgentGroups = new ObservableCollection<AiAgentGroup>();
-
-    [ObservableProperty]
-    private AiAgentBase selectedAiAgent;
-
-    [ObservableProperty]
-    private AiAgentGroup selectedAiAgentGroup;
-
-    private TextRewriterService service;
-
+    
     partial void OnSelectedAiAgentChanged(AiAgentBase value)
     {
         service.AiAgent = value;
         AiConversation.Reset();
-    }
-
-    public TextRewriterViewModel(ViewModelServices services) : base(services)
-    {
-        service = HostServices.GetRequiredService<TextRewriterService>();
-        service.BindConversation(AiConversation);
     }
 }
