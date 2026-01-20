@@ -47,6 +47,11 @@ public partial class AiConversation : ObservableObject
 
     public event EventHandler SendMessageRequested;
 
+    public IList<ChatMessage> GetChatMessages()
+    {
+        return Messages.Select(x => x.ChatMessage).ToList();
+    }
+
     public void CallSendMessageRequested()
     {
         SendMessageRequested?.Invoke(this, EventArgs.Empty);

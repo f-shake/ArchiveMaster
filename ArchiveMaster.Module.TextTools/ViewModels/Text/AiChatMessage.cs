@@ -3,6 +3,7 @@ using ArchiveMaster.Enums;
 using Avalonia.Collections;
 using Avalonia.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
+using Microsoft.Extensions.AI;
 
 namespace ArchiveMaster.ViewModels;
 
@@ -41,9 +42,24 @@ public partial class AiChatMessage : ObservableObject
 
     private bool isFrozen;
 
+    private ChatMessage chatMessage;
+
+    public ChatMessage ChatMessage => !isFrozen ? throw new InvalidOperationException("当前消息未冻结，无法获取ChatMessage") : chatMessage;
+
     public void Freeze(bool fold, int maxLength = 50)
     {
         isFrozen = true;
+
+        var role = Sender switch
+        {
+            AiChatMessageSender.System => ChatRole.System,
+            AiChatMessageSender.User => ChatRole.User,
+            AiChatMessageSender.Assistant => ChatRole.Assistant,
+            _ => throw new ArgumentOutOfRangeException(nameof(Sender), Sender, null)
+        };
+        chatMessage = new ChatMessage(role, string.Concat(Inlines.Select(i => i.Text)));
+
+
         if (fold)
         {
             StringBuilder str = new StringBuilder();
@@ -74,7 +90,7 @@ public partial class AiChatMessage : ObservableObject
             message = message.Replace("\r", "");
         }
 
-        Inlines.Add(new InlineItem(message));
+        AddInline(new InlineItem(message));
     }
 
     public void ReplaceWithFinalResponse(string text)
