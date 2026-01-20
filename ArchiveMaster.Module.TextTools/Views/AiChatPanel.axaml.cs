@@ -19,13 +19,19 @@ namespace ArchiveMaster.Views
             // this.GetObservable(ResultProperty).Subscribe(r => { result.ScrollToLine(result.GetLineCount()-1); });
         }
 
-        public static readonly StyledProperty<AiConversation> ConversationProperty = AvaloniaProperty.Register<AiChatPanel, AiConversation>(
-            nameof(Conversation));
+        public static readonly StyledProperty<AiConversation> ConversationProperty =
+            AvaloniaProperty.Register<AiChatPanel, AiConversation>(
+                nameof(Conversation));
 
         public AiConversation Conversation
         {
             get => GetValue(ConversationProperty);
             set => SetValue(ConversationProperty, value);
+        }
+
+        private void SendButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            Conversation?.CallSendMessageRequested();
         }
     }
 }

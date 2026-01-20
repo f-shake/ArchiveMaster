@@ -24,30 +24,6 @@ public class TextRewriterService(AppConfig appConfig)
     public AiAgentBase AiAgent { get; set; }
 
 
-    public async Task ExecuteAsync(CancellationToken ct = default)
-    {
-        if (AiAgent == null)
-        {
-            throw new InvalidOperationException("请设置AI智能体");
-        }
-
-        StringBuilder str = new StringBuilder();
-
-        await Task.Run(async () =>
-        {
-            NotifyMessage("正在读取文本源");
-            string text = (await Config.Source.GetPlainTextAsync(TextSourceReadUnit.Combined, ct)
-                .FirstOrDefaultAsync()).Text;
-            this.CheckTextSource(text, MaxLength, "文本源");
-
-            NotifyMessage("正在调用AI进行处理");
-
-            var prompt = await GetSystemPromptAsync(ct);
-            AiResult = await this.CallAiWithStreamAsync(prompt, text, null, true, ct);
-        }, ct);
-    }
-    
-
     private async Task<string> GetSystemPromptAsync(CancellationToken ct)
     {
         var prompt = new StringBuilder();
@@ -66,5 +42,25 @@ public class TextRewriterService(AppConfig appConfig)
         prompt.AppendLine("输出格式上，要完全符合用户输入的语段，不要添加额外的内容。" +
                           "若有必要输出MarkDown，只能包含标题、粗体、斜体三种样式，不要输出表格。");
         return prompt.ToString();
+    }
+
+    public override async Task<(string SystemPrompt, string UserPrompt)> GetFirstPromptAsync(CancellationToken ct)
+    {
+        if (AiAgent == null)
+        {
+            throw new InvalidOperationException("请设置AI智能体");
+        }
+
+        StringBuilder str = new StringBuilder();
+
+        NotifyMessage("正在读取文本源");
+        string text = (await Config.Source.GetPlainTextAsync(TextSourceReadUnit.Combined, ct)
+            .FirstOrDefaultAsync()).Text;
+        this.CheckTextSource(text, MaxLength, "文本源");
+
+        NotifyMessage("正在调用AI进行处理");
+
+        var prompt = await GetSystemPromptAsync(ct);
+        return (prompt, text);
     }
 }

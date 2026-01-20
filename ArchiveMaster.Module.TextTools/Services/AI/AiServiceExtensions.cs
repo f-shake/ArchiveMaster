@@ -24,19 +24,14 @@ public static class AiServiceExtensions
                 service.OnAiTextGenerate(e.Value);
                 service.Conversation?.LastAssistantMessage.AddInline(e.Value);
             }, ct);
+            
             if (removeThink)
             {
                 result = LlmCallerService.RemoveThink(result);
-                if (service.Conversation != null)
-                {
-                    service.Conversation.LastAssistantMessage.ReplaceWithFinalResponse(result);
-                }
+                service.Conversation?.LastAssistantMessage.ReplaceWithFinalResponse(result);
             }
 
-            if (service.Conversation != null)
-            {
-                service.Conversation.CanUserInput = true;
-            }
+            service.Conversation?.EndResponse();
 
             return result;
         }

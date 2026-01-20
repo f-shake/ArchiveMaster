@@ -29,5 +29,11 @@ public abstract class AiTwoStepServiceBase<TConfig>(AppConfig appConfig)
         AiTextGenerate?.Invoke(this, new GenericEventArgs<LlmOutputItem>(e));
     }
 
+    public Task<(string SystemPrompt, string UserPrompt)> GetFirstPromptAsync(CancellationToken ct)
+    {
+        throw new NotImplementedException();
+    }
+
+
     protected AppConfig AppConfig { get; } = appConfig;
 }

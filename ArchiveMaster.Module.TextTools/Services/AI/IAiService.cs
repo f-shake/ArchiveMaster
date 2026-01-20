@@ -12,4 +12,5 @@ public interface IAiService
     public void BindConversation(AiConversation conversation);
     public AiConversation Conversation { get; }
     internal void OnAiTextGenerate(LlmOutputItem e);
+    protected Task<(string SystemPrompt, string UserPrompt)> GetFirstPromptAsync(CancellationToken ct);
 }

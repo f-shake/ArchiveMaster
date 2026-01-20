@@ -8,12 +8,21 @@ namespace ArchiveMaster.ViewModels;
 
 public partial class AiConversation : ObservableObject
 {
+    public AiConversation()
+    {
+        Reset();
+    }
+
     public AvaloniaList<AiChatMessage> Messages { get; } = new AvaloniaList<AiChatMessage>();
 
     [ObservableProperty]
-    private bool canUserInput = false;
-    
+    private bool canUserInput;
 
+    [ObservableProperty]
+    private string inputText;
+
+    [ObservableProperty]
+    private bool canUserSend;
 
     public AiChatMessage AddSystemMessage(string systemPrompt)
     {
@@ -36,9 +45,33 @@ public partial class AiConversation : ObservableObject
         return message;
     }
 
+    public event EventHandler SendMessageRequested;
+
+    public void CallSendMessageRequested()
+    {
+        SendMessageRequested?.Invoke(this, EventArgs.Empty);
+        InputText = "";
+        CanUserInput = false;
+        CanUserSend = false;
+    }
+
+    public void EndResponse()
+    {
+        CanUserInput = true;
+        CanUserSend = true;
+    }
+
     public AiChatMessage LastSystemMessage => Messages.LastOrDefault(x => x.Sender == AiChatMessageSender.System);
 
     public AiChatMessage LastUserMessage => Messages.LastOrDefault(x => x.Sender == AiChatMessageSender.User);
 
     public AiChatMessage LastAssistantMessage => Messages.LastOrDefault(x => x.Sender == AiChatMessageSender.Assistant);
+
+    public void Reset()
+    {
+        Messages.Clear();
+        CanUserInput = false;
+        CanUserSend = true;
+        InputText = "（自动生成）";
+    }
 }

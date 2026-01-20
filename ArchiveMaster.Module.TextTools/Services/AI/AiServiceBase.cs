@@ -13,12 +13,34 @@ public abstract class AiServiceBase<TConfig>(AppConfig appConfig)
 
     public AiProviderConfig AI => AppConfig.GetOrCreateConfigWithDefaultKey<AiProvidersConfig>().CurrentProvider;
 
+    public bool NeedRemoveThink { get; } = true;
     public event GenericEventHandler<LlmOutputItem> AiTextGenerate;
     public string AiResult { get; protected set; }
 
     public void BindConversation(AiConversation conversation)
     {
         Conversation = conversation;
+        Conversation.SendMessageRequested += ConversationOnSendMessageRequested;
+    }
+
+    private async void ConversationOnSendMessageRequested(object sender, EventArgs e)
+    {
+        if (isFirstCall)
+        {
+            isFirstCall = false;
+            (var systemPrompt, var userPrompt) = await GetFirstPromptAsync(CancellationToken.None);
+            await this.CallAiWithStreamAsync(systemPrompt, userPrompt, null, NeedRemoveThink);
+        }
+        else
+        {
+        }
+    }
+
+    private bool isFirstCall = true;
+
+    public void Reset()
+    {
+        isFirstCall = false;
     }
 
     public AiConversation Conversation { get; private set; }
@@ -27,6 +49,9 @@ public abstract class AiServiceBase<TConfig>(AppConfig appConfig)
     {
         AiTextGenerate?.Invoke(this, new GenericEventArgs<LlmOutputItem>(e));
     }
+
+    public abstract Task<(string SystemPrompt, string UserPrompt)> GetFirstPromptAsync(CancellationToken ct);
+
 
     protected AppConfig AppConfig { get; } = appConfig;
 }
