@@ -29,8 +29,7 @@ public partial class AiChatMessage : ObservableObject
 
     public event EventHandler MessageAppended;
 
-    [ObservableProperty]
-    private AvaloniaList<InlineItem> inlines = new AvaloniaList<InlineItem>();
+    public AvaloniaList<InlineItem> Inlines { get; } = new AvaloniaList<InlineItem>();
 
     public void AddInline(InlineItem inline)
     {
@@ -44,6 +43,11 @@ public partial class AiChatMessage : ObservableObject
     }
 
     private bool isFrozen;
+    private string fullText;
+
+    public bool IsFrozen => isFrozen;
+
+    public string FullText => isFrozen ? fullText : throw new InvalidOperationException("当前消息未冻结，无法获取FullText");
 
     private ChatMessage chatMessage;
 
@@ -63,28 +67,36 @@ public partial class AiChatMessage : ObservableObject
         };
         chatMessage = new ChatMessage(role, string.Concat(Inlines.Select(i => i.Text)));
 
+        fullText = string.Concat(Inlines.Select(p => p.Text)).Trim();
 
         if (fold)
         {
-            StringBuilder str = new StringBuilder();
-            foreach (var inline in Inlines)
-            {
-                str.Append(inline.Text.Replace("\r", "").Replace("\n", ""));
-            }
-
             Inlines.Clear();
-            if (str.Length > maxLength)
+            var text = FullText.Replace("\r", "").Replace("\n", "");
+            if (text.Length > maxLength)
             {
                 //前半部分
-                Inlines.Add(new InlineItem(str.ToString(0, maxLength / 2)));
+                Inlines.Add(new InlineItem(text[..(maxLength / 2)]));
                 Inlines.Add(new InlineItem("  ...  ", foreground: Brushes.Gray));
-                Inlines.Add(new InlineItem(str.ToString(str.Length - maxLength / 2, maxLength / 2)));
+                Inlines.Add(new InlineItem(text[^(maxLength / 2)..]));
             }
             else
             {
-                Inlines.Add(new InlineItem(str.ToString()));
+                Inlines.Add(new InlineItem(text));
             }
         }
+        else
+        {
+            if (Sender == AiChatMessageSender.Assistant)
+            {
+                Inlines.Clear();
+                var inlines = SimpleMarkdownParser.ParseSimpleMarkdown(FullText);
+                Inlines.AddRange(inlines);
+            }
+        }
+
+        OnPropertyChanged(nameof(IsFrozen));
+        OnPropertyChanged(nameof(FullText));
     }
 
     public void AddInline(string message)
@@ -97,11 +109,10 @@ public partial class AiChatMessage : ObservableObject
         AddInline(new InlineItem(message));
     }
 
-    public void ReplaceWithFinalResponse(string text)
-    {
-        Inlines.Clear();
-        var inlines = SimpleMarkdownParser.ParseSimpleMarkdown(text);
-        Inlines.AddRange(inlines);
-        Freeze(false);
-    }
+    // public void ReplaceWithFinalResponse(string text)
+    // {
+    //     Inlines.Clear();
+    //     Inlines.AddRange(inlines);
+    //     Freeze(false);
+    // }
 }

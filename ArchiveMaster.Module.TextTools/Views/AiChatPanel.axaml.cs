@@ -34,5 +34,27 @@ namespace ArchiveMaster.Views
             get => GetValue(ConversationProperty);
             set => SetValue(ConversationProperty, value);
         }
+
+        private async void CopyButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var message = (AiChatMessage)((Button)sender).DataContext;
+                if (message == null)
+                {
+                    return;
+                }
+
+                var task = TopLevel.GetTopLevel(this)?.Clipboard?.SetTextAsync(message.FullText);
+                if (task != null)
+                {
+                    await task;
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Logger.Error(ex, "复制AI消息失败");
+            }
+        }
     }
 }

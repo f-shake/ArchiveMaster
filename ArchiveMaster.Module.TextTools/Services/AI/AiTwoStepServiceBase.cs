@@ -19,7 +19,6 @@ public abstract class AiTwoStepServiceBase<TConfig>(AppConfig appConfig)
 
     public ChatOptions ChatOptions { get; }
 
-    public AiConversation Conversation { get; private set; }
 
     public bool NeedRemoveThink { get; }
 

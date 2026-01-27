@@ -12,7 +12,7 @@ public static class SimpleMarkdownParser
 
         var lines = text.Replace("\r\n", "\n").Split('\n');
 
-        foreach (var line in lines)
+        foreach (var (index, line) in lines.Index())
         {
             int fontSize = 0;
             string content = line;
@@ -40,8 +40,10 @@ public static class SimpleMarkdownParser
                 yield return item;
             }
 
-            // 保留换行
-            yield return new InlineItem("\n") { FontSize = fontSize };
+            if (index < lines.Length - 1)
+            {
+                yield return new InlineItem("\n") { FontSize = fontSize };
+            }
         }
     }
 

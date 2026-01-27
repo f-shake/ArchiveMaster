@@ -98,7 +98,7 @@ public partial class AiConversation : ObservableObject
         }
         else
         {
-            AddUserMessage(prompt).Freeze(true);
+            AddUserMessage(prompt).Freeze(false);
         }
 
         string result = "";
@@ -113,7 +113,7 @@ public partial class AiConversation : ObservableObject
             await DialogService.ShowErrorDialogAsync("AI调用失败", ex);
         }
         
-        LastAssistantMessage.ReplaceWithFinalResponse(result);
+        LastAssistantMessage.Freeze(false);
         OnEndResponse();
     }
 }

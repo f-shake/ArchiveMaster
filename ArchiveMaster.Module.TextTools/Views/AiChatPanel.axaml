@@ -12,47 +12,92 @@
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
+    <UserControl.Resources>
+        <DataTemplate x:Key="CopyButton">
+            <Button>复制</Button>
+        </DataTemplate>
+    </UserControl.Resources>
+    <UserControl.Styles>
+        <Style Selector="Border.ChatBox">
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="Padding" Value="16,8" />
+        </Style>
+        <Style Selector="DockPanel.ChatContainer">
+            <Setter Property="Margin" Value="64,8,8,8" />
+            <Setter Property="HorizontalAlignment" Value="Right" />
+            <Setter Property="HorizontalSpacing" Value="8" />
+        </Style>
+        <Style Selector="Button.CopyButton">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground3}" />
+            <Setter Property="HorizontalAlignment" Value="Left" />
+            <Setter Property="VerticalAlignment" Value="Bottom" />
+            <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Foreground" Value="{DynamicResource Foreground0}" />
+            </Style>
+        </Style>
+    </UserControl.Styles>
     <Grid RowDefinitions="*,8,Auto">
         <ScrollViewer x:Name="scr">
+
             <ItemsControl ItemsSource="{Binding $parent[UserControl].Conversation.Messages}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <Panel>
                             <!--  用户  -->
-                            <Border
-                                Margin="64,8,8,8"
-                                Padding="16,8"
-                                HorizontalAlignment="Right"
-                                Background="{DynamicResource AccentB2}"
-                                CornerRadius="8"
+                            <DockPanel
+                                Classes="ChatContainer"
                                 IsVisible="{Binding Sender, Converter={x:Static cvt:Converters.EqualWithParameter}, ConverterParameter=User}">
-                                <SelectableTextBlock
-                                    b:TextBlockInlinesBehavior.ItemsSource="{Binding Inlines}"
-                                    TextWrapping="Wrap" />
-                            </Border>
+                                <Button
+                                    Classes="Icon CopyButton"
+                                    Click="CopyButton_Click"
+                                    Content="{ic:FluentIcon Icon=Copy}"
+                                    DockPanel.Dock="Left"
+                                    IsVisible="{Binding IsFrozen}" />
+                                <Border
+                                    Background="{DynamicResource AccentB2}"
+                                    Classes="ChatBox">
+                                    <SelectableTextBlock
+                                        b:TextBlockInlinesBehavior.ItemsSource="{Binding Inlines}"
+                                        TextWrapping="Wrap" />
+                                </Border>
+                            </DockPanel>
+
 
                             <!--  系统  -->
-                            <Border
-                                Margin="64,8,8,8"
-                                Padding="16,8"
-                                HorizontalAlignment="Right"
-                                Background="{DynamicResource Background2}"
-                                CornerRadius="8"
+                            <DockPanel
+                                Classes="ChatContainer"
                                 IsVisible="{Binding Sender, Converter={x:Static cvt:Converters.EqualWithParameter}, ConverterParameter=System}">
-                                <SelectableTextBlock
-                                    b:TextBlockInlinesBehavior.ItemsSource="{Binding Inlines}"
-                                    Opacity="0.75"
-                                    TextWrapping="Wrap" />
-                            </Border>
-
+                                <!--  <Button  -->
+                                <!--  Classes="Icon CopyButton"  -->
+                                <!--  Content="{ic:FluentIcon Icon=Copy}"  -->
+                                <!--  DockPanel.Dock="Left" />  -->
+                                <Border
+                                    HorizontalAlignment="Right"
+                                    Background="{DynamicResource Background2}"
+                                    Classes="ChatBox">
+                                    <SelectableTextBlock
+                                        b:TextBlockInlinesBehavior.ItemsSource="{Binding Inlines}"
+                                        Opacity="0.75"
+                                        TextWrapping="Wrap" />
+                                </Border>
+                            </DockPanel>
                             <!--  AI  -->
-                            <Border
-                                Margin="16,8"
-                                IsVisible="{Binding Sender, Converter={x:Static cvt:Converters.EqualWithParameter}, ConverterParameter=Assistant}">
-                                <SelectableTextBlock
-                                    b:TextBlockInlinesBehavior.ItemsSource="{Binding Inlines}"
-                                    TextWrapping="Wrap" />
-                            </Border>
+
+                            <StackPanel
+                                IsVisible="{Binding Sender, Converter={x:Static cvt:Converters.EqualWithParameter}, ConverterParameter=Assistant}"
+                                Orientation="Vertical"
+                                Spacing="8">
+                                <Border Margin="16,8">
+                                    <SelectableTextBlock
+                                        b:TextBlockInlinesBehavior.ItemsSource="{Binding Inlines}"
+                                        TextWrapping="Wrap" />
+                                </Border>
+                                <Button
+                                    Classes="Icon CopyButton"
+                                    Click="CopyButton_Click"
+                                    Content="{ic:FluentIcon Icon=Copy}"
+                                    IsVisible="{Binding IsFrozen}" />
+                            </StackPanel>
                         </Panel>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
@@ -64,8 +109,12 @@
             Margin="8"
             ColumnDefinitions="*,8,Auto">
             <TextBox
+                AcceptsReturn="True"
+                AcceptsTab="True"
                 IsEnabled="{Binding $parent[UserControl].Conversation.CanUserInput}"
-                Text="{Binding $parent[UserControl].Conversation.InputText}" />
+                MaxLines="6"
+                Text="{Binding $parent[UserControl].Conversation.InputText}"
+                TextWrapping="Wrap" />
             <Panel Grid.Column="2">
                 <Panel.Styles>
                     <Style Selector="Button">
