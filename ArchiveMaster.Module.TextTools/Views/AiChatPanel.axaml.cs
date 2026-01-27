@@ -12,6 +12,10 @@ namespace ArchiveMaster.Views
 {
     public partial class AiChatPanel : UserControl
     {
+        public static readonly StyledProperty<AiConversation> ConversationProperty =
+            AvaloniaProperty.Register<AiChatPanel, AiConversation>(
+                nameof(Conversation));
+
         public AiChatPanel()
         {
             InitializeComponent();
@@ -24,10 +28,6 @@ namespace ArchiveMaster.Views
                 }
             });
         }
-
-        public static readonly StyledProperty<AiConversation> ConversationProperty =
-            AvaloniaProperty.Register<AiChatPanel, AiConversation>(
-                nameof(Conversation));
 
         public AiConversation Conversation
         {

@@ -12,11 +12,6 @@
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
-    <UserControl.Resources>
-        <DataTemplate x:Key="CopyButton">
-            <Button>复制</Button>
-        </DataTemplate>
-    </UserControl.Resources>
     <UserControl.Styles>
         <Style Selector="Border.ChatBox">
             <Setter Property="CornerRadius" Value="8" />
@@ -27,12 +22,15 @@
             <Setter Property="HorizontalAlignment" Value="Right" />
             <Setter Property="HorizontalSpacing" Value="8" />
         </Style>
-        <Style Selector="Button.CopyButton">
-            <Setter Property="Foreground" Value="{DynamicResource Foreground3}" />
+        <Style Selector="Button.ChatButton">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground2}" />
             <Setter Property="HorizontalAlignment" Value="Left" />
             <Setter Property="VerticalAlignment" Value="Bottom" />
             <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
                 <Setter Property="Foreground" Value="{DynamicResource Foreground0}" />
+            </Style>
+            <Style Selector="^:disabled /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Foreground" Value="{DynamicResource Foreground3}" />
             </Style>
         </Style>
     </UserControl.Styles>
@@ -48,11 +46,12 @@
                                 Classes="ChatContainer"
                                 IsVisible="{Binding Sender, Converter={x:Static cvt:Converters.EqualWithParameter}, ConverterParameter=User}">
                                 <Button
-                                    Classes="Icon CopyButton"
+                                    Classes="Icon ChatButton"
                                     Click="CopyButton_Click"
                                     Content="{ic:FluentIcon Icon=Copy}"
                                     DockPanel.Dock="Left"
-                                    IsVisible="{Binding IsFrozen}" />
+                                    IsVisible="{Binding IsFrozen}"
+                                    ToolTip.Tip="复制内容" />
                                 <Border
                                     Background="{DynamicResource AccentB2}"
                                     Classes="ChatBox">
@@ -67,10 +66,6 @@
                             <DockPanel
                                 Classes="ChatContainer"
                                 IsVisible="{Binding Sender, Converter={x:Static cvt:Converters.EqualWithParameter}, ConverterParameter=System}">
-                                <!--  <Button  -->
-                                <!--  Classes="Icon CopyButton"  -->
-                                <!--  Content="{ic:FluentIcon Icon=Copy}"  -->
-                                <!--  DockPanel.Dock="Left" />  -->
                                 <Border
                                     HorizontalAlignment="Right"
                                     Background="{DynamicResource Background2}"
@@ -92,11 +87,24 @@
                                         b:TextBlockInlinesBehavior.ItemsSource="{Binding Inlines}"
                                         TextWrapping="Wrap" />
                                 </Border>
-                                <Button
-                                    Classes="Icon CopyButton"
-                                    Click="CopyButton_Click"
-                                    Content="{ic:FluentIcon Icon=Copy}"
-                                    IsVisible="{Binding IsFrozen}" />
+                                <StackPanel
+                                    Orientation="Horizontal"
+                                    Spacing="8">
+                                    <Button
+                                        Classes="Icon ChatButton"
+                                        Click="CopyButton_Click"
+                                        Content="{ic:FluentIcon Icon=Copy}"
+                                        IsVisible="{Binding IsFrozen}"
+                                        ToolTip.Tip="复制内容" />
+                                    <Button
+                                        Classes="Icon ChatButton"
+                                        Command="{Binding $parent[UserControl].Conversation.RegenerateCommand}"
+                                        CommandParameter="{Binding .}"
+                                        Content="{ic:FluentIcon Icon=ArrowClockwise}"
+                                        IsEnabled="{Binding !$parent[UserControl].Conversation.SendCommand.IsRunning}"
+                                        IsVisible="{Binding IsFrozen}"
+                                        ToolTip.Tip="重新生成" />
+                                </StackPanel>
                             </StackPanel>
                         </Panel>
                     </DataTemplate>
@@ -107,23 +115,33 @@
         <Grid
             Grid.Row="2"
             Margin="8"
-            ColumnDefinitions="*,8,Auto">
+            ColumnDefinitions="Auto,8,*,8,Auto">
+            <Grid.Styles>
+                <Style Selector="Button">
+                    <Setter Property="Width" Value="36" />
+                    <Setter Property="Height" Value="36" />
+                    <Setter Property="Padding" Value="0" />
+                    <Setter Property="CornerRadius" Value="18" />
+                </Style>
+            </Grid.Styles>
+            <Button
+                Command="{Binding $parent[UserControl].Conversation.ResetCommand}"
+                Content="{ic:FluentIcon Icon=ArrowReset}"
+                Foreground="White"
+                IsDefault="True"
+                IsEnabled="{Binding !$parent[UserControl].Conversation.SendCommand.IsRunning}"
+                ToolTip.Tip="重置" />
+
             <TextBox
+                Grid.Column="2"
                 AcceptsReturn="True"
                 AcceptsTab="True"
                 IsEnabled="{Binding $parent[UserControl].Conversation.CanUserInput}"
                 MaxLines="6"
                 Text="{Binding $parent[UserControl].Conversation.InputText}"
                 TextWrapping="Wrap" />
-            <Panel Grid.Column="2">
-                <Panel.Styles>
-                    <Style Selector="Button">
-                        <Setter Property="Width" Value="36" />
-                        <Setter Property="Height" Value="36" />
-                        <Setter Property="Padding" Value="0" />
-                        <Setter Property="CornerRadius" Value="18" />
-                    </Style>
-                </Panel.Styles>
+            <Panel Grid.Column="4">
+
                 <Button
                     Classes="Primary"
                     Command="{Binding $parent[UserControl].Conversation.SendCommand}"
@@ -131,14 +149,16 @@
                     Foreground="White"
                     IsDefault="True"
                     IsEnabled="{Binding $parent[UserControl].Conversation.InputText, Converter={x:Static cvt:Converters.IsNotNull}}"
-                    IsVisible="{Binding !$parent[UserControl].Conversation.SendCommand.IsRunning}" />
+                    IsVisible="{Binding !$parent[UserControl].Conversation.SendCommand.IsRunning}"
+                    ToolTip.Tip="发送" />
                 <Button
                     Background="Red"
                     Command="{Binding $parent[UserControl].Conversation.SendCancelCommand}"
                     Content="{ic:FluentIcon Icon=Stop}"
                     Foreground="White"
                     IsDefault="True"
-                    IsVisible="{Binding $parent[UserControl].Conversation.SendCommand.IsRunning}">
+                    IsVisible="{Binding $parent[UserControl].Conversation.SendCommand.IsRunning}"
+                    ToolTip.Tip="取消">
                     <Button.Styles>
                         <Style Selector="Button">
                             <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">

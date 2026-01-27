@@ -9,6 +9,15 @@ namespace ArchiveMaster.ViewModels;
 
 public partial class AiChatMessage : ObservableObject
 {
+    private ChatMessage chatMessage;
+
+    private string fullText;
+
+    private bool isFrozen;
+
+    [ObservableProperty]
+    private AiChatMessageSender sender;
+
     public AiChatMessage()
     {
     }
@@ -24,12 +33,15 @@ public partial class AiChatMessage : ObservableObject
         AddInline(message);
     }
 
-    [ObservableProperty]
-    private AiChatMessageSender sender;
-
     public event EventHandler MessageAppended;
 
+    public ChatMessage ChatMessage =>
+        !isFrozen ? throw new InvalidOperationException("当前消息未冻结，无法获取ChatMessage") : chatMessage;
+
+    public string FullText => isFrozen ? fullText : throw new InvalidOperationException("当前消息未冻结，无法获取FullText");
     public AvaloniaList<InlineItem> Inlines { get; } = new AvaloniaList<InlineItem>();
+
+    public bool IsFrozen => isFrozen;
 
     public void AddInline(InlineItem inline)
     {
@@ -41,18 +53,15 @@ public partial class AiChatMessage : ObservableObject
         Inlines.Add(inline);
         MessageAppended?.Invoke(this, EventArgs.Empty);
     }
+    public void AddInline(string message)
+    {
+        if (message.Contains('\r'))
+        {
+            message = message.Replace("\r", "");
+        }
 
-    private bool isFrozen;
-    private string fullText;
-
-    public bool IsFrozen => isFrozen;
-
-    public string FullText => isFrozen ? fullText : throw new InvalidOperationException("当前消息未冻结，无法获取FullText");
-
-    private ChatMessage chatMessage;
-
-    public ChatMessage ChatMessage =>
-        !isFrozen ? throw new InvalidOperationException("当前消息未冻结，无法获取ChatMessage") : chatMessage;
+        AddInline(new InlineItem(message));
+    }
 
     public void Freeze(bool fold, int maxLength = 50)
     {
@@ -98,17 +107,6 @@ public partial class AiChatMessage : ObservableObject
         OnPropertyChanged(nameof(IsFrozen));
         OnPropertyChanged(nameof(FullText));
     }
-
-    public void AddInline(string message)
-    {
-        if (message.Contains('\r'))
-        {
-            message = message.Replace("\r", "");
-        }
-
-        AddInline(new InlineItem(message));
-    }
-
     // public void ReplaceWithFinalResponse(string text)
     // {
     //     Inlines.Clear();

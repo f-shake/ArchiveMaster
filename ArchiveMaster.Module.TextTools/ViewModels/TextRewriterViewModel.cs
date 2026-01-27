@@ -42,6 +42,7 @@ public partial class TextRewriterViewModel : AiViewModelBase<TextRewriterConfig>
     private AiAgentGroup selectedAiAgentGroup;
 
     private TextRewriterService service;
+
     public TextRewriterViewModel(ViewModelServices services) : base(services)
     {
         AiConversation = HostServices.GetRequiredService<AiConversation>();
@@ -57,6 +58,7 @@ public partial class TextRewriterViewModel : AiViewModelBase<TextRewriterConfig>
         InitializeAiAgents();
         service.Config = Config;
     }
+
     private void InitializeAiAgents()
     {
         AiAgentGroups.Clear();
@@ -86,15 +88,22 @@ public partial class TextRewriterViewModel : AiViewModelBase<TextRewriterConfig>
                     Config.AiAgents.Add(agent);
                     aiAgentGroup.Agents.Add(agent);
                 }
+
+                if (Config.SelectedAiAgentTypeName == type.FullName)
+                {
+                    SelectedAiAgentGroup = aiAgentGroup;
+                    SelectedAiAgent = agent;
+                }
             }
 
             AiAgentGroups.Add(aiAgentGroup);
         }
     }
-    
+
     partial void OnSelectedAiAgentChanged(AiAgentBase value)
     {
         service.AiAgent = value;
-        AiConversation.Reset();
+        Config.SelectedAiAgentTypeName = value.GetType().FullName;
+        AiConversation.ResetCommand.Execute(null);
     }
 }

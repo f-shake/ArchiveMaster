@@ -14,7 +14,9 @@
     ShowBottomBar="False"
     mc:Ignorable="d">
     <v:TwoStepPanelBase.ConfigsContent>
-        <ct:StackFormItemGroup x:Name="stkForm">
+        <ct:StackFormItemGroup
+            x:Name="stkForm"
+            IsEnabled="{Binding !AiConversation.SendCommand.IsRunning}">
             <ct:FormItem Label="文本源：">
                 <v:TextSourceInput Source="{Binding Config.Source}" />
             </ct:FormItem>

@@ -18,6 +18,8 @@ public partial class AiConversation : ObservableObject
     [ObservableProperty]
     private string inputText;
 
+    private bool isRegenerating;
+
     public AiConversation(IDialogService dialogService)
     {
         DialogService = dialogService;
@@ -27,10 +29,15 @@ public partial class AiConversation : ObservableObject
     public event EventHandler MessageAppended;
 
     public IDialogService DialogService { get; }
+
     public AiChatMessage LastAssistantMessage => Messages.LastOrDefault(x => x.Sender == AiChatMessageSender.Assistant);
+
     public AiChatMessage LastSystemMessage => Messages.LastOrDefault(x => x.Sender == AiChatMessageSender.System);
+
     public AiChatMessage LastUserMessage => Messages.LastOrDefault(x => x.Sender == AiChatMessageSender.User);
+
     public AvaloniaList<AiChatMessage> Messages { get; } = new AvaloniaList<AiChatMessage>();
+
     public IAiService Service { get; private set; }
 
     public AiChatMessage AddAssistantMessage()
@@ -52,6 +59,7 @@ public partial class AiConversation : ObservableObject
     {
         Service = service;
     }
+
     public IList<ChatMessage> GetChatMessages()
     {
         return Messages.Select(x => x.ChatMessage).ToList();
@@ -60,13 +68,6 @@ public partial class AiConversation : ObservableObject
     public void OnEndResponse()
     {
         CanUserInput = true;
-    }
-
-    public void Reset()
-    {
-        Messages.Clear();
-        CanUserInput = false;
-        InputText = "（自动生成）";
     }
 
     private AiChatMessage AddMessage(AiChatMessageSender sender, string text = "")
@@ -84,36 +85,84 @@ public partial class AiConversation : ObservableObject
         CanUserInput = false;
     }
 
+    [RelayCommand]
+    private async Task RegenerateAsync(AiChatMessage message)
+    {
+        var index = Messages.IndexOf(message);
+        if (index < 0)
+        {
+            throw new Exception("消息不存在");
+        }
+
+        Messages.RemoveRange(index, Messages.Count - index);
+        try
+        {
+            isRegenerating = true;
+            await SendCommand.ExecuteAsync(null);
+        }
+        finally
+        {
+            isRegenerating = false;
+        }
+    }
+
+    [RelayCommand]
+    private void Reset()
+    {
+        if (SendCommand.IsRunning)
+        {
+            throw new Exception("正在生成中");
+        }
+
+        Messages.Clear();
+        CanUserInput = false;
+        InputText = "（自动生成）";
+    }
+
     [RelayCommand(IncludeCancelCommand = true)]
     private async Task SendAsync(CancellationToken ct)
     {
-        var prompt = InputText;
+        if (SendCommand.IsRunning)
+        {
+            throw new Exception("正在生成中");
+        }
+
+        var prompt = isRegenerating ? LastUserMessage.FullText : InputText;
+        bool isFirst = LastSystemMessage == null;
         OnBeginResponse();
-        if (LastSystemMessage == null) //第一次
-        {
-            var (systemPrompt, userPrompt) = await Service.GetFirstPromptAsync(ct);
-
-            AddSystemMessage(systemPrompt).Freeze(true);
-            AddUserMessage(userPrompt).Freeze(true);
-        }
-        else
-        {
-            AddUserMessage(prompt).Freeze(false);
-        }
-
-        string result = "";
-        var messages = GetChatMessages();
-        var assistantMessage = AddAssistantMessage();
         try
         {
-            result = await Service.CallAiWithStreamAsync(messages,assistantMessage, ct);
+            if (isFirst)
+            {
+                var (systemPrompt, userPrompt) = await Service.GetFirstPromptAsync(ct);
+
+                AddSystemMessage(systemPrompt).Freeze(true);
+                AddUserMessage(userPrompt).Freeze(true);
+            }
+            else
+            {
+                if (!isRegenerating)
+                {
+                    AddUserMessage(prompt).Freeze(false);
+                }
+            }
+
+            var messages = GetChatMessages();
+            var assistantMessage = AddAssistantMessage();
+            try
+            {
+                await Service.CallAiWithStreamAsync(messages, assistantMessage, ct);
+            }
+            catch (Exception ex)
+            {
+                await DialogService.ShowErrorDialogAsync("AI调用失败", ex);
+            }
+
+            LastAssistantMessage.Freeze(false);
         }
-        catch (Exception ex)
+        finally
         {
-            await DialogService.ShowErrorDialogAsync("AI调用失败", ex);
+            OnEndResponse();
         }
-        
-        LastAssistantMessage.Freeze(false);
-        OnEndResponse();
     }
 }

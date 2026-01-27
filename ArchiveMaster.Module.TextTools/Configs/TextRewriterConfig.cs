@@ -16,7 +16,8 @@ public partial class TextRewriterConfig : ConfigBase
     [ObservableProperty]
     private List<AiAgentBase> aiAgents = new List<AiAgentBase>();
 
-    public event EventHandler ModeChanged;
+    [ObservableProperty]
+    private string selectedAiAgentTypeName;
 
 
     public override void Check()

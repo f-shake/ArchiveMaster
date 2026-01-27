@@ -47,6 +47,23 @@ public static class SimpleMarkdownParser
         }
     }
 
+    private static int FindNextSpecial(string text, int start)
+    {
+        int nextBold = text.IndexOf("**", start);
+        int nextItalic = text.IndexOf('*', start);
+
+        int next = -1;
+
+        if (nextBold >= 0 && nextItalic >= 0)
+            next = Math.Min(nextBold, nextItalic);
+        else if (nextBold >= 0)
+            next = nextBold;
+        else if (nextItalic >= 0)
+            next = nextItalic;
+
+        return next >= 0 ? next : text.Length;
+    }
+
     private static IEnumerable<InlineItem> ParseInline(string text, int fontSize)
     {
         int i = 0;
@@ -97,22 +114,5 @@ public static class SimpleMarkdownParser
 
             i = next;
         }
-    }
-
-    private static int FindNextSpecial(string text, int start)
-    {
-        int nextBold = text.IndexOf("**", start);
-        int nextItalic = text.IndexOf('*', start);
-
-        int next = -1;
-
-        if (nextBold >= 0 && nextItalic >= 0)
-            next = Math.Min(nextBold, nextItalic);
-        else if (nextBold >= 0)
-            next = nextBold;
-        else if (nextItalic >= 0)
-            next = nextItalic;
-
-        return next >= 0 ? next : text.Length;
     }
 }
