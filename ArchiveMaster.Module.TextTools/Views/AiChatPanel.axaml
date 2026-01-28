@@ -128,15 +128,14 @@
                 Command="{Binding $parent[UserControl].Conversation.ResetCommand}"
                 Content="{ic:FluentIcon Icon=ArrowReset}"
                 Foreground="White"
-                IsDefault="True"
                 IsEnabled="{Binding !$parent[UserControl].Conversation.SendCommand.IsRunning}"
                 ToolTip.Tip="重置" />
 
             <TextBox
                 Grid.Column="2"
-                AcceptsReturn="True"
                 AcceptsTab="True"
                 IsEnabled="{Binding $parent[UserControl].Conversation.CanUserInput}"
+                KeyDown="InputTextBox_KeyDown"
                 MaxLines="6"
                 Text="{Binding $parent[UserControl].Conversation.InputText}"
                 TextWrapping="Wrap" />
@@ -156,7 +155,6 @@
                     Command="{Binding $parent[UserControl].Conversation.SendCancelCommand}"
                     Content="{ic:FluentIcon Icon=Stop}"
                     Foreground="White"
-                    IsDefault="True"
                     IsVisible="{Binding $parent[UserControl].Conversation.SendCommand.IsRunning}"
                     ToolTip.Tip="取消">
                     <Button.Styles>
