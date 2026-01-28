@@ -25,24 +25,6 @@ public static class AiServiceExtensions
             return result;
         }
 
-        [Obsolete]
-        public async Task<string> CallAiWithStreamAsync(string systemPrompt,
-            string userPrompt, ChatOptions options,
-            bool removeThink, CancellationToken ct = default)
-        {
-            LlmCallerService s = new LlmCallerService(service.AI);
-            var result = await s.CallWithStreamAsync(systemPrompt, userPrompt, options,
-                (_, e) => { service.OnAiTextGenerate(e.Value); }, ct);
-
-            if (removeThink)
-            {
-                result = LlmCallerService.RemoveThink(result);
-            }
-
-
-            return result;
-        }
-
         public void CheckTextSource(string text, int maxLength, string name)
         {
             if (string.IsNullOrWhiteSpace(text))

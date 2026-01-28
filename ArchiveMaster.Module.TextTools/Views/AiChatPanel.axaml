@@ -33,6 +33,10 @@
                 <Setter Property="Foreground" Value="{DynamicResource Foreground3}" />
             </Style>
         </Style>
+        <Style Selector="SelectableTextBlock.ChatMessage">
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="LineSpacing" Value="2" />
+        </Style>
     </UserControl.Styles>
     <Grid RowDefinitions="*,8,Auto">
         <ScrollViewer x:Name="scr">
@@ -57,7 +61,7 @@
                                     Classes="ChatBox">
                                     <SelectableTextBlock
                                         b:TextBlockInlinesBehavior.ItemsSource="{Binding Inlines}"
-                                        TextWrapping="Wrap" />
+                                        Classes="ChatMessage" />
                                 </Border>
                             </DockPanel>
 
@@ -72,8 +76,8 @@
                                     Classes="ChatBox">
                                     <SelectableTextBlock
                                         b:TextBlockInlinesBehavior.ItemsSource="{Binding Inlines}"
-                                        Opacity="0.75"
-                                        TextWrapping="Wrap" />
+                                        Classes="ChatMessage"
+                                        Opacity="0.75" />
                                 </Border>
                             </DockPanel>
                             <!--  AI  -->
@@ -85,7 +89,7 @@
                                 <Border Margin="16,8">
                                     <SelectableTextBlock
                                         b:TextBlockInlinesBehavior.ItemsSource="{Binding Inlines}"
-                                        TextWrapping="Wrap" />
+                                        Classes="ChatMessage" />
                                 </Border>
                                 <StackPanel
                                     Orientation="Horizontal"

@@ -8,8 +8,6 @@ namespace ArchiveMaster.Services;
 
 public interface IAiService
 {
-    public event GenericEventHandler<LlmOutputItem> AiTextGenerate;
-
     public AiProviderConfig AI { get; }
     public ChatOptions ChatOptions { get; }
 

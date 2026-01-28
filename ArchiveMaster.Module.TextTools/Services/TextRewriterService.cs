@@ -24,26 +24,6 @@ public class TextRewriterService(AppConfig appConfig)
     public AiAgentBase AiAgent { get; set; }
 
 
-    private async Task<string> GetSystemPromptAsync(CancellationToken ct)
-    {
-        var prompt = new StringBuilder();
-        prompt.AppendLine("你是一个文本处理机器人。");
-        prompt.AppendLine(await AiAgent.BuildSystemPromptAsync(ct));
-
-
-        //处理额外提示
-        if (AiAgent.CanUserSetExtraPrompt && !string.IsNullOrWhiteSpace(AiAgent.ExtraPrompt))
-        {
-            prompt.AppendLine($"额外要求：{AiAgent.ExtraPrompt}");
-        }
-
-        //增加其他要求
-        prompt.AppendLine("要求输出的时候，仅输出结果，不要输出其他内容。");
-        prompt.AppendLine("输出格式上，要完全符合用户输入的语段，不要添加额外的内容。" +
-                          "若有必要输出MarkDown，只能包含标题、粗体、斜体三种样式，不要输出表格。");
-        return prompt.ToString();
-    }
-
     public override async Task<(string SystemPrompt, string UserPrompt)> GetFirstPromptAsync(CancellationToken ct)
     {
         if (AiAgent == null)
@@ -62,5 +42,29 @@ public class TextRewriterService(AppConfig appConfig)
 
         var prompt = await GetSystemPromptAsync(ct);
         return (prompt, text);
+    }
+
+    public override void Reset()
+    {
+    }
+
+    private async Task<string> GetSystemPromptAsync(CancellationToken ct)
+    {
+        var prompt = new StringBuilder();
+        prompt.AppendLine("你是一个文本处理机器人。");
+        prompt.AppendLine(await AiAgent.BuildSystemPromptAsync(ct));
+
+
+        //处理额外提示
+        if (AiAgent.CanUserSetExtraPrompt && !string.IsNullOrWhiteSpace(AiAgent.ExtraPrompt))
+        {
+            prompt.AppendLine($"额外要求：{AiAgent.ExtraPrompt}");
+        }
+
+        //增加其他要求
+        prompt.AppendLine("要求输出的时候，仅输出结果，不要输出其他内容。");
+        prompt.AppendLine("输出格式上，要完全符合用户输入的语段，不要添加额外的内容。" +
+                          "若有必要输出MarkDown，只能包含标题、粗体、斜体三种样式，不要输出表格。");
+        return prompt.ToString();
     }
 }

@@ -12,6 +12,8 @@ namespace ArchiveMaster.ViewModels;
 
 public partial class AiConversation : ObservableObject
 {
+    public ViewModelServices Services { get; }
+
     [ObservableProperty]
     private bool canUserInput;
 
@@ -20,15 +22,14 @@ public partial class AiConversation : ObservableObject
 
     private bool isRegenerating;
 
-    public AiConversation(IDialogService dialogService)
+    public AiConversation(ViewModelServices services)
     {
-        DialogService = dialogService;
+        Services = services;
         Reset();
     }
 
     public event EventHandler MessageAppended;
 
-    public IDialogService DialogService { get; }
 
     public AiChatMessage LastAssistantMessage => Messages.LastOrDefault(x => x.Sender == AiChatMessageSender.Assistant);
 
@@ -70,6 +71,19 @@ public partial class AiConversation : ObservableObject
         CanUserInput = true;
     }
 
+    [RelayCommand]
+    public void Reset()
+    {
+        if (SendCommand.IsRunning)
+        {
+            throw new Exception("正在生成中");
+        }
+
+        Messages.Clear();
+        CanUserInput = false;
+        InputText = "（自动生成）";
+    }
+
     private AiChatMessage AddMessage(AiChatMessageSender sender, string text = "")
     {
         var message = new AiChatMessage(sender, text);
@@ -106,19 +120,6 @@ public partial class AiConversation : ObservableObject
         }
     }
 
-    [RelayCommand]
-    private void Reset()
-    {
-        if (SendCommand.IsRunning)
-        {
-            throw new Exception("正在生成中");
-        }
-
-        Messages.Clear();
-        CanUserInput = false;
-        InputText = "（自动生成）";
-    }
-
     [RelayCommand(IncludeCancelCommand = true)]
     private async Task SendAsync(CancellationToken ct)
     {
@@ -149,19 +150,20 @@ public partial class AiConversation : ObservableObject
 
             var messages = GetChatMessages();
             var assistantMessage = AddAssistantMessage();
-            try
-            {
-                await Service.CallAiWithStreamAsync(messages, assistantMessage, ct);
-            }
-            catch (Exception ex)
-            {
-                await DialogService.ShowErrorDialogAsync("AI调用失败", ex);
-            }
 
-            LastAssistantMessage.Freeze(false);
+            await Service.CallAiWithStreamAsync(messages, assistantMessage, ct);
+        }
+        catch (Exception ex)
+        {
+            await Services.Dialog.ShowErrorDialogAsync("AI调用失败", ex);
         }
         finally
         {
+            if (LastAssistantMessage?.IsFrozen == false)
+            {
+                LastAssistantMessage.Freeze(false);
+            }
+
             OnEndResponse();
         }
     }

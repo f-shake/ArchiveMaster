@@ -19,7 +19,7 @@ using Serilog;
 
 namespace ArchiveMaster.ViewModels;
 
-public partial class TextRewriterViewModel : AiViewModelBase<TextRewriterConfig>
+public partial class TextRewriterViewModel : AiChatViewModelBase<TextRewriterService,TextRewriterConfig>
 {
     private static readonly Dictionary<string, (string Description, int Order)>
         AiAgentGroupMap = new()
@@ -41,22 +41,16 @@ public partial class TextRewriterViewModel : AiViewModelBase<TextRewriterConfig>
     [ObservableProperty]
     private AiAgentGroup selectedAiAgentGroup;
 
-    private TextRewriterService service;
 
     public TextRewriterViewModel(ViewModelServices services) : base(services)
     {
-        AiConversation = HostServices.GetRequiredService<AiConversation>();
-        service = HostServices.GetRequiredService<TextRewriterService>();
-        AiConversation.BindService(service);
     }
 
-    private AiConversation AiConversation { get; }
 
     protected override void OnConfigChanged()
     {
         base.OnConfigChanged();
         InitializeAiAgents();
-        service.Config = Config;
     }
 
     private void InitializeAiAgents()
@@ -102,8 +96,8 @@ public partial class TextRewriterViewModel : AiViewModelBase<TextRewriterConfig>
 
     partial void OnSelectedAiAgentChanged(AiAgentBase value)
     {
-        service.AiAgent = value;
+        Service.AiAgent = value;
         Config.SelectedAiAgentTypeName = value.GetType().FullName;
-        AiConversation.ResetCommand.Execute(null);
+        AiConversation.Reset();
     }
 }

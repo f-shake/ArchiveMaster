@@ -53,6 +53,7 @@ public partial class AiChatMessage : ObservableObject
         Inlines.Add(inline);
         MessageAppended?.Invoke(this, EventArgs.Empty);
     }
+
     public void AddInline(string message)
     {
         if (message.Contains('\r'))
@@ -80,18 +81,14 @@ public partial class AiChatMessage : ObservableObject
 
         if (fold)
         {
-            Inlines.Clear();
-            var text = FullText.Replace("\r", "").Replace("\n", "");
-            if (text.Length > maxLength)
+            if (FullText.Length > maxLength)
             {
-                //前半部分
+                Inlines.Clear();
+                var text = FullText.Replace("\r", "").Replace("\n", "");
                 Inlines.Add(new InlineItem(text[..(maxLength / 2)]));
                 Inlines.Add(new InlineItem("  ...  ", foreground: Brushes.Gray));
                 Inlines.Add(new InlineItem(text[^(maxLength / 2)..]));
-            }
-            else
-            {
-                Inlines.Add(new InlineItem(text));
+                Inlines.Add(new InlineItem($"（共{FullText.Length}字）"));
             }
         }
         else

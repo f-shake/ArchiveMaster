@@ -17,11 +17,12 @@ public abstract class AiServiceBase<TConfig>(AppConfig appConfig)
     public ChatOptions ChatOptions { get; } = null;
     public bool NeedRemoveThink { get; } = true;
     protected AppConfig AppConfig { get; } = appConfig;
-
     public abstract Task<(string SystemPrompt, string UserPrompt)> GetFirstPromptAsync(CancellationToken ct);
 
     public void OnAiTextGenerate(LlmOutputItem e)
     {
         AiTextGenerate?.Invoke(this, new GenericEventArgs<LlmOutputItem>(e));
     }
+
+    public abstract void Reset();
 }

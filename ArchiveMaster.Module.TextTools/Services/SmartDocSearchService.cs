@@ -18,11 +18,8 @@ using Markdig;
 
 namespace ArchiveMaster.Services
 {
-    public class SmartDocSearchService(AppConfig appConfig)
-        : AiTwoStepServiceBase<SmartDocSearchConfig>(appConfig)
+    public class SmartDocSearchService(AppConfig appConfig) : AiServiceBase<SmartDocSearchConfig>(appConfig)
     {
-        public string AiConclude { get; private set; }
-
         public List<TextSearchResult> SearchResults { get; private set; }
 
         public static List<T> RandomSelect<T>(List<T> source, int m)
@@ -38,56 +35,13 @@ namespace ArchiveMaster.Services
             return selected.Select(i => source[i]).ToList();
         }
 
-        public override async Task ExecuteAsync(CancellationToken ct)
+        public override Task<(string SystemPrompt, string UserPrompt)> GetFirstPromptAsync(CancellationToken ct)
         {
-            await Task.Run(async () =>
+            if (SearchResults == null)
             {
-                NotifyMessage("正在调用AI进行归纳总结");
-                AiConclude = await GetAiConcludeAsync(ct);
-            }, ct);
-        }
-
-        public override IEnumerable<SimpleFileInfo> GetInitializedFiles()
-        {
-            return null;
-        }
-
-        public override async Task InitializeAsync(CancellationToken ct)
-        {
-            await Task.Run(async () =>
-            {
-                NotifyMessage("正在文档中搜索关键词");
-                SearchResults = await GetSearchResultAsync(ct);
-            }, ct);
-        }
-
-        private static List<int> FindAllIndexes(string source, string keyword, StringComparison comparison)
-        {
-            var indexes = new List<int>();
-            int index = 0;
-
-            while ((index = source.IndexOf(keyword, index, comparison)) != -1)
-            {
-                indexes.Add(index);
-                index += keyword.Length; // 避免死循环，跳到关键字之后
+                throw new InvalidOperationException("请先执行搜索");
             }
 
-            return indexes;
-        }
-
-        private static List<int> FindAllIndexesRegex(string source, string pattern)
-        {
-            var indexes = new List<int>();
-            foreach (Match match in Regex.Matches(source, pattern))
-            {
-                indexes.Add(match.Index);
-            }
-
-            return indexes;
-        }
-
-        private async Task<string> GetAiConcludeAsync(CancellationToken ct)
-        {
             string sys = $"""
                           你是一个归纳总结机器人。当前，用户以“{string.Join(" ", Config.Keywords.Trimmed)}”为关键词，对一些文段进行了搜索，得到了一系列的结果，这些结果将在下面给出。
                           你需要根据这些结果，进行归纳总结。期望输出长度（字数）：{Config.ExpectedAiConcludeLength}，请严格遵守输出字数要求。
@@ -116,72 +70,111 @@ namespace ArchiveMaster.Services
                 prompt.AppendLine(item.Context);
             }
 
-            return await this.CallAiWithStreamAsync(sys, prompt.ToString(), null, true, ct);
+            return Task.FromResult((sys, prompt.ToString()));
         }
 
-        private async Task<List<TextSearchResult>> GetSearchResultAsync(CancellationToken ct)
+        public async Task SearchAsync(CancellationToken ct)
         {
             var results = new List<TextSearchResult>();
-            await foreach (var docFileLine in Config.Source.GetPlainTextAsync(ct: ct))
+            await Task.Run(async () =>
             {
-                List<(string keyword, int index)> indexes = new List<(string, int)>();
-
-                //对每个关键词进行搜索
-                foreach (var keyword in Config.Keywords)
+                NotifyMessage("正在文档中搜索关键词");
+                await foreach (var docFileLine in Config.Source.GetPlainTextAsync(ct: ct))
                 {
-                    var tempIndexes = Config.UseRegex
-                        ? FindAllIndexesRegex(docFileLine.Text, keyword)
-                        : FindAllIndexes(docFileLine.Text, keyword, StringComparison.OrdinalIgnoreCase);
-                    indexes.AddRange(tempIndexes.Select(p => (keyword.Value, p)));
+                    List<(string keyword, int index)> indexes = new List<(string, int)>();
+
+                    //对每个关键词进行搜索
+                    foreach (var keyword in Config.Keywords)
+                    {
+                        ct.ThrowIfCancellationRequested();
+                        var tempIndexes = Config.UseRegex
+                            ? FindAllIndexesRegex(docFileLine.Text, keyword)
+                            : FindAllIndexes(docFileLine.Text, keyword, StringComparison.OrdinalIgnoreCase);
+                        indexes.AddRange(tempIndexes.Select(p => (keyword.Value, p)));
+                    }
+
+                    //对这个段落的搜索结果，按先后顺序进行排序
+                    var tempResults = indexes
+                        .OrderBy(p => p.index)
+                        .Select(p => new TextSearchResult()
+                        {
+                            Source = docFileLine.Source,
+                            Keywords = [p.keyword],
+                            Indexes = [p.index],
+                            ContextStartIndex = p.index - Config.ContextLength / 2,
+                            ContextEndIndex = p.index + Config.ContextLength / 2,
+                            SourceParagraph = docFileLine.Text
+                        })
+                        .ToList();
+
+                    ct.ThrowIfCancellationRequested();
+
+                    //合并交叉的搜索结果
+                    var paraResults = new List<TextSearchResult>();
+                    foreach (var current in tempResults)
+                    {
+                        ct.ThrowIfCancellationRequested();
+                        if (paraResults.Count == 0)
+                        {
+                            paraResults.Add(current);
+                            continue;
+                        }
+
+                        var lastResult = paraResults[^1];
+                        if (lastResult.ContextEndIndex > current.ContextStartIndex)
+                        {
+                            //合并
+                            lastResult.Keywords.Add(current.Keywords.Single()); //一定只有一个
+                            lastResult.Indexes.Add(current.Indexes.Single()); //同样只有一个
+                            lastResult.ContextEndIndex = current.ContextEndIndex;
+                        }
+                        else
+                        {
+                            paraResults.Add(current);
+                        }
+                    }
+
+                    ct.ThrowIfCancellationRequested();
+                    results.AddRange(paraResults);
                 }
 
-                //对这个段落的搜索结果，按先后顺序进行排序
-                var tempResults = indexes
-                    .OrderBy(p => p.index)
-                    .Select(p => new TextSearchResult()
-                    {
-                        Source = docFileLine.Source,
-                        Keywords = [p.keyword],
-                        Indexes = [p.index],
-                        ContextStartIndex = p.index - Config.ContextLength / 2,
-                        ContextEndIndex = p.index + Config.ContextLength / 2,
-                        SourceParagraph = docFileLine.Text
-                    })
-                    .ToList();
-
-                //合并交叉的搜索结果
-                var paraResults = new List<TextSearchResult>();
-                foreach (var current in tempResults)
+                foreach (var searchResult in results)
                 {
-                    if (paraResults.Count == 0)
-                    {
-                        paraResults.Add(current);
-                        continue;
-                    }
-
-                    var lastResult = paraResults[^1];
-                    if (lastResult.ContextEndIndex > current.ContextStartIndex)
-                    {
-                        //合并
-                        lastResult.Keywords.Add(current.Keywords.Single()); //一定只有一个
-                        lastResult.Indexes.Add(current.Indexes.Single()); //同样只有一个
-                        lastResult.ContextEndIndex = current.ContextEndIndex;
-                    }
-                    else
-                    {
-                        paraResults.Add(current);
-                    }
+                    ct.ThrowIfCancellationRequested();
+                    searchResult.GenerateContext();
                 }
+            }, ct);
+            SearchResults = results;
+        }
 
-                results.AddRange(paraResults);
-            }
+        public override void Reset()
+        {
+            SearchResults = null;
+        }
 
-            foreach (var searchResult in results)
+        private static List<int> FindAllIndexes(string source, string keyword, StringComparison comparison)
+        {
+            var indexes = new List<int>();
+            int index = 0;
+
+            while ((index = source.IndexOf(keyword, index, comparison)) != -1)
             {
-                searchResult.GenerateContext();
+                indexes.Add(index);
+                index += keyword.Length; // 避免死循环，跳到关键字之后
             }
 
-            return results;
+            return indexes;
+        }
+
+        private static List<int> FindAllIndexesRegex(string source, string pattern)
+        {
+            var indexes = new List<int>();
+            foreach (Match match in Regex.Matches(source, pattern))
+            {
+                indexes.Add(match.Index);
+            }
+
+            return indexes;
         }
     }
 }

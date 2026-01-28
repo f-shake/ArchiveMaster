@@ -18,9 +18,10 @@
     x:DataType="vm:SmartDocSearchViewModel"
     ExecuteButtonContent="AI归纳"
     InitializeButtonContent="搜索"
+    ShowBottomBar="False"
     mc:Ignorable="d">
     <v:TwoStepPanelBase.ConfigsContent>
-        <ct:StackFormItemGroup>
+        <ct:StackFormItemGroup IsEnabled="{Binding !AiConversation.SendCommand.IsRunning}">
             <ct:FormItem Label="文本源：">
                 <v:TextSourceInput Source="{Binding Config.Source}" />
             </ct:FormItem>
@@ -82,8 +83,20 @@
 
     <v:TwoStepPanelBase.ResultsContent>
         <Grid ColumnDefinitions="2*,8,*">
-            <gb:GroupBox Header="搜索结果">
-                <Grid Grid.RowDefinitions="*,8,Auto">
+
+            <Button
+                Grid.ColumnSpan="3"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Classes="Long"
+                Command="{Binding SearchCommand}"
+                Content="搜索"
+                IsVisible="{Binding SearchResults, Converter={x:Static cvt:Converters.IsNull}}" />
+
+            <gb:GroupBox
+                Header="搜索结果"
+                IsVisible="{Binding !!SearchResults}">
+                <Grid RowDefinitions="*,8,Auto">
                     <ScrollViewer>
                         <ItemsControl
                             Margin="0,0,20,0"
@@ -148,20 +161,30 @@
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
                     </ScrollViewer>
-                    <TextBlock Grid.Row="2">
-                        <Run Text="共" />
-                        <Run Text="{Binding SearchResults.Count}" />
-                        <Run Text="条搜索结果" />
-                    </TextBlock>
+                    <Grid
+                        Grid.Row="2"
+                        ColumnDefinitions="*,8,Auto">
+                        <TextBlock>
+                            <Run Text="共" />
+                            <Run Text="{Binding SearchResults.Count}" />
+                            <Run Text="条搜索结果" />
+                        </TextBlock>
+
+                        <Button
+                            Grid.Column="2"
+                            Classes="Link"
+                            Command="{Binding ResetCommand}"
+                            Content="重置" />
+                    </Grid>
                 </Grid>
             </gb:GroupBox>
 
             <gb:GroupBox
                 Grid.Column="2"
-                Header="AI分析结果">
-                <v:ResultTextBox
-                    Message="{Binding AI.Name, StringFormat='{}AI服务提供商：{0}'}"
-                    Result="{Binding AiConclude}" />
+                Header="AI分析"
+                IsVisible="{Binding !!SearchResults}">
+                <v:AiChatPanel Conversation="{Binding AiConversation}" />
+
             </gb:GroupBox>
 
             <GridSplitter

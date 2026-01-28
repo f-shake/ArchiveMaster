@@ -17,38 +17,42 @@ using Serilog;
 namespace ArchiveMaster.ViewModels;
 
 public partial class SmartDocSearchViewModel(ViewModelServices services)
-    : AiTwoStepViewModelBase<SmartDocSearchService, SmartDocSearchConfig>(services)
+    : AiChatViewModelBase<SmartDocSearchService, SmartDocSearchConfig>(services)
 {
     [ObservableProperty]
-    private string aiConclude = "";
+    private List<TextSearchResult> searchResults;
 
-    [ObservableProperty]
-    private ObservableCollection<TextSearchResult> searchResults = new ObservableCollection<TextSearchResult>();
-
-    public override bool EnableRepeatExecute => true;
-
-    protected override Task OnExecutedAsync(CancellationToken ct)
+    [RelayCommand]
+    private void Reset()
     {
-        AiConclude = Service.AiConclude;
-        return base.OnExecutedAsync(ct);
+        SearchResults = null;
+        Service.Reset();
+        AiConversation.Reset();
     }
 
-    protected override Task OnExecutingAsync(CancellationToken ct)
+    [RelayCommand(IncludeCancelCommand = true)]
+    private Task SearchAsync(CancellationToken ct)
     {
-        AiConclude = "";
-        Service.AiTextGenerate += (sender, e) => AiConclude += e.Value;
-        return base.OnExecutingAsync(ct);
-    }
+        return Services.ProgressOverlay.WithOverlayAsync(
+            async () =>
+            {
+                await Service.SearchAsync(ct);
+                SearchResults = Service.SearchResults;
+            },
+            () =>
+            {
+                SearchCancelCommand.Execute(null);
+                Services.ProgressOverlay.SetVisible(false);
+                return Task.CompletedTask;
+            },
+            async ex =>
+            {
+                if (ex is OperationCanceledException)
+                {
+                    return;
+                }
 
-    protected override Task OnInitializedAsync()
-    {
-        SearchResults = [..Service.SearchResults];
-        return base.OnInitializedAsync();
-    }
-
-    protected override void OnReset()
-    {
-        SearchResults.Clear();
-        AiConclude = "";
+                await Services.Dialog.ShowErrorDialogAsync("搜索失败", ex);
+            }, "正在搜索");
     }
 }
