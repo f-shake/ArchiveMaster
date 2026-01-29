@@ -46,7 +46,10 @@ if ($all) {
 }
 
 if ($targets.Count -eq 0) {
-    Write-Host "Please specify at least one platform: -w, -l, -m or --all"
+    Write-Host "Please specify at least one platform: -w, -l, -m or -all."
+    Write-Host "can specify -s to enable self-contained build."
+    Write-Host "can specify -c to enable compression."
+    Write-Host "can specify -noSingleFile to disable single-file publish."
     exit 1
 }
 

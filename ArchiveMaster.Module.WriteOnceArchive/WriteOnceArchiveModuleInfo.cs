@@ -1,4 +1,5 @@
-﻿using ArchiveMaster.Configs;
+﻿using System.Text.Json.Serialization;
+using ArchiveMaster.Configs;
 using ArchiveMaster.Models;
 using ArchiveMaster.Services;
 using ArchiveMaster.ViewModels;
@@ -18,6 +19,8 @@ namespace ArchiveMaster
             new ConfigMetadata(typeof(RebuildConfig), CONFIG_GROUP),
             new ConfigMetadata(typeof(VerifyConfig), CONFIG_GROUP),
         ];
+
+        public IList<JsonConverter> JsonConverters { get; }
 
         public string ModuleName => "动态固存备份";
         public string ModuleDescription => "解决将动态更新目录中的定期文件备份到多个容量有限、写入后不可修改介质（如光盘、一次性磁带）的需求";

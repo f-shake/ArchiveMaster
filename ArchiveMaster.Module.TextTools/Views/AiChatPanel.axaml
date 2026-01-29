@@ -1,0 +1,178 @@
+<UserControl
+    x:Class="ArchiveMaster.Views.AiChatPanel"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:b="using:ArchiveMaster.Behaviors"
+    xmlns:cvt="clr-namespace:ArchiveMaster.Converters;assembly=ArchiveMaster.Core"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:enums="using:ArchiveMaster.Enums"
+    xmlns:ic="using:FluentIcons.Avalonia.Markup"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="clr-namespace:ArchiveMaster.ViewModels;assembly=ArchiveMaster.Core"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
+    <UserControl.Styles>
+        <Style Selector="Border.ChatBox">
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="Padding" Value="16,8" />
+        </Style>
+        <Style Selector="DockPanel.ChatContainer">
+            <Setter Property="Margin" Value="64,8,8,8" />
+            <Setter Property="HorizontalAlignment" Value="Right" />
+            <Setter Property="HorizontalSpacing" Value="8" />
+        </Style>
+        <Style Selector="Button.ChatButton">
+            <Setter Property="Foreground" Value="{DynamicResource Foreground2}" />
+            <Setter Property="HorizontalAlignment" Value="Left" />
+            <Setter Property="VerticalAlignment" Value="Bottom" />
+            <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Foreground" Value="{DynamicResource Foreground0}" />
+            </Style>
+            <Style Selector="^:disabled /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Foreground" Value="{DynamicResource Foreground3}" />
+            </Style>
+        </Style>
+        <Style Selector="SelectableTextBlock.ChatMessage">
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="LineSpacing" Value="2" />
+        </Style>
+    </UserControl.Styles>
+    <Grid RowDefinitions="*,8,Auto">
+        <ScrollViewer x:Name="scr">
+
+            <ItemsControl ItemsSource="{Binding $parent[UserControl].Conversation.Messages}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Panel>
+                            <!--  用户  -->
+                            <DockPanel
+                                Classes="ChatContainer"
+                                IsVisible="{Binding Sender, Converter={x:Static cvt:Converters.EqualWithParameter}, ConverterParameter=User}">
+                                <Button
+                                    Classes="Icon ChatButton"
+                                    Click="CopyButton_Click"
+                                    Content="{ic:FluentIcon Icon=Copy}"
+                                    DockPanel.Dock="Left"
+                                    IsVisible="{Binding IsFrozen}"
+                                    ToolTip.Tip="复制内容" />
+                                <Border
+                                    Background="{DynamicResource AccentB2}"
+                                    Classes="ChatBox">
+                                    <SelectableTextBlock
+                                        b:TextBlockInlinesBehavior.ItemsSource="{Binding Inlines}"
+                                        Classes="ChatMessage" />
+                                </Border>
+                            </DockPanel>
+
+
+                            <!--  系统  -->
+                            <DockPanel
+                                Classes="ChatContainer"
+                                IsVisible="{Binding Sender, Converter={x:Static cvt:Converters.EqualWithParameter}, ConverterParameter=System}">
+                                <Border
+                                    HorizontalAlignment="Right"
+                                    Background="{DynamicResource Background2}"
+                                    Classes="ChatBox">
+                                    <SelectableTextBlock
+                                        b:TextBlockInlinesBehavior.ItemsSource="{Binding Inlines}"
+                                        Classes="ChatMessage"
+                                        Opacity="0.75" />
+                                </Border>
+                            </DockPanel>
+                            <!--  AI  -->
+
+                            <StackPanel
+                                IsVisible="{Binding Sender, Converter={x:Static cvt:Converters.EqualWithParameter}, ConverterParameter=Assistant}"
+                                Orientation="Vertical"
+                                Spacing="8">
+                                <Border Margin="16,8">
+                                    <SelectableTextBlock
+                                        b:TextBlockInlinesBehavior.ItemsSource="{Binding Inlines}"
+                                        Classes="ChatMessage" />
+                                </Border>
+                                <StackPanel
+                                    Orientation="Horizontal"
+                                    Spacing="8">
+                                    <Button
+                                        Classes="Icon ChatButton"
+                                        Click="CopyButton_Click"
+                                        Content="{ic:FluentIcon Icon=Copy}"
+                                        IsVisible="{Binding IsFrozen}"
+                                        ToolTip.Tip="复制内容" />
+                                    <Button
+                                        Classes="Icon ChatButton"
+                                        Command="{Binding $parent[UserControl].Conversation.RegenerateCommand}"
+                                        CommandParameter="{Binding .}"
+                                        Content="{ic:FluentIcon Icon=ArrowClockwise}"
+                                        IsEnabled="{Binding !$parent[UserControl].Conversation.SendCommand.IsRunning}"
+                                        IsVisible="{Binding IsFrozen}"
+                                        ToolTip.Tip="重新生成" />
+                                </StackPanel>
+                            </StackPanel>
+                        </Panel>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+
+        <Grid
+            Grid.Row="2"
+            Margin="8"
+            ColumnDefinitions="Auto,8,*,8,Auto">
+            <Grid.Styles>
+                <Style Selector="Button">
+                    <Setter Property="Width" Value="36" />
+                    <Setter Property="Height" Value="36" />
+                    <Setter Property="Padding" Value="0" />
+                    <Setter Property="CornerRadius" Value="18" />
+                </Style>
+            </Grid.Styles>
+            <Button
+                Command="{Binding $parent[UserControl].Conversation.ResetCommand}"
+                Content="{ic:FluentIcon Icon=ArrowReset}"
+                Foreground="White"
+                IsEnabled="{Binding !$parent[UserControl].Conversation.SendCommand.IsRunning}"
+                ToolTip.Tip="重置" />
+
+            <TextBox
+                Grid.Column="2"
+                AcceptsTab="True"
+                IsEnabled="{Binding $parent[UserControl].Conversation.CanUserInput}"
+                KeyDown="InputTextBox_KeyDown"
+                MaxLines="6"
+                Text="{Binding $parent[UserControl].Conversation.InputText}"
+                TextWrapping="Wrap" />
+            <Panel Grid.Column="4">
+
+                <Button
+                    Classes="Primary"
+                    Command="{Binding $parent[UserControl].Conversation.SendCommand}"
+                    Content="{ic:FluentIcon Icon=Send}"
+                    Foreground="White"
+                    IsDefault="True"
+                    IsEnabled="{Binding $parent[UserControl].Conversation.InputText, Converter={x:Static cvt:Converters.IsNotNull}}"
+                    IsVisible="{Binding !$parent[UserControl].Conversation.SendCommand.IsRunning}"
+                    ToolTip.Tip="发送" />
+                <Button
+                    Background="Red"
+                    Command="{Binding $parent[UserControl].Conversation.SendCancelCommand}"
+                    Content="{ic:FluentIcon Icon=Stop}"
+                    Foreground="White"
+                    IsVisible="{Binding $parent[UserControl].Conversation.SendCommand.IsRunning}"
+                    ToolTip.Tip="取消">
+                    <Button.Styles>
+                        <Style Selector="Button">
+                            <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                                <Setter Property="Background" Value="DarkRed" />
+                            </Style>
+                            <Style Selector="^:pressed /template/ ContentPresenter#PART_ContentPresenter">
+                                <Setter Property="Opacity" Value="0.7" />
+                            </Style>
+                        </Style>
+                    </Button.Styles>
+                </Button>
+            </Panel>
+        </Grid>
+    </Grid>
+</UserControl>

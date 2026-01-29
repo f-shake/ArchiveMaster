@@ -2,6 +2,7 @@
 using System.Text;
 using System.Text.Json.Nodes;
 using ArchiveMaster.Configs;
+using ArchiveMaster.Enums;
 using ArchiveMaster.Events;
 using ArchiveMaster.Models;
 using ArchiveMaster.ViewModels;

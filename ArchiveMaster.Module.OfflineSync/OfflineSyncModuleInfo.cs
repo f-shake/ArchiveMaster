@@ -11,6 +11,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using ArchiveMaster.Models;
 using ArchiveMaster.Services;
@@ -37,6 +38,8 @@ namespace ArchiveMaster
             new ConfigMetadata(typeof(OfflineSyncStep2Config), CONFIG_GRROUP),
             new ConfigMetadata(typeof(OfflineSyncStep3Config), CONFIG_GRROUP),
         ];
+
+        public IList<JsonConverter> JsonConverters { get; }
 
         public string ModuleName => "异地备份";
         public string ModuleDescription => "解决在无法通过网络或实地全量同步的情况下，进行增量同步和备份的需求";

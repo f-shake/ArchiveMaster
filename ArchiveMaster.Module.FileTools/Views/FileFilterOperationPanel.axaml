@@ -15,14 +15,16 @@
     d:DesignWidth="800"
     x:DataType="vm:TwinFileCleanerViewModel"
     mc:Ignorable="d">
+    <v:TwoStepPanelBase.Resources>
+        <cvt:FileLengthConverter x:Key="FileLengthConverter" />
+        <cvt:LenientDateTimeConverter x:Key="LenientDateTimeConverter" />
+    </v:TwoStepPanelBase.Resources>
     <v:TwoStepPanelBase.ConfigsContent>
         <ct:StackFormItemGroup>
             <ct:FormItem Label="源目录：">
                 <v:FilePickerTextBox
                     AllowMultiple="True"
                     FileNames="{Binding Config.SourceDirs}"
-                    Filter="{Binding Config.Filter}"
-                    IsFilterBarVisible="True"
                     Type="OpenFolder" />
             </ct:FormItem>
 
@@ -30,6 +32,38 @@
                 <v:FilePickerTextBox
                     FileNames="{Binding Config.TargetDir}"
                     Type="OpenFolder" />
+            </ct:FormItem>
+
+            <ct:FormItem Label="名称路径筛选：">
+                <v:FileFilterBar Filter="{Binding Config.PathFilter}" />
+            </ct:FormItem>
+
+
+            <ct:FormItem Label="时间/大小筛选：">
+                <Grid ColumnDefinitions="3*,8,Auto,8,3*,16,2*,8,Auto,8,2*">
+                    <TextBox
+                        Text="{Binding Config.EarliestTime, Converter={StaticResource LenientDateTimeConverter}, UpdateSourceTrigger=LostFocus}"
+                        TextAlignment="Center" />
+                    <TextBlock
+                        Grid.Column="2"
+                        Text="——" />
+                    <TextBox
+                        Grid.Column="4"
+                        Text="{Binding Config.LatestTime, Converter={StaticResource LenientDateTimeConverter}, UpdateSourceTrigger=LostFocus}"
+                        TextAlignment="Center" />
+
+                    <TextBox
+                        Grid.Column="6"
+                        Text="{Binding Config.MinLength, Converter={StaticResource FileLengthConverter}, UpdateSourceTrigger=LostFocus, Mode=TwoWay}"
+                        TextAlignment="Center" />
+                    <TextBlock
+                        Grid.Column="8"
+                        Text="——" />
+                    <TextBox
+                        Grid.Column="10"
+                        Text="{Binding Config.MaxLength, Converter={StaticResource FileLengthConverter}, UpdateSourceTrigger=LostFocus, Mode=TwoWay}"
+                        TextAlignment="Center" />
+                </Grid>
             </ct:FormItem>
 
             <ct:FormItem Label="选项：">
@@ -51,21 +85,24 @@
                     <ct:FormItem Header="目标文件">
                         <ComboBox
                             x:Name="ccbTarget"
-                            Width="330"
+                            Width="280"
                             DisplayMemberBinding="{Binding ., Converter={x:Static cvt:Converters.Description}}"
                             ItemsSource="{me:EnumValues e:FileFilterOperationTargetFileNameMode}"
                             SelectedItem="{Binding Config.TargetFileNameMode}" />
                         <ct:FormItem.Description>
                             <Panel>
                                 <TextBlock
+                                    MaxWidth="360"
                                     IsVisible="{Binding #ccbTarget.SelectedIndex, Converter={x:Static cvt:Converters.EqualWithParameter}, ConverterParameter=0}"
                                     Text="将文件复制/移动到目标目录时，完全保留原始目录层级结构，且文件名不变"
                                     TextWrapping="Wrap" />
                                 <TextBlock
+                                    MaxWidth="360"
                                     IsVisible="{Binding #ccbTarget.SelectedIndex, Converter={x:Static cvt:Converters.EqualWithParameter}, ConverterParameter=1}"
                                     Text="将文件复制/移动到目标目录时，忽略原始目录结构（所有文件直接放在目标根目录），但保留原文件名"
                                     TextWrapping="Wrap" />
                                 <TextBlock
+                                    MaxWidth="360"
                                     IsVisible="{Binding #ccbTarget.SelectedIndex, Converter={x:Static cvt:Converters.EqualWithParameter}, ConverterParameter=2}"
                                     Text="将文件复制/移动到目标目录时，忽略原始目录结构，但将原始相对路径信息编码到新文件名中，避免冲突"
                                     TextWrapping="Wrap" />

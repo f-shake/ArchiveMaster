@@ -1,4 +1,4 @@
-﻿namespace ArchiveMaster.Services;
+﻿namespace ArchiveMaster.Enums;
 
 public enum TextSourceReadUnit
 {

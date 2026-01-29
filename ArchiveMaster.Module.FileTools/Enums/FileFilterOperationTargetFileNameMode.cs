@@ -4,12 +4,12 @@ namespace ArchiveMaster.Enums;
 
 public enum FileFilterOperationTargetFileNameMode
 {
-    [Description("保持原有目录结构，使用原文件名")]
+    [Description("保持原目录结构")]
     PreserveDirectoryStructure,
 
-    [Description("平铺到目标目录，使用原文件名")]
+    [Description("平铺目录，使用原文件名")]
     FlattenWithOriginalNames,
 
-    [Description("平铺到目标目录，使用相对路径作为新文件名")]
+    [Description("平铺目录，相对路径作为文件名")]
     FlattenWithRelativePathNames
 }

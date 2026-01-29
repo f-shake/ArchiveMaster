@@ -36,6 +36,11 @@ public abstract partial class MultiPresetViewModelBase<TConfig> : ViewModelBase 
         ConfigGroupName = configGroupName;
     }
 
+    protected MultiPresetViewModelBase(ViewModelServices services) :
+        this(services, typeof(TConfig).Name)
+    {
+    }
+
     /// <summary>
     /// 配置版本的组名（见AppConfig）
     /// </summary>

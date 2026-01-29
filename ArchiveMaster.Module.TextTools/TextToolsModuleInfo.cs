@@ -7,7 +7,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using ArchiveMaster.AiAgents;
 using ArchiveMaster.Models;
 using ArchiveMaster.Services;
 using Microsoft.Extensions.DependencyInjection;
@@ -30,12 +32,13 @@ namespace ArchiveMaster
             new ConfigMetadata(typeof(LineByLineProcessorConfig)),
         ];
 
-        public string ModuleName => "文本工具";
-        public string ModuleDescription => "对文本或文本文件进行相关处理";
         public string HelpFileName { get; } = "text.md";
-        
+        public IList<JsonConverter> JsonConverters { get; } = [new AiAgentListJsonConverter()];
+
+        public string ModuleDescription => "对文本或文本文件进行相关处理";
+        public string ModuleName => "文本工具";
         public int Order => 3;
-        
+
         public IList<Type> SingletonServices { get; }
 
         public IList<Type> TransientServices { get; } =
@@ -46,6 +49,7 @@ namespace ArchiveMaster
             typeof(TextRewriterService),
             typeof(EncodingConverterService),
             typeof(LineByLineProcessorService),
+            typeof(AiConversation),
         ];
 
         public ToolPanelGroupInfo Views => new ToolPanelGroupInfo()

@@ -11,6 +11,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using ArchiveMaster.Models;
 using ArchiveMaster.Services;
@@ -31,6 +32,8 @@ namespace ArchiveMaster
         [
             new ConfigMetadata(typeof(FileCopyTestConfig))
         ];
+
+        public IList<JsonConverter> JsonConverters { get; }
 
         public string ModuleName => "测试";
         public string ModuleDescription => "测试";
