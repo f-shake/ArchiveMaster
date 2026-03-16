@@ -6,7 +6,7 @@ namespace ArchiveMaster.Configs;
 public partial class TextEncryptionConfig : ConfigBase
 {
     [ObservableProperty]
-    private bool? lastOperation = null;
+    private bool autoFlush = true;
 
     [ObservableProperty]
     private SecurePassword password = new SecurePassword();
@@ -16,7 +16,6 @@ public partial class TextEncryptionConfig : ConfigBase
 
     [ObservableProperty]
     private string suffix = "##";
-    
     public override void Check()
     {
         CheckEmpty(Password, "密码");

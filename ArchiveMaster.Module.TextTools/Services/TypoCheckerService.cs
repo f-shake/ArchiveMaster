@@ -201,8 +201,7 @@ public class TypoCheckerService(AppConfig appConfig)
     }
 
     public async IAsyncEnumerable<ICheckItem> CheckAsync(IList<DocFilePart> parts,
-        [EnumeratorCancellation]
-        CancellationToken ct)
+        [EnumeratorCancellation] CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(parts);
         if (parts.Count == 0)
@@ -303,13 +302,6 @@ public class TypoCheckerService(AppConfig appConfig)
         throw new NotImplementedException();
     }
 
-    private void CheckStringLength(StringBuilder str)
-    {
-        if (str.Length > MaxLength)
-        {
-            throw new Exception($"文本长度超过限制（{MaxLength}）");
-        }
-    }
 
     private IEnumerable<TypoItem> Parse(string text, string source)
     {
