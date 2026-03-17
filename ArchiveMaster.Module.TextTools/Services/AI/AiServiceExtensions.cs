@@ -17,10 +17,10 @@ public static class AiServiceExtensions
                 assistantMessage?.AddInline(e.Value);
             }, ct: ct);
 
-            if (service.NeedRemoveThink)
-            {
-                result = LlmCallerService.RemoveThink(result);
-            }
+            // if (service.NeedRemoveThink)
+            // {
+            //     result = LlmCallerService.RemoveThink(result);
+            // }
 
             return result;
         }

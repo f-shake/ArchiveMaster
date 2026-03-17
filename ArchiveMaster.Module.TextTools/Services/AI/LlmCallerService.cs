@@ -131,7 +131,8 @@ public class LlmCallerService
     }
 
 
-    public async IAsyncEnumerable<string> CallStreamAsync(IEnumerable<ChatMessage> messages, ChatOptions options = null, CancellationToken ct = default)
+    public async IAsyncEnumerable<string> CallStreamAsync(IEnumerable<ChatMessage> messages, ChatOptions options = null,
+        CancellationToken ct = default)
     {
         await foreach (var p in GetStreamResponseAsync(messages, options, ct))
         {
@@ -214,11 +215,5 @@ public class LlmCallerService
         }
 
         return chatClient;
-    }
-
-    public static string RemoveThink(string text)
-    {
-        return Regex.Replace(text, @"^\s*<Think>.*?</Think>\s*$\r?\n?", string.Empty,
-            RegexOptions.Singleline | RegexOptions.IgnoreCase | RegexOptions.Multiline);
     }
 }

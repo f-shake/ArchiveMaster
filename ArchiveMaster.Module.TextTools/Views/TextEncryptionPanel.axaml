@@ -94,19 +94,27 @@
                 Grid.Row="2"
                 ColumnDefinitions="*,8,Auto,8,*"
                 RowDefinitions="*,8,Auto">
-                <TextBox
-                    AcceptsReturn="True"
-                    AcceptsTab="True"
-                    IsReadOnly="{Binding IsWorking}"
-                    Text="{Binding Plaintext}"
-                    TextWrapping="Wrap" />
-                <TextBox
+                <HeaderedContentControl
+                    Classes="GroupBox"
+                    Header="明文">
+                    <TextBox
+                        AcceptsReturn="True"
+                        AcceptsTab="True"
+                        IsReadOnly="{Binding IsWorking}"
+                        Text="{Binding Plaintext}"
+                        TextWrapping="Wrap" />
+                </HeaderedContentControl>
+                <HeaderedContentControl
                     Grid.Column="4"
-                    AcceptsReturn="True"
-                    AcceptsTab="True"
-                    IsReadOnly="{Binding IsWorking}"
-                    Text="{Binding Ciphertext}"
-                    TextWrapping="Wrap" />
+                    Classes="GroupBox"
+                    Header="密文">
+                    <TextBox
+                        AcceptsReturn="True"
+                        AcceptsTab="True"
+                        IsReadOnly="{Binding IsWorking}"
+                        Text="{Binding Ciphertext}"
+                        TextWrapping="Wrap" />
+                </HeaderedContentControl>
                 <StackPanel
                     Grid.Column="2"
                     VerticalAlignment="Center"

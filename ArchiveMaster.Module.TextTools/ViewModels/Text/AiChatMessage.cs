@@ -1,5 +1,7 @@
 ﻿using System.Text;
+using System.Text.RegularExpressions;
 using ArchiveMaster.Enums;
+using ArchiveMaster.Services;
 using Avalonia.Collections;
 using Avalonia.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -64,7 +66,7 @@ public partial class AiChatMessage : ObservableObject
         AddInline(new InlineItem(message));
     }
 
-    public void Freeze(bool fold, int maxLength = 50)
+    public void Freeze(bool removeThink = true, bool fold = false, int maxLength = 50)
     {
         isFrozen = true;
 
@@ -78,6 +80,10 @@ public partial class AiChatMessage : ObservableObject
         chatMessage = new ChatMessage(role, string.Concat(Inlines.Select(i => i.Text)));
 
         fullText = string.Concat(Inlines.Select(p => p.Text)).Trim();
+        if (removeThink)
+        {
+            fullText = RemoveThink(fullText);
+        }
 
         if (fold)
         {
@@ -104,10 +110,13 @@ public partial class AiChatMessage : ObservableObject
         OnPropertyChanged(nameof(IsFrozen));
         OnPropertyChanged(nameof(FullText));
     }
-    // public void ReplaceWithFinalResponse(string text)
-    // {
-    //     Inlines.Clear();
-    //     Inlines.AddRange(inlines);
-    //     Freeze(false);
-    // }
+
+    public static string RemoveThink(string text)
+    {
+        return ThinkPartRegex().Replace(text, string.Empty);
+    }
+
+    [GeneratedRegex(@"^\s*<Think>.*?</Think>\s*$\r?\n?",
+        RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.Singleline, "zh-CN")]
+    private static partial Regex ThinkPartRegex();
 }

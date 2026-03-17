@@ -137,14 +137,14 @@ public partial class AiConversation : ObservableObject
             {
                 var (systemPrompt, userPrompt) = await Service.GetFirstPromptAsync(ct);
 
-                AddSystemMessage(systemPrompt).Freeze(true);
-                AddUserMessage(userPrompt).Freeze(true);
+                AddSystemMessage(systemPrompt).Freeze(fold: true);
+                AddUserMessage(userPrompt).Freeze(fold: true);
             }
             else
             {
                 if (!isRegenerating)
                 {
-                    AddUserMessage(prompt).Freeze(false);
+                    AddUserMessage(prompt).Freeze(fold: false);
                 }
             }
 
@@ -161,7 +161,7 @@ public partial class AiConversation : ObservableObject
         {
             if (LastAssistantMessage?.IsFrozen == false)
             {
-                LastAssistantMessage.Freeze(false);
+                LastAssistantMessage.Freeze(Service.NeedRemoveThink, false);
             }
 
             OnEndResponse();

@@ -235,7 +235,7 @@ public class TypoCheckerService(AppConfig appConfig)
             string result = await llm.CallAsync(systemPrompt, segment,
                 new ChatOptions { ResponseFormat = ChatResponseFormat.Json }, ct);
             yield return new LlmOutputItem(result);
-            result = LlmCallerService.RemoveThink(result);
+            result =AiChatMessage.RemoveThink(result);
 
             result = result.Replace("```json", "").Replace("```", "");
 
