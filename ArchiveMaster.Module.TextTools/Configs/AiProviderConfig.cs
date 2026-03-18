@@ -1,9 +1,30 @@
 ﻿using System;
+using ArchiveMaster.Enums;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace ArchiveMaster.Configs
 {
-    public partial class AiProviderConfig : ObservableObject
+    public interface IAiProvider
+    {
+        public string Name { get; set; }
+        public string Model { get; set; }
+        public string Url { get; set; }
+        public double? Temperature { get; set; }
+        public double? TopP { get; set; }
+        public int? MaxTokens { get; set; }
+        public string ExtraParamsJson { get; set; }
+    }
+
+    public interface IOpenAIAiProvider : IAiProvider
+    {
+        public SecurePassword Key { get; set; }
+    }
+
+    public interface IOllamaAiProvider : IAiProvider
+    {
+    }
+
+    public partial class AiProviderConfig : ObservableObject, IOpenAIAiProvider, IOllamaAiProvider
     {
         [property: SecurePassword.SecurePasswordAlwaysRemember]
         [ObservableProperty]
@@ -20,5 +41,17 @@ namespace ArchiveMaster.Configs
 
         [ObservableProperty]
         private string url = "";
+        
+        [ObservableProperty]
+        private double? temperature = null;
+        
+        [ObservableProperty]
+        private double? topP = null;
+        
+        [ObservableProperty]
+        private int? maxTokens = null;
+        
+        [ObservableProperty]
+        private string extraParamsJson = "";
     }
 }

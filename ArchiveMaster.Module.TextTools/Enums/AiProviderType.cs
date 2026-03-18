@@ -1,4 +1,4 @@
-﻿namespace ArchiveMaster.Configs;
+﻿namespace ArchiveMaster.Enums;
 
 public enum AiProviderType
 {

@@ -46,6 +46,7 @@
       <DependentUpon>AiChatPanel.axaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Remove="Services\AI\OpenAIChatClient.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -65,7 +66,7 @@
     <PackageReference Include="NetTopologySuite.IO.GeoJSON4STJ" />
 <!--    <PackageReference Include="NPOI" />-->
     <PackageReference Include="OllamaSharp" />
-    <PackageReference Include="OpenAI" />
+<!--    <PackageReference Include="OpenAI" />-->
     <PackageReference Include="PdfPig" />
     <PackageReference Include="UTF.Unknown" />
   </ItemGroup>

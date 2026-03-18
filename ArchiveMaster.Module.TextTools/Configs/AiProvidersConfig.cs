@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.Text.Json.Serialization;
+using ArchiveMaster.Enums;
 using ArchiveMaster.Helpers;
 using CommunityToolkit.Mvvm.ComponentModel;
 using FzLib.IO;
@@ -42,7 +43,7 @@ public partial class AiProvidersConfig : ConfigBase
         Name = "请配置AI模型",
         Type = AiProviderType.Ollama,
         Model = "qwen3:4b",
-        Url = "http://localhost:11434/api",
+        Url = "http://localhost:11434",
     };
 
     public override void Check()

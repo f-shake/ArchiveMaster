@@ -7,6 +7,7 @@
     xmlns:ct="using:FzLib.Avalonia.Controls"
     xmlns:cvt="clr-namespace:ArchiveMaster.Converters;assembly=ArchiveMaster.Core"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:enums="clr-namespace:ArchiveMaster.Enums"
     xmlns:gb="using:GroupBox.Avalonia.Controls"
     xmlns:ic="using:FluentIcons.Avalonia.Markup"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -63,7 +64,7 @@
                     </ct:FormItem>
                     <ct:FormItem Label="类型：">
                         <ct:RadioButtonGroup
-                            ItemsSource="{me:EnumValues c:AiProviderType}"
+                            ItemsSource="{me:EnumValues enums:AiProviderType}"
                             SelectedItem="{Binding SelectedProvider.Type}" />
                     </ct:FormItem>
                     <ct:FormItem Label="地址：">

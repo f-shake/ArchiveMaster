@@ -1,18 +1,16 @@
-﻿using System.ClientModel;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using ArchiveMaster.Configs;
+using ArchiveMaster.Enums;
 using ArchiveMaster.Events;
 using ArchiveMaster.Models;
 using ArchiveMaster.ViewModels;
 using Microsoft.Extensions.AI;
 using OllamaSharp;
-using OpenAI;
 using Serilog;
-using ChatResponseFormat = OpenAI.Chat.ChatResponseFormat;
 
 namespace ArchiveMaster.Services;
 
@@ -30,11 +28,11 @@ public class LlmCallerService
             throw new ArgumentException($"AI提供商{config.Name}的模型名为空");
         }
 
-        if (config.Type == AiProviderType.OpenAI &&
-            (string.IsNullOrWhiteSpace(config.Key) || string.IsNullOrWhiteSpace(config.Key.Password)))
-        {
-            throw new ArgumentException($"AI提供商{config.Name}的密钥为空");
-        }
+        // if (config.Type == AiProviderType.OpenAI &&
+        //     (string.IsNullOrWhiteSpace(config.Key) || string.IsNullOrWhiteSpace(config.Key.Password)))
+        // {
+        //     throw new ArgumentException($"AI提供商{config.Name}的密钥为空");
+        // }
 
         Config = config;
     }
@@ -196,23 +194,13 @@ public class LlmCallerService
 
     private IChatClient GetChatClient()
     {
-        IChatClient chatClient;
-        switch (Config.Type)
+        IChatClient chatClient = Config.Type switch
         {
-            case AiProviderType.OpenAI:
-                chatClient = new OpenAIChatClient(Config.Url, Config.Model, Config.Key);
-                break;
-            case AiProviderType.Ollama:
-                var httpClient = new HttpClient
-                {
-                    BaseAddress = new Uri(Config.Url),
-                    Timeout = TimeSpan.FromHours(1)
-                };
-                chatClient = new OllamaApiClient(httpClient, Config.Model);
-                break;
-            default:
-                throw new ArgumentOutOfRangeException();
-        }
+            AiProviderType.OpenAI => new OpenAICompatibleChatClient(Config),
+            AiProviderType.Ollama => new OllamaChatClient(Config),
+            // AiProviderType.OpenAICompatible => new OpenAICompatibleChatClient(Config),
+            _ => throw new ArgumentOutOfRangeException()
+        };
 
         return chatClient;
     }
