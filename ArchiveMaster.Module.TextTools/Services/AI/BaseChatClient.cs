@@ -1,12 +1,16 @@
-﻿using System.Text.Json;
+﻿using System.Net.Http.Json;
+using System.Runtime.CompilerServices;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using ArchiveMaster.Configs;
-using Microsoft.Extensions.AI;
+using ArchiveMaster.Models;
+using ArchiveMaster.ViewModels;
 
 public abstract class BaseChatClient<TConfig> : IChatClient where TConfig : IAiProvider
 {
     protected readonly HttpClient HttpClient;
     protected readonly TConfig Config;
-    protected readonly string Model;
+    public string Model { get; }
 
     protected BaseChatClient(TConfig config, string urlSuffix = "")
     {
@@ -27,42 +31,67 @@ public abstract class BaseChatClient<TConfig> : IChatClient where TConfig : IAiP
         }
     }
 
-    public abstract Task<ChatResponse> GetResponseAsync(IEnumerable<ChatMessage> messages, ChatOptions options = null,
+    public abstract Task<string> GetResponseAsync(IEnumerable<AiChatMessage> messages, ChatOptions options = null,
         CancellationToken cancellationToken = default);
 
-    public abstract IAsyncEnumerable<ChatResponseUpdate> GetStreamingResponseAsync(IEnumerable<ChatMessage> messages,
-        ChatOptions options = null, CancellationToken cancellationToken = default);
+    public abstract IAsyncEnumerable<string> GetStreamingResponseAsync(IEnumerable<AiChatMessage> messages,
+        ChatOptions options = null, CancellationToken ct = default);
 
-    // 公共的 Payload 基础构建逻辑
-    protected Dictionary<string, object> CreateBasePayload(IEnumerable<ChatMessage> messages, bool isStream)
+    protected abstract JsonObject BuildPayload(IEnumerable<AiChatMessage> messages, ChatOptions options, bool isStream);
+
+    protected async IAsyncEnumerable<string> GetStreamingResponseAsync(IEnumerable<AiChatMessage> messages,
+        ChatOptions options, string requestUrl,
+        Func<string, string> processEachLine,
+        [EnumeratorCancellation]
+        CancellationToken ct)
     {
-        return new Dictionary<string, object>
+        var payload = BuildPayload(messages, options, true);
+
+        // 1. 手动构建 Request 以便控制 CompletionOption
+        using var request = new HttpRequestMessage(HttpMethod.Post, requestUrl)
+        {
+            Content = JsonContent.Create(payload)
+        };
+        using var response =
+            await HttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct);
+        response.EnsureSuccessStatusCode();
+        await using var stream = await response.Content.ReadAsStreamAsync(ct);
+        using var reader = new StreamReader(stream);
+        while (await reader.ReadLineAsync(ct) is { } line)
+        {
+            if (string.IsNullOrWhiteSpace(line))
+            {
+                continue;
+            }
+
+            var result = processEachLine(line);
+            if (result != null)
+            {
+                yield return result;
+            }
+        }
+    }
+
+    protected JsonObject CreateBasePayload(IEnumerable<AiChatMessage> messages, bool isStream)
+    {
+        var messageArray = new JsonArray();
+
+        foreach (var m in messages)
+        {
+            messageArray.Add(new JsonObject
+            {
+                ["role"] = m.Sender.ToString().ToLower(),
+                ["content"] = m.FullText
+            });
+        }
+
+        return new JsonObject
         {
             ["model"] = Model,
-            ["messages"] = messages.Select(m => new { role = m.Role.Value.ToLower(), content = m.Text }),
+            ["messages"] = messageArray,
             ["stream"] = isStream
         };
     }
 
-    // 公共的 ExtraParams 合并逻辑
-    protected void ApplyExtraParams(Dictionary<string, object> rootPayload, Action<string, object> applyAction)
-    {
-        if (string.IsNullOrWhiteSpace(Config.ExtraParamsJson)) return;
-        try
-        {
-            var extraParams = JsonSerializer.Deserialize<Dictionary<string, object>>(Config.ExtraParamsJson);
-            if (extraParams == null) return;
-            foreach (var kvp in extraParams)
-            {
-                applyAction(kvp.Key, kvp.Value);
-            }
-        }
-        catch (JsonException ex)
-        {
-            throw new ArgumentException($"ExtraParamsJson 解析错误: {ex.Message}");
-        }
-    }
-
-    public object GetService(Type serviceType, object serviceKey = null) => null;
     public void Dispose() => HttpClient.Dispose();
 }

@@ -7,10 +7,6 @@ using ArchiveMaster.Events;
 using ArchiveMaster.Models;
 using ArchiveMaster.ViewModels;
 using ArchiveMaster.ViewModels.FileSystem;
-using DocumentFormat.OpenXml.Bibliography;
-using DocumentFormat.OpenXml.InkML;
-using FzLib.Text;
-using Microsoft.Extensions.AI;
 using Serilog;
 
 namespace ArchiveMaster.Services;
@@ -201,7 +197,8 @@ public class TypoCheckerService(AppConfig appConfig)
     }
 
     public async IAsyncEnumerable<ICheckItem> CheckAsync(IList<DocFilePart> parts,
-        [EnumeratorCancellation] CancellationToken ct)
+        [EnumeratorCancellation]
+        CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(parts);
         if (parts.Count == 0)
@@ -233,9 +230,9 @@ public class TypoCheckerService(AppConfig appConfig)
             }
 
             string result = await llm.CallAsync(systemPrompt, segment,
-                new ChatOptions { ResponseFormat = ChatResponseFormat.Json }, ct);
+                new ChatOptions { OutputJson = true }, ct);
             yield return new LlmOutputItem(result);
-            result =AiChatMessage.RemoveThink(result);
+            result = AiChatMessage.RemoveThink(result);
 
             result = result.Replace("```json", "").Replace("```", "");
 

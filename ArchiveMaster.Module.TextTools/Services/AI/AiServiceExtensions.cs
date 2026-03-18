@@ -1,5 +1,4 @@
 ﻿using ArchiveMaster.ViewModels;
-using Microsoft.Extensions.AI;
 
 namespace ArchiveMaster.Services;
 
@@ -7,7 +6,7 @@ public static class AiServiceExtensions
 {
     extension(IAiService service)
     {
-        public async Task<string> CallAiWithStreamAsync(IEnumerable<ChatMessage> messages,
+        public async Task<string> CallAiWithStreamAsync(IEnumerable<AiChatMessage> messages,
             AiChatMessage assistantMessage, CancellationToken ct = default)
         {
             LlmCallerService s = new LlmCallerService(service.AI);

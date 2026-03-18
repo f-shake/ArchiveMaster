@@ -5,13 +5,12 @@ using ArchiveMaster.Services;
 using Avalonia.Collections;
 using Avalonia.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
-using Microsoft.Extensions.AI;
 
 namespace ArchiveMaster.ViewModels;
 
 public partial class AiChatMessage : ObservableObject
 {
-    private ChatMessage chatMessage;
+    private AiChatMessage chatMessage;
 
     private string fullText;
 
@@ -37,8 +36,6 @@ public partial class AiChatMessage : ObservableObject
 
     public event EventHandler MessageAppended;
 
-    public ChatMessage ChatMessage =>
-        !isFrozen ? throw new InvalidOperationException("当前消息未冻结，无法获取ChatMessage") : chatMessage;
 
     public string FullText => isFrozen ? fullText : throw new InvalidOperationException("当前消息未冻结，无法获取FullText");
     public AvaloniaList<InlineItem> Inlines { get; } = new AvaloniaList<InlineItem>();
@@ -70,14 +67,7 @@ public partial class AiChatMessage : ObservableObject
     {
         isFrozen = true;
 
-        var role = Sender switch
-        {
-            AiChatMessageSender.System => ChatRole.System,
-            AiChatMessageSender.User => ChatRole.User,
-            AiChatMessageSender.Assistant => ChatRole.Assistant,
-            _ => throw new ArgumentOutOfRangeException(nameof(Sender), Sender, null)
-        };
-        chatMessage = new ChatMessage(role, string.Concat(Inlines.Select(i => i.Text)));
+        chatMessage = new AiChatMessage(Sender, string.Concat(Inlines.Select(i => i.Text)));
 
         fullText = string.Concat(Inlines.Select(p => p.Text)).Trim();
         if (removeThink)

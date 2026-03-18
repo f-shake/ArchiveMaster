@@ -3,7 +3,6 @@ using ArchiveMaster.Events;
 using ArchiveMaster.Models;
 using ArchiveMaster.ViewModels;
 using Avalonia.Media;
-using Microsoft.Extensions.AI;
 
 namespace ArchiveMaster.Services;
 

@@ -33,7 +33,7 @@
                 <Setter Property="Foreground" Value="{DynamicResource Foreground3}" />
             </Style>
         </Style>
-        <Style Selector="SelectableTextBlock.ChatMessage">
+        <Style Selector="SelectableTextBlock.AiChatMessage">
             <Setter Property="TextWrapping" Value="Wrap" />
             <Setter Property="LineSpacing" Value="2" />
         </Style>
@@ -61,7 +61,7 @@
                                     Classes="ChatBox">
                                     <SelectableTextBlock
                                         b:TextBlockInlinesBehavior.ItemsSource="{Binding Inlines}"
-                                        Classes="ChatMessage" />
+                                        Classes="AiChatMessage" />
                                 </Border>
                             </DockPanel>
 
@@ -76,7 +76,7 @@
                                     Classes="ChatBox">
                                     <SelectableTextBlock
                                         b:TextBlockInlinesBehavior.ItemsSource="{Binding Inlines}"
-                                        Classes="ChatMessage"
+                                        Classes="AiChatMessage"
                                         Opacity="0.75" />
                                 </Border>
                             </DockPanel>
@@ -89,7 +89,7 @@
                                 <Border Margin="16,8">
                                     <SelectableTextBlock
                                         b:TextBlockInlinesBehavior.ItemsSource="{Binding Inlines}"
-                                        Classes="ChatMessage" />
+                                        Classes="AiChatMessage" />
                                 </Border>
                                 <StackPanel
                                     Orientation="Horizontal"

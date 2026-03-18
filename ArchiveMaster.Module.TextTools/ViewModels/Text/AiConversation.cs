@@ -6,7 +6,6 @@ using Avalonia.Collections;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using FzLib.Avalonia.Dialogs;
-using Microsoft.Extensions.AI;
 
 namespace ArchiveMaster.ViewModels;
 
@@ -59,11 +58,6 @@ public partial class AiConversation : ObservableObject
     public void BindService(IAiService service)
     {
         Service = service;
-    }
-
-    public IList<ChatMessage> GetChatMessages()
-    {
-        return Messages.Select(x => x.ChatMessage).ToList();
     }
 
     public void OnEndResponse()
@@ -148,7 +142,7 @@ public partial class AiConversation : ObservableObject
                 }
             }
 
-            var messages = GetChatMessages();
+            var messages = Messages.ToList();
             var assistantMessage = AddAssistantMessage();
 
             await Service.CallAiWithStreamAsync(messages, assistantMessage, ct);
