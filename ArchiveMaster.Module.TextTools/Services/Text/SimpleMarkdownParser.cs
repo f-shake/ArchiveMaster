@@ -51,7 +51,7 @@ public static class SimpleMarkdownParser
             }
 
             // 4. 标题解析 (对 content 进行操作，这样可以支持 "> # 标题")
-            if (content.StartsWith("### "))
+            if (content.StartsWith("#### "))
             {
                 fontSize = 16;
                 content = content[5..];

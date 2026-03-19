@@ -11,7 +11,7 @@ namespace ArchiveMaster.ViewModels;
 
 public partial class AiChatMessage : ObservableObject
 {
-    private StringBuilder fullTextBuilder=new StringBuilder();
+    private StringBuilder fullTextBuilder = new StringBuilder();
     private string frozenFullText;
 
     private bool isFrozen;
@@ -60,7 +60,7 @@ public partial class AiChatMessage : ObservableObject
 
     private void EndLine()
     {
-        var inlines = Inlines.GetRange(lineBeginIndex, Inlines.Count - lineBeginIndex).ToList();
+        var inlines = Inlines.GetRange(lineBeginIndex, Inlines.Count - lineBeginIndex);
         var text = string.Concat(inlines.Select(i => i.Text));
         Inlines.RemoveRange(lineBeginIndex, Inlines.Count - lineBeginIndex);
         var formatedInlines = SimpleMarkdownParser.ParseSimpleMarkdown(text);
@@ -85,7 +85,12 @@ public partial class AiChatMessage : ObservableObject
         }
 
         //换行了
-        AddInline(lines[0]);
+        if (lines[0].Length > 0)
+        {
+            //如果\n开头，第一个元素将为空
+            AddInline(lines[0]);
+        }
+
         for (int i = 1; i < lines.Length; i++)
         {
             EndLine();
@@ -119,7 +124,7 @@ public partial class AiChatMessage : ObservableObject
                 Inlines.Clear();
                 var text = FullText.Replace("\r", "").Replace("\n", "");
                 Inlines.Add(new InlineItem(text[..(maxLength / 2)]));
-                Inlines.Add(new InlineItem("  ...  ", foreground: Brushes.Gray));
+                Inlines.Add(new InlineItem("  ...  ", false, Brushes.Gray));
                 Inlines.Add(new InlineItem(text[^(maxLength / 2)..]));
                 Inlines.Add(new InlineItem($"（共{FullText.Length}字）"));
             }

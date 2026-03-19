@@ -3,7 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace ArchiveMaster.ViewModels;
 
-public partial class InlineItem : ObservableObject
+public class InlineItem
 {
     public InlineItem()
     {
@@ -19,15 +19,14 @@ public partial class InlineItem : ObservableObject
         FontSize = fontSize;
     }
 
-    [ObservableProperty]
-    private string text;
+    public string Text { get; set; }
 
-    public bool IsBold { get; set; }
-    public bool IsItalic { get; set; }
-    public int FontSize { get; set; }
-    public IBrush Foreground { get; set; }
-    
-    public static implicit operator InlineItem( string message)
+    public bool IsBold { get;set; }
+    public bool IsItalic { get;set; }
+    public int FontSize { get; set;}
+    public IBrush Foreground { get;set; }
+
+    public static implicit operator InlineItem(string message)
     {
         return new InlineItem(message);
     }

@@ -137,14 +137,15 @@
 
             <TextBox
                 Grid.Column="2"
+                AcceptsReturn="True"
                 AcceptsTab="True"
                 IsEnabled="{Binding $parent[UserControl].Conversation.CanUserInput}"
                 KeyDown="InputTextBox_KeyDown"
                 MaxLines="6"
                 Text="{Binding $parent[UserControl].Conversation.InputText}"
                 TextWrapping="Wrap" />
-            <Panel Grid.Column="4">
 
+            <Panel Grid.Column="4">
                 <Button
                     Classes="Primary"
                     Command="{Binding $parent[UserControl].Conversation.SendCommand}"

@@ -212,12 +212,8 @@ public static class TextBlockInlinesBehavior
         {
             return new LineBreak();
         }
-        var run = new Run ();
-        run.Bind(Run.TextProperty, new Binding(nameof(InlineItem.Text)) 
-        { 
-            Source = item,
-            Mode = BindingMode.OneWay 
-        });
+
+        var run = new Run { Text = item.Text };
         if (item.IsBold)
         {
             run.FontWeight = FontWeight.Bold;

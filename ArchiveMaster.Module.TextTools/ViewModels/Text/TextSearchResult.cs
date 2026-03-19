@@ -23,6 +23,7 @@ public partial class TextSearchResult : ObservableObject
 
     [ObservableProperty]
     private string source;
+
     [ObservableProperty]
     private string sourceParagraph;
 
@@ -33,6 +34,7 @@ public partial class TextSearchResult : ObservableObject
         inlines ?? throw new InvalidOperationException($"请先调用{nameof(GenerateContext)}方法");
 
     public string KeyWordsString => string.Join("、", Keywords);
+
     public void GenerateContext()
     {
         int start = Math.Max(0, ContextStartIndex);
@@ -42,7 +44,7 @@ public partial class TextSearchResult : ObservableObject
         if (string.IsNullOrEmpty(Context) || Keywords?.Count is null or 0)
         {
             // 如果没有关键词，返回普通文本
-            inlines = [new InlineItem { Text = Context }];
+            inlines = [new InlineItem(Context)];
         }
         else
         {
@@ -61,12 +63,7 @@ public partial class TextSearchResult : ObservableObject
                 if (foundKeyword != null)
                 {
                     // 添加加粗的关键词
-                    result.Add(new InlineItem
-                    {
-                        Text = foundKeyword,
-                        IsBold = true,
-                        Foreground = Brushes.Red
-                    });
+                    result.Add(new InlineItem(foundKeyword, true, Brushes.Red));
                     remainingText = remainingText[foundKeyword.Length..];
                 }
                 else
@@ -81,10 +78,7 @@ public partial class TextSearchResult : ObservableObject
                         ? nextKeywordPositions.Min()
                         : remainingText.Length;
 
-                    result.Add(new InlineItem
-                    {
-                        Text = remainingText[..nextPos]
-                    });
+                    result.Add(new InlineItem(remainingText[..nextPos]));
                     remainingText = remainingText[nextPos..];
                 }
             }
