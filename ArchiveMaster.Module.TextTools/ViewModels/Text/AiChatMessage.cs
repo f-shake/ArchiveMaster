@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Diagnostics;
+using System.Text;
 using System.Text.RegularExpressions;
 using ArchiveMaster.Enums;
 using ArchiveMaster.Services;
@@ -10,9 +11,8 @@ namespace ArchiveMaster.ViewModels;
 
 public partial class AiChatMessage : ObservableObject
 {
-    private AiChatMessage chatMessage;
-
-    private string fullText;
+    private StringBuilder fullTextBuilder=new StringBuilder();
+    private string frozenFullText;
 
     private bool isFrozen;
 
@@ -37,7 +37,11 @@ public partial class AiChatMessage : ObservableObject
     public event EventHandler MessageAppended;
 
 
-    public string FullText => isFrozen ? fullText : throw new InvalidOperationException("当前消息未冻结，无法获取FullText");
+    public string FullText => !isFrozen
+        ? throw new InvalidOperationException("当前消息未冻结，无法获取FullText")
+        : frozenFullText ?? throw new InvalidOperationException("当前消息已冻结，但全文内容尚未初始化");
+
+    private int lineBeginIndex = 0;
     public AvaloniaList<InlineItem> Inlines { get; } = new AvaloniaList<InlineItem>();
 
     public bool IsFrozen => isFrozen;
@@ -50,7 +54,19 @@ public partial class AiChatMessage : ObservableObject
         }
 
         Inlines.Add(inline);
+        fullTextBuilder.Append(inline.Text);
         MessageAppended?.Invoke(this, EventArgs.Empty);
+    }
+
+    private void EndLine()
+    {
+        var inlines = Inlines.GetRange(lineBeginIndex, Inlines.Count - lineBeginIndex).ToList();
+        var text = string.Concat(inlines.Select(i => i.Text));
+        Inlines.RemoveRange(lineBeginIndex, Inlines.Count - lineBeginIndex);
+        var formatedInlines = SimpleMarkdownParser.ParseSimpleMarkdown(text);
+        Inlines.AddRange(formatedInlines.Append("\n"));
+        fullTextBuilder.AppendLine();
+        lineBeginIndex = Inlines.Count;
     }
 
     public void AppendMessage(string message)
@@ -60,24 +76,19 @@ public partial class AiChatMessage : ObservableObject
             throw new InvalidOperationException("当前消息不是Assistant，无法追加消息");
         }
 
-        if (Inlines.Count == 0)
-        {
-            AddInline("");
-        }
-
         var lines = message.Split('\n');
-        Inlines[^1].Text += lines[0];
+        //没有换行
         if (lines.Length == 1)
         {
+            AddInline(message);
             return;
         }
 
+        //换行了
+        AddInline(lines[0]);
         for (int i = 1; i < lines.Length; i++)
         {
-            var inlines = SimpleMarkdownParser.ParseSimpleMarkdown(Inlines[^1].Text);
-            inlines = inlines.Append("\n");
-            Inlines.RemoveAt(Inlines.Count - 1);
-            Inlines.AddRange(inlines);
+            EndLine();
             AddInline(lines[i]);
         }
     }
@@ -87,13 +98,19 @@ public partial class AiChatMessage : ObservableObject
     {
         isFrozen = true;
 
-        chatMessage = new AiChatMessage(Sender, string.Concat(Inlines.Select(i => i.Text)));
+        if (Sender == AiChatMessageSender.Assistant)
+        {
+            EndLine();
+        }
 
-        fullText = string.Concat(Inlines.Select(p => p.Text)).Trim();
+        var fullText = fullTextBuilder.ToString();
         if (removeThink)
         {
             fullText = RemoveThink(fullText);
         }
+
+        frozenFullText = fullText;
+        fullTextBuilder = null;
 
         if (fold)
         {
@@ -106,16 +123,6 @@ public partial class AiChatMessage : ObservableObject
                 Inlines.Add(new InlineItem(text[^(maxLength / 2)..]));
                 Inlines.Add(new InlineItem($"（共{FullText.Length}字）"));
             }
-        }
-        else
-        {
-            //20260319改为逐行解析
-            // if (Sender == AiChatMessageSender.Assistant)
-            // {
-            //     Inlines.Clear();
-            //     var inlines = SimpleMarkdownParser.ParseSimpleMarkdown(FullText);
-            //     Inlines.AddRange(inlines);
-            // }
         }
 
         OnPropertyChanged(nameof(IsFrozen));
