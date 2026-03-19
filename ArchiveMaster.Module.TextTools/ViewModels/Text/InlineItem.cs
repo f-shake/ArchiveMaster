@@ -1,8 +1,9 @@
 ﻿using Avalonia.Media;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace ArchiveMaster.ViewModels;
 
-public class InlineItem
+public partial class InlineItem : ObservableObject
 {
     public InlineItem()
     {
@@ -18,9 +19,16 @@ public class InlineItem
         FontSize = fontSize;
     }
 
-    public string Text { get; set; }
+    [ObservableProperty]
+    private string text;
+
     public bool IsBold { get; set; }
     public bool IsItalic { get; set; }
     public int FontSize { get; set; }
     public IBrush Foreground { get; set; }
+    
+    public static implicit operator InlineItem( string message)
+    {
+        return new InlineItem(message);
+    }
 }

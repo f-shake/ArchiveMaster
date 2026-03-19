@@ -53,15 +53,35 @@ public partial class AiChatMessage : ObservableObject
         MessageAppended?.Invoke(this, EventArgs.Empty);
     }
 
-    public void AddInline(string message)
+    public void AppendMessage(string message)
     {
-        if (message.Contains('\r'))
+        if (Sender != AiChatMessageSender.Assistant)
         {
-            message = message.Replace("\r", "");
+            throw new InvalidOperationException("当前消息不是Assistant，无法追加消息");
         }
 
-        AddInline(new InlineItem(message));
+        if (Inlines.Count == 0)
+        {
+            AddInline("");
+        }
+
+        var lines = message.Split('\n');
+        Inlines[^1].Text += lines[0];
+        if (lines.Length == 1)
+        {
+            return;
+        }
+
+        for (int i = 1; i < lines.Length; i++)
+        {
+            var inlines = SimpleMarkdownParser.ParseSimpleMarkdown(Inlines[^1].Text);
+            inlines = inlines.Append("\n");
+            Inlines.RemoveAt(Inlines.Count - 1);
+            Inlines.AddRange(inlines);
+            AddInline(lines[i]);
+        }
     }
+
 
     public void Freeze(bool removeThink = true, bool fold = false, int maxLength = 50)
     {
@@ -89,12 +109,13 @@ public partial class AiChatMessage : ObservableObject
         }
         else
         {
-            if (Sender == AiChatMessageSender.Assistant)
-            {
-                Inlines.Clear();
-                var inlines = SimpleMarkdownParser.ParseSimpleMarkdown(FullText);
-                Inlines.AddRange(inlines);
-            }
+            //20260319改为逐行解析
+            // if (Sender == AiChatMessageSender.Assistant)
+            // {
+            //     Inlines.Clear();
+            //     var inlines = SimpleMarkdownParser.ParseSimpleMarkdown(FullText);
+            //     Inlines.AddRange(inlines);
+            // }
         }
 
         OnPropertyChanged(nameof(IsFrozen));

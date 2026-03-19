@@ -16,7 +16,19 @@ public static class SimpleMarkdownParser
         {
             int fontSize = 0;
             string content = line;
+            
+            if (line.Trim() == "---")
+            {
+                // 使用 Unicode 制表符模拟一条长线，或者自定义颜色
+                yield return new InlineItem("────────────────────────────────", foreground: Brushes.Gray);
 
+                if (index < lines.Length - 1)
+                {
+                    yield return new InlineItem("\n");
+                }
+                continue;
+            }
+            
             // ===== 1. 标题解析 =====
             if (line.StartsWith("### "))
             {
