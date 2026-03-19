@@ -93,5 +93,50 @@ public abstract class BaseChatClient<TConfig> : IChatClient where TConfig : IAiP
         };
     }
 
+    protected void WriteOptions(JsonObject container, ChatOptions options, string temperatureKey, string topPKey,
+        string maxTokensKey)
+    {
+        ArgumentNullException.ThrowIfNull(container);
+        if ((options?.Temperature ?? Config.Temperature) is double t)
+        {
+            container[temperatureKey] = t;
+        }
+
+        if ((options?.TopP ?? Config.TopP) is double p)
+        {
+            container[topPKey] = p;
+        }
+
+        if ((options?.MaxOutputTokens ?? Config.MaxTokens) is int m)
+        {
+            container[maxTokensKey] = m;
+        }
+    }
+
+    protected void MergeExtraParams(JsonObject container)
+    {
+        if (string.IsNullOrWhiteSpace(Config.ExtraParamsJson))
+        {
+            return;
+        }
+
+        try
+        {
+            var extraNode = JsonNode.Parse(Config.ExtraParamsJson);
+
+            if (extraNode is JsonObject extraObj)
+            {
+                foreach (var property in extraObj)
+                {
+                    container[property.Key] = property.Value?.DeepClone();
+                }
+            }
+        }
+        catch (JsonException ex)
+        {
+            throw new Exception($"AI提供者的额外JSON参数解析失败: {ex.Message}");
+        }
+    }
+
     public void Dispose() => HttpClient.Dispose();
 }

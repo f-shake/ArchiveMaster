@@ -51,28 +51,17 @@ public class OpenAICompatibleChatClient(IOpenAIAiProvider config) : BaseChatClie
             }, ct);
     }
 
+
     protected override JsonObject BuildPayload(IEnumerable<AiChatMessage> messages, ChatOptions options, bool isStream)
     {
         var root = CreateBasePayload(messages, isStream);
-        if ((options?.Temperature ?? Config.Temperature) is double t)
-        {
-            root["temperature"] = t;
-        }
-
-        if ((options?.TopP ?? Config.TopP) is double p)
-        {
-            root["top_p"] = p;
-        }
-
-        if ((options?.MaxOutputTokens ?? Config.MaxTokens) is int m)
-        {
-            root["max_tokens"] = m;
-        }
-
+        WriteOptions(root, options, "temperature", "top_p", "max_tokens");
+      
         if (options?.OutputJson == true)
         {
-            root["response_format"] = new JsonObject { ["type"] = "json" };
+            root["response_format"] = new JsonObject { ["type"] = "json_object" };
         }
+        MergeExtraParams(root);
 
         return root;
     }

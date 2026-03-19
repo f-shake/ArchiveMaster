@@ -56,7 +56,6 @@ public class OllamaChatClient(IOllamaAiProvider config) : BaseChatClient<IOllama
 
     protected override JsonObject BuildPayload(IEnumerable<AiChatMessage> messages, ChatOptions options, bool isStream)
     {
-        // 假设 CreateBasePayload 也修改为返回 JsonObject
         var root = CreateBasePayload(messages, isStream);
         if (options?.OutputJson == true)
         {
@@ -65,17 +64,10 @@ public class OllamaChatClient(IOllamaAiProvider config) : BaseChatClient<IOllama
 
         var ollamaOptions = new JsonObject();
 
-        // 使用模式匹配简化赋值逻辑
-        if ((options?.Temperature ?? Config.Temperature) is double t)
-            ollamaOptions["temperature"] = t;
+        WriteOptions(ollamaOptions, options, "temperature", "top_p", "num_predict");
 
-        if ((options?.TopP ?? Config.TopP) is double p)
-            ollamaOptions["top_p"] = p;
-
-        if ((options?.MaxOutputTokens ?? Config.MaxTokens) is int m)
-            ollamaOptions["num_predict"] = m;
-
-        // 如果有配置项，直接挂载到 root
+        MergeExtraParams(ollamaOptions);
+        
         if (ollamaOptions.Count > 0)
         {
             root["options"] = ollamaOptions;
