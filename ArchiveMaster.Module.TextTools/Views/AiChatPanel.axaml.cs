@@ -7,6 +7,7 @@ using Avalonia.Input;
 using Avalonia.Input.Platform;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
+using Avalonia.Threading;
 using Serilog;
 
 namespace ArchiveMaster.Views
@@ -25,7 +26,13 @@ namespace ArchiveMaster.Views
             {
                 if (c != null)
                 {
-                    c.MessageAppended += (s, e) => { scr.ScrollToEnd(); };
+                    c.MessageAppended += (s, e) =>
+                    {
+                        Dispatcher.UIThread.Invoke(() =>
+                        {
+                            scr.ScrollToEnd();
+                        });
+                    };
                 }
             });
         }
