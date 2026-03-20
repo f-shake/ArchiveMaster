@@ -33,9 +33,24 @@
                 <!-- </ct:FormItem> -->
                 <ListBox
                     Grid.Row="2"
-                    DisplayMemberBinding="{Binding Name}"
                     ItemsSource="{Binding Providers}"
-                    SelectedItem="{Binding SelectedProvider}" />
+                    SelectedItem="{Binding SelectedProvider}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate x:DataType="vm:AiProviderConfigViewModel">
+                            <Grid ColumnDefinitions="8,8,*">
+                                <Ellipse
+                                    Width="8"
+                                    Height="8"
+                                    Fill="Green"
+                                    IsVisible="{Binding IsDefault}" />
+                                <TextBlock
+                                    Grid.Column="2"
+                                    Text="{Binding Name}"
+                                    TextTrimming="CharacterEllipsis" />
+                            </Grid>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
                 <StackPanel
                     Grid.Row="4"
                     Margin="0,0,8,0"

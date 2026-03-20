@@ -34,8 +34,8 @@ public class LlmCallerService
     public async Task<string> CallAsync(string systemPrompt, string userPrompt, ChatOptions options = null,
         CancellationToken ct = default)
     {
-        var sys = new AiChatMessage(AiChatMessageSender.System, systemPrompt);
-        var user = new AiChatMessage(AiChatMessageSender.User, userPrompt);
+        var sys = AiChatMessage.CreateSystemMessage(systemPrompt, false, 0);
+        var user = AiChatMessage.CreateUserMessage(userPrompt, false, 0);
         return await GetResponseAsync([sys, user], options, ct);
     }
 
@@ -110,8 +110,8 @@ public class LlmCallerService
         CancellationToken ct = default)
     {
         // LogPrompt(systemPrompt, userPrompt, true);
-        var sys = new AiChatMessage(AiChatMessageSender.System, systemPrompt);
-        var user = new AiChatMessage(AiChatMessageSender.User, userPrompt);
+        var sys = AiChatMessage.CreateSystemMessage(systemPrompt, false, 0);
+        var user = AiChatMessage.CreateUserMessage(userPrompt, false, 0);
         await foreach (var p in GetStreamResponseAsync([sys, user], options, ct))
         {
             yield return p;

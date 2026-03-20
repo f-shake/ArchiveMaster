@@ -80,8 +80,8 @@
                                         Opacity="0.75" />
                                 </Border>
                             </DockPanel>
-                            <!--  AI  -->
 
+                            <!--  AI  -->
                             <StackPanel
                                 IsVisible="{Binding Sender, Converter={x:Static cvt:Converters.EqualWithParameter}, ConverterParameter=Assistant}"
                                 Orientation="Vertical"
@@ -96,10 +96,26 @@
                                     Spacing="8">
                                     <Button
                                         Classes="Icon ChatButton"
-                                        Click="CopyButton_Click"
                                         Content="{ic:FluentIcon Icon=Copy}"
                                         IsVisible="{Binding IsFrozen}"
-                                        ToolTip.Tip="复制内容" />
+                                        ToolTip.Tip="复制内容">
+                                        <Button.Flyout>
+                                            <MenuFlyout>
+                                                <MenuItem
+                                                    Click="CopyButton_Click"
+                                                    Header="复制文本"
+                                                    Tag="PlainText" />
+                                                <MenuItem
+                                                    Click="CopyButton_Click"
+                                                    Header="复制原始内容（MarkDown）"
+                                                    Tag="RawText" />
+                                                <MenuItem
+                                                    Click="CopyButton_Click"
+                                                    Header="复制思考内容"
+                                                    Tag="ThinkText" />
+                                            </MenuFlyout>
+                                        </Button.Flyout>
+                                    </Button>
                                     <Button
                                         Classes="Icon ChatButton"
                                         Command="{Binding $parent[UserControl].Conversation.RegenerateCommand}"

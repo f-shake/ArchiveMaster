@@ -40,13 +40,21 @@ namespace ArchiveMaster.Views
         {
             try
             {
-                var message = (AiChatMessage)((Button)sender).DataContext;
+                var message = (AiChatMessage)((Control)sender).DataContext;
                 if (message == null)
                 {
                     return;
                 }
 
-                var task = TopLevel.GetTopLevel(this)?.Clipboard?.SetTextAsync(message.FullText);
+                var tag = (string)((Control)sender).Tag;
+                var text = tag switch
+                {
+                    "PlainText" => message.PlainText,
+                    "RawText" => message.FullText,
+                    "ThinkText" => message.ThinkText,
+                    _ => message.FullText
+                };
+                var task = TopLevel.GetTopLevel(this)?.Clipboard?.SetTextAsync(text);
                 if (task != null)
                 {
                     await task;

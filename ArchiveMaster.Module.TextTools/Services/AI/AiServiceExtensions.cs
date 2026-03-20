@@ -13,7 +13,7 @@ public static class AiServiceExtensions
             string result = await s.CallWithStreamAsync(messages, service.ChatOptions, (_, e) =>
             {
                 service.OnAiTextGenerate(e.Value);
-                assistantMessage?.AppendMessage(e.Value);
+                assistantMessage?.AppendAssistantMessage(e.Value);
             }, ct: ct);
 
             // if (service.NeedRemoveThink)
