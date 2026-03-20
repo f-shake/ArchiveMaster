@@ -49,9 +49,9 @@ namespace ArchiveMaster.Views
                 var tag = (string)((Control)sender).Tag;
                 var text = tag switch
                 {
-                    "PlainText" => message.PlainText,
+                    "PlainText" => ((AiAssistantChatMessage)message).PlainText,
                     "RawText" => message.FullText,
-                    "ThinkText" => message.ThinkText,
+                    "ThinkText" => ((AiAssistantChatMessage)message).ThinkText,
                     _ => message.FullText
                 };
                 var task = TopLevel.GetTopLevel(this)?.Clipboard?.SetTextAsync(text);

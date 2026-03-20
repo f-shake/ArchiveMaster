@@ -12,8 +12,6 @@ namespace ArchiveMaster.ViewModels;
 public partial class AiConversation : ObservableObject
 {
     public int MAX_FOLDED_LENGTH = 50;
-    public ViewModelServices Services { get; }
-
     [ObservableProperty]
     private bool canUserInput;
 
@@ -21,7 +19,6 @@ public partial class AiConversation : ObservableObject
     private string inputText;
 
     private bool isRegenerating;
-
     public AiConversation(ViewModelServices services)
     {
         Services = services;
@@ -30,33 +27,31 @@ public partial class AiConversation : ObservableObject
 
     public event EventHandler MessageAppended;
 
-
-    public AiChatMessage LastAssistantMessage => Messages.LastOrDefault(x => x.Sender == AiChatMessageSender.Assistant);
-
-    public AiChatMessage LastSystemMessage => Messages.LastOrDefault(x => x.Sender == AiChatMessageSender.System);
-
-    public AiChatMessage LastUserMessage => Messages.LastOrDefault(x => x.Sender == AiChatMessageSender.User);
-
+    public AiAssistantChatMessage LastAssistantMessage => Messages.OfType<AiAssistantChatMessage>().LastOrDefault();
+    public AiSystemChatMessage LastSystemMessage => Messages.OfType<AiSystemChatMessage>().LastOrDefault();
+    public AiUserChatMessage LastUserMessage => Messages.OfType<AiUserChatMessage>().LastOrDefault();
     public AvaloniaList<AiChatMessage> Messages { get; } = new AvaloniaList<AiChatMessage>();
-
     public IAiService Service { get; private set; }
-
-    public AiChatMessage AddAssistantMessage()
+    public ViewModelServices Services { get; }
+    public AiAssistantChatMessage AddAssistantMessage()
     {
         var message = AiChatMessage.CreateAssistantMessage();
-        return AddMessage(message);
+        AddMessage(message);
+        return message;
     }
 
-    public AiChatMessage AddSystemMessage(string systemPrompt, bool fold, int maxLength)
+    public AiSystemChatMessage AddSystemMessage(string systemPrompt, bool fold, int maxLength)
     {
         var message = AiChatMessage.CreateSystemMessage(systemPrompt, fold, maxLength);
-        return AddMessage(message);
+        AddMessage(message);
+        return message;
     }
 
-    public AiChatMessage AddUserMessage(string userPrompt, bool fold, int maxLength)
+    public AiUserChatMessage AddUserMessage(string userPrompt, bool fold, int maxLength)
     {
         var message = AiChatMessage.CreateUserMessage(userPrompt, fold, maxLength);
-        return AddMessage(message);
+        AddMessage(message);
+        return message;
     }
 
     public void BindService(IAiService service)
@@ -82,12 +77,11 @@ public partial class AiConversation : ObservableObject
         InputText = "（自动生成）";
     }
 
-    private AiChatMessage AddMessage(AiChatMessage message)
+    private void AddMessage(AiChatMessage message)
     {
         Messages.Add(message);
         message.MessageAppended += (s, e) => MessageAppended?.Invoke(s, e);
         MessageAppended?.Invoke(this, EventArgs.Empty);
-        return message;
     }
 
     private void OnBeginResponse()
@@ -148,27 +142,27 @@ public partial class AiConversation : ObservableObject
             var messages = Messages.ToList();
             var assistantMessage = AddAssistantMessage();
 
-            LastAssistantMessage.AppendAssistantMessage("<think>\n");
-            for (int i = 1; i < 20; i++)
-            {
-                if (i % 3 == 0)
-                {
-                    LastAssistantMessage.AppendAssistantMessage("\n");
-                }
-                else
-                {
-                    LastAssistantMessage.AppendAssistantMessage("# 哈哈哈哈222");
-                }
-
-                if (i == 12)
-                {
-                    LastAssistantMessage.AppendAssistantMessage("</think>\n");
-                }
-
-                await Task.Delay(100);
-            }
-
-            return;
+            // LastAssistantMessage.Append("<think>\n");
+            // for (int i = 1; i < 20; i++)
+            // {
+            //     if (i % 3 == 0)
+            //     {
+            //         LastAssistantMessage.Append("\n");
+            //     }
+            //     else
+            //     {
+            //         LastAssistantMessage.Append("# 哈哈哈哈222");
+            //     }
+            //
+            //     if (i == 12)
+            //     {
+            //         LastAssistantMessage.Append("</think>\n");
+            //     }
+            //
+            //     await Task.Delay(100);
+            // }
+            //
+            // return;
             await Service.CallAiWithStreamAsync(messages, assistantMessage, ct);
         }
         catch (Exception ex)
