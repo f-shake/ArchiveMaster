@@ -8,7 +8,6 @@
     xmlns:cvt="clr-namespace:ArchiveMaster.Converters;assembly=ArchiveMaster.Core"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:fzb="clr-namespace:FzLib.Avalonia.Behaviors;assembly=FzLib.Avalonia"
-    xmlns:gb="using:GroupBox.Avalonia.Controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:sys="clr-namespace:System;assembly=System.Runtime"
     xmlns:v="using:ArchiveMaster.Views"

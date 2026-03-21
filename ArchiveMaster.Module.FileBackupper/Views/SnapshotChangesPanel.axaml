@@ -3,38 +3,41 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:g="clr-namespace:GroupBox.Avalonia.Controls;assembly=GroupBox.Avalonia"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:v="using:ArchiveMaster.Views"
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
     <Grid ColumnDefinitions="*,8,*,8,*">
-        <g:GroupBox Header="新增的文件">
+        <HeaderedContentControl
+            Classes="GroupBox"
+            Header="新增的文件">
             <v:SimpleFileDataGrid
                 ColumnIsCheckedIndex="-1"
                 ColumnStatusIndex="-1"
                 ItemsSource="{Binding CreatedFiles}"
                 RowDetailsTemplate="{x:Null}" />
-        </g:GroupBox>
-        <g:GroupBox
+        </HeaderedContentControl>
+        <HeaderedContentControl
             Grid.Column="2"
+            Classes="GroupBox"
             Header="修改的文件">
             <v:SimpleFileDataGrid
                 ColumnIsCheckedIndex="-1"
                 ColumnStatusIndex="-1"
                 ItemsSource="{Binding ModifiedFiles}"
                 RowDetailsTemplate="{x:Null}" />
-        </g:GroupBox>
-        <g:GroupBox
+        </HeaderedContentControl>
+        <HeaderedContentControl
             Grid.Column="4"
+            Classes="GroupBox"
             Header="删除的文件">
             <v:SimpleFileDataGrid
                 ColumnIsCheckedIndex="-1"
                 ColumnStatusIndex="-1"
                 ItemsSource="{Binding DeletedFiles}"
                 RowDetailsTemplate="{x:Null}" />
-        </g:GroupBox>
+        </HeaderedContentControl>
     </Grid>
 
 </UserControl>

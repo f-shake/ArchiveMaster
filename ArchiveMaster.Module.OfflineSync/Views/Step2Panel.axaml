@@ -8,7 +8,6 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:e="using:ArchiveMaster.Enums"
     xmlns:enums="clr-namespace:ArchiveMaster.Enums"
-    xmlns:gb="clr-namespace:GroupBox.Avalonia.Controls;assembly=GroupBox.Avalonia"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:me="using:FzLib.Avalonia.MarkupExtensions"
     xmlns:sys="clr-namespace:System;assembly=mscorlib"
@@ -106,9 +105,10 @@
                 Grid.Column="1"
                 Background="Transparent" />
             <!--  绑定宽度，当目录数量较多时，能够在DataGrid内部出现滚动条，而不是整个ConfigsContent的滚动条  -->
-            <gb:GroupBox
+            <HeaderedContentControl
                 Grid.Column="2"
                 Height="{Binding #configs.Bounds.Height, Mode=OneWay}"
+                Classes="GroupBox"
                 Header="目录匹配">
                 <Grid RowDefinitions="Auto,8,*">
                     <ctrl:FormItem>
@@ -150,7 +150,7 @@
                         </DataGrid.Columns>
                     </DataGrid>
                 </Grid>
-            </gb:GroupBox>
+            </HeaderedContentControl>
 
         </Grid>
 

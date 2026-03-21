@@ -8,7 +8,6 @@
     xmlns:cvt="clr-namespace:ArchiveMaster.Converters;assembly=ArchiveMaster.Core"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:enums="clr-namespace:ArchiveMaster.Enums"
-    xmlns:gb="using:GroupBox.Avalonia.Controls"
     xmlns:ic="using:FluentIcons.Avalonia.Markup"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:me="using:FzLib.Avalonia.MarkupExtensions"
@@ -75,7 +74,9 @@
                 IsEnabled="{Binding SelectedProvider, Converter={x:Static cvt:Converters.IsNotNull}}"
                 VerticalScrollBarVisibility="Auto">
                 <StackPanel Orientation="Vertical">
-                    <gb:GroupBox Header="基本信息">
+                    <HeaderedContentControl
+                        Classes="GroupBox"
+                        Header="基本信息">
                         <ct:StackFormItemGroup>
                             <ct:FormItem Label="名称：">
                                 <TextBox Text="{Binding SelectedProvider.Name}" />
@@ -98,9 +99,11 @@
                                 <TextBox Text="{Binding SelectedProvider.Model}" />
                             </ct:FormItem>
                         </ct:StackFormItemGroup>
-                    </gb:GroupBox>
+                    </HeaderedContentControl>
 
-                    <gb:GroupBox Header="高级设置">
+                    <HeaderedContentControl
+                        Classes="GroupBox"
+                        Header="高级设置">
                         <ct:StackFormItemGroup>
                             <ct:FormItem Label="温度：">
                                 <Grid ColumnDefinitions="*,8,Auto">
@@ -162,9 +165,11 @@
                                     Watermark="{}{&#10;    &quot;think&quot;: false&#10;}" />
                             </ct:FormItem>
                         </ct:StackFormItemGroup>
-                    </gb:GroupBox>
+                    </HeaderedContentControl>
 
-                    <gb:GroupBox Header="当前提供者">
+                    <HeaderedContentControl
+                        Classes="GroupBox"
+                        Header="当前提供者">
                         <StackPanel Orientation="Vertical">
                             <Button
                                 HorizontalAlignment="Center"
@@ -178,7 +183,7 @@
                                 Text="已设置为当前AI提供者" />
                         </StackPanel>
 
-                    </gb:GroupBox>
+                    </HeaderedContentControl>
                 </StackPanel>
             </ScrollViewer>
         </Grid>

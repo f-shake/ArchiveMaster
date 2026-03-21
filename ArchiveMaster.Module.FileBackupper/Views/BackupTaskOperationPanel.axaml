@@ -4,13 +4,14 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:e="using:ArchiveMaster.Enums"
-    xmlns:g="clr-namespace:GroupBox.Avalonia.Controls;assembly=GroupBox.Avalonia"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
     <StackPanel IsEnabled="{Binding IsTaskOperationEnable}">
-        <g:GroupBox Header="立即备份">
+        <HeaderedContentControl
+            Classes="GroupBox"
+            Header="立即备份">
             <StackPanel>
                 <StackPanel Orientation="Horizontal">
                     <Button
@@ -51,9 +52,11 @@
                     <Run>在已有全量快照的前提下，仅备份和记录与上一个快照有差异的部分</Run>
                 </TextBlock>
             </StackPanel>
-        </g:GroupBox>
+        </HeaderedContentControl>
 
-        <g:GroupBox Header="清理">
+        <HeaderedContentControl
+            Classes="GroupBox"
+            Header="清理">
             <StackPanel
                 IsEnabled="{Binding CanMakeBackup}"
                 Orientation="Horizontal">
@@ -61,9 +64,11 @@
                     Command="{Binding OrganizeFilesCommand}"
                     Content="整理文件" />
             </StackPanel>
-        </g:GroupBox>
+        </HeaderedContentControl>
 
-        <g:GroupBox Header="最后的日志">
+        <HeaderedContentControl
+            Classes="GroupBox"
+            Header="最后的日志">
             <Grid ColumnDefinitions="200,8,*">
                 <TextBlock Text="{Binding LastLog.Time}" />
                 <TextBlock
@@ -71,6 +76,6 @@
                     Text="{Binding LastLog.Message}"
                     ToolTip.Tip="{Binding LastLog.Message}" />
             </Grid>
-        </g:GroupBox>
+        </HeaderedContentControl>
     </StackPanel>
 </UserControl>

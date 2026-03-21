@@ -5,7 +5,6 @@
     xmlns:ctrl="clr-namespace:FzLib.Avalonia.Controls;assembly=FzLib.Avalonia"
     xmlns:cvt="using:ArchiveMaster.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:g="clr-namespace:GroupBox.Avalonia.Controls;assembly=GroupBox.Avalonia"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:sys="clr-namespace:System;assembly=mscorlib"
     xmlns:v="using:ArchiveMaster.Views"
@@ -55,7 +54,9 @@
                 VerticalAlignment="Center"
                 Background="Transparent" />
 
-            <g:GroupBox Header="文件包基本信息">
+            <HeaderedContentControl
+                Classes="GroupBox"
+                Header="文件包基本信息">
                 <ScrollViewer
                     HorizontalScrollBarVisibility="Disabled"
                     VerticalScrollBarVisibility="Auto">
@@ -161,21 +162,23 @@
                         </ctrl:FormItem>
                     </WrapPanel>
                 </ScrollViewer>
-            </g:GroupBox>
+            </HeaderedContentControl>
 
-            <g:GroupBox
+            <HeaderedContentControl
                 Grid.Row="2"
+                Classes="GroupBox"
                 Header="目标结构树">
                 <v:WriteOnceTreeFileDataGrid
                     ColumnIsCheckedIndex="-1"
                     ColumnStatusIndex="-1"
                     FileNameHalfTransparentBindingPath="HasPhysicalFile"
                     ItemsSource="{Binding FileTree}" />
-            </g:GroupBox>
+            </HeaderedContentControl>
 
-            <g:GroupBox
+            <HeaderedContentControl
                 Grid.RowSpan="3"
                 Grid.Column="2"
+                Classes="GroupBox"
                 Header="文件列表">
                 <v:SimpleFileDataGrid
                     ColumnIsCheckedIndex="-1"
@@ -243,7 +246,7 @@
                     </v:SimpleFileDataGrid.Columns>
                 </v:SimpleFileDataGrid>
 
-            </g:GroupBox>
+            </HeaderedContentControl>
         </Grid>
     </v:TwoStepPanelBase.ResultsContent>
 

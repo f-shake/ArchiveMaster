@@ -7,7 +7,6 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:enums="using:ArchiveMaster.Enums"
     xmlns:fcvt="using:FzLib.Avalonia.Converters"
-    xmlns:gb="using:GroupBox.Avalonia.Controls"
     xmlns:ic="using:FluentIcons.Avalonia.Markup"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:me="using:FzLib.Avalonia.MarkupExtensions"
@@ -127,7 +126,9 @@
                 HorizontalAlignment="Center"
                 VerticalAlignment="Stretch"
                 Background="Transparent" />
-            <gb:GroupBox Header="文件包">
+            <HeaderedContentControl
+                Classes="GroupBox"
+                Header="文件包">
                 <ListBox
                     ItemsSource="{Binding WriteOnceFilePackages}"
                     SelectedItem="{Binding SelectedPackage}">
@@ -193,10 +194,11 @@
                 </ListBox>
 
 
-            </gb:GroupBox>
-            <gb:GroupBox
+            </HeaderedContentControl>
+            <HeaderedContentControl
                 Grid.RowSpan="99"
                 Grid.Column="2"
+                Classes="GroupBox"
                 Header="文件包中的文件">
                 <v:SimpleFileDataGrid
                     ColumnIsCheckedIndex="-1"
@@ -208,7 +210,7 @@
                             IsReadOnly="True" />
                     </v:SimpleFileDataGrid.Columns>
                 </v:SimpleFileDataGrid>
-            </gb:GroupBox>
+            </HeaderedContentControl>
 
             <Grid
                 Grid.Row="2"

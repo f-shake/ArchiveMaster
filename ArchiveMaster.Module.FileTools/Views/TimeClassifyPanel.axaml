@@ -5,7 +5,6 @@
     xmlns:ct="using:FzLib.Avalonia.Controls"
     xmlns:cvt="using:ArchiveMaster.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:gb="clr-namespace:GroupBox.Avalonia.Controls;assembly=GroupBox.Avalonia"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:v="using:ArchiveMaster.Views"
     xmlns:vm="clr-namespace:ArchiveMaster.ViewModels"
@@ -31,20 +30,23 @@
     </v:TwoStepPanelBase.ConfigsContent>
     <v:TwoStepPanelBase.ResultsContent>
         <Grid ColumnDefinitions="*,8,*">
-            <gb:GroupBox Header="按修改时间分类的目录">
+            <HeaderedContentControl
+                Classes="GroupBox"
+                Header="按修改时间分类的目录">
                 <ListBox
                     x:Name="lstDirs"
                     DisplayMemberBinding="{Binding Name}"
                     ItemsSource="{Binding SameTimePhotosDirs}" />
-            </gb:GroupBox>
-            <gb:GroupBox
+            </HeaderedContentControl>
+            <HeaderedContentControl
                 Grid.Column="2"
+                Classes="GroupBox"
                 Header="目录内文件">
                 <v:SimpleFileDataGrid
                     ColumnIsCheckedIndex="-1"
                     ColumnStatusIndex="-1"
                     ItemsSource="{Binding #lstDirs.SelectedItem.Subs}" />
-            </gb:GroupBox>
+            </HeaderedContentControl>
         </Grid>
     </v:TwoStepPanelBase.ResultsContent>
 </v:TwoStepPanelBase>

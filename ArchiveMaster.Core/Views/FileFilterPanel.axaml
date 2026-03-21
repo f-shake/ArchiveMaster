@@ -3,7 +3,6 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:gb="using:GroupBox.Avalonia.Controls"
     xmlns:ic="using:FluentIcons.Avalonia.Markup"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:v="using:ArchiveMaster.Views"
@@ -20,7 +19,9 @@
                 <Setter Property="TextWrapping" Value="Wrap" />
             </Style>
         </Grid.Styles>
-        <gb:GroupBox Header="白名单">
+        <HeaderedContentControl
+            Classes="GroupBox"
+            Header="白名单">
             <Grid RowDefinitions="Auto,8,*,16,Auto,8,*,16,Auto,8,*">
                 <TextBlock Text="包含的文件：" />
                 <TextBox
@@ -44,9 +45,10 @@
                     AcceptsReturn="{Binding !$parent[UserControl].Filter.UseRegex}"
                     Text="{Binding $parent[UserControl].Filter.IncludePaths}" />
             </Grid>
-        </gb:GroupBox>
-        <gb:GroupBox
+        </HeaderedContentControl>
+        <HeaderedContentControl
             Grid.Column="2"
+            Classes="GroupBox"
             Header="黑名单">
             <Grid RowDefinitions="Auto,8,*,16,Auto,8,*,16,Auto,8,*">
                 <TextBlock Text="排除的文件：" />
@@ -70,7 +72,7 @@
                     AcceptsReturn="{Binding !$parent[UserControl].Filter.UseRegex}"
                     Text="{Binding $parent[UserControl].Filter.ExcludePaths}" />
             </Grid>
-        </gb:GroupBox>
+        </HeaderedContentControl>
         <Grid
             Grid.Row="2"
             Grid.ColumnSpan="3"
