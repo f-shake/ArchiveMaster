@@ -8,7 +8,6 @@
     xmlns:cvt="clr-namespace:ArchiveMaster.Converters;assembly=ArchiveMaster.Core"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:fzb="clr-namespace:FzLib.Avalonia.Behaviors;assembly=FzLib.Avalonia"
-    xmlns:gb="using:GroupBox.Avalonia.Controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:v="using:ArchiveMaster.Views"
     xmlns:vm="using:ArchiveMaster.ViewModels"
@@ -93,7 +92,8 @@
                 Content="搜索"
                 IsVisible="{Binding SearchResults, Converter={x:Static cvt:Converters.IsNull}}" />
 
-            <gb:GroupBox
+            <HeaderedContentControl
+                Classes="GroupBox"
                 Header="搜索结果"
                 IsVisible="{Binding !!SearchResults}">
                 <Grid RowDefinitions="*,8,Auto">
@@ -177,15 +177,16 @@
                             Content="重置" />
                     </Grid>
                 </Grid>
-            </gb:GroupBox>
+            </HeaderedContentControl>
 
-            <gb:GroupBox
+            <HeaderedContentControl
                 Grid.Column="2"
+                Classes="GroupBox"
                 Header="AI分析"
                 IsVisible="{Binding !!SearchResults}">
                 <v:AiChatPanel Conversation="{Binding AiConversation}" />
 
-            </gb:GroupBox>
+            </HeaderedContentControl>
 
             <GridSplitter
                 Grid.Column="1"

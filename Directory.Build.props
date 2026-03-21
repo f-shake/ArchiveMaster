@@ -4,7 +4,7 @@
     <!--App版本-->
     <AppVersion>2.4.0</AppVersion>
     <!--Avalonia版本-->
-    <AvaloniaVersion>11.3.11</AvaloniaVersion>
+    <AvaloniaVersion>11.3.12</AvaloniaVersion>
     <!--FzLib版本-->
     <FzLibVersion>3.3.2</FzLibVersion>
     <!--是否使用本地最新的FzLib。非开发者本人应当设置为T。-->
@@ -46,7 +46,6 @@
     <PackageReference Include="Avalonia.Controls.DataGrid"/>
     <PackageReference Include="Avalonia.Themes.Fluent"/>
     <PackageReference Include="Xaml.Behaviors.Avalonia"/>
-    <PackageReference Include="BinToss.GroupBox.Avalonia"/>
     <PackageReference Include="CommunityToolkit.Mvvm"/>
     <PackageReference Include="Serilog"/>
     <PackageReference Include="Serilog.Sinks.File"/>

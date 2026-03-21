@@ -21,125 +21,99 @@ namespace ArchiveMaster.ViewModels;
 
 public partial class TextEncryptionViewModel : ViewModelBase
 {
-    private readonly ConcurrentQueue<Func<Task>> taskQueue = new ConcurrentQueue<Func<Task>>();
+    [ObservableProperty]
+    private string ciphertext;
 
     [ObservableProperty]
-    private string result;
-
-    [ObservableProperty]
-    private TextSource source = new TextSource() { FromFile = false }; //敏感数据，不保存到配置文件
+    private string plaintext;
 
     public TextEncryptionViewModel(ViewModelServices services) : base(services)
     {
         Config = Services.AppConfig.GetOrCreateConfigWithDefaultKey<TextEncryptionConfig>();
         Service = new TextEncryptionService(Config, services.AppConfig);
-        Source.PropertyChanged += ConfigOnPropertyChanged;
-        Config.Password.PropertyChanged += ConfigOnPropertyChanged;
-        Config.PropertyChanged += ConfigOnPropertyChanged;
     }
 
     public TextEncryptionConfig Config { get; }
 
     public TextEncryptionService Service { get; }
 
-    private async void ConfigOnPropertyChanged(object sender, PropertyChangedEventArgs e)
+    protected async override void OnPropertyChanged(PropertyChangedEventArgs e)
     {
-        if (e.PropertyName is nameof(TextSource.Text)
-            or nameof(TextEncryptionConfig.Prefix)
-            or nameof(TextEncryptionConfig.Suffix)
-            or nameof(SecurePassword.Password))
+        base.OnPropertyChanged(e);
+        if (IsWorking || !Config.AutoFlush)
         {
-            await ExecuteLastAsync();
+            return;
+        }
+
+        if (e.PropertyName is nameof(Ciphertext))
+        {
+            await DecryptAsync();
+        }
+        else if (e.PropertyName is nameof(Plaintext))
+        {
+            await EncryptAsync();
         }
     }
 
     [RelayCommand]
-    private Task DecryptAsync()
+    private async Task CopyPlaintextAsync()
     {
-        return QueueTaskAsync(() => EncryptOrDecryptAsync(false));
+        await Services.Clipboard.SetTextAsync(Plaintext);
     }
 
     [RelayCommand]
-    private Task EncryptAsync()
+    private async Task CopyCiphertextAsync()
     {
-        return QueueTaskAsync(() => EncryptOrDecryptAsync(true));
+        await Services.Clipboard.SetTextAsync(Ciphertext);
     }
 
-    private async Task EncryptOrDecryptAsync(bool encrypt)
+    [RelayCommand]
+    private async Task DecryptAsync()
     {
-        Config.Check();
-        Config.LastOperation = encrypt;
         try
         {
-            if (encrypt)
-            {
-                await Service.EncryptAsync(Source);
-            }
-            else
-            {
-                await Service.DecryptAsync(Source);
-            }
-
-            Result = Service.ProcessedText;
+            Config.Check();
+            IsWorking = true;
+            Plaintext = await Service.DecryptAsync(Ciphertext);
         }
         catch (Exception ex)
         {
-            await Services.Dialog.ShowErrorDialogAsync($"{(encrypt ? "加密" : "解密")}失败", ex);
+            await Services.Dialog.ShowErrorDialogAsync("解密失败", ex);
+        }
+        finally
+        {
+            IsWorking = false;
         }
     }
 
-    private async Task ExecuteLastAsync()
+    [RelayCommand]
+    private async Task EncryptAsync()
     {
-        if (Source.FromFile)
+        try
         {
-            return;
-        }
-
-        if (Source.Text == null)
-        {
-            Result = null;
-        }
-        else if (Config.LastOperation.HasValue)
-        {
-            await QueueTaskAsync(() => EncryptOrDecryptAsync(Config.LastOperation.Value));
-        }
-    }
-
-    private async Task QueueTaskAsync(Func<Task> func)
-    {
-        //由于触发器较多，可能存在上个任务未执行完毕，又触发了新的任务，因此使用队列来处理任务
-        taskQueue.Enqueue(func);
-
-        if (IsWorking)
-        {
-            return;
-        }
-
-        while (taskQueue.Count > 0)
-        {
+            Config.Check();
             IsWorking = true;
-            try
-            {
-                while (taskQueue.Count > 1)
-                {
-                    //丢弃非最后一个任务
-                    taskQueue.TryDequeue(out _);
-                }
-
-                if (taskQueue.TryDequeue(out var lastTaskFunc))
-                {
-                    await lastTaskFunc();
-                }
-            }
-            catch (Exception ex)
-            {
-                //应该不会到这儿
-                await Services.Dialog.ShowErrorDialogAsync("执行任务时发生错误", ex);
-            }
-            finally
-            {
-                IsWorking = false;
-            }
+            Ciphertext = await Service.EncryptAsync(Plaintext);
         }
+        catch (Exception ex)
+        {
+            await Services.Dialog.ShowErrorDialogAsync("加密失败", ex);
+        }
+        finally
+        {
+            IsWorking = false;
+        }
+    }
+
+    [RelayCommand]
+    private async Task PastePlaintextAsync()
+    {
+        Plaintext = await Services.Clipboard.GetTextAsync();
+    }
+
+    [RelayCommand]
+    private async Task PasteCiphertextAsync()
+    {
+        Ciphertext = await Services.Clipboard.GetTextAsync();
     }
 }

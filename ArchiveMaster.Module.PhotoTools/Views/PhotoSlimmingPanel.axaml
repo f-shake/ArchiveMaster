@@ -6,7 +6,6 @@
     xmlns:cvt="using:ArchiveMaster.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:enums="clr-namespace:ArchiveMaster.Enums"
-    xmlns:gb="using:GroupBox.Avalonia.Controls"
     xmlns:im="using:ImageMagick"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:sys="clr-namespace:System;assembly=System.Runtime"

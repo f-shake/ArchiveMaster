@@ -33,7 +33,7 @@
                 <Setter Property="Foreground" Value="{DynamicResource Foreground3}" />
             </Style>
         </Style>
-        <Style Selector="SelectableTextBlock.ChatMessage">
+        <Style Selector="SelectableTextBlock.AiChatMessage">
             <Setter Property="TextWrapping" Value="Wrap" />
             <Setter Property="LineSpacing" Value="2" />
         </Style>
@@ -61,7 +61,7 @@
                                     Classes="ChatBox">
                                     <SelectableTextBlock
                                         b:TextBlockInlinesBehavior.ItemsSource="{Binding Inlines}"
-                                        Classes="ChatMessage" />
+                                        Classes="AiChatMessage" />
                                 </Border>
                             </DockPanel>
 
@@ -76,12 +76,12 @@
                                     Classes="ChatBox">
                                     <SelectableTextBlock
                                         b:TextBlockInlinesBehavior.ItemsSource="{Binding Inlines}"
-                                        Classes="ChatMessage"
+                                        Classes="AiChatMessage"
                                         Opacity="0.75" />
                                 </Border>
                             </DockPanel>
-                            <!--  AI  -->
 
+                            <!--  AI  -->
                             <StackPanel
                                 IsVisible="{Binding Sender, Converter={x:Static cvt:Converters.EqualWithParameter}, ConverterParameter=Assistant}"
                                 Orientation="Vertical"
@@ -89,17 +89,33 @@
                                 <Border Margin="16,8">
                                     <SelectableTextBlock
                                         b:TextBlockInlinesBehavior.ItemsSource="{Binding Inlines}"
-                                        Classes="ChatMessage" />
+                                        Classes="AiChatMessage" />
                                 </Border>
                                 <StackPanel
                                     Orientation="Horizontal"
                                     Spacing="8">
                                     <Button
                                         Classes="Icon ChatButton"
-                                        Click="CopyButton_Click"
                                         Content="{ic:FluentIcon Icon=Copy}"
                                         IsVisible="{Binding IsFrozen}"
-                                        ToolTip.Tip="复制内容" />
+                                        ToolTip.Tip="复制内容">
+                                        <Button.Flyout>
+                                            <MenuFlyout>
+                                                <MenuItem
+                                                    Click="CopyButton_Click"
+                                                    Header="复制文本"
+                                                    Tag="PlainText" />
+                                                <MenuItem
+                                                    Click="CopyButton_Click"
+                                                    Header="复制原始内容（MarkDown）"
+                                                    Tag="RawText" />
+                                                <MenuItem
+                                                    Click="CopyButton_Click"
+                                                    Header="复制思考内容"
+                                                    Tag="ThinkText" />
+                                            </MenuFlyout>
+                                        </Button.Flyout>
+                                    </Button>
                                     <Button
                                         Classes="Icon ChatButton"
                                         Command="{Binding $parent[UserControl].Conversation.RegenerateCommand}"
@@ -137,14 +153,15 @@
 
             <TextBox
                 Grid.Column="2"
+                AcceptsReturn="True"
                 AcceptsTab="True"
                 IsEnabled="{Binding $parent[UserControl].Conversation.CanUserInput}"
                 KeyDown="InputTextBox_KeyDown"
                 MaxLines="6"
                 Text="{Binding $parent[UserControl].Conversation.InputText}"
                 TextWrapping="Wrap" />
-            <Panel Grid.Column="4">
 
+            <Panel Grid.Column="4">
                 <Button
                     Classes="Primary"
                     Command="{Binding $parent[UserControl].Conversation.SendCommand}"

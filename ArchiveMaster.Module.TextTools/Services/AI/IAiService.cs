@@ -2,7 +2,6 @@
 using ArchiveMaster.Events;
 using ArchiveMaster.Models;
 using ArchiveMaster.ViewModels;
-using Microsoft.Extensions.AI;
 
 namespace ArchiveMaster.Services;
 

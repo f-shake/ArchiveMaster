@@ -6,14 +6,12 @@ using Avalonia.Collections;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using FzLib.Avalonia.Dialogs;
-using Microsoft.Extensions.AI;
 
 namespace ArchiveMaster.ViewModels;
 
 public partial class AiConversation : ObservableObject
 {
-    public ViewModelServices Services { get; }
-
+    public int MAX_FOLDED_LENGTH = 50;
     [ObservableProperty]
     private bool canUserInput;
 
@@ -21,7 +19,6 @@ public partial class AiConversation : ObservableObject
     private string inputText;
 
     private bool isRegenerating;
-
     public AiConversation(ViewModelServices services)
     {
         Services = services;
@@ -30,40 +27,36 @@ public partial class AiConversation : ObservableObject
 
     public event EventHandler MessageAppended;
 
-
-    public AiChatMessage LastAssistantMessage => Messages.LastOrDefault(x => x.Sender == AiChatMessageSender.Assistant);
-
-    public AiChatMessage LastSystemMessage => Messages.LastOrDefault(x => x.Sender == AiChatMessageSender.System);
-
-    public AiChatMessage LastUserMessage => Messages.LastOrDefault(x => x.Sender == AiChatMessageSender.User);
-
+    public AiAssistantChatMessage LastAssistantMessage => Messages.OfType<AiAssistantChatMessage>().LastOrDefault();
+    public AiSystemChatMessage LastSystemMessage => Messages.OfType<AiSystemChatMessage>().LastOrDefault();
+    public AiUserChatMessage LastUserMessage => Messages.OfType<AiUserChatMessage>().LastOrDefault();
     public AvaloniaList<AiChatMessage> Messages { get; } = new AvaloniaList<AiChatMessage>();
-
     public IAiService Service { get; private set; }
-
-    public AiChatMessage AddAssistantMessage()
+    public ViewModelServices Services { get; }
+    public AiAssistantChatMessage AddAssistantMessage()
     {
-        return AddMessage(AiChatMessageSender.Assistant);
+        var message = AiChatMessage.CreateAssistantMessage();
+        AddMessage(message);
+        return message;
     }
 
-    public AiChatMessage AddSystemMessage(string systemPrompt)
+    public AiSystemChatMessage AddSystemMessage(string systemPrompt, bool fold, int maxLength)
     {
-        return AddMessage(AiChatMessageSender.System, systemPrompt);
+        var message = AiChatMessage.CreateSystemMessage(systemPrompt, fold, maxLength);
+        AddMessage(message);
+        return message;
     }
 
-    public AiChatMessage AddUserMessage(string userPrompt)
+    public AiUserChatMessage AddUserMessage(string userPrompt, bool fold, int maxLength)
     {
-        return AddMessage(AiChatMessageSender.User, userPrompt);
+        var message = AiChatMessage.CreateUserMessage(userPrompt, fold, maxLength);
+        AddMessage(message);
+        return message;
     }
 
     public void BindService(IAiService service)
     {
         Service = service;
-    }
-
-    public IList<ChatMessage> GetChatMessages()
-    {
-        return Messages.Select(x => x.ChatMessage).ToList();
     }
 
     public void OnEndResponse()
@@ -84,13 +77,11 @@ public partial class AiConversation : ObservableObject
         InputText = "（自动生成）";
     }
 
-    private AiChatMessage AddMessage(AiChatMessageSender sender, string text = "")
+    private void AddMessage(AiChatMessage message)
     {
-        var message = new AiChatMessage(sender, text);
         Messages.Add(message);
         message.MessageAppended += (s, e) => MessageAppended?.Invoke(s, e);
         MessageAppended?.Invoke(this, EventArgs.Empty);
-        return message;
     }
 
     private void OnBeginResponse()
@@ -137,20 +128,41 @@ public partial class AiConversation : ObservableObject
             {
                 var (systemPrompt, userPrompt) = await Service.GetFirstPromptAsync(ct);
 
-                AddSystemMessage(systemPrompt).Freeze(true);
-                AddUserMessage(userPrompt).Freeze(true);
+                AddSystemMessage(systemPrompt, true, MAX_FOLDED_LENGTH);
+                AddUserMessage(userPrompt, true, MAX_FOLDED_LENGTH);
             }
             else
             {
                 if (!isRegenerating)
                 {
-                    AddUserMessage(prompt).Freeze(false);
+                    AddUserMessage(prompt, false, MAX_FOLDED_LENGTH);
                 }
             }
 
-            var messages = GetChatMessages();
+            var messages = Messages.ToList();
             var assistantMessage = AddAssistantMessage();
 
+            // LastAssistantMessage.Append("<think>\n");
+            // for (int i = 1; i < 20; i++)
+            // {
+            //     if (i % 3 == 0)
+            //     {
+            //         LastAssistantMessage.Append("\n");
+            //     }
+            //     else
+            //     {
+            //         LastAssistantMessage.Append("# 哈哈哈哈222");
+            //     }
+            //
+            //     if (i == 12)
+            //     {
+            //         LastAssistantMessage.Append("</think>\n");
+            //     }
+            //
+            //     await Task.Delay(100);
+            // }
+            //
+            // return;
             await Service.CallAiWithStreamAsync(messages, assistantMessage, ct);
         }
         catch (Exception ex)
@@ -161,7 +173,7 @@ public partial class AiConversation : ObservableObject
         {
             if (LastAssistantMessage?.IsFrozen == false)
             {
-                LastAssistantMessage.Freeze(false);
+                LastAssistantMessage.FreezeAssistantMessage();
             }
 
             OnEndResponse();

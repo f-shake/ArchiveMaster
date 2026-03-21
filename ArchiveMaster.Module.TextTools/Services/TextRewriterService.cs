@@ -5,14 +5,7 @@ using ArchiveMaster.AiAgents;
 using ArchiveMaster.Attributes;
 using ArchiveMaster.Configs;
 using ArchiveMaster.Enums;
-using ArchiveMaster.Events;
-using ArchiveMaster.Models;
-using ArchiveMaster.ViewModels;
-using ArchiveMaster.ViewModels.FileSystem;
-using DocumentFormat.OpenXml.Bibliography;
-using DocumentFormat.OpenXml.InkML;
 using FzLib.Collections;
-using Microsoft.Extensions.AI;
 
 namespace ArchiveMaster.Services;
 
@@ -64,7 +57,7 @@ public class TextRewriterService(AppConfig appConfig)
         //增加其他要求
         prompt.AppendLine("要求输出的时候，仅输出结果，不要输出其他内容。");
         prompt.AppendLine("输出格式上，要完全符合用户输入的语段，不要添加额外的内容。" +
-                          "若有必要输出MarkDown，只能包含标题、粗体、斜体三种样式，不要输出表格。");
+                          "若有必要输出MarkDown，样式应当简单，不要输出表格。");
         return prompt.ToString();
     }
 }

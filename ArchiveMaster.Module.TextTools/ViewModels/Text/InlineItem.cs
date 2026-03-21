@@ -1,4 +1,5 @@
 ﻿using Avalonia.Media;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace ArchiveMaster.ViewModels;
 
@@ -19,8 +20,14 @@ public class InlineItem
     }
 
     public string Text { get; set; }
-    public bool IsBold { get; set; }
-    public bool IsItalic { get; set; }
-    public int FontSize { get; set; }
-    public IBrush Foreground { get; set; }
+
+    public bool IsBold { get;set; }
+    public bool IsItalic { get;set; }
+    public int FontSize { get; set;}
+    public IBrush Foreground { get;set; }
+
+    public static implicit operator InlineItem(string message)
+    {
+        return new InlineItem(message);
+    }
 }

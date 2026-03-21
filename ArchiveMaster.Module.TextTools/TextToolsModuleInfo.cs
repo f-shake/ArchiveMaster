@@ -56,8 +56,8 @@ namespace ArchiveMaster
         {
             Panels =
             {
-                new ToolPanelInfo(typeof(TextEncryptionPanel), typeof(TextEncryptionViewModel), "文本混淆",
-                    "使用替换式密码的方式混淆文本，实现防君子不防小人的文本加密", baseUrl + "encrypt.svg"),
+                new ToolPanelInfo(typeof(TextEncryptionPanel), typeof(TextEncryptionViewModel), "文本简单加密",
+                    "使用替换式密码的方式加密文本，实现防君子不防小人的文本加密", baseUrl + "encrypt.svg"),
                 new ToolPanelInfo(typeof(EncodingConverterPanel), typeof(EncodingConverterViewModel), "编码识别与转换",
                     "识别文本文件的编码，并可以转换为指定编码", baseUrl + "encoding.svg"),
                 new ToolPanelInfo(typeof(TextRewriterPanel), typeof(TextRewriterViewModel), "文本智能生成",

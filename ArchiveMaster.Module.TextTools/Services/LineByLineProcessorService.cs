@@ -15,8 +15,6 @@ using DocumentFormat.OpenXml.Bibliography;
 using DocumentFormat.OpenXml.InkML;
 using FzLib.Collections;
 using FzLib.Text;
-using Microsoft.Extensions.AI;
-using Microsoft.VisualBasic.FileIO;
 using Serilog;
 
 namespace ArchiveMaster.Services;

@@ -7,10 +7,6 @@ using ArchiveMaster.Events;
 using ArchiveMaster.Models;
 using ArchiveMaster.ViewModels;
 using ArchiveMaster.ViewModels.FileSystem;
-using DocumentFormat.OpenXml.Bibliography;
-using DocumentFormat.OpenXml.InkML;
-using FzLib.Text;
-using Microsoft.Extensions.AI;
 using Serilog;
 
 namespace ArchiveMaster.Services;
@@ -233,36 +229,12 @@ public class TypoCheckerService(AppConfig appConfig)
                 systemPrompt += "用户具有额外要求，在满足上面格式输出要求的前提下，尽可能满足以下要求：" + Config.ExtraAiPrompt;
             }
 
-#if DEBUG
-            StringBuilder temp = new StringBuilder();
-            await foreach (var t in llm
-                               .CallStreamAsync(systemPrompt, segment,
-                                   new ChatOptions { ResponseFormat = ChatResponseFormat.Json }, ct))
-            {
-                temp.Append(t);
-            }
-
-            string result = temp.ToString();
-#else
             string result = await llm.CallAsync(systemPrompt, segment,
-                new ChatOptions { ResponseFormat = ChatResponseFormat.Json }, ct);
-#endif
+                new ChatOptions { OutputJson = true }, ct);
             yield return new LlmOutputItem(result);
-            var lines = result.SplitLines();
-            int startLine = 0;
-            for (int i = 0; i < lines.Length; i++)
-            {
-                if (lines[i] == "</think>")
-                {
-                    startLine = i + 1;
-                    break;
-                }
-            }
+            result = AiChatMessage.RemoveThink(result);
 
-            if (startLine > 0)
-            {
-                result = string.Join(Environment.NewLine, lines[startLine..]);
-            }
+            result = result.Replace("```json", "").Replace("```", "");
 
             IEnumerable<TypoItem> results = [];
             try
@@ -327,13 +299,6 @@ public class TypoCheckerService(AppConfig appConfig)
         throw new NotImplementedException();
     }
 
-    private void CheckStringLength(StringBuilder str)
-    {
-        if (str.Length > MaxLength)
-        {
-            throw new Exception($"文本长度超过限制（{MaxLength}）");
-        }
-    }
 
     private IEnumerable<TypoItem> Parse(string text, string source)
     {

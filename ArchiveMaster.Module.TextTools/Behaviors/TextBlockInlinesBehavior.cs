@@ -5,6 +5,7 @@ using Avalonia.Controls.Documents;
 using Avalonia.Media;
 using System.Collections;
 using System.Collections.Specialized;
+using Avalonia.Data;
 using Avalonia.Threading;
 
 namespace ArchiveMaster.Behaviors;
@@ -15,8 +16,8 @@ public static class TextBlockInlinesBehavior
         AvaloniaProperty.RegisterAttached<TextBlock, IEnumerable<InlineItem>>(
             "ItemsSource", typeof(TextBlockInlinesBehavior));
 
-    private static readonly AttachedProperty<Dictionary<InlineItem, Run>> InlineMapProperty =
-        AvaloniaProperty.RegisterAttached<TextBlock, Dictionary<InlineItem, Run>>(
+    private static readonly AttachedProperty<Dictionary<InlineItem, Inline>> InlineMapProperty =
+        AvaloniaProperty.RegisterAttached<TextBlock, Dictionary<InlineItem, Inline>>(
             "InlineMap", typeof(TextBlockInlinesBehavior));
 
     private static readonly AttachedProperty<NotifyCollectionChangedEventHandler>
@@ -54,7 +55,7 @@ public static class TextBlockInlinesBehavior
         textBlock.ClearValue(CollectionChangedHandlerProperty);
         textBlock.Inlines.Clear();
 
-        var inlineMap = new Dictionary<InlineItem, Run>();
+        var inlineMap = new Dictionary<InlineItem, Inline>();
         textBlock.SetValue(InlineMapProperty, inlineMap);
 
 
@@ -66,9 +67,9 @@ public static class TextBlockInlinesBehavior
 
         foreach (var item in items)
         {
-            var run = CreateRun(item);
-            inlineMap[item] = run;
-            textBlock.Inlines.Add(run);
+            var inline = CreateInline(item);
+            inlineMap[item] = inline;
+            textBlock.Inlines.Add(inline);
         }
 
         // 增量监听
@@ -125,9 +126,9 @@ public static class TextBlockInlinesBehavior
                     map.Clear();
                     foreach (var item in source)
                     {
-                        var run = CreateRun(item);
-                        map[item] = run;
-                        textBlock.Inlines.Add(run);
+                        var inline = CreateInline(item);
+                        map[item] = inline;
+                        textBlock.Inlines.Add(inline);
                     }
 
                     break;
@@ -139,7 +140,7 @@ public static class TextBlockInlinesBehavior
 
     private static void MoveItems(
         TextBlock textBlock,
-        Dictionary<InlineItem, Run> map,
+        Dictionary<InlineItem, Inline> map,
         IList items,
         int oldIndex,
         int newIndex)
@@ -149,11 +150,11 @@ public static class TextBlockInlinesBehavior
             // AvaloniaList 通常只 move 一个
             foreach (InlineItem item in items)
             {
-                if (!map.TryGetValue(item, out var run))
+                if (!map.TryGetValue(item, out var inline))
                     continue;
 
-                textBlock.Inlines.Remove(run);
-                textBlock.Inlines.Insert(newIndex, run);
+                textBlock.Inlines.Remove(inline);
+                textBlock.Inlines.Insert(newIndex, inline);
                 newIndex++;
             }
 
@@ -170,45 +171,49 @@ public static class TextBlockInlinesBehavior
 
     private static void AddItems(
         TextBlock textBlock,
-        Dictionary<InlineItem, Run> map,
+        Dictionary<InlineItem, Inline> map,
         IList items,
         int startIndex)
     {
         for (int i = 0; i < items.Count; i++)
         {
             var item = (InlineItem)items[i];
-            var run = CreateRun(item);
-            map[item] = run;
+            var inline = CreateInline(item);
+            map[item] = inline;
 
             int targetIndex = startIndex + i;
 
             if (targetIndex >= 0 && targetIndex <= textBlock.Inlines.Count)
             {
-                textBlock.Inlines.Insert(targetIndex, run);
+                textBlock.Inlines.Insert(targetIndex, inline);
             }
             else
             {
-                textBlock.Inlines.Add(run);
+                textBlock.Inlines.Add(inline);
             }
         }
     }
 
-    private static void RemoveItems(TextBlock textBlock, Dictionary<InlineItem, Run> map, IList items)
+    private static void RemoveItems(TextBlock textBlock, Dictionary<InlineItem, Inline> map, IList items)
     {
         foreach (InlineItem item in items)
         {
-            if (map.TryGetValue(item, out var run))
+            if (map.TryGetValue(item, out var inline))
             {
-                textBlock.Inlines.Remove(run);
+                textBlock.Inlines.Remove(inline);
                 map.Remove(item);
             }
         }
     }
 
-    private static Run CreateRun(InlineItem item)
+    private static Inline CreateInline(InlineItem item)
     {
-        var run = new Run { Text = item.Text };
+        if (item.Text == "\n")
+        {
+            return new LineBreak();
+        }
 
+        var run = new Run { Text = item.Text };
         if (item.IsBold)
         {
             run.FontWeight = FontWeight.Bold;

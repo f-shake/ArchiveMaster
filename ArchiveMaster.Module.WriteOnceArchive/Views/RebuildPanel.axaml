@@ -5,7 +5,6 @@
     xmlns:ctrl="clr-namespace:FzLib.Avalonia.Controls;assembly=FzLib.Avalonia"
     xmlns:cvt="clr-namespace:ArchiveMaster.Converters;assembly=ArchiveMaster.Core"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:g="clr-namespace:GroupBox.Avalonia.Controls;assembly=GroupBox.Avalonia"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:sys="clr-namespace:System;assembly=mscorlib"
     xmlns:v="using:ArchiveMaster.Views"
@@ -65,16 +64,19 @@
                 HorizontalAlignment="Center"
                 VerticalAlignment="Stretch"
                 Background="Transparent" />
-            <g:GroupBox Header="目标结构树">
+            <HeaderedContentControl
+                Classes="GroupBox"
+                Header="目标结构树">
                 <v:WriteOnceTreeFileDataGrid
                     ColumnStatusIndex="-1"
                     FileNameHalfTransparentBindingPath="HasPhysicalFile"
                     IsDirCheckBoxVisible="True"
                     ItemsSource="{Binding FileTree}" />
-            </g:GroupBox>
+            </HeaderedContentControl>
 
-            <g:GroupBox
+            <HeaderedContentControl
                 Grid.Column="2"
+                Classes="GroupBox"
                 Header="需要重建的文件">
                 <v:SimpleFileDataGrid
                     ColumnLengthIndex="1.2"
@@ -99,7 +101,7 @@
                     </v:SimpleFileDataGrid.Columns>
                 </v:SimpleFileDataGrid>
 
-            </g:GroupBox>
+            </HeaderedContentControl>
 
             <TextBlock
                 Grid.Row="1"

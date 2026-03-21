@@ -1,18 +1,14 @@
-﻿using System.ClientModel;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using ArchiveMaster.Configs;
+using ArchiveMaster.Enums;
 using ArchiveMaster.Events;
 using ArchiveMaster.Models;
 using ArchiveMaster.ViewModels;
-using Microsoft.Extensions.AI;
-using OllamaSharp;
-using OpenAI;
 using Serilog;
-using ChatResponseFormat = OpenAI.Chat.ChatResponseFormat;
 
 namespace ArchiveMaster.Services;
 
@@ -30,12 +26,6 @@ public class LlmCallerService
             throw new ArgumentException($"AI提供商{config.Name}的模型名为空");
         }
 
-        if (config.Type == AiProviderType.OpenAI &&
-            (string.IsNullOrWhiteSpace(config.Key) || string.IsNullOrWhiteSpace(config.Key.Password)))
-        {
-            throw new ArgumentException($"AI提供商{config.Name}的密钥为空");
-        }
-
         Config = config;
     }
 
@@ -44,18 +34,16 @@ public class LlmCallerService
     public async Task<string> CallAsync(string systemPrompt, string userPrompt, ChatOptions options = null,
         CancellationToken ct = default)
     {
-        // LogPrompt(systemPrompt, userPrompt, false);
-
-        var sys = new ChatMessage(ChatRole.System, systemPrompt);
-        var user = new ChatMessage(ChatRole.User, userPrompt);
-        return (await GetResponseAsync([sys, user], options, ct)).Text;
+        var sys = AiChatMessage.CreateSystemMessage(systemPrompt, false, 0);
+        var user = AiChatMessage.CreateUserMessage(userPrompt, false, 0);
+        return await GetResponseAsync([sys, user], options, ct);
     }
 
-    private async Task<ChatResponse> GetResponseAsync(IEnumerable<ChatMessage> messages, ChatOptions options = null,
+    private async Task<string> GetResponseAsync(IEnumerable<AiChatMessage> messages, ChatOptions options = null,
         CancellationToken ct = default)
     {
         var chatClient = GetChatClient();
-        ChatResponse response;
+        string response;
         try
         {
             response = await chatClient.GetResponseAsync(messages, options, ct);
@@ -69,8 +57,8 @@ public class LlmCallerService
             throw new Exception($"AI模型调用失败（{ex.Message}）", ex);
         }
 
-        Debug.WriteLine($"AI回答：{response.Text}");
-        Log.Logger.Information("AI回答：{ResponseText}", response.Text);
+        Debug.WriteLine($"AI回答：{response}");
+        Log.Logger.Information("AI回答：{ResponseText}", response);
         Debug.WriteLine("AI调用完成");
         return response;
     }
@@ -90,7 +78,7 @@ public class LlmCallerService
         return string.Concat(result);
     }
 
-    public async Task<string> CallWithStreamAsync(IEnumerable<ChatMessage> messages,
+    public async Task<string> CallWithStreamAsync(IEnumerable<AiChatMessage> messages,
         ChatOptions options = null,
         GenericEventHandler<LlmOutputItem> onStreamUpdate = null,
         bool throwOnCancel = false,
@@ -122,24 +110,26 @@ public class LlmCallerService
         CancellationToken ct = default)
     {
         // LogPrompt(systemPrompt, userPrompt, true);
-        var sys = new ChatMessage(ChatRole.System, systemPrompt);
-        var user = new ChatMessage(ChatRole.User, userPrompt);
+        var sys = AiChatMessage.CreateSystemMessage(systemPrompt, false, 0);
+        var user = AiChatMessage.CreateUserMessage(userPrompt, false, 0);
         await foreach (var p in GetStreamResponseAsync([sys, user], options, ct))
         {
-            yield return p.Text;
+            yield return p;
         }
     }
 
 
-    public async IAsyncEnumerable<string> CallStreamAsync(IEnumerable<ChatMessage> messages, ChatOptions options = null, CancellationToken ct = default)
+    public async IAsyncEnumerable<string> CallStreamAsync(IEnumerable<AiChatMessage> messages,
+        ChatOptions options = null,
+        CancellationToken ct = default)
     {
         await foreach (var p in GetStreamResponseAsync(messages, options, ct))
         {
-            yield return p.Text;
+            yield return p;
         }
     }
 
-    private async IAsyncEnumerable<ChatResponseUpdate> GetStreamResponseAsync(IEnumerable<ChatMessage> messages,
+    private async IAsyncEnumerable<string> GetStreamResponseAsync(IEnumerable<AiChatMessage> messages,
         ChatOptions options = null, CancellationToken ct = default)
     {
         var chatClient = GetChatClient();
@@ -147,7 +137,7 @@ public class LlmCallerService
         Debug.WriteLine("AI开始回答");
         StringBuilder str = new StringBuilder("AI回答：");
 
-        IAsyncEnumerable<ChatResponseUpdate> items = null;
+        IAsyncEnumerable<string> items = null;
         try
         {
             items = chatClient.GetStreamingResponseAsync(messages, options, ct);
@@ -157,10 +147,10 @@ public class LlmCallerService
             throw new Exception($"AI模型调用失败（{ex.Message}）", ex);
         }
 
-        await foreach (ChatResponseUpdate item in items)
+        await foreach (string item in items)
         {
-            Debug.Write(item.Text);
-            str.Append(item.Text);
+            Debug.Write(item);
+            str.Append(item);
             ct.ThrowIfCancellationRequested();
             yield return item;
         }
@@ -195,30 +185,14 @@ public class LlmCallerService
 
     private IChatClient GetChatClient()
     {
-        IChatClient chatClient;
-        switch (Config.Type)
+        IChatClient chatClient = Config.Type switch
         {
-            case AiProviderType.OpenAI:
-                chatClient = new OpenAIChatClient(Config.Url, Config.Model, Config.Key);
-                break;
-            case AiProviderType.Ollama:
-                var httpClient = new HttpClient
-                {
-                    BaseAddress = new Uri(Config.Url),
-                    Timeout = TimeSpan.FromHours(1)
-                };
-                chatClient = new OllamaApiClient(httpClient, Config.Model);
-                break;
-            default:
-                throw new ArgumentOutOfRangeException();
-        }
+            AiProviderType.OpenAI => new OpenAICompatibleChatClient(Config),
+            AiProviderType.Ollama => new OllamaChatClient(Config),
+            // AiProviderType.OpenAICompatible => new OpenAICompatibleChatClient(Config),
+            _ => throw new ArgumentOutOfRangeException()
+        };
 
         return chatClient;
-    }
-
-    public static string RemoveThink(string text)
-    {
-        return Regex.Replace(text, @"^\s*<Think>.*?</Think>\s*$\r?\n?", string.Empty,
-            RegexOptions.Singleline | RegexOptions.IgnoreCase | RegexOptions.Multiline);
     }
 }

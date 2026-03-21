@@ -7,6 +7,7 @@ using Avalonia.Input;
 using Avalonia.Input.Platform;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
+using Avalonia.Threading;
 using Serilog;
 
 namespace ArchiveMaster.Views
@@ -25,7 +26,13 @@ namespace ArchiveMaster.Views
             {
                 if (c != null)
                 {
-                    c.MessageAppended += (s, e) => { scr.ScrollToEnd(); };
+                    c.MessageAppended += (s, e) =>
+                    {
+                        Dispatcher.UIThread.Invoke(() =>
+                        {
+                            scr.ScrollToEnd();
+                        });
+                    };
                 }
             });
         }
@@ -40,13 +47,21 @@ namespace ArchiveMaster.Views
         {
             try
             {
-                var message = (AiChatMessage)((Button)sender).DataContext;
+                var message = (AiChatMessage)((Control)sender).DataContext;
                 if (message == null)
                 {
                     return;
                 }
 
-                var task = TopLevel.GetTopLevel(this)?.Clipboard?.SetTextAsync(message.FullText);
+                var tag = (string)((Control)sender).Tag;
+                var text = tag switch
+                {
+                    "PlainText" => ((AiAssistantChatMessage)message).PlainText,
+                    "RawText" => message.FullText,
+                    "ThinkText" => ((AiAssistantChatMessage)message).ThinkText,
+                    _ => message.FullText
+                };
+                var task = TopLevel.GetTopLevel(this)?.Clipboard?.SetTextAsync(text);
                 if (task != null)
                 {
                     await task;

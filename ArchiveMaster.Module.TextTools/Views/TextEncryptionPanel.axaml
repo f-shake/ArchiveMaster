@@ -6,93 +6,177 @@
     xmlns:ct="using:FzLib.Avalonia.Controls"
     xmlns:cvt="clr-namespace:ArchiveMaster.Converters;assembly=ArchiveMaster.Core"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:gb="using:GroupBox.Avalonia.Controls"
+    xmlns:ic="using:FluentIcons.Avalonia.Markup"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:system="clr-namespace:System;assembly=System.Runtime"
     xmlns:v="using:ArchiveMaster.Views"
     xmlns:vm="clr-namespace:ArchiveMaster.ViewModels"
     d:DesignHeight="450"
     d:DesignWidth="800"
-    x:DataType="vm:SmartDocSearchViewModel"
+    x:DataType="vm:TextEncryptionViewModel"
     mc:Ignorable="d">
     <v:PanelBase.PanelContent>
         <Grid
             Margin="8"
-            RowDefinitions="Auto,8,*,8,Auto">
-            <ct:StackFormItemGroup>
-                <ct:FormItem Label="文本源：">
-                    <v:TextSourceInput Source="{Binding Source}" />
-                </ct:FormItem>
-                <ct:FormItem Label="密文前后缀：">
-                    <StackPanel Orientation="Horizontal">
-                        <TextBox
-                            Width="128"
-                            Text="{Binding Config.Prefix}"
-                            Watermark="前缀" />
-                        <TextBlock Text="——" />
-                        <TextBox
-                            Width="128"
-                            Text="{Binding Config.Suffix}"
-                            TextAlignment="Right"
-                            Watermark="后缀" />
-                        <TextBlock
-                            Foreground="Red"
-                            Text="前缀和后缀应当同时提供或均不提供">
-                            <TextBlock.IsVisible>
-                                <MultiBinding Converter="{x:Static cvt:Converters.XorLogic}">
-                                    <Binding
-                                        Converter="{x:Static cvt:Converters.IsNotNull}"
-                                        Path="Config.Prefix" />
-                                    <Binding
-                                        Converter="{x:Static cvt:Converters.IsNotNull}"
-                                        Path="Config.Suffix" />
-                                </MultiBinding>
-                            </TextBlock.IsVisible>
-                        </TextBlock>
-                    </StackPanel>
-                </ct:FormItem>
-
-                <ct:FormItem Label="密码：">
+            RowDefinitions="Auto,8,*">
+            <Grid
+                Margin="0,0,8,8"
+                IsEnabled="{Binding !IsWorking}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="8" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="8" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="8" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition
+                        Width="Auto"
+                        MinWidth="8" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="8" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <ct:FormItem Header="密码">
                     <v:PasswordBox Password="{Binding Config.Password}" />
                 </ct:FormItem>
-            </ct:StackFormItemGroup>
+                <ct:FormItem
+                    Grid.Column="2"
+                    Header="密文前缀">
+                    <TextBox
+                        Width="128"
+                        Text="{Binding Config.Prefix}" />
+                </ct:FormItem>
+                <TextBlock
+                    Grid.Column="4"
+                    Text="——" />
+                <ct:FormItem
+                    Grid.Column="6"
+                    Header="密文后缀">
+                    <TextBox
+                        Width="128"
+                        Text="{Binding Config.Suffix}" />
+                </ct:FormItem>
 
-            <v:ResultTextBox
-                Grid.Row="2"
-                Result="{Binding Result}" />
+
+                <TextBlock
+                    Grid.Column="7"
+                    Foreground="Red"
+                    Text="前缀和后缀应当同时提供或均不提供">
+                    <TextBlock.IsVisible>
+                        <MultiBinding Converter="{x:Static cvt:Converters.XorLogic}">
+                            <Binding
+                                Converter="{x:Static cvt:Converters.IsNotNull}"
+                                Path="Config.Prefix" />
+                            <Binding
+                                Converter="{x:Static cvt:Converters.IsNotNull}"
+                                Path="Config.Suffix" />
+                        </MultiBinding>
+                    </TextBlock.IsVisible>
+                </TextBlock>
+
+
+
+            </Grid>
+
+            <Border
+                Grid.Row="1"
+                Height="3"
+                MinHeight="3"
+                Margin="32,16"
+                Background="{DynamicResource Background3}"
+                CornerRadius="1.5"
+                IsVisible="{Binding ConfigsContent, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static cvt:Converters.IsNotNull}}" />
+
 
             <Grid
-                Grid.Row="4"
-                Margin="0,0,8,8"
-                ColumnDefinitions="Auto,*,Auto"
-                IsEnabled="{Binding !IsWorking}">
+                Grid.Row="2"
+                ColumnDefinitions="*,8,Auto,8,*"
+                RowDefinitions="*,8,Auto">
+                <HeaderedContentControl
+                    Classes="GroupBox"
+                    Header="明文">
+                    <TextBox
+                        AcceptsReturn="True"
+                        AcceptsTab="True"
+                        IsReadOnly="{Binding IsWorking}"
+                        Text="{Binding Plaintext}"
+                        TextWrapping="Wrap" />
+                </HeaderedContentControl>
+                <HeaderedContentControl
+                    Grid.Column="4"
+                    Classes="GroupBox"
+                    Header="密文">
+                    <TextBox
+                        AcceptsReturn="True"
+                        AcceptsTab="True"
+                        IsReadOnly="{Binding IsWorking}"
+                        Text="{Binding Ciphertext}"
+                        TextWrapping="Wrap" />
+                </HeaderedContentControl>
                 <StackPanel
                     Grid.Column="2"
-                    Orientation="Horizontal">
+                    VerticalAlignment="Center"
+                    IsEnabled="{Binding !IsWorking}"
+                    Orientation="Vertical"
+                    Spacing="8">
+                    <StackPanel
+                        VerticalAlignment="Center"
+                        IsEnabled="{Binding !Config.AutoFlush}"
+                        Orientation="Vertical"
+                        Spacing="8">
+                        <Button Command="{Binding EncryptCommand}">
+                            <StackPanel>
+                                <ic:FluentIcon Icon="ArrowRight" />
+                                <TextBlock Text="加密" />
+                            </StackPanel>
+                        </Button>
+                        <Button Command="{Binding DecryptCommand}">
+                            <StackPanel>
+                                <ic:FluentIcon Icon="ArrowLeft" />
+                                <TextBlock Text="解密" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                    <CheckBox
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Bottom"
+                        Content="自动"
+                        IsChecked="{Binding Config.AutoFlush}" />
                     <ct:ProgressRing
                         Width="20"
                         Height="20"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Bottom"
                         IsActive="{Binding IsWorking}" />
+                </StackPanel>
+
+                <StackPanel
+                    Grid.Row="2"
+                    HorizontalAlignment="Right"
+                    Orientation="Horizontal">
                     <Button
-                        Command="{Binding EncryptCommand}"
-                        Content="加密" />
+                        Classes="Icon"
+                        Command="{Binding CopyPlaintextCommand}"
+                        Content="{ic:FluentIcon Icon=Copy}" />
                     <Button
-                        Command="{Binding DecryptCommand}"
-                        Content="解密" />
-                    <CheckBox
-                        Content="自动"
-                        IsChecked="True">
-                        <CheckBox.IsEnabled>
-                            <MultiBinding Converter="{x:Static cvt:Converters.AndLogic}">
-                                <Binding
-                                    Converter="{x:Static cvt:Converters.IsNotNull}"
-                                    Path="Config.LastOperation" />
-                                <Binding
-                                    Converter="{x:Static cvt:Converters.InverseBool}"
-                                    Path="Source.FromFile" />
-                            </MultiBinding>
-                        </CheckBox.IsEnabled>
-                    </CheckBox>
+                        Classes="Icon"
+                        Command="{Binding PastePlaintextCommand}"
+                        Content="{ic:FluentIcon Icon=ClipboardPaste}" />
+                </StackPanel>
+                <StackPanel
+                    Grid.Row="2"
+                    Grid.Column="4"
+                    HorizontalAlignment="Right"
+                    Orientation="Horizontal">
+                    <Button
+                        Classes="Icon"
+                        Command="{Binding CopyCiphertextCommand}"
+                        Content="{ic:FluentIcon Icon=Copy}" />
+                    <Button
+                        Classes="Icon"
+                        Command="{Binding PasteCiphertextCommand}"
+                        Content="{ic:FluentIcon Icon=ClipboardPaste}" />
                 </StackPanel>
             </Grid>
         </Grid>

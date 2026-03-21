@@ -9,48 +9,40 @@ public class TextEncryptionService(TextEncryptionConfig config, AppConfig appCon
     : ServiceBase(appConfig)
 {
     public const int MaxLength = 300_000;
-    
+
     public TextEncryptionConfig Config { get; } = config;
 
-    public string ProcessedText { get; private set; }
-
-    public async Task DecryptAsync(TextSource source, CancellationToken ct = default)
+    public async Task<string> DecryptAsync(string ciphertext, CancellationToken ct = default)
     {
         StringBuilder str = new StringBuilder();
 
         TextEncryptor encryptor = new TextEncryptor(Config.Password.Password);
 
-        await Task.Run(async () =>
+        await Task.Run(() =>
         {
-            await foreach (var line in source.GetPlainTextAsync().WithCancellation(ct))
+            foreach (var (part, isEncrypted) in SplitIntoEncryptedAndUnencryptedText(ciphertext))
             {
-                foreach (var (part, isEncrypted) in SplitIntoEncryptedAndUnencryptedText(line.Text))
-                {
-                    str.Append(isEncrypted == false ? part : encryptor.Decrypt(part));
-                    CheckStringLength(str);
-                }
+                str.Append(isEncrypted == false ? part : encryptor.Decrypt(part));
+                CheckStringLength(str);
             }
         }, ct);
 
-        ProcessedText = str.ToString();
+        return str.ToString();
     }
 
-    public async Task EncryptAsync(TextSource source, CancellationToken ct = default)
+    public async Task<string> EncryptAsync(string plaintext, CancellationToken ct = default)
     {
         StringBuilder str = new StringBuilder();
         str.Append(Config.Prefix);
 
         TextEncryptor encryptor = new TextEncryptor(Config.Password.Password);
 
-        await Task.Run(async () =>
+        await Task.Run(() =>
         {
-            await foreach (var line in source.GetPlainTextAsync().WithCancellation(ct))
+            foreach (var (part, isEncrypted) in SplitIntoEncryptedAndUnencryptedText(plaintext))
             {
-                foreach (var (part, isEncrypted) in SplitIntoEncryptedAndUnencryptedText(line.Text))
-                {
-                    str.Append(isEncrypted == true ? part : encryptor.Encrypt(part));
-                    CheckStringLength(str);
-                }
+                str.Append(isEncrypted == true ? part : encryptor.Encrypt(part));
+                CheckStringLength(str);
             }
         }, ct);
 
@@ -60,7 +52,7 @@ public class TextEncryptionService(TextEncryptionConfig config, AppConfig appCon
             str.Clear();
         }
 
-        ProcessedText = str.ToString();
+        return str.ToString();
     }
 
     private void CheckStringLength(StringBuilder str)
@@ -70,6 +62,7 @@ public class TextEncryptionService(TextEncryptionConfig config, AppConfig appCon
             throw new Exception($"文本长度超过限制（{MaxLength}）");
         }
     }
+
     private IEnumerable<(string part, bool? isEncrypted)> SplitIntoEncryptedAndUnencryptedText(string text)
     {
         if (string.IsNullOrEmpty(text))

@@ -1,5 +1,6 @@
 ﻿using System.ClientModel;
 using System.Runtime.CompilerServices;
+using ArchiveMaster.Configs;
 using Microsoft.Extensions.AI;
 using OpenAI;
 using OpenAI.Chat;
@@ -15,16 +16,16 @@ public class OpenAIChatClient : IChatClient
     private readonly OpenAIClient client;
     private readonly string model;
 
-    public OpenAIChatClient(string endpoint, string model, string apiKey)
+    public OpenAIChatClient(IOpenAIAiProvider config)
     {
-        this.model = model ?? throw new ArgumentNullException(nameof(model));
-        if (string.IsNullOrEmpty(apiKey)) throw new ArgumentNullException(nameof(apiKey));
+        model = config.Model ?? throw new ArgumentNullException(nameof(config.Model));
+        if (string.IsNullOrEmpty(config.Key)) throw new ArgumentNullException(nameof(config.Key));
 
         client = new OpenAIClient(
-            new ApiKeyCredential(apiKey),
+            new ApiKeyCredential(config.Key),
             new OpenAIClientOptions
             {
-                Endpoint = new Uri(endpoint)
+                Endpoint = new Uri(config.Url)
             });
     }
 
