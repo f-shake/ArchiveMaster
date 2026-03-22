@@ -2,7 +2,7 @@
   <PropertyGroup>
     <Nullable>disable</Nullable>
     <!--App版本-->
-    <AppVersion>2.4.0</AppVersion>
+    <AppVersion>2.5.0</AppVersion>
     <!--Avalonia版本-->
     <AvaloniaVersion>11.3.12</AvaloniaVersion>
     <!--FzLib版本-->
