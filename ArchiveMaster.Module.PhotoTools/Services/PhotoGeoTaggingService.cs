@@ -57,7 +57,7 @@ namespace ArchiveMaster.Services
 
         public override Task ExecuteAsync(CancellationToken ct = default)
         {
-            var files = Files.Where(p => p.IsMatched && p.IsChecked).ToList();
+            var files = Files.Where(p => p.IsChecked).ToList();
             return TryForFilesAsync(files,
                 (file, state) =>
                 {
@@ -151,7 +151,8 @@ namespace ArchiveMaster.Services
                 DateTime? exifTime = ExifHelper.FindExifTime(file.Path);
                 if (!exifTime.HasValue)
                 {
-                    file.IsMatched = false;
+                    file.IsChecked = file.CanCheck = false;
+                    file.Warn("照片Exif时间为空");
                     return;
                 }
 
@@ -171,21 +172,19 @@ namespace ArchiveMaster.Services
                     file.Latitude = lat;
                     file.Longitude = lon;
                     file.GpsTime = gpsTime;
-                    file.IsMatched = !file.AlreadyHasGps;
+                    file.IsChecked = !file.AlreadyHasGps;
+                    file.CanCheck = true;
                 }
                 else
                 {
-                    file.IsMatched = false;
+                    file.Warn("没有找到匹配的GPX位置");
+                    file.IsChecked = file.CanCheck = false;
                 }
             }, ct, FilesLoopOptions.Builder().AutoApplyFileNumberProgress().Build());
 
-            foreach (var file in files)
-            {
-                file.IsChecked = file.CanCheck = file.IsMatched;
-            }
-
             Files = results;
         }
+
         /// <summary>
         /// 双指针查找最近点
         /// </summary>

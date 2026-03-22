@@ -36,7 +36,7 @@ namespace ArchiveMaster.Services
         {
             return TryForFilesAsync(Files
                 .CheckedOnly()
-                .Where(p => p.IsMatched && !string.IsNullOrWhiteSpace(p.Region))
+                .Where(p =>!string.IsNullOrWhiteSpace(p.Region))
                 .ToList(), (file, s) =>
             {
                 NotifyMessage($"正在移动{s.GetFileNumberMessage()}：{file.Name}");
@@ -84,7 +84,6 @@ namespace ArchiveMaster.Services
                             {
                                 f.Region = FileNameHelper.GetValidFileName(candidate.Attributes[Config.FieldName]
                                     .ToString());
-                                f.IsMatched = true;
                                 f.IsChecked = true;
                                 break;
                             }

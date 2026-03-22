@@ -19,9 +19,6 @@ public partial class GpsFileInfo : SimpleFileInfo
 
     [ObservableProperty]
     private DateTime? gpsTime;
-
-    [ObservableProperty]
-    private bool isMatched;
     
     [ObservableProperty]
     private bool alreadyHasGps;

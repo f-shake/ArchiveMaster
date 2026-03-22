@@ -278,10 +278,22 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
 
     #region 文件检查
 
-    private async Task CheckWarningFiles(IEnumerable<SimpleFileInfo> files)
+    private int warningFilesCountWhenInitialized;
+
+    private async Task CheckWarningFiles(IEnumerable<SimpleFileInfo> files, bool isExecuted)
     {
         Debug.Assert(files != null);
         var wrongFiles = files.Where(p => p.Status is Enums.ProcessStatus.Warn or Enums.ProcessStatus.Error).ToList();
+        if (isExecuted && wrongFiles.Count <= warningFilesCountWhenInitialized)
+        {
+            return;
+        }
+
+        if (!isExecuted)
+        {
+            warningFilesCountWhenInitialized = wrongFiles.Count;
+        }
+
         if (wrongFiles.Count > 0)
         {
             string message = $"执行完成，但存在{wrongFiles.Count}个警告或错误文件，请仔细检查";
@@ -316,7 +328,7 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
             return;
         }
 
-        await CheckWarningFiles(files);
+        await CheckWarningFiles(files, true);
     }
 
     /// <summary>
@@ -343,7 +355,7 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
             return true;
         }
 
-        await CheckWarningFiles(files);
+        await CheckWarningFiles(files, false);
 
         return false;
     }

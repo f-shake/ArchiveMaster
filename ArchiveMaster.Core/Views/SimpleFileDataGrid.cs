@@ -131,6 +131,9 @@ public class SimpleFileDataGrid : DataGrid
     protected static readonly ProcessStatusColorConverter ProcessStatusColorConverter =
         new ProcessStatusColorConverter();
 
+    protected static readonly FuncValueConverter<bool, double> BoolToOpacityConverter =
+        new FuncValueConverter<bool, double>(b => b ? 1.0 : 0.5);
+
     public SimpleFileDataGrid()
     {
         AreRowDetailsFrozen = true;
@@ -233,7 +236,8 @@ public class SimpleFileDataGrid : DataGrid
                     [!IsEnabledProperty] = new Binding("DataContext.IsWorking") //执行命令时，这CheckBox不可以Enable
                         { Source = rootPanel, Converter = InverseBoolConverter },
                 },
-                [!IsEnabledProperty] = new Binding(nameof(SimpleFileInfo.CanCheck)) //套两层控件，实现任一禁止选择则不允许选择
+                [!IsEnabledProperty] = new Binding(nameof(SimpleFileInfo.CanCheck)), //套两层控件，实现任一禁止选择则不允许选择
+                [!OpacityProperty] = new Binding(nameof(SimpleFileInfo.CanCheck)) { Converter = BoolToOpacityConverter }
             };
         });
 
@@ -354,7 +358,7 @@ public class SimpleFileDataGrid : DataGrid
             {
                 btnSelectAll.Click += (_, _) =>
                 {
-                    foreach (var file in GetItems())
+                    foreach (var file in GetItems().Where(p => p.CanCheck))
                     {
                         file.IsChecked = true;
                     }
@@ -366,7 +370,7 @@ public class SimpleFileDataGrid : DataGrid
             {
                 btnSelectNone.Click += (_, _) =>
                 {
-                    foreach (var file in GetItems())
+                    foreach (var file in GetItems().Where(p => p.CanCheck))
                     {
                         file.IsChecked = false;
                     }
@@ -378,7 +382,7 @@ public class SimpleFileDataGrid : DataGrid
             {
                 btnSwitchSelection.Click += (_, _) =>
                 {
-                    foreach (var file in GetItems())
+                    foreach (var file in GetItems().Where(p => p.CanCheck))
                     {
                         file.IsChecked = !file.IsChecked;
                     }

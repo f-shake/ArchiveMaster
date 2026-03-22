@@ -11,7 +11,7 @@ namespace ArchiveMaster.Configs
 
         [ObservableProperty]
         private FileFilterRule filter = FileHelper.NoRawImageFileFilterRule;
-
+        
         [ObservableProperty]
         private string gpxFile;
 
