@@ -3,16 +3,17 @@ using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using ArchiveMaster.Configs;
+using ArchiveMaster.ViewModels;
 using ArchiveMaster.ViewModels.FileSystem;
 
 namespace ArchiveMaster.Helpers;
 
 public class AssHelper
 {
-    public static bool AutoGenerateVideoInfo(TimeAssConfig format, TimeAssVideoFileInfo file)
+    public static bool AutoGenerateVideoInfo(TimeAssFormat format, TimeAssVideoFileInfo file)
     {
         if (new[] { ".jpg", ".tif", ".raw", ".png", ".dng", ".arw", ".nef", ".cr2", ".rw2" }
-            .Any(p=>file.Name.EndsWith(p, StringComparison.OrdinalIgnoreCase)))
+            .Any(p => file.Name.EndsWith(p, StringComparison.OrdinalIgnoreCase)))
         {
             file.StartTime = file.Time;
             return true;
@@ -48,12 +49,12 @@ public class AssHelper
         return true;
     }
 
-    public static void Export(TimeAssConfig format, TimeAssVideoFileInfo file, string exportPath)
+    public static void Export(TimeAssFormat format, TimeAssVideoFileInfo file, string exportPath)
     {
         Export(format, [file], exportPath);
     }
 
-    public static void Export(TimeAssConfig format, IList<TimeAssVideoFileInfo> files, string path)
+    public static void Export(TimeAssFormat format, IList<TimeAssVideoFileInfo> files, string path)
     {
         Debug.Assert(!string.IsNullOrEmpty(path));
         StringBuilder outputs = GetAssHead(format, files);
@@ -77,7 +78,7 @@ public class AssHelper
                     .Append(",")
                     .Append((totalTime + nextTime).ToString(timespanFormat))
                     .Append(",Default,,0000,0000,0000,,")
-                    .Append((file.StartTime.Value + currentTime * file.Ratio).ToString(format.Format))
+                    .Append((file.StartTime.Value + currentTime * file.Ratio).ToString(format.TimeFormat))
                     .AppendLine();
                 if (nextTime >= file.Length)
                 {
@@ -103,11 +104,11 @@ public class AssHelper
         return Path.Combine(Path.GetDirectoryName(path), Path.GetFileNameWithoutExtension(path) + ".ass");
     }
 
-    public static StringBuilder GetAssHead(TimeAssConfig format, IList<TimeAssVideoFileInfo> files)
+    public static StringBuilder GetAssHead(TimeAssFormat format, IList<TimeAssVideoFileInfo> files)
     {
         int size = format.Size;
         int margin = format.Margin;
-        int al = format.Alignment;
+        int al = format.Alignment + 1;
         int bw = format.BorderWidth;
         var c = (byte.MaxValue - format.TextColor.A).ToString("X2") + format.TextColor.ToString()[3..];
         var bc = (byte.MaxValue - format.BorderColor.A).ToString("X2") + format.BorderColor.ToString()[3..];
@@ -137,7 +138,7 @@ public class AssHelper
         return outputs;
     }
 
-    // public static (List<TimeAssVideoFileInfo> files, TimeAssConfig format) ImportFromAss(string path)
+    // public static (List<TimeAssVideoFileInfo> files, TimeAssFormat format) ImportFromAss(string path)
     // {
     //     string assText = File.ReadAllText(path);
     //     if (!assText.Contains(Parameters.AssSoftware))

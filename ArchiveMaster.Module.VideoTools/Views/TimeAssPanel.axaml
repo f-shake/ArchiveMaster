@@ -11,19 +11,107 @@
     x:Name="root"
     d:DesignHeight="450"
     d:DesignWidth="800"
+    x:DataType="vm:TimeAssViewModel"
     mc:Ignorable="d">
+    <v:TwoStepPanelBase.Resources>
+        <cvt:ColorConverter x:Key="ColorConverter" />
+        <cvt:IntToHorizontalAlignmentConverter x:Key="IntToHorizontalAlignmentConverter" />
+        <cvt:IntToMarginConverter x:Key="IntToMarginConverter" />
+    </v:TwoStepPanelBase.Resources>
     <v:TwoStepPanelBase.ConfigsContent>
         <ct:StackFormItemGroup>
-            <!-- <ct:FormItem Label="源目录："> -->
-            <!--  <v:FilePickerTextBox  -->
-            <!--  FileNames="{Binding Config.SourceDir}"  -->
-            <!--  Type="OpenFolder" />  -->
-            <!-- </ct:FormItem> -->
-            <!-- <ct:FormItem Label="目标目录："> -->
-            <!--  <v:FilePickerTextBox  -->
-            <!--  FileNames="{Binding Config.DestinationDir}"  -->
-            <!--  Type="OpenFolder" />  -->
-            <!-- </ct:FormItem> -->
+            <ct:FormItem Label="源文件：">
+                <v:FilePickerTextBox
+                    AllowMultiple="True"
+                    Type="OpenFile" />
+            </ct:FormItem>
+            <ct:FormItem Label="字幕内容：">
+                <ct:WrapFormItemGroup>
+                    <ct:FormItem Header="字幕格式">
+                        <AutoCompleteBox
+                            Width="240"
+                            ItemsSource="{Binding SampleTimeFormats, Mode=OneTime}"
+                            Text="{Binding Config.Format.TimeFormat}" />
+                    </ct:FormItem>
+                    <ct:FormItem Header="更新间隔（毫秒）">
+                        <NumericUpDown
+                            Width="140"
+                            FormatString="N0"
+                            Increment="10"
+                            Maximum="60000"
+                            Minimum="30"
+                            Value="{Binding Config.Format.Interval}" />
+                    </ct:FormItem>
+                </ct:WrapFormItemGroup>
+            </ct:FormItem>
+
+            <ct:FormItem Label="字体样式：">
+                <ct:WrapFormItemGroup>
+                    <ct:FormItem Header="字体大小">
+                        <NumericUpDown
+                            Width="108"
+                            FormatString="0"
+                            Increment="2"
+                            Maximum="72"
+                            Minimum="4"
+                            Value="{Binding Config.Format.Size}" />
+                    </ct:FormItem>
+
+                    <ct:FormItem Header="文本颜色">
+                        <ColorPicker Color="{Binding Config.Format.TextColor, Converter={StaticResource ColorConverter}}" />
+                    </ct:FormItem>
+                    <ct:FormItem Header="描边颜色">
+                        <ColorPicker Color="{Binding Config.Format.BorderColor, Converter={StaticResource ColorConverter}}" />
+                    </ct:FormItem>
+                    <ct:FormItem Header="描边粗细">
+                        <NumericUpDown
+                            Width="120"
+                            FormatString="0"
+                            Increment="2"
+                            Maximum="48"
+                            Minimum="0"
+                            Value="{Binding Config.Format.BorderWidth}" />
+                    </ct:FormItem>
+                    <ct:FormItem Header="字体">
+                        <AutoCompleteBox
+                            Width="240"
+                            ItemsSource="{Binding FontFamilyNames, Mode=OneTime}"
+                            Text="{Binding Config.Format.Font}" />
+                    </ct:FormItem>
+                    <CheckBox
+                        Content="粗体"
+                        IsChecked="{Binding Config.Format.Bold}" />
+                    <CheckBox
+                        Content="斜体"
+                        IsChecked="{Binding Config.Format.Italic}" />
+                    <CheckBox
+                        Content="下划线"
+                        IsChecked="{Binding Config.Format.Underline}" />
+                </ct:WrapFormItemGroup>
+            </ct:FormItem>
+
+            <ct:FormItem Label="界面布局：">
+                <ct:WrapFormItemGroup>
+
+                    <ct:FormItem Header="边距">
+                        <NumericUpDown
+                            Width="120"
+                            FormatString="0"
+                            Increment="2"
+                            Maximum="200"
+                            Minimum="4"
+                            Value="{Binding Config.Format.Margin}" />
+                    </ct:FormItem>
+                    <ct:FormItem Header="对齐">
+                        <ct:RadioButtonGroup SelectedIndex="{Binding Config.Format.Alignment}">
+                            <ListBoxItem Content="左" />
+                            <ListBoxItem Content="中" />
+                            <ListBoxItem Content="右" />
+                        </ct:RadioButtonGroup>
+                    </ct:FormItem>
+
+                </ct:WrapFormItemGroup>
+            </ct:FormItem>
         </ct:StackFormItemGroup>
     </v:TwoStepPanelBase.ConfigsContent>
     <v:TwoStepPanelBase.ResultsContent>

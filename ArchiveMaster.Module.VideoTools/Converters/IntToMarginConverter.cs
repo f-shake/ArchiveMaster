@@ -10,8 +10,9 @@ public class IntToMarginConverter : IValueConverter
     {
         if (value != null)
         {
-            return new Thickness((int)value);
+            return new Thickness((int)value + 1);
         }
+
         throw new ArgumentNullException(nameof(value));
     }
 
