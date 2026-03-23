@@ -32,8 +32,6 @@ namespace ArchiveMaster
         public string ModuleName => "照片工具";
         public string ModuleDescription => "解决根据照片元数据分类或更新照片元数据的需求";
         public string HelpFileName { get; } = "photos.md";
-
-        public int Order => 2;
         public IList<Type> SingletonServices { get; }
 
         public IList<Type> TransientServices { get; } =

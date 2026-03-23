@@ -16,7 +16,6 @@ namespace ArchiveMaster
         public string ModuleName { get; }
         public string ModuleDescription { get; }
         public string HelpFileName { get; }
-        public int Order { get; }
         public IList<Type> SingletonServices { get; }
         public IList<Type> TransientServices { get; }
         public ToolPanelGroupInfo Views { get; }

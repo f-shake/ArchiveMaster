@@ -40,7 +40,6 @@ namespace ArchiveMaster
         
         public string HelpFileName { get; } = "files.md";
 
-        public int Order => 1;
         public IList<Type> SingletonServices { get; }
 
         public IList<Type> TransientServices { get; } =

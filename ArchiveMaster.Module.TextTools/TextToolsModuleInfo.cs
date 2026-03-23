@@ -37,7 +37,6 @@ namespace ArchiveMaster
 
         public string ModuleDescription => "对文本或文本文件进行相关处理";
         public string ModuleName => "文本工具";
-        public int Order => 3;
 
         public IList<Type> SingletonServices { get; }
 

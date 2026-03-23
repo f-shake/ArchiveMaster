@@ -47,6 +47,7 @@
     <ProjectReference Include="..\ArchiveMaster.Module.FileBackupper\ArchiveMaster.Module.FileBackupper.csproj"/>
     <ProjectReference Include="..\ArchiveMaster.Module.FileTools\ArchiveMaster.Module.FileTools.csproj"/>
     <ProjectReference Include="..\ArchiveMaster.Module.PhotoTools\ArchiveMaster.Module.PhotoTools.csproj"/>
+    <ProjectReference Include="..\ArchiveMaster.Module.VideoTools\ArchiveMaster.Module.VideoTools.csproj"/>
     <ProjectReference Include="..\ArchiveMaster.Module.OfflineSync\ArchiveMaster.Module.OfflineSync.csproj"/>
     <ProjectReference Include="..\ArchiveMaster.Module.WriteOnceArchive\ArchiveMaster.Module.WriteOnceArchive.csproj"/>
     <ProjectReference Include="..\ArchiveMaster.Module.TextTools\ArchiveMaster.Module.TextTools.csproj" />

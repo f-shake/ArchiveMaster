@@ -23,36 +23,34 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace ArchiveMaster
 {
-    public class TestModuleInfo : IModuleInfo
+    public class VideoToolsModuleInfo : IModuleInfo
     {
-        private readonly string baseUrl = "avares://ArchiveMaster.Module.Test/Assets/";
+        private readonly string baseUrl = "avares://ArchiveMaster.Module.VideoTools/Assets/";
         public IList<Type> BackgroundServices { get; }
 
         public IList<ConfigMetadata> Configs =>
         [
-            new ConfigMetadata(typeof(FileCopyTestConfig))
+            new ConfigMetadata(typeof(TimeAssConfig))
         ];
 
         public IList<JsonConverter> JsonConverters { get; }
 
-        public string ModuleName => "测试";
-        public string ModuleDescription => "测试";
+        public string ModuleName => "视频工具";
+        public string ModuleDescription => "关于视频的一些处理工作";
         public string HelpFileName { get; } = null;
         public IList<Type> SingletonServices { get; }
 
         public IList<Type> TransientServices { get; } =
         [
-            typeof(FileCopyTestService),
+            typeof(TimeAssService),
         ];
 
         public ToolPanelGroupInfo Views => new ToolPanelGroupInfo()
         {
             Panels =
             {
-                new ToolPanelInfo(typeof(FileFilterTestPanel), typeof(FileFilterTestViewModel), "文件筛选测试",
-                    "测试FileFilter功能", baseUrl + "test.svg"),
-                new ToolPanelInfo(typeof(FileCopyTestPanel), typeof(FileCopyTestViewModel), "文件复制测试",
-                    "测试自写文件复制功能", baseUrl + "test.svg"),
+                new ToolPanelInfo(typeof(TimeAssPanel), typeof(TimeAssViewModel), "视频时间戳字幕",
+                    "为视频添加录制时间的字幕", baseUrl + "time_ass.svg"),
             },
             GroupName = ModuleName,
             GroupDescription = ModuleDescription
