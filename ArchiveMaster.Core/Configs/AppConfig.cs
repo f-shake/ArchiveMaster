@@ -11,6 +11,7 @@ using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using System.Text.Unicode;
 using System.Threading.Tasks;
+using ArchiveMaster.Converters;
 using ArchiveMaster.Models;
 using ArchiveMaster.ViewModels;
 using FzLib.IO;
@@ -56,7 +57,8 @@ namespace ArchiveMaster.Configs
             Converters =
             {
                 new SecurePassword.JsonConverter(),
-                new EditableString.JsonConverter()
+                new EditableString.JsonConverter(),
+                new ColorJsonConverter()
             }
         };
 

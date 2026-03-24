@@ -115,6 +115,32 @@
         </ct:StackFormItemGroup>
     </v:TwoStepPanelBase.ConfigsContent>
     <v:TwoStepPanelBase.ResultsContent>
+        <Viewbox>
+            <Grid
+                x:Name="cvs"
+                Width="960"
+                Height="540">
+                <TextBlock
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    FontSize="72"
+                    Opacity="0.3"
+                    Text="正在以两倍放大预览" />
+                <v:OutlinedTextBlock
+                    Margin="{Binding Config.Format.Margin, Converter={x:Static cvt:Converters.Thickness}}"
+                    HorizontalAlignment="{Binding Config.Format.Alignment, Converter={StaticResource IntToHorizontalAlignmentConverter}}"
+                    VerticalAlignment="Bottom"
+                    Fill="{Binding Config.Format.TextColor, Converter={StaticResource ColorConverter}}"
+                    FontFamily="{Binding Config.Format.Font}"
+                    FontSize="{Binding Config.Format.Size}"
+                    FontStyle="{Binding Config.Format.Italic, Converter={x:Static cvt:Converters.ItalicFontStyle}}"
+                    FontWeight="{Binding Config.Format.Bold, Converter={x:Static cvt:Converters.BoldFontWeight}}"
+                    Stroke="{Binding Config.Format.BorderColor, Converter={StaticResource ColorConverter}}"
+                    StrokeThickness="{Binding Config.Format.BorderWidth}"
+                    Text="{Binding PreviewContent}"
+                    Underline="{Binding Config.Format.Underline}" />
+            </Grid>
+        </Viewbox>
         <!--  <v:SimpleFileDataGrid  -->
         <!--  Grid.Row="2"  -->
         <!--  ItemsSource="{Binding Files}">  -->

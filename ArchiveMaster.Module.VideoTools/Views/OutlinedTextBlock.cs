@@ -36,6 +36,14 @@ namespace ArchiveMaster.Views
         public static readonly StyledProperty<TextAlignment> TextAlignmentProperty =
             AvaloniaProperty.Register<OutlinedTextBlock, TextAlignment>(nameof(TextAlignment), TextAlignment.Left);
 
+        // 新增：下划线属性
+        public static readonly StyledProperty<bool> UnderlineProperty =
+            AvaloniaProperty.Register<OutlinedTextBlock, bool>(nameof(Underline), false);
+
+        // 新增：删除线属性
+        public static readonly StyledProperty<bool> StrikethroughProperty =
+            AvaloniaProperty.Register<OutlinedTextBlock, bool>(nameof(Strikethrough), false);
+
         private FormattedText? _formattedText;
         private Geometry? _textGeometry;
         private IPen? _pen;
@@ -51,23 +59,24 @@ namespace ArchiveMaster.Views
         public FontStyle FontStyle { get => GetValue(FontStyleProperty); set => SetValue(FontStyleProperty, value); }
         public FontWeight FontWeight { get => GetValue(FontWeightProperty); set => SetValue(FontWeightProperty, value); }
         public TextAlignment TextAlignment { get => GetValue(TextAlignmentProperty); set => SetValue(TextAlignmentProperty, value); }
+        public bool Underline { get => GetValue(UnderlineProperty); set => SetValue(UnderlineProperty, value); }
+        public bool Strikethrough { get => GetValue(StrikethroughProperty); set => SetValue(StrikethroughProperty, value); }
         #endregion
 
         static OutlinedTextBlock()
         {
-            // 监视属性变化，自动触发重绘或重新测量
-            AffectsRender<OutlinedTextBlock>(FillProperty, StrokeProperty, StrokeThicknessProperty);
+            AffectsRender<OutlinedTextBlock>(FillProperty, StrokeProperty, StrokeThicknessProperty, UnderlineProperty, StrikethroughProperty);
             AffectsMeasure<OutlinedTextBlock>(TextProperty, FontFamilyProperty, FontSizeProperty, 
-                FontStyleProperty, FontWeightProperty, TextAlignmentProperty);
+                FontStyleProperty, FontWeightProperty, TextAlignmentProperty, UnderlineProperty, StrikethroughProperty);
             
-            // 当笔刷相关属性变化时，清除 Pen 缓存
             StrokeProperty.Changed.AddClassHandler<OutlinedTextBlock>((x, _) => x._pen = null);
             StrokeThicknessProperty.Changed.AddClassHandler<OutlinedTextBlock>((x, _) => x._pen = null);
             
-            // 当文本相关属性变化时，清除 FormattedText 和 Geometry 缓存
             TextProperty.Changed.AddClassHandler<OutlinedTextBlock>((x, _) => x.InvalidateText());
             FontFamilyProperty.Changed.AddClassHandler<OutlinedTextBlock>((x, _) => x.InvalidateText());
             FontSizeProperty.Changed.AddClassHandler<OutlinedTextBlock>((x, _) => x.InvalidateText());
+            UnderlineProperty.Changed.AddClassHandler<OutlinedTextBlock>((x, _) => x.InvalidateText());
+            StrikethroughProperty.Changed.AddClassHandler<OutlinedTextBlock>((x, _) => x.InvalidateText());
         }
 
         private void InvalidateText()
@@ -81,14 +90,13 @@ namespace ArchiveMaster.Views
             EnsureFormattedText(availableSize);
             if (_formattedText == null) return new Size();
             
-            // 考虑描边粗细对尺寸的影响（可选）
             var thickness = StrokeThickness;
             return new Size(_formattedText.Width + thickness, _formattedText.Height + thickness);
         }
 
         protected override Size ArrangeOverride(Size finalSize)
         {
-            _textGeometry = null; // 尺寸变了，Geometry 必须重构
+            _textGeometry = null; 
             return base.ArrangeOverride(finalSize);
         }
 
@@ -102,9 +110,10 @@ namespace ArchiveMaster.Views
 
             if (_textGeometry != null)
             {
-                // 使用平移确保描边不被边缘裁切（视需求而定）
-                using (context.PushTransform(Matrix.CreateTranslation(StrokeThickness / 2, StrokeThickness / 2)))
+                var offset = StrokeThickness / 2;
+                using (context.PushTransform(Matrix.CreateTranslation(offset, offset)))
                 {
+                    // 注意：这里先画描边（Pen），再画填充（Fill），保证文字内部清晰
                     context.DrawGeometry(null, _pen, _textGeometry);
                     context.DrawGeometry(Fill, null, _textGeometry);
                 }
@@ -133,7 +142,7 @@ namespace ArchiveMaster.Views
             )
             {
                 MaxTextWidth = constraint.Width,
-                MaxTextHeight = constraint.Height,
+                MaxTextHeight = Math.Max(1, constraint.Height),
                 TextAlignment = TextAlignment
             };
         }
@@ -141,7 +150,43 @@ namespace ArchiveMaster.Views
         private void EnsureGeometry()
         {
             if (_textGeometry != null || _formattedText == null) return;
-            _textGeometry = _formattedText.BuildGeometry(new Point(0, 0));
+
+            // 获取基础文字路径
+            var textGeo = _formattedText.BuildGeometry(new Point(0, 0));
+            
+            // 手动构建装饰线几何图形
+            Geometry? decorations = null;
+            double thickness = Math.Max(1, FontSize / 15); // 根据字号自动计算线条粗细
+
+            // 处理下划线
+            if (Underline)
+            {
+                // 位置通常在基线下方一点点
+                double y = _formattedText.Baseline + (thickness * 1.5);
+                var rect = new RectangleGeometry(new Rect(0, y, _formattedText.Width, thickness));
+                decorations = rect;
+            }
+
+            // 处理删除线
+            if (Strikethrough)
+            {
+                // 位置通常在基线上方约 1/3 字高处
+                double y = _formattedText.Baseline - (FontSize * 0.3);
+                var rect = new RectangleGeometry(new Rect(0, y, _formattedText.Width, thickness));
+                
+                if (decorations == null) decorations = rect;
+                else decorations = new CombinedGeometry(GeometryCombineMode.Union, decorations, rect);
+            }
+
+            // 合并文字和装饰线
+            if (decorations != null)
+            {
+                _textGeometry = new CombinedGeometry(GeometryCombineMode.Union, textGeo, decorations);
+            }
+            else
+            {
+                _textGeometry = textGeo;
+            }
         }
     }
 }

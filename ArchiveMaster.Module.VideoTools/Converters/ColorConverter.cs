@@ -28,7 +28,7 @@ public class ColorConverter : IValueConverter
             return new Avalonia.Media.Color((byte)argb.a, (byte)argb.r, (byte)argb.g, (byte)argb.b);
         }
 
-        if (targetType == typeof(Avalonia.Media.SolidColorBrush))
+        if (targetType == typeof(Avalonia.Media.SolidColorBrush) || targetType == typeof(Avalonia.Media.IBrush))
         {
             return new Avalonia.Media.SolidColorBrush(new Avalonia.Media.Color((byte)argb.a, (byte)argb.r, (byte)argb.g,
                 (byte)argb.b));
