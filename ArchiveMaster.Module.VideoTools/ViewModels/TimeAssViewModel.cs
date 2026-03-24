@@ -29,7 +29,9 @@ public partial class TimeAssViewModel : TwoStepViewModelBase<TimeAssService, Tim
     [ObservableProperty]
     private string previewContent;
     
-    private DispatcherTimer previewTimer;
+    private readonly DispatcherTimer previewTimer;
+
+    private ObservableCollection<TimeAssVideoFileInfo> files;
 
     public TimeAssViewModel(ViewModelServices services) : base(services)
     {

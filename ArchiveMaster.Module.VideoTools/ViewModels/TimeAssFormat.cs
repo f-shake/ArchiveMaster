@@ -6,7 +6,10 @@ namespace ArchiveMaster.ViewModels;
 public partial class TimeAssFormat : ObservableObject
 {
     [ObservableProperty]
-    private int alignment = 2;
+    private int horizontalAlignment = 2;
+    
+    [ObservableProperty]
+    private int verticalAlignment = 2;
 
     [ObservableProperty]
     private bool bold;

@@ -15,7 +15,7 @@
     mc:Ignorable="d">
     <v:TwoStepPanelBase.Resources>
         <cvt:ColorConverter x:Key="ColorConverter" />
-        <cvt:IntToHorizontalAlignmentConverter x:Key="IntToHorizontalAlignmentConverter" />
+        <cvt:IntToAlignmentConverter x:Key="IntToAlignmentConverter" />
         <cvt:IntToMarginConverter x:Key="IntToMarginConverter" />
     </v:TwoStepPanelBase.Resources>
     <v:TwoStepPanelBase.ConfigsContent>
@@ -102,34 +102,51 @@
                             Minimum="4"
                             Value="{Binding Config.Format.Margin}" />
                     </ct:FormItem>
-                    <ct:FormItem Header="对齐">
-                        <ct:RadioButtonGroup SelectedIndex="{Binding Config.Format.Alignment}">
+                    <ct:FormItem Header="水平对齐">
+                        <ct:RadioButtonGroup SelectedIndex="{Binding Config.Format.HorizontalAlignment}">
                             <ListBoxItem Content="左" />
                             <ListBoxItem Content="中" />
                             <ListBoxItem Content="右" />
                         </ct:RadioButtonGroup>
                     </ct:FormItem>
-
+                    <ct:FormItem Header="垂直对齐">
+                        <ct:RadioButtonGroup SelectedIndex="{Binding Config.Format.VerticalAlignment}">
+                            <ListBoxItem Content="下" />
+                            <ListBoxItem Content="中" />
+                            <ListBoxItem Content="上" />
+                        </ct:RadioButtonGroup>
+                    </ct:FormItem>
                 </ct:WrapFormItemGroup>
             </ct:FormItem>
         </ct:StackFormItemGroup>
     </v:TwoStepPanelBase.ConfigsContent>
     <v:TwoStepPanelBase.ResultsContent>
-        <Viewbox>
+        <Grid ColumnDefinitions="*,8,Auto">
+            <v:SimpleFileDataGrid
+                Grid.Row="2"
+                ItemsSource="{Binding Files}">
+                <v:SimpleFileDataGrid.Columns>
+                    <DataGridTextColumn
+                        Binding="{Binding DestinationPath}"
+                        Header="目标位置" />
+                </v:SimpleFileDataGrid.Columns>
+            </v:SimpleFileDataGrid>
             <Grid
                 x:Name="cvs"
-                Width="960"
-                Height="540">
+                Grid.Column="2"
+                Width="480"
+                Height="270"
+                Background="{DynamicResource Background3}">
                 <TextBlock
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
-                    FontSize="72"
+                    FontSize="36"
                     Opacity="0.3"
-                    Text="正在以两倍放大预览" />
+                    Text="正在以四倍放大预览" />
                 <v:OutlinedTextBlock
                     Margin="{Binding Config.Format.Margin, Converter={x:Static cvt:Converters.Thickness}}"
-                    HorizontalAlignment="{Binding Config.Format.Alignment, Converter={StaticResource IntToHorizontalAlignmentConverter}}"
-                    VerticalAlignment="Bottom"
+                    HorizontalAlignment="{Binding Config.Format.HorizontalAlignment, Converter={StaticResource IntToAlignmentConverter}}"
+                    VerticalAlignment="{Binding Config.Format.VerticalAlignment, Converter={StaticResource IntToAlignmentConverter}}"
                     Fill="{Binding Config.Format.TextColor, Converter={StaticResource ColorConverter}}"
                     FontFamily="{Binding Config.Format.Font}"
                     FontSize="{Binding Config.Format.Size}"
@@ -140,15 +157,6 @@
                     Text="{Binding PreviewContent}"
                     Underline="{Binding Config.Format.Underline}" />
             </Grid>
-        </Viewbox>
-        <!--  <v:SimpleFileDataGrid  -->
-        <!--  Grid.Row="2"  -->
-        <!--  ItemsSource="{Binding Files}">  -->
-        <!--     <v:SimpleFileDataGrid.Columns> -->
-        <!--  <DataGridTextColumn  -->
-        <!--  Binding="{Binding DestinationPath}"  -->
-        <!--  Header="目标位置" />  -->
-        <!--     </v:SimpleFileDataGrid.Columns> -->
-        <!-- </v:SimpleFileDataGrid> -->
+        </Grid>
     </v:TwoStepPanelBase.ResultsContent>
 </v:TwoStepPanelBase>
