@@ -1,4 +1,4 @@
-﻿<v:TwoStepPanelBase
+﻿<v:VerticalTwoStepPanelBase
     x:Class="ArchiveMaster.Views.RebuildPanel"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -12,7 +12,7 @@
     d:DesignWidth="800"
     mc:Ignorable="d">
 
-    <v:TwoStepPanelBase.ConfigsContent>
+    <v:VerticalTwoStepPanelBase.ConfigsContent>
         <ctrl:StackFormItemGroup>
             <ctrl:FormItem Label="文件包目录：">
                 <v:FilePickerTextBox
@@ -51,10 +51,10 @@
                 </ctrl:WrapFormItemGroup>
             </ctrl:FormItem>
         </ctrl:StackFormItemGroup>
-    </v:TwoStepPanelBase.ConfigsContent>
+    </v:VerticalTwoStepPanelBase.ConfigsContent>
 
 
-    <v:TwoStepPanelBase.ResultsContent>
+    <v:VerticalTwoStepPanelBase.ResultsContent>
         <Grid
             ColumnDefinitions="*,8,*"
             RowDefinitions="*,Auto">
@@ -124,6 +124,6 @@
             </TextBlock>
 
         </Grid>
-    </v:TwoStepPanelBase.ResultsContent>
+    </v:VerticalTwoStepPanelBase.ResultsContent>
 
-</v:TwoStepPanelBase>
+</v:VerticalTwoStepPanelBase>

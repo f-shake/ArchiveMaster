@@ -6,7 +6,7 @@ namespace ArchiveMaster.Views
     /// <summary>
     /// RebuildPanel.xaml 的交互逻辑
     /// </summary>
-    public partial class DirStructureSyncPanel : TwoStepPanelBase
+    public partial class DirStructureSyncPanel : VerticalTwoStepPanelBase
     {
         public DirStructureSyncPanel()
         {

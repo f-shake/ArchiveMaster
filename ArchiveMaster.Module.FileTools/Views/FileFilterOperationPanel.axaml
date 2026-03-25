@@ -1,4 +1,4 @@
-<v:TwoStepPanelBase
+<v:VerticalTwoStepPanelBase
     x:Class="ArchiveMaster.Views.FileFilterOperationPanel"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -15,11 +15,11 @@
     d:DesignWidth="800"
     x:DataType="vm:TwinFileCleanerViewModel"
     mc:Ignorable="d">
-    <v:TwoStepPanelBase.Resources>
+    <v:VerticalTwoStepPanelBase.Resources>
         <cvt:FileLengthConverter x:Key="FileLengthConverter" />
         <cvt:LenientDateTimeConverter x:Key="LenientDateTimeConverter" />
-    </v:TwoStepPanelBase.Resources>
-    <v:TwoStepPanelBase.ConfigsContent>
+    </v:VerticalTwoStepPanelBase.Resources>
+    <v:VerticalTwoStepPanelBase.ConfigsContent>
         <ct:StackFormItemGroup>
             <ct:FormItem Label="源目录：">
                 <v:FilePickerTextBox
@@ -113,8 +113,8 @@
                 </ct:WrapFormItemGroup>
             </ct:FormItem>
         </ct:StackFormItemGroup>
-    </v:TwoStepPanelBase.ConfigsContent>
-    <v:TwoStepPanelBase.ResultsContent>
+    </v:VerticalTwoStepPanelBase.ConfigsContent>
+    <v:VerticalTwoStepPanelBase.ResultsContent>
         <Grid RowDefinitions="*,8,Auto">
             <v:SimpleFileDataGrid
                 ColumnLengthIndex="1.1"
@@ -127,5 +127,5 @@
                 </v:SimpleFileDataGrid.Columns>
             </v:SimpleFileDataGrid>
         </Grid>
-    </v:TwoStepPanelBase.ResultsContent>
-</v:TwoStepPanelBase>
+    </v:VerticalTwoStepPanelBase.ResultsContent>
+</v:VerticalTwoStepPanelBase>

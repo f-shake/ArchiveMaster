@@ -3,7 +3,7 @@
     /// <summary>
     /// RebuildPanel.xaml 的交互逻辑
     /// </summary>
-    public partial class RebuildPanel : TwoStepPanelBase
+    public partial class RebuildPanel : VerticalTwoStepPanelBase
     {
         public RebuildPanel()
         {

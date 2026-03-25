@@ -7,10 +7,7 @@ using Avalonia.Interactivity;
 
 namespace ArchiveMaster.Views
 {
-    /// <summary>
-    /// UpdatePanel.xaml 的交互逻辑
-    /// </summary>
-    public partial class TimeAssPanel : TwoStepPanelBase
+    public partial class TimeAssPanel : HorizontalTwoStepPanelBase
     {
         public TimeAssPanel()
         {

@@ -18,15 +18,10 @@ namespace ArchiveMaster.Services
         public const string ASS_FORMAT = "Format";
         public const string ASS_SOFTWARE = "Software=ArchiveMaster";
 
-        public static bool AutoGenerateVideoInfo(TimeAssFormat format, TimeAssVideoFileInfo file)
-        {
-            if (new[] { ".jpg", ".tif", ".raw", ".png", ".dng", ".arw", ".nef", ".cr2", ".rw2" }
-                .Any(p => file.Name.EndsWith(p, StringComparison.OrdinalIgnoreCase)))
-            {
-                file.StartTime = file.Time;
-                return true;
-            }
+        public List<TimeAssVideoFileInfo> Files { get; private set; } = new List<TimeAssVideoFileInfo>();
 
+        public static TimeSpan? GetVideoLength(string path)
+        {
             ProcessStartInfo startInfo = new ProcessStartInfo()
             {
                 UseShellExecute = false,
@@ -36,7 +31,7 @@ namespace ArchiveMaster.Services
                 RedirectStandardOutput = true,
                 FileName = "ffprobe",
                 Arguments =
-                    $"-v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 \"{file.Path}\""
+                    $"-v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 \"{path}\""
             };
 
             using Process p = new Process();
@@ -46,16 +41,12 @@ namespace ArchiveMaster.Services
             var output = p.StandardOutput.ReadToEnd().Trim();
             if (double.TryParse(output, out double length))
             {
-                file.Length = TimeSpan.FromSeconds(length);
+                return TimeSpan.FromSeconds(length);
             }
             else
             {
-                return false;
+                return null;
             }
-
-            var modifiedTime = file.Time;
-            file.StartTime = modifiedTime - file.Length;
-            return true;
         }
 
         public static void Export(TimeAssFormat format, TimeAssVideoFileInfo file, string exportPath)
@@ -77,9 +68,9 @@ namespace ArchiveMaster.Services
                 while (true)
                 {
                     var nextTime = currentTime.Add(interval);
-                    if (nextTime > file.Length)
+                    if (nextTime > file.VideoLength)
                     {
-                        nextTime = file.Length;
+                        nextTime = file.VideoLength.Value;
                     }
 
                     outputs.Append($"Dialogue: 3,")
@@ -89,7 +80,7 @@ namespace ArchiveMaster.Services
                         .Append(",Default,,0000,0000,0000,,")
                         .Append((file.StartTime.Value + currentTime * file.Ratio).ToString(format.TimeFormat))
                         .AppendLine();
-                    if (nextTime >= file.Length)
+                    if (nextTime >= file.VideoLength)
                     {
                         break;
                     }
@@ -97,7 +88,7 @@ namespace ArchiveMaster.Services
                     currentTime = nextTime;
                 }
 
-                totalTime += file.Length;
+                totalTime += file.VideoLength.Value;
             }
 
             if (!Directory.Exists(Path.GetDirectoryName(path)))
@@ -209,24 +200,25 @@ namespace ArchiveMaster.Services
 
         public override IEnumerable<SimpleFileInfo> GetInitializedFiles()
         {
-            // return Files.Cast<SimpleFileInfo>();
-            return [];
+            return Files;
         }
 
         public override async Task InitializeAsync(CancellationToken token = default)
         {
-            // var files = new DirectoryInfo(Config.SourceDir)
-            //     .EnumerateFiles("*", FileEnumerateExtension.GetEnumerationOptions())
-            //     .ApplyFilter(token)
-            //     .Select(f => new CopyingFile(f, Config.SourceDir));
-            // Files = new List<CopyingFile>();
-            // await TryForFilesAsync(files,
-            //     (f, s) =>
-            //     {
-            //         f.DestinationPath = Path.Combine(Config.DestinationDir,
-            //             Path.GetRelativePath(Config.SourceDir, f.Path));
-            //         Files.Add(f);
-            //     }, token, FilesLoopOptions.DoNothing());
+            var files = FileNameHelper.GetFileNames(Config.Files)
+                .Select(p => new TimeAssVideoFileInfo(p))
+                .ToList();
+            await TryForFilesAsync(files,
+                (f, s) =>
+                {
+                    f.VideoLength = GetVideoLength(f.Path);
+                    if (f.VideoLength != null)
+                    {
+                        f.StartTime = f.Time - f.VideoLength;
+                    }
+                }, token,
+                FilesLoopOptions.Builder().AutoApplyFileNumberProgress().AutoApplyStatus().Build());
+            Files = files.ToList();
         }
     }
 }

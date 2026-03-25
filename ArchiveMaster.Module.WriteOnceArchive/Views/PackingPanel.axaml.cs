@@ -1,6 +1,6 @@
 ﻿namespace ArchiveMaster.Views
 {
-    public partial class PackingPanel : TwoStepPanelBase
+    public partial class PackingPanel : VerticalTwoStepPanelBase
     {
         public PackingPanel()
         {

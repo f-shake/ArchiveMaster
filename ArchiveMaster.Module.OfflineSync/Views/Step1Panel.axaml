@@ -1,4 +1,4 @@
-﻿<v:TwoStepPanelBase
+﻿<v:VerticalTwoStepPanelBase
     x:Class="ArchiveMaster.Views.Step1Panel"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -15,10 +15,10 @@
     x:DataType="vm:Step1ViewModel"
     ExecuteButtonContent="导出"
     mc:Ignorable="d">
-    <v:TwoStepPanelBase.Styles>
+    <v:VerticalTwoStepPanelBase.Styles>
         <StyleInclude Source="Styles.axaml" />
-    </v:TwoStepPanelBase.Styles>
-    <v:TwoStepPanelBase.ResultsContent>
+    </v:VerticalTwoStepPanelBase.Styles>
+    <v:VerticalTwoStepPanelBase.ResultsContent>
         <Grid
             Margin="8"
             RowDefinitions="Auto,8,*,8,Auto">
@@ -60,5 +60,5 @@
                     ToolTip.Tip="移除全部" />
             </StackPanel>
         </Grid>
-    </v:TwoStepPanelBase.ResultsContent>
-</v:TwoStepPanelBase>
+    </v:VerticalTwoStepPanelBase.ResultsContent>
+</v:VerticalTwoStepPanelBase>

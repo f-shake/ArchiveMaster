@@ -1,4 +1,4 @@
-<v:TwoStepPanelBase
+<v:VerticalTwoStepPanelBase
     x:Class="ArchiveMaster.Views.TypoCheckerPanel"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -19,7 +19,7 @@
     x:DataType="vm:TypoCheckerViewModel"
     ExecuteButtonContent="检查"
     mc:Ignorable="d">
-    <v:TwoStepPanelBase.ConfigsContent>
+    <v:VerticalTwoStepPanelBase.ConfigsContent>
         <ct:StackFormItemGroup>
             <ct:FormItem Label="文本源：">
                 <v:TextSourceInput Source="{Binding Config.Source}" />
@@ -47,9 +47,9 @@
                 <TextBox Text="{Binding Config.ExtraAiPrompt}" />
             </ct:FormItem>
         </ct:StackFormItemGroup>
-    </v:TwoStepPanelBase.ConfigsContent>
+    </v:VerticalTwoStepPanelBase.ConfigsContent>
 
-    <v:TwoStepPanelBase.ResultsContent>
+    <v:VerticalTwoStepPanelBase.ResultsContent>
         <Grid RowDefinitions="*,8,Auto">
             <ScrollViewer Padding="0,0,20,0">
                 <ItemsControl ItemsSource="{Binding Typos}">
@@ -153,5 +153,5 @@
                     Text="{Binding Typos.Count, StringFormat='{}共{0}条'}" />
             </Grid>
         </Grid>
-    </v:TwoStepPanelBase.ResultsContent>
-</v:TwoStepPanelBase>
+    </v:VerticalTwoStepPanelBase.ResultsContent>
+</v:VerticalTwoStepPanelBase>

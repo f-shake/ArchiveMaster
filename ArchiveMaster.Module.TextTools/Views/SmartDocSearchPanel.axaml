@@ -1,4 +1,4 @@
-<v:TwoStepPanelBase
+<v:VerticalTwoStepPanelBase
     x:Class="ArchiveMaster.Views.SmartDocSearchPanel"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -19,7 +19,7 @@
     InitializeButtonContent="搜索"
     ShowBottomBar="False"
     mc:Ignorable="d">
-    <v:TwoStepPanelBase.ConfigsContent>
+    <v:VerticalTwoStepPanelBase.ConfigsContent>
         <ct:StackFormItemGroup IsEnabled="{Binding !AiConversation.SendCommand.IsRunning}">
             <ct:FormItem Label="文本源：">
                 <v:TextSourceInput Source="{Binding Config.Source}" />
@@ -78,9 +78,9 @@
                 </ct:WrapFormItemGroup>
             </ct:FormItem>
         </ct:StackFormItemGroup>
-    </v:TwoStepPanelBase.ConfigsContent>
+    </v:VerticalTwoStepPanelBase.ConfigsContent>
 
-    <v:TwoStepPanelBase.ResultsContent>
+    <v:VerticalTwoStepPanelBase.ResultsContent>
         <Grid ColumnDefinitions="2*,8,*">
 
             <Button
@@ -192,5 +192,5 @@
                 Grid.Column="1"
                 Background="Transparent" />
         </Grid>
-    </v:TwoStepPanelBase.ResultsContent>
-</v:TwoStepPanelBase>
+    </v:VerticalTwoStepPanelBase.ResultsContent>
+</v:VerticalTwoStepPanelBase>

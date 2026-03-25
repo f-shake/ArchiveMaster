@@ -1,4 +1,4 @@
-﻿<v:TwoStepPanelBase
+﻿<v:VerticalTwoStepPanelBase
     x:Class="ArchiveMaster.Views.Step3Panel"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -16,10 +16,10 @@
     ExecuteButtonContent="2.更新"
     InitializeButtonContent="1.分析"
     mc:Ignorable="d">
-    <v:TwoStepPanelBase.Styles>
+    <v:VerticalTwoStepPanelBase.Styles>
         <StyleInclude Source="Styles.axaml" />
-    </v:TwoStepPanelBase.Styles>
-    <v:TwoStepPanelBase.ConfigsContent>
+    </v:VerticalTwoStepPanelBase.Styles>
+    <v:VerticalTwoStepPanelBase.ConfigsContent>
         <ctrl:StackFormItemGroup>
             <ctrl:FormItem Label="本地补丁目录：">
                 <v:FilePickerTextBox
@@ -32,8 +32,8 @@
                 <v:PasswordBox Password="{Binding Config.Password}" />
             </ctrl:FormItem>
         </ctrl:StackFormItemGroup>
-    </v:TwoStepPanelBase.ConfigsContent>
-    <v:TwoStepPanelBase.ResultsContent>
+    </v:VerticalTwoStepPanelBase.ConfigsContent>
+    <v:VerticalTwoStepPanelBase.ResultsContent>
         <v:SyncFilesList />
-    </v:TwoStepPanelBase.ResultsContent>
-</v:TwoStepPanelBase>
+    </v:VerticalTwoStepPanelBase.ResultsContent>
+</v:VerticalTwoStepPanelBase>

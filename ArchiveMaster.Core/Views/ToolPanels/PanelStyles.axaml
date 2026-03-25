@@ -61,9 +61,9 @@
     </ControlTheme>
 
     <ControlTheme
-        x:Key="{x:Type v:TwoStepPanelBase}"
+        x:Key="{x:Type v:VerticalTwoStepPanelBase}"
         BasedOn="{StaticResource {x:Type v:PanelBase}}"
-        TargetType="v:TwoStepPanelBase">
+        TargetType="v:VerticalTwoStepPanelBase">
         <Setter Property="Template">
             <ControlTemplate>
                 <Grid RowDefinitions="Auto,*">
@@ -273,4 +273,216 @@
     </ControlTheme>
 
 
+    <ControlTheme
+        x:Key="{x:Type v:HorizontalTwoStepPanelBase}"
+        BasedOn="{StaticResource {x:Type v:PanelBase}}"
+        TargetType="v:HorizontalTwoStepPanelBase">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Grid RowDefinitions="Auto,*">
+                    <Grid
+                        Margin="8"
+                        ColumnDefinitions="Auto,8,*,8,Auto"
+                        RowDefinitions="*,*">
+
+                        <TextBlock
+                            Grid.Column="2"
+                            FontSize="16"
+                            FontWeight="Bold"
+                            Text="{TemplateBinding Title}" />
+                        <TextBlock
+                            Grid.Row="1"
+                            Grid.Column="2"
+                            Margin="0,4,0,0"
+                            MaxLines="2"
+                            Text="{TemplateBinding Description}"
+                            TextTrimming="CharacterEllipsis"
+                            TextWrapping="Wrap" />
+
+
+                        <StackPanel
+                            Grid.RowSpan="2"
+                            Grid.Column="4"
+                            VerticalAlignment="Top"
+                            IsEnabled="{Binding !IsWorking}"
+                            Orientation="Horizontal">
+                            <ComboBox
+                                Width="128"
+                                VerticalAlignment="Center"
+                                ItemsSource="{Binding PresetNames}"
+                                SelectedItem="{Binding PresetName}"
+                                ToolTip.Tip="切换预设" />
+                            <Button
+                                Classes="Icon"
+                                Command="{Binding AddPresetCommand}"
+                                Content="{ic:FluentIcon Icon=Add}"
+                                ToolTip.Tip="新增预设" />
+                            <Button
+                                Classes="Icon"
+                                Command="{Binding RemovePresetCommand}"
+                                Content="{ic:FluentIcon Icon=Delete}"
+                                ToolTip.Tip="删除当前预设" />
+                            <Button
+                                Classes="Icon"
+                                Command="{Binding ModifyPresetNameCommand}"
+                                Content="{ic:FluentIcon Icon=Edit}"
+                                ToolTip.Tip="修改当前预设名称" />
+                            <Button
+                                Classes="Icon"
+                                Command="{Binding ClonePresetCommand}"
+                                Content="{ic:FluentIcon Icon=Copy}"
+                                ToolTip.Tip="建立当前预设的副本" />
+                        </StackPanel>
+                    </Grid>
+
+                    <Grid
+                        x:Name="PART_ContentContainer"
+                        Grid.Row="1"
+                        ColumnDefinitions="*,8,*"
+                        RowDefinitions="*,8,Auto">
+
+                        <!--  配置区  -->
+                        <ScrollViewer
+                            x:Name="PART_Configs"
+                            Margin="8"
+                            Padding="0,0,20,0"
+                            HorizontalScrollBarVisibility="Disabled"
+                            IsEnabled="{Binding CanInitialize}"
+                            IsVisible="{Binding ConfigsContent, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static cvt:Converters.IsNotNull}}"
+                            VerticalScrollBarVisibility="Auto">
+                            <ContentPresenter Content="{TemplateBinding ConfigsContent}" />
+                        </ScrollViewer>
+
+                        <GridSplitter
+                            x:Name="PART_GridSplitter"
+                            Grid.Column="1"
+                            Width="3"
+                            MinWidth="3"
+                            Margin="4,32"
+                            Background="{DynamicResource Background3}"
+                            CornerRadius="1.5"
+                            IsVisible="{Binding ConfigsContent, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static cvt:Converters.IsNotNull}}" />
+
+                        <!--  结果区  -->
+                        <ContentPresenter
+                            x:Name="PART_Results"
+                            Grid.Column="2"
+                            Margin="8"
+                            Content="{TemplateBinding ResultsContent}" />
+
+                        <!--  信息、进度、按钮  -->
+                        <Panel
+                            Grid.Row="2"
+                            Grid.ColumnSpan="3"
+                            Margin="16"
+                            IsVisible="{TemplateBinding ShowBottomBar}">
+                            <Grid
+                                x:Name="PART_BottomOneLine"
+                                ColumnDefinitions="4*,8,*,16,Auto,8,Auto,8,Auto,8,Auto"
+                                IsEnabled="{Binding Config, Converter={x:Static cvt:Converters.IsNotNull}}">
+
+
+                                <TextBlock
+                                    Text="{Binding Message}"
+                                    TextTrimming="CharacterEllipsis"
+                                    ToolTip.Tip="{Binding Message}" />
+
+                                <ProgressBar
+                                    Grid.Column="2"
+                                    Height="24"
+                                    IsIndeterminate="{Binding ProgressIndeterminate}"
+                                    IsVisible="{Binding IsWorking}"
+                                    Maximum="1"
+                                    Minimum="0"
+                                    ProgressTextFormat="{}{1:0.0}%"
+                                    ShowProgressText="{Binding !ProgressIndeterminate}"
+                                    Value="{Binding Progress}">
+                                    <ProgressBar.Styles>
+                                        <Style Selector="ProgressBar:horizontal">
+                                            <Setter Property="MinWidth" Value="72" />
+                                        </Style>
+                                    </ProgressBar.Styles>
+                                </ProgressBar>
+                                <Button
+                                    Grid.Column="4"
+                                    Classes="Long Primary"
+                                    Command="{Binding InitializeCommand}"
+                                    Content="{TemplateBinding InitializeButtonContent}"
+                                    IsVisible="{Binding EnableInitialize}" />
+                                <Button
+                                    Grid.Column="6"
+                                    Classes="Long Primary"
+                                    Command="{Binding ExecuteCommand}"
+                                    Content="{TemplateBinding ExecuteButtonContent}" />
+                                <Button
+                                    Grid.Column="8"
+                                    Classes="Middle"
+                                    Command="{Binding CancelCommand}"
+                                    Content="{TemplateBinding StopButtonContent}" />
+                                <Button
+                                    Grid.Column="10"
+                                    Classes="Middle"
+                                    Command="{Binding ResetCommand}"
+                                    Content="{TemplateBinding ResetButtonContent}" />
+                            </Grid>
+
+                            <Grid
+                                x:Name="PART_BottomTwoLine"
+                                ColumnDefinitions="*,16,Auto,8,Auto"
+                                IsEnabled="{Binding Config, Converter={x:Static cvt:Converters.IsNotNull}}"
+                                RowDefinitions="Auto,8,Auto">
+
+
+                                <TextBlock
+                                    Text="{Binding Message}"
+                                    TextTrimming="CharacterEllipsis"
+                                    ToolTip.Tip="{Binding Message}" />
+
+                                <ProgressBar
+                                    Grid.Row="2"
+                                    Height="24"
+                                    IsIndeterminate="{Binding ProgressIndeterminate}"
+                                    IsVisible="{Binding IsWorking}"
+                                    Maximum="1"
+                                    Minimum="0"
+                                    ProgressTextFormat="{}{1:0.0}%"
+                                    ShowProgressText="{Binding !ProgressIndeterminate}"
+                                    Value="{Binding Progress}">
+                                    <ProgressBar.Styles>
+                                        <Style Selector="ProgressBar:horizontal">
+                                            <Setter Property="MinWidth" Value="72" />
+                                        </Style>
+                                    </ProgressBar.Styles>
+                                </ProgressBar>
+
+                                <Button
+                                    Grid.Column="2"
+                                    Classes="Long Primary"
+                                    Command="{Binding InitializeCommand}"
+                                    Content="{TemplateBinding InitializeButtonContent}"
+                                    IsVisible="{Binding EnableInitialize}" />
+                                <Button
+                                    Grid.Row="2"
+                                    Grid.Column="2"
+                                    Classes="Long Primary"
+                                    Command="{Binding ExecuteCommand}"
+                                    Content="{TemplateBinding ExecuteButtonContent}" />
+                                <Button
+                                    Grid.Column="4"
+                                    Classes="Middle"
+                                    Command="{Binding CancelCommand}"
+                                    Content="{TemplateBinding StopButtonContent}" />
+                                <Button
+                                    Grid.Row="2"
+                                    Grid.Column="4"
+                                    Classes="Middle"
+                                    Command="{Binding ResetCommand}"
+                                    Content="{TemplateBinding ResetButtonContent}" />
+                            </Grid>
+                        </Panel>
+                    </Grid>
+                </Grid>
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
 </ResourceDictionary>

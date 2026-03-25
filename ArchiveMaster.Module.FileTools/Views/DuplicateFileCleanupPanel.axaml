@@ -1,4 +1,4 @@
-<v:TwoStepPanelBase
+<v:VerticalTwoStepPanelBase
     x:Class="ArchiveMaster.Views.DuplicateFileCleanupPanel"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -11,7 +11,7 @@
     d:DesignWidth="800"
     x:DataType="vm:EncryptorViewModel"
     mc:Ignorable="d">
-    <v:TwoStepPanelBase.ConfigsContent>
+    <v:VerticalTwoStepPanelBase.ConfigsContent>
         <ct:StackFormItemGroup>
             <ct:FormItem Label="待清理目录：">
                 <v:FilePickerTextBox
@@ -42,8 +42,8 @@
                 </ct:WrapFormItemGroup>
             </ct:FormItem>
         </ct:StackFormItemGroup>
-    </v:TwoStepPanelBase.ConfigsContent>
-    <v:TwoStepPanelBase.ResultsContent>
+    </v:VerticalTwoStepPanelBase.ConfigsContent>
+    <v:VerticalTwoStepPanelBase.ResultsContent>
         <Grid RowDefinitions="*,8,Auto">
             <v:TreeFileDataGrid
                 ItemsSource="{Binding Groups}"
@@ -58,5 +58,5 @@
                 </v:TreeFileDataGrid.Columns>
             </v:TreeFileDataGrid>
         </Grid>
-    </v:TwoStepPanelBase.ResultsContent>
-</v:TwoStepPanelBase>
+    </v:VerticalTwoStepPanelBase.ResultsContent>
+</v:VerticalTwoStepPanelBase>

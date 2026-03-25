@@ -226,7 +226,7 @@ public class SimpleFileDataGrid : DataGrid
         };
         var cellTemplate = new FuncDataTemplate<SimpleFileInfo>((value, namescope) =>
         {
-            var rootPanel = this.GetLogicalAncestors().OfType<TwoStepPanelBase>().FirstOrDefault();
+            var rootPanel = this.GetLogicalAncestors().OfType<VerticalTwoStepPanelBase>().FirstOrDefault();
             return new ContentControl
             {
                 Content = new CheckBox()
