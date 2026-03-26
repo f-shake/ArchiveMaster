@@ -156,18 +156,26 @@ public class SimpleFileDataGrid : DataGrid
     public virtual string ColumnLengthHeader { get; init; } = "文件大小";
 
     public virtual double ColumnLengthIndex { get; init; } = 0.5;
+    
+    public virtual double ColumnLengthMaxWidth { get; init; } = 120;
 
     public virtual string ColumnMessageHeader { get; init; } = "信息";
 
     public virtual double ColumnMessageIndex { get; init; } = 999;
+    
+    public virtual DataGridLength ColumnMessageWidth { get; init; } = new DataGridLength(400);
 
     public virtual string ColumnNameHeader { get; init; } = "文件名";
+    
+    public virtual DataGridLength ColumnNameWidth { get; init; } = new DataGridLength(400);
 
     public virtual double ColumnNameIndex { get; init; } = 0.3;
 
     public virtual string ColumnPathHeader { get; init; } = "路径";
 
     public virtual double ColumnPathIndex { get; init; } = 0.4;
+
+    public virtual DataGridLength ColumnPathWidth { get; init; }=new DataGridLength(400);
 
     public virtual string ColumnStatusHeader { get; init; } = "状态";
 
@@ -254,7 +262,7 @@ public class SimpleFileDataGrid : DataGrid
                 { Converter = FileDirLength2StringConverter, Mode = BindingMode.OneWay },
             SortMemberPath = nameof(SimpleFileInfo.Length),
             IsReadOnly = true,
-            MaxWidth = 120,
+            MaxWidth = ColumnLengthMaxWidth,
             CellStyleClasses = { "Right" }
         };
     }
@@ -266,7 +274,7 @@ public class SimpleFileDataGrid : DataGrid
             Header = ColumnMessageHeader,
             Binding = new Binding(nameof(SimpleFileInfo.Message)),
             IsReadOnly = true,
-            Width = new DataGridLength(400),
+            Width = ColumnMessageWidth
         };
     }
 
@@ -277,7 +285,7 @@ public class SimpleFileDataGrid : DataGrid
             Header = ColumnNameHeader,
             Binding = new Binding(nameof(SimpleFileInfo.Name)),
             IsReadOnly = true,
-            Width = new DataGridLength(400),
+            Width = ColumnNameWidth,
         };
     }
 
@@ -288,7 +296,7 @@ public class SimpleFileDataGrid : DataGrid
             Header = ColumnPathHeader,
             Binding = new Binding(nameof(SimpleFileInfo.RelativePath)),
             IsReadOnly = true,
-            Width = new DataGridLength(400),
+            Width = ColumnPathWidth
         };
     }
 

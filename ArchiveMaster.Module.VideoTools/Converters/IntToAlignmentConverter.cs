@@ -17,7 +17,7 @@ public class IntToAlignmentConverter : IValueConverter
 
             if (targetType == typeof(VerticalAlignment))
             {
-                return (VerticalAlignment)(i + 1);
+                return (VerticalAlignment)(3-i);
             }
         }
 
@@ -33,7 +33,7 @@ public class IntToAlignmentConverter : IValueConverter
 
         if (value is VerticalAlignment va)
         {
-            return va - 1;
+            return 3 - va;
         }
         
         throw new ArgumentOutOfRangeException();

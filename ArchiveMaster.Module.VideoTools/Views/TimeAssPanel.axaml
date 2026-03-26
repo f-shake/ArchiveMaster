@@ -12,6 +12,8 @@
     d:DesignHeight="450"
     d:DesignWidth="800"
     x:DataType="vm:TimeAssViewModel"
+    LeftPanelWidth="2*"
+    RightPanelWidth="3*"
     mc:Ignorable="d">
     <v:HorizontalTwoStepPanelBase.Resources>
         <cvt:ColorConverter x:Key="ColorConverter" />
@@ -27,10 +29,21 @@
                     <ct:FormItem Label="源文件：">
                         <v:FilePickerTextBox
                             AllowMultiple="True"
+                            FileNames="{Binding Config.Files}"
+                            StringFileTypeFilter="视频文件;*.mp4,*.mkv,*.mov,*.avi;;|所有文件;*.*;;"
                             Type="OpenFile" />
                     </ct:FormItem>
                     <ct:FormItem Label="导出字幕：">
-                        <v:FilePickerTextBox Type="SaveFile" />
+                        <v:FilePickerTextBox
+                            FileNames="{Binding Config.ExportFile}"
+                            IsEnabled="{Binding Config.CombineIntoSingleFile}"
+                            StringFileTypeFilter="ASS字幕文件;*.ass;;"
+                            Type="SaveFile" />
+                    </ct:FormItem>
+                    <ct:FormItem Label=" ">
+                        <CheckBox
+                            Content="合并到单个字幕"
+                            IsChecked="{Binding Config.CombineIntoSingleFile}" />
                     </ct:FormItem>
                 </ct:StackFormItemGroup>
             </HeaderedContentControl>
@@ -43,39 +56,48 @@
                             ItemsSource="{Binding SampleTimeFormats, Mode=OneTime}"
                             Text="{Binding Config.Format.TimeFormat}" />
                     </ct:FormItem>
-                    <ct:FormItem Label="更新间隔（毫秒）：">
-                        <NumericUpDown
-                            FormatString="N0"
-                            Increment="10"
-                            Maximum="60000"
-                            Minimum="30"
-                            Value="{Binding Config.Format.Interval}" />
-                    </ct:FormItem>
-                    <ct:FormItem Label="文本大小和颜色：">
+                    <ct:FormItem Label="刷新间隔：">
                         <Grid ColumnDefinitions="*,8,Auto">
                             <NumericUpDown
+                                FormatString="N0"
+                                Increment="10"
+                                Maximum="60000"
+                                Minimum="30"
+                                Value="{Binding Config.Format.Interval}" />
+                            <TextBlock
+                                Grid.Column="2"
+                                Text="毫秒" />
+                        </Grid>
+                    </ct:FormItem>
+                    <ct:FormItem Label="文本：">
+                        <Grid ColumnDefinitions="Auto,8,*,8,Auto">
+                            <ColorPicker Color="{Binding Config.Format.TextColor, Converter={StaticResource ColorConverter}}" />
+                            <NumericUpDown
+                                Grid.Column="2"
                                 FormatString="0"
                                 Increment="2"
                                 Maximum="72"
                                 Minimum="4"
                                 Value="{Binding Config.Format.Size}" />
-                            <ColorPicker
-                                Grid.Column="2"
-                                Color="{Binding Config.Format.TextColor, Converter={StaticResource ColorConverter}}" />
+                            <TextBlock
+                                Grid.Column="4"
+                                Text="像素" />
                         </Grid>
                     </ct:FormItem>
 
-                    <ct:FormItem Label="描边粗细和颜色：">
-                        <Grid ColumnDefinitions="*,8,Auto">
+                    <ct:FormItem Label="描边：">
+                        <Grid ColumnDefinitions="Auto,8,*,8,Auto">
+                            <ColorPicker Color="{Binding Config.Format.BorderColor, Converter={StaticResource ColorConverter}}" />
                             <NumericUpDown
+                                Grid.Column="2"
                                 FormatString="0"
                                 Increment="2"
                                 Maximum="48"
                                 Minimum="0"
                                 Value="{Binding Config.Format.BorderWidth}" />
-                            <ColorPicker
-                                Grid.Column="2"
-                                Color="{Binding Config.Format.BorderColor, Converter={StaticResource ColorConverter}}" />
+                            <TextBlock
+                                Grid.Column="4"
+                                Text="像素" />
                         </Grid>
                     </ct:FormItem>
                     <ct:FormItem Label="字体：">
@@ -97,12 +119,18 @@
                         </ct:WrapFormItemGroup>
                     </ct:FormItem>
                     <ct:FormItem Label="边距：">
-                        <NumericUpDown
-                            FormatString="0"
-                            Increment="2"
-                            Maximum="200"
-                            Minimum="4"
-                            Value="{Binding Config.Format.Margin}" />
+                        <Grid ColumnDefinitions="*,8,Auto">
+                            <NumericUpDown
+                                FormatString="0"
+                                Increment="2"
+                                Maximum="200"
+                                Minimum="4"
+                                Value="{Binding Config.Format.Margin}" />
+                            <TextBlock
+                                Grid.Column="2"
+                                Text="像素" />
+                        </Grid>
+
                     </ct:FormItem>
                     <ct:FormItem Label="对齐：">
                         <ct:WrapFormItemGroup>
@@ -120,46 +148,67 @@
                     </ct:FormItem>
                 </ct:StackFormItemGroup>
             </HeaderedContentControl>
-            <HeaderedContentControl
-                Classes="GroupBox"
-                Header="预览">
-                <Viewbox Margin="16">
-                    <Grid
-                        Width="480"
-                        Height="270"
-                        Background="{DynamicResource Background3}">
-                        <TextBlock
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"
-                            FontSize="36"
-                            Opacity="0.3"
-                            Text="不代表真实大小" />
-                        <v:OutlinedTextBlock
-                            Margin="{Binding Config.Format.Margin, Converter={x:Static cvt:Converters.Thickness}}"
-                            HorizontalAlignment="{Binding Config.Format.HorizontalAlignment, Converter={StaticResource IntToAlignmentConverter}}"
-                            VerticalAlignment="{Binding Config.Format.VerticalAlignment, Converter={StaticResource IntToAlignmentConverter}}"
-                            Fill="{Binding Config.Format.TextColor, Converter={StaticResource ColorConverter}}"
-                            FontFamily="{Binding Config.Format.Font}"
-                            FontSize="{Binding Config.Format.Size}"
-                            FontStyle="{Binding Config.Format.Italic, Converter={x:Static cvt:Converters.ItalicFontStyle}}"
-                            FontWeight="{Binding Config.Format.Bold, Converter={x:Static cvt:Converters.BoldFontWeight}}"
-                            Stroke="{Binding Config.Format.BorderColor, Converter={StaticResource ColorConverter}}"
-                            StrokeThickness="{Binding Config.Format.BorderWidth}"
-                            Text="{Binding PreviewContent}"
-                            Underline="{Binding Config.Format.Underline}" />
-                    </Grid>
-                </Viewbox>
-            </HeaderedContentControl>
         </ct:StackFormItemGroup>
     </v:HorizontalTwoStepPanelBase.ConfigsContent>
     <v:HorizontalTwoStepPanelBase.ResultsContent>
-        <v:SimpleFileDataGrid ItemsSource="{Binding Files}">
-            <v:SimpleFileDataGrid.Columns>
-                <DataGridTextColumn
-                    Binding="{Binding DestinationPath}"
-                    Header="目标位置" />
-            </v:SimpleFileDataGrid.Columns>
-        </v:SimpleFileDataGrid>
+        <Grid RowDefinitions="Auto,8,*">
+
+            <Viewbox
+                MaxHeight="240"
+                Margin="16">
+                <Grid
+                    Width="960"
+                    Height="540"
+                    Background="{DynamicResource Background3}">
+                    <TextBlock
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        FontSize="72"
+                        Opacity="0.3"
+                        Text="预览" />
+                    <v:OutlinedTextBlock
+                        Margin="{Binding Config.Format.Margin, Converter={x:Static cvt:Converters.Thickness}}"
+                        HorizontalAlignment="{Binding Config.Format.HorizontalAlignment, Converter={StaticResource IntToAlignmentConverter}}"
+                        VerticalAlignment="{Binding Config.Format.VerticalAlignment, Converter={StaticResource IntToAlignmentConverter}}"
+                        Fill="{Binding Config.Format.TextColor, Converter={StaticResource ColorConverter}}"
+                        FontFamily="{Binding Config.Format.Font}"
+                        FontSize="{Binding Config.Format.Size}"
+                        FontStyle="{Binding Config.Format.Italic, Converter={x:Static cvt:Converters.ItalicFontStyle}}"
+                        FontWeight="{Binding Config.Format.Bold, Converter={x:Static cvt:Converters.BoldFontWeight}}"
+                        Stroke="{Binding Config.Format.BorderColor, Converter={StaticResource ColorConverter}}"
+                        StrokeThickness="{Binding Config.Format.BorderWidth}"
+                        Text="{Binding PreviewContent}"
+                        Underline="{Binding Config.Format.Underline}" />
+                </Grid>
+            </Viewbox>
+
+            <v:SimpleFileDataGrid
+                Grid.Row="2"
+                ColumnLengthIndex="-1"
+                ColumnNameWidth="160"
+                ColumnPathIndex="-1"
+                ColumnTimeIndex="-1"
+                ItemsSource="{Binding Files}">
+                <v:SimpleFileDataGrid.Columns>
+                    <DataGridTextColumn
+                        Binding="{Binding StartTime}"
+                        Header="开始时间"
+                        IsReadOnly="False" />
+                    <DataGridTextColumn
+                        Binding="{Binding VideoLength, Converter={x:Static cvt:Converters.TimeSpanMs}}"
+                        Header="时长"
+                        IsReadOnly="False" />
+                    <DataGridTextColumn
+                        Binding="{Binding EndTime}"
+                        Header="结束时间（自动）"
+                        IsReadOnly="True" />
+                    <DataGridTextColumn
+                        Binding="{Binding Ratio}"
+                        Header="倍速比率"
+                        IsReadOnly="False" />
+                </v:SimpleFileDataGrid.Columns>
+            </v:SimpleFileDataGrid>
+        </Grid>
 
     </v:HorizontalTwoStepPanelBase.ResultsContent>
 </v:HorizontalTwoStepPanelBase>

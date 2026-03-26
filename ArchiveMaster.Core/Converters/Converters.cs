@@ -60,6 +60,7 @@ public static class Converters
     public static readonly NumberToThicknessConverter Thickness = FzLib.Avalonia.Converters.Converters.Thickness;
 
     public static readonly TimeSpanConverter TimeSpan = FzLib.Avalonia.Converters.Converters.TimeSpan;
+    public static readonly TimeSpanConverter TimeSpanMs =new TimeSpanConverter(){Format = "hh\\:mm\\:ss\\.fff" };
 
     public static readonly TimeSpanNumberConverter TimeSpanNumber = FzLib.Avalonia.Converters.Converters.TimeSpanNumber;
 

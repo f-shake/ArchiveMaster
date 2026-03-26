@@ -31,6 +31,7 @@ public partial class TimeAssViewModel : TwoStepViewModelBase<TimeAssService, Tim
     
     private readonly DispatcherTimer previewTimer;
 
+    [ObservableProperty]
     private ObservableCollection<TimeAssVideoFileInfo> files;
 
     public TimeAssViewModel(ViewModelServices services) : base(services)
@@ -59,6 +60,13 @@ public partial class TimeAssViewModel : TwoStepViewModelBase<TimeAssService, Tim
 
     protected override Task OnInitializedAsync()
     {
+        Files = new ObservableCollection<TimeAssVideoFileInfo>(Service.Files);
         return base.OnInitializedAsync();
+    }
+
+    protected override void OnReset()
+    {
+        base.OnReset();
+        Files = null;
     }
 }

@@ -49,18 +49,18 @@ namespace ArchiveMaster.Services
             }
         }
 
-        public static void Export(TimeAssFormat format, TimeAssVideoFileInfo file, string exportPath)
+        private void Export( TimeAssVideoFileInfo file, string exportPath)
         {
-            Export(format, [file], exportPath);
+            Export([file], exportPath);
         }
 
-        public static void Export(TimeAssFormat format, IList<TimeAssVideoFileInfo> files, string path)
+        private void Export(IList<TimeAssVideoFileInfo> files, string path)
         {
             Debug.Assert(!string.IsNullOrEmpty(path));
-            StringBuilder outputs = GetAssHead(format, files);
+            StringBuilder outputs = GetAssHead(Config.Format, files);
 
             string timespanFormat = "hh\\:mm\\:ss\\:ff";
-            var interval = TimeSpan.FromMilliseconds(format.Interval);
+            var interval = TimeSpan.FromMilliseconds(Config.Format.Interval);
             TimeSpan totalTime = TimeSpan.Zero;
             foreach (var file in files)
             {
@@ -75,10 +75,10 @@ namespace ArchiveMaster.Services
 
                     outputs.Append($"Dialogue: 3,")
                         .Append((totalTime + currentTime).ToString(timespanFormat))
-                        .Append(",")
+                        .Append(',')
                         .Append((totalTime + nextTime).ToString(timespanFormat))
                         .Append(",Default,,0000,0000,0000,,")
-                        .Append((file.StartTime.Value + currentTime * file.Ratio).ToString(format.TimeFormat))
+                        .Append((file.StartTime.Value + currentTime * file.Ratio).ToString(Config.Format.TimeFormat))
                         .AppendLine();
                     if (nextTime >= file.VideoLength)
                     {
@@ -89,6 +89,7 @@ namespace ArchiveMaster.Services
                 }
 
                 totalTime += file.VideoLength.Value;
+                file.Success();
             }
 
             if (!Directory.Exists(Path.GetDirectoryName(path)))
@@ -99,19 +100,19 @@ namespace ArchiveMaster.Services
             File.WriteAllText(path, outputs.ToString());
         }
 
-        public static string GetAssFileName(string path)
+        private static string GetAssFileName(string path)
         {
             return Path.Combine(Path.GetDirectoryName(path), Path.GetFileNameWithoutExtension(path) + ".ass");
         }
 
-        public static StringBuilder GetAssHead(TimeAssFormat format, IList<TimeAssVideoFileInfo> files)
+        private static StringBuilder GetAssHead(TimeAssFormat format, IList<TimeAssVideoFileInfo> files)
         {
             int size = format.Size;
             int margin = format.Margin;
             int al = format.HorizontalAlignment + format.VerticalAlignment * 3 + 1;
             int bw = format.BorderWidth;
-            var c = (byte.MaxValue - format.TextColor.A).ToString("X2") + format.TextColor.ToString()[3..];
-            var bc = (byte.MaxValue - format.BorderColor.A).ToString("X2") + format.BorderColor.ToString()[3..];
+            var c = $"&H{(255 - format.TextColor.A):X2}{format.TextColor.B:X2}{format.TextColor.G:X2}{format.TextColor.R:X2}";
+            var bc = $"&H{(255 - format.BorderColor.A):X2}{format.BorderColor.B:X2}{format.BorderColor.G:X2}{format.BorderColor.R:X2}";
             int bold = format.Bold ? 1 : 0;
             int italic = format.Italic ? 1 : 0;
             int underline = format.Underline ? 1 : 0;
@@ -131,14 +132,13 @@ namespace ArchiveMaster.Services
                 .AppendLine(
                     "Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding")
                 .AppendLine(
-                    $"Style: Default, Microsoft YaHei, {size}, &H{c}, &H{c}, &H{bc}, &H00000000, {bold}, {italic}, {underline}, 0, 100, 100, 0.00, 0.00, 1, {bw}, 0, {al}, {margin}, {margin}, {margin}, 0")
-                .AppendLine()
+                    $"Style: Default, Microsoft YaHei, {size}, {c}, {c}, {bc}, &H00000000, {bold}, {italic}, {underline}, 0, 100, 100, 0.00, 0.00, 1, {bw}, 0, {al}, {margin}, {margin}, {margin}, 0")                .AppendLine()
                 .AppendLine("[Events]")
                 .AppendLine("Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text");
             return outputs;
         }
 
-        public static (List<TimeAssVideoFileInfo> files, TimeAssFormat format) ImportFromAss(string path)
+        private static (List<TimeAssVideoFileInfo> files, TimeAssFormat format) ImportFromAss(string path)
         {
             string assText = File.ReadAllText(path);
             if (!assText.Contains(ASS_SOFTWARE))
@@ -169,33 +169,45 @@ namespace ArchiveMaster.Services
         }
 
 
-        public override Task ExecuteAsync(CancellationToken token = default)
+        public async override Task ExecuteAsync(CancellationToken token = default)
         {
-            //     var files = Files.Where(p => p.IsChecked).ToList();
-            //     var totalLength = files.Sum(p => p.Length);
-            //     long currentLength = 0;
-            //     return TryForFilesAsync(files,
-            //         async (file, state) =>
-            //         {
-            //             int index = state.FileIndex;
-            //             int count = state.FileCount;
-            //             NotifyMessage($"正在复制（{index}/{count}），当前文件：{Path.GetFileName(file.Name)}");
-            //
-            //             await FileCopyHelper.CopyFileAsync(file.Path, file.DestinationPath,
-            //                 progress: new Progress<FileProcessProgress>(
-            //                     p =>
-            //                     {
-            //                         NotifyMessage(
-            //                             $"正在复制（{index}/{count}，当前文件{1.0 * p.ProcessedBytes / 1024 / 1024:0}MB/{1.0 * p.TotalBytes / 1024 / 1024:0}MB），当前文件：{Path.GetFileName(p.SourceFilePath)}");
-            //                       
-            //                         NotifyProgress(1.0 * (currentLength + p.ProcessedBytes) / totalLength);
-            //                     }),
-            //                 cancellationToken: token);
-            //             File.SetLastWriteTimeUtc(file.DestinationPath, file.Time);
-            //             currentLength += file.Length;
-            //         },
-            //         token, FilesLoopOptions.Builder().AutoApplyFileLengthProgress().AutoApplyStatus().Build());
-            return Task.CompletedTask;
+            //检查文件是否有开始时间和视频长度
+            foreach (var file in Files)
+            {
+                if (!file.StartTime.HasValue)
+                {
+                    throw new Exception($"文件{file.Path}没有开始时间");
+                }
+
+                if (!file.VideoLength.HasValue)
+                {
+                    throw new Exception($"文件{file.Path}没有视频长度");
+                }
+            }
+
+            //检查文件是否有重叠
+            if (Config.CombineIntoSingleFile)
+            {
+                DateTime lastTime = DateTime.MinValue;
+                foreach (var file in Files)
+                {
+                    if (file.StartTime.Value < lastTime)
+                    {
+                        throw new Exception($"文件{file.Path}开始时间小于上一个文件的结束时间");
+                    }
+                    lastTime =file.EndTime.Value;
+                }
+
+                await Task.Run(() =>
+                {
+                    Export(Files, Config.ExportFile);
+                }, token);
+            }
+            else
+            {
+                throw new  NotImplementedException();
+            }
+            
         }
 
         public override IEnumerable<SimpleFileInfo> GetInitializedFiles()
@@ -207,6 +219,7 @@ namespace ArchiveMaster.Services
         {
             var files = FileNameHelper.GetFileNames(Config.Files)
                 .Select(p => new TimeAssVideoFileInfo(p))
+                .OrderBy(p=>p.Time)
                 .ToList();
             await TryForFilesAsync(files,
                 (f, s) =>
@@ -217,7 +230,7 @@ namespace ArchiveMaster.Services
                         f.StartTime = f.Time - f.VideoLength;
                     }
                 }, token,
-                FilesLoopOptions.Builder().AutoApplyFileNumberProgress().AutoApplyStatus().Build());
+                FilesLoopOptions.Builder().AutoApplyFileNumberProgress().Build());
             Files = files.ToList();
         }
     }
