@@ -108,7 +108,7 @@ namespace ArchiveMaster.Services
         private static StringBuilder GetAssHead(TimeAssFormat format, IList<TimeAssVideoFileInfo> files)
         {
             int size = format.Size;
-            int marginV = format.VerticalAlignment;
+            int marginV = format.VerticalMargin;
             int marginH = format.HorizontalMargin;
             int al = format.HorizontalAlignment + format.VerticalAlignment * 3 + 1;
             int bw = format.BorderWidth;
@@ -170,7 +170,7 @@ namespace ArchiveMaster.Services
         }
 
 
-        public async override Task ExecuteAsync(CancellationToken token = default)
+        public async override Task ExecuteAsync(CancellationToken ct = default)
         {
             //检查文件是否有开始时间和视频长度
             foreach (var file in Files)
@@ -202,11 +202,17 @@ namespace ArchiveMaster.Services
                 await Task.Run(() =>
                 {
                     Export(Files, Config.ExportFile);
-                }, token);
+                }, ct);
             }
             else
             {
-                throw new  NotImplementedException();
+                await Task.Run(() =>
+                {
+                    foreach (var file in Files)
+                    {
+                        Export(file, GetAssFileName(file.Path));
+                    }
+                }, ct);
             }
             
         }

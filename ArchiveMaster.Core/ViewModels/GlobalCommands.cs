@@ -33,4 +33,26 @@ public partial class GlobalCommands(IClipboardService clipboardService, IDialogS
             Log.Error(ex, "打开文件失败");
         }
     }
+
+    [RelayCommand]
+    private async Task OpenParentDirAsync(string path)
+    {
+        path = Path.GetDirectoryName(path);
+        if (string.IsNullOrEmpty(path))
+        {
+            await dialogService.ShowErrorDialogAsync("打开文件失败", "文件路径无效");
+        }
+        try
+        {
+            Process.Start(new ProcessStartInfo(path)
+            {
+                UseShellExecute = true
+            });
+        }
+        catch (Exception ex)
+        {
+            await dialogService.ShowErrorDialogAsync("打开文件失败", ex);
+            Log.Error(ex, "打开文件失败");
+        }
+    }
 }
