@@ -17,9 +17,11 @@
     mc:Ignorable="d">
     <v:HorizontalTwoStepPanelBase.Resources>
         <cvt:ColorConverter x:Key="ColorConverter" />
-        <cvt:IntToAlignmentConverter x:Key="IntToAlignmentConverter" />
-        <cvt:IntToMarginConverter x:Key="IntToMarginConverter" />
+        <cvt:NumberToAlignmentConverter x:Key="IntToAlignmentConverter" />
+        <cvt:NumbersToMarginConverter x:Key="NumbersToMarginConverter" />
+
     </v:HorizontalTwoStepPanelBase.Resources>
+    <v:HorizontalTwoStepPanelBase.Styles />
     <v:HorizontalTwoStepPanelBase.ConfigsContent>
         <ct:StackFormItemGroup>
             <HeaderedContentControl
@@ -57,20 +59,22 @@
                             Text="{Binding Config.Format.TimeFormat}" />
                     </ct:FormItem>
                     <ct:FormItem Label="刷新间隔：">
-                        <Grid ColumnDefinitions="*,8,Auto">
-                            <NumericUpDown
-                                FormatString="N0"
-                                Increment="10"
-                                Maximum="60000"
-                                Minimum="30"
-                                Value="{Binding Config.Format.Interval}" />
-                            <TextBlock
-                                Grid.Column="2"
-                                Text="毫秒" />
-                        </Grid>
+                        <NumericUpDown
+                            FormatString="N0"
+                            Increment="10"
+                            Maximum="60000"
+                            Minimum="30"
+                            Value="{Binding Config.Format.Interval}">
+                            <NumericUpDown.InnerRightContent>
+                                <TextBlock
+                                    Margin="8,0"
+                                    VerticalAlignment="Center"
+                                    Text="毫秒" />
+                            </NumericUpDown.InnerRightContent>
+                        </NumericUpDown>
                     </ct:FormItem>
                     <ct:FormItem Label="文本：">
-                        <Grid ColumnDefinitions="Auto,8,*,8,Auto">
+                        <Grid ColumnDefinitions="Auto,8,*">
                             <ColorPicker Color="{Binding Config.Format.TextColor, Converter={StaticResource ColorConverter}}" />
                             <NumericUpDown
                                 Grid.Column="2"
@@ -78,15 +82,19 @@
                                 Increment="2"
                                 Maximum="72"
                                 Minimum="4"
-                                Value="{Binding Config.Format.Size}" />
-                            <TextBlock
-                                Grid.Column="4"
-                                Text="像素" />
+                                Value="{Binding Config.Format.Size}">
+                                <NumericUpDown.InnerRightContent>
+                                    <TextBlock
+                                        Margin="8,0"
+                                        VerticalAlignment="Center"
+                                        Text="像素" />
+                                </NumericUpDown.InnerRightContent>
+                            </NumericUpDown>
                         </Grid>
                     </ct:FormItem>
 
                     <ct:FormItem Label="描边：">
-                        <Grid ColumnDefinitions="Auto,8,*,8,Auto">
+                        <Grid ColumnDefinitions="Auto,8,*">
                             <ColorPicker Color="{Binding Config.Format.BorderColor, Converter={StaticResource ColorConverter}}" />
                             <NumericUpDown
                                 Grid.Column="2"
@@ -94,10 +102,14 @@
                                 Increment="2"
                                 Maximum="48"
                                 Minimum="0"
-                                Value="{Binding Config.Format.BorderWidth}" />
-                            <TextBlock
-                                Grid.Column="4"
-                                Text="像素" />
+                                Value="{Binding Config.Format.BorderWidth}">
+                                <NumericUpDown.InnerRightContent>
+                                    <TextBlock
+                                        Margin="8,0"
+                                        VerticalAlignment="Center"
+                                        Text="像素" />
+                                </NumericUpDown.InnerRightContent>
+                            </NumericUpDown>
                         </Grid>
                     </ct:FormItem>
                     <ct:FormItem Label="字体：">
@@ -118,33 +130,65 @@
                                 IsChecked="{Binding Config.Format.Underline}" />
                         </ct:WrapFormItemGroup>
                     </ct:FormItem>
-                    <ct:FormItem Label="边距：">
-                        <Grid ColumnDefinitions="*,8,Auto">
-                            <NumericUpDown
-                                FormatString="0"
-                                Increment="2"
-                                Maximum="200"
-                                Minimum="4"
-                                Value="{Binding Config.Format.Margin}" />
-                            <TextBlock
-                                Grid.Column="2"
-                                Text="像素" />
-                        </Grid>
-
-                    </ct:FormItem>
-                    <ct:FormItem Label="对齐：">
-                        <ct:WrapFormItemGroup>
+                    <ct:FormItem Label="水平对齐：">
+                        <Grid ColumnDefinitions="Auto,8,*">
                             <ct:RadioButtonGroup SelectedIndex="{Binding Config.Format.HorizontalAlignment}">
                                 <ListBoxItem Content="左" />
                                 <ListBoxItem Content="中" />
                                 <ListBoxItem Content="右" />
                             </ct:RadioButtonGroup>
+                            <NumericUpDown
+                                Grid.Column="2"
+                                VerticalContentAlignment="Center"
+                                FormatString="0"
+                                Increment="2"
+                                Maximum="200"
+                                Minimum="4"
+                                Value="{Binding Config.Format.HorizontalMargin}">
+                                <NumericUpDown.InnerLeftContent>
+                                    <TextBlock
+                                        Margin="8,0"
+                                        VerticalAlignment="Center"
+                                        Text="边距" />
+                                </NumericUpDown.InnerLeftContent>
+                                <NumericUpDown.InnerRightContent>
+                                    <TextBlock
+                                        Margin="8,0"
+                                        VerticalAlignment="Center"
+                                        Text="像素" />
+                                </NumericUpDown.InnerRightContent>
+                            </NumericUpDown>
+                        </Grid>
+                    </ct:FormItem>
+                    <ct:FormItem Label="垂直对齐：">
+                        <Grid ColumnDefinitions="Auto,8,*">
                             <ct:RadioButtonGroup SelectedIndex="{Binding Config.Format.VerticalAlignment}">
                                 <ListBoxItem Content="下" />
                                 <ListBoxItem Content="中" />
                                 <ListBoxItem Content="上" />
                             </ct:RadioButtonGroup>
-                        </ct:WrapFormItemGroup>
+                            <NumericUpDown
+                                Grid.Column="2"
+                                VerticalContentAlignment="Center"
+                                FormatString="0"
+                                Increment="2"
+                                Maximum="200"
+                                Minimum="4"
+                                Value="{Binding Config.Format.VerticalMargin}">
+                                <NumericUpDown.InnerLeftContent>
+                                    <TextBlock
+                                        Margin="8,0"
+                                        VerticalAlignment="Center"
+                                        Text="边距" />
+                                </NumericUpDown.InnerLeftContent>
+                                <NumericUpDown.InnerRightContent>
+                                    <TextBlock
+                                        Margin="8,0"
+                                        VerticalAlignment="Center"
+                                        Text="像素" />
+                                </NumericUpDown.InnerRightContent>
+                            </NumericUpDown>
+                        </Grid>
                     </ct:FormItem>
                 </ct:StackFormItemGroup>
             </HeaderedContentControl>
@@ -167,7 +211,6 @@
                         Opacity="0.3"
                         Text="预览" />
                     <v:OutlinedTextBlock
-                        Margin="{Binding Config.Format.Margin, Converter={x:Static cvt:Converters.Thickness}}"
                         HorizontalAlignment="{Binding Config.Format.HorizontalAlignment, Converter={StaticResource IntToAlignmentConverter}}"
                         VerticalAlignment="{Binding Config.Format.VerticalAlignment, Converter={StaticResource IntToAlignmentConverter}}"
                         Fill="{Binding Config.Format.TextColor, Converter={StaticResource ColorConverter}}"
@@ -178,7 +221,14 @@
                         Stroke="{Binding Config.Format.BorderColor, Converter={StaticResource ColorConverter}}"
                         StrokeThickness="{Binding Config.Format.BorderWidth}"
                         Text="{Binding PreviewContent}"
-                        Underline="{Binding Config.Format.Underline}" />
+                        Underline="{Binding Config.Format.Underline}">
+                        <v:OutlinedTextBlock.Margin>
+                            <MultiBinding Converter="{StaticResource NumbersToMarginConverter}">
+                                <Binding Path="Config.Format.HorizontalMargin" />
+                                <Binding Path="Config.Format.VerticalMargin" />
+                            </MultiBinding>
+                        </v:OutlinedTextBlock.Margin>
+                    </v:OutlinedTextBlock>
                 </Grid>
             </Viewbox>
 

@@ -108,7 +108,8 @@ namespace ArchiveMaster.Services
         private static StringBuilder GetAssHead(TimeAssFormat format, IList<TimeAssVideoFileInfo> files)
         {
             int size = format.Size;
-            int margin = format.Margin;
+            int marginV = format.VerticalAlignment;
+            int marginH = format.HorizontalMargin;
             int al = format.HorizontalAlignment + format.VerticalAlignment * 3 + 1;
             int bw = format.BorderWidth;
             var c = $"&H{(255 - format.TextColor.A):X2}{format.TextColor.B:X2}{format.TextColor.G:X2}{format.TextColor.R:X2}";
@@ -132,7 +133,7 @@ namespace ArchiveMaster.Services
                 .AppendLine(
                     "Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding")
                 .AppendLine(
-                    $"Style: Default, Microsoft YaHei, {size}, {c}, {c}, {bc}, &H00000000, {bold}, {italic}, {underline}, 0, 100, 100, 0.00, 0.00, 1, {bw}, 0, {al}, {margin}, {margin}, {margin}, 0")                .AppendLine()
+                    $"Style: Default, Microsoft YaHei, {size}, {c}, {c}, {bc}, &H00000000, {bold}, {italic}, {underline}, 0, 100, 100, 0.00, 0.00, 1, {bw}, 0, {al}, {marginH}, {marginH}, {marginV}, 0")                .AppendLine()
                 .AppendLine("[Events]")
                 .AppendLine("Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text");
             return outputs;

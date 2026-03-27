@@ -36,7 +36,10 @@ public partial class TimeAssFormat : ObservableObject
     private bool italic;
 
     [ObservableProperty]
-    private int margin = 20;
+    private int verticalMargin = 20;
+
+    [ObservableProperty]
+    private int horizontalMargin = 20;
 
     [ObservableProperty]
     private int size = 32;

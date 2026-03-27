@@ -1,10 +1,11 @@
 ﻿using System.Globalization;
+using System.Numerics;
 using Avalonia.Data.Converters;
 using Avalonia.Layout;
 
 namespace ArchiveMaster.Converters;
 
-public class IntToAlignmentConverter : IValueConverter
+public class NumberToAlignmentConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {

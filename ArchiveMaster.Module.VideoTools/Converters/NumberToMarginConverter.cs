@@ -4,13 +4,13 @@ using Avalonia.Data.Converters;
 
 namespace ArchiveMaster.Converters;
 
-public class IntToMarginConverter : IValueConverter
+public class NumberToMarginConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
         if (value != null)
         {
-            return (int)value;
+            return (double)value;
         }
 
         throw new ArgumentNullException(nameof(value));
