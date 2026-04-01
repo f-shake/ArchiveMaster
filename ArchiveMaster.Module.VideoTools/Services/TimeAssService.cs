@@ -20,7 +20,7 @@ namespace ArchiveMaster.Services
 
         public List<TimeAssVideoFileInfo> Files { get; private set; } = new List<TimeAssVideoFileInfo>();
 
-        public static TimeSpan? GetVideoLength(string path)
+        public static TimeSpan? GetVideoLength(string path, string ffprobePath)
         {
             ProcessStartInfo startInfo = new ProcessStartInfo()
             {
@@ -29,7 +29,7 @@ namespace ArchiveMaster.Services
                 RedirectStandardError = true,
                 RedirectStandardInput = true,
                 RedirectStandardOutput = true,
-                FileName = "ffprobe",
+                FileName = ffprobePath,
                 Arguments =
                     $"-v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 \"{path}\""
             };
@@ -49,7 +49,7 @@ namespace ArchiveMaster.Services
             }
         }
 
-        private void Export( TimeAssVideoFileInfo file, string exportPath)
+        private void Export(TimeAssVideoFileInfo file, string exportPath)
         {
             Export([file], exportPath);
         }
@@ -186,18 +186,17 @@ namespace ArchiveMaster.Services
                 }
             }
 
-            //检查文件是否有重叠
             if (Config.CombineIntoSingleFile)
             {
-                DateTime lastTime = DateTime.MinValue;
-                foreach (var file in Files)
-                {
-                    if (file.StartTime.Value < lastTime)
-                    {
-                        throw new Exception($"文件{file.Path}开始时间小于上一个文件的结束时间");
-                    }
-                    lastTime =file.EndTime.Value;
-                }
+                // DateTime lastTime = DateTime.MinValue;
+                // foreach (var file in Files)
+                // {
+                //     if (file.StartTime.Value < lastTime)
+                //     {
+                //         throw new Exception($"文件{file.Path}开始时间小于上一个文件的结束时间");
+                //     }
+                //     lastTime =file.EndTime.Value;
+                // }
 
                 await Task.Run(() =>
                 {
@@ -224,6 +223,7 @@ namespace ArchiveMaster.Services
 
         public override async Task InitializeAsync(CancellationToken token = default)
         {
+            var ffprobePath = ExecutableDependencyHelper.GetFFprobeExePath();
             var files = FileNameHelper.GetFileNames(Config.Files)
                 .Select(p => new TimeAssVideoFileInfo(p))
                 .OrderBy(p=>p.Time)
@@ -231,7 +231,7 @@ namespace ArchiveMaster.Services
             await TryForFilesAsync(files,
                 (f, s) =>
                 {
-                    f.VideoLength = GetVideoLength(f.Path);
+                    f.VideoLength = GetVideoLength(f.Path, ffprobePath);
                     if (f.VideoLength != null)
                     {
                         f.StartTime = f.Time - f.VideoLength;

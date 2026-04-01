@@ -7,12 +7,15 @@ namespace ArchiveMaster.ViewModels.FileSystem
 {
     public partial class TimeAssVideoFileInfo : SimpleFileInfo
     {
+        [NotifyPropertyChangedFor(nameof(EndTime))]
         [ObservableProperty]
         private TimeSpan? videoLength;
 
+        [NotifyPropertyChangedFor(nameof(EndTime))]
         [ObservableProperty]
         private DateTime? startTime = null;
 
+        [NotifyPropertyChangedFor(nameof(EndTime))]
         [ObservableProperty]
         private double ratio = 1;
 

@@ -27,6 +27,8 @@ public class GlobalConfigs
 
     public string MasterPassword { get; set; } = SecurePasswordStoreService.EncryptMasterPassword(DefaultPassword);
 
+    public string FFmpegDir { get; set; } = "";
+
     public static GlobalConfigs GetEmptyInstance()
     {
         string name = $"{nameof(ArchiveMaster)}回收站";

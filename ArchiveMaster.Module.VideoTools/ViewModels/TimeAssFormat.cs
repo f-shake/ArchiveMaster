@@ -9,7 +9,7 @@ public partial class TimeAssFormat : ObservableObject
     private int horizontalAlignment = 2;
     
     [ObservableProperty]
-    private int verticalAlignment = 2;
+    private int verticalAlignment = 0;
 
     [ObservableProperty]
     private bool bold;

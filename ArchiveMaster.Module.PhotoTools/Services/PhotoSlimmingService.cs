@@ -88,6 +88,7 @@ namespace ArchiveMaster.Services
             {
                 SearchCopyingAndCompressingFiles(ct);
                 SearchDeletingFiles(ct);
+                Files = Files.Where(p => p.SlimmingTaskType != SlimmingTaskType.Skip).ToList();
             }, ct);
 
             Files = Files.OrderBy(p => p.SlimmingTaskType).ToList();
