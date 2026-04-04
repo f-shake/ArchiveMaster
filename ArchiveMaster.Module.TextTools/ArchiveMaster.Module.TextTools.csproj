@@ -10,10 +10,6 @@
     <Compile Remove="obj\**" />
     <EmbeddedResource Remove="obj\**" />
     <None Remove="obj\**" />
-    <Compile Update="Views\AiProvidersPanel.axaml.cs">
-      <DependentUpon>AiProvidersPanel.axaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Update="Views\TextEncryptionPanel.axaml.cs">
       <DependentUpon>TextEncryptionPanel.axaml</DependentUpon>
       <SubType>Code</SubType>
@@ -42,14 +38,11 @@
       <DependentUpon>SettingDialog.axaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="Views\AiChatPanel.axaml.cs">
-      <DependentUpon>AiChatPanel.axaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Remove="Services\AI\OpenAIChatClient.cs" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\ArchiveMaster.Core.AI\ArchiveMaster.Core.AI.csproj" />
     <ProjectReference Include="..\ArchiveMaster.Core\ArchiveMaster.Core.csproj" />
   </ItemGroup>
 

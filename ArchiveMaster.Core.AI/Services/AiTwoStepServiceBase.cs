@@ -2,26 +2,35 @@
 using ArchiveMaster.Events;
 using ArchiveMaster.Models;
 using ArchiveMaster.ViewModels;
+using Avalonia.Media;
 
 namespace ArchiveMaster.Services;
 
-public abstract class AiServiceBase<TConfig>(AppConfig appConfig)
-    : ServiceBase<TConfig>(appConfig), IAiService
+public abstract class AiTwoStepServiceBase<TConfig>(AppConfig appConfig)
+    : TwoStepServiceBase<TConfig>(appConfig), IAiService
     where TConfig : ConfigBase
 {
     public const int MaxLength = 300_000;
+
     public event GenericEventHandler<LlmOutputItem> AiTextGenerate;
 
-    public AiProviderConfig AI => AppConfig.GetOrCreateConfigWithDefaultKey<AiProvidersConfig>().CurrentProvider;
-    public ChatOptions ChatOptions { get; } = null;
-    public bool NeedRemoveThink { get; } = true;
+    public AiProviderConfig AI => GlobalConfigs.Instance.AiProviders.CurrentProvider;
+
+    public ChatOptions ChatOptions { get; }
+
+
+    public bool NeedRemoveThink { get; }
+
     protected AppConfig AppConfig { get; } = appConfig;
-    public abstract Task<(string SystemPrompt, string UserPrompt)> GetFirstPromptAsync(CancellationToken ct);
+
+
+    public Task<(string SystemPrompt, string UserPrompt)> GetFirstPromptAsync(CancellationToken ct)
+    {
+        throw new NotImplementedException();
+    }
 
     public void OnAiTextGenerate(LlmOutputItem e)
     {
         AiTextGenerate?.Invoke(this, new GenericEventArgs<LlmOutputItem>(e));
     }
-
-    public abstract void Reset();
 }

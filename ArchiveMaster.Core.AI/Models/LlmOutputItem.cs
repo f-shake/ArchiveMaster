@@ -1,6 +1,6 @@
 ﻿namespace ArchiveMaster.Models;
 
-public class LlmOutputItem : ICheckItem
+public class LlmOutputItem
 {
     public LlmOutputItem()
     {

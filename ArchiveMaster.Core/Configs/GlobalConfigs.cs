@@ -29,6 +29,8 @@ public class GlobalConfigs
 
     public string FFmpegDir { get; set; } = "";
 
+    public AiProvidersConfig AiProviders { get; set; } = new AiProvidersConfig();
+
     public static GlobalConfigs GetEmptyInstance()
     {
         string name = $"{nameof(ArchiveMaster)}回收站";

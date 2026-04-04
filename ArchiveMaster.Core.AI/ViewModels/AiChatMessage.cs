@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using ArchiveMaster.Enums;
+using ArchiveMaster.Models;
 using ArchiveMaster.Services;
 using Avalonia.Collections;
 using Avalonia.Media;

@@ -1,8 +1,7 @@
-﻿using Avalonia.Media;
-using System.Collections.Generic;
-using System.Linq;
+﻿using ArchiveMaster.Models;
+using Avalonia.Media;
 
-namespace ArchiveMaster.ViewModels;
+namespace ArchiveMaster.Services;
 
 public static class SimpleMarkdownParser
 {

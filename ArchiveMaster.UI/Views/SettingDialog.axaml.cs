@@ -2,6 +2,7 @@ using ArchiveMaster.ViewModels;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
+using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using FzLib.Avalonia.Dialogs;
 
@@ -18,10 +19,18 @@ public partial class SettingDialog : DialogHost
     {
         if (DataContext is SettingViewModel vm)
         {
-            if (vm.OnClosing())
+            if (vm.OnSettingPanelClosing())
             {
                 Close();
             }
+        }
+    }
+
+    private void Control_OnLoaded(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is SettingViewModel vm)
+        {
+            vm.OnSettingPanelOpened();
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Avalonia.Media;
+﻿using ArchiveMaster.Models;
+using Avalonia.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace ArchiveMaster.ViewModels;

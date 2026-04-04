@@ -1,7 +1,6 @@
 ﻿using Avalonia.Media;
-using CommunityToolkit.Mvvm.ComponentModel;
 
-namespace ArchiveMaster.ViewModels;
+namespace ArchiveMaster.Models;
 
 public class InlineItem
 {

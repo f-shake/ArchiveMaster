@@ -196,7 +196,7 @@ public class TypoCheckerService(AppConfig appConfig)
         return segments;
     }
 
-    public async IAsyncEnumerable<ICheckItem> CheckAsync(IList<DocFilePart> parts,
+    public async IAsyncEnumerable<object> CheckAsync(IList<DocFilePart> parts,
         [EnumeratorCancellation]
         CancellationToken ct)
     {
@@ -230,7 +230,7 @@ public class TypoCheckerService(AppConfig appConfig)
             }
 
             string result = await llm.CallAsync(systemPrompt, segment,
-                new ChatOptions { OutputJson = true }, ct);
+                new ChatOptions { OutputJson = false }, ct);
             yield return new LlmOutputItem(result);
             result = AiChatMessage.RemoveThink(result);
 

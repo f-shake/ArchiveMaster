@@ -33,7 +33,7 @@ public static class AiServiceExtensions
 
             if (text.Length > maxLength)
             {
-                throw new ArgumentOutOfRangeException(nameof(TextSource), $"{name}长度超过限制（{maxLength}），请缩减文本源长度。");
+                throw new ArgumentOutOfRangeException(nameof(text), $"{name}长度超过限制（{maxLength}），请缩减文本源长度。");
             }
         }
     }

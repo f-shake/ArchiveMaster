@@ -27,7 +27,6 @@ namespace ArchiveMaster
             new ConfigMetadata(typeof(TextEncryptionConfig)),
             new ConfigMetadata(typeof(SmartDocSearchConfig)),
             new ConfigMetadata(typeof(TypoCheckerConfig)),
-            new ConfigMetadata(typeof(AiProvidersConfig)),
             new ConfigMetadata(typeof(EncodingConverterConfig)),
             new ConfigMetadata(typeof(LineByLineProcessorConfig)),
         ];
@@ -48,7 +47,6 @@ namespace ArchiveMaster
             typeof(TextRewriterService),
             typeof(EncodingConverterService),
             typeof(LineByLineProcessorService),
-            typeof(AiConversation),
         ];
 
         public ToolPanelGroupInfo Views => new ToolPanelGroupInfo()
@@ -67,8 +65,6 @@ namespace ArchiveMaster
                     "使用AI检查文本是否存在错别字", baseUrl + "typo.svg", true),
                 new ToolPanelInfo(typeof(LineByLineProcessorPanel), typeof(LineByLineProcessorViewModel), "逐行智能转换",
                     "针对每行文本调用AI进行独立转换，可用于分类、判断或文本改写等任务", baseUrl + "lineConverter.svg", true),
-                new ToolPanelInfo(typeof(AiProvidersPanel), typeof(AiProvidersViewModel), "AI服务提供商",
-                    "配置AI服务提供商", baseUrl + "ai.svg", true),
             },
             GroupName = ModuleName,
             GroupDescription = ModuleDescription

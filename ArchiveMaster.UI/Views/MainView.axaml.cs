@@ -49,7 +49,7 @@ public partial class MainView : UserControl
     public MainView(MainViewModel viewModel,
         AppConfig appConfig,
         IDialogService dialogService,
-        IProgressOverlayService  progressOverlayService ,
+        IProgressOverlayService progressOverlayService,
         IViewPadding viewPadding = null,
         IPermissionService permissionService = null)
     {
@@ -71,10 +71,10 @@ public partial class MainView : UserControl
     {
         base.OnLoaded(e);
         permissionService?.CheckPermissions();
-        
+
         //Linux下会遇到无法找到TopLevel导致无法显示的问题，所以这里手动设置一下
-        dialogService.DefaultOwner=TopLevel.GetTopLevel(this);
-        
+        dialogService.DefaultOwner = TopLevel.GetTopLevel(this);
+
         if (appConfig.LoadError != null)
         {
             await dialogService.ShowErrorDialogAsync("加载配置失败", appConfig.LoadError);
@@ -92,9 +92,9 @@ public partial class MainView : UserControl
         }
         catch (Exception ex)
         {
-            await dialogService.ShowErrorDialogAsync("加载主密码失败", 
-                "主密码解析失败，可能是配置文件错误或软硬件发生改变，请重新设置主密码", 
-                ex.ToString());     
+            await dialogService.ShowErrorDialogAsync("加载主密码失败",
+                "主密码解析失败，可能是配置文件错误或软硬件发生改变，请重新设置主密码",
+                ex.ToString());
             var dialog = HostServices.GetRequiredService<MasterPasswordDialog>();
             await dialogService.ShowCustomDialogAsync(dialog);
         }
@@ -166,6 +166,7 @@ public partial class MainView : UserControl
         }
         catch (Exception ex)
         {
+            EndChangingContent();
             Log.Error(ex, "打开面板失败");
             await dialogService.ShowErrorDialogAsync("打开面板失败", ex);
         }

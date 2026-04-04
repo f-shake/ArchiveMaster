@@ -101,6 +101,8 @@ public static class Initializer
         builder.Services.AddTransient<MainView>();
         builder.Services.AddTransient<MainViewModel>();
         builder.Services.AddSingleton<GlobalCommands>();
+        builder.Services.AddTransient<AiConversation>();
+        builder.Services.AddViewAndViewModel<AiProvidersPanel, AiProvidersViewModel>();
         builder.Services.AddViewAndViewModel<SettingDialog, SettingViewModel>();
         builder.Services.AddViewAndViewModel<MasterPasswordDialog, MasterPasswordViewModel>();
         builder.Services.AddHostedService<AppLifetime>();
@@ -112,6 +114,7 @@ public static class Initializer
         ServiceInitializing?.Invoke(null, new ServiceInitializingEventArgs(builder.Services));
         AppHost = builder.Build();
         HostServices.Initialize(AppHost.Services);
+        ViewModelInjection.Register(AppHost.Services);
         AppHost.Start();
         IsInitialized = true;
     }

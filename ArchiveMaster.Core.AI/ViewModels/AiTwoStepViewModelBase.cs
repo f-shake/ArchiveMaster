@@ -10,7 +10,7 @@ public abstract class AiTwoStepViewModelBase<TService, TConfig> : TwoStepViewMod
 {
     protected AiTwoStepViewModelBase(ViewModelServices services) : base(services)
     {
-        Services.AppConfig.GetOrCreateConfigWithDefaultKey<AiProvidersConfig>().PropertyChanged += (s, e) =>
+        GlobalConfigs.Instance.AiProviders.PropertyChanged += (s, e) =>
         {
             if (e.PropertyName == nameof(AiProvidersConfig.CurrentProvider))
             {
@@ -19,6 +19,5 @@ public abstract class AiTwoStepViewModelBase<TService, TConfig> : TwoStepViewMod
         };
     }
 
-    public AiProviderConfig AI =>
-        Services.AppConfig.GetOrCreateConfigWithDefaultKey<AiProvidersConfig>().CurrentProvider;
+    public AiProviderConfig AI => GlobalConfigs.Instance.AiProviders.CurrentProvider;
 }

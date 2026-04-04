@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using ArchiveMaster.ViewModels.FileSystem;
@@ -17,16 +18,17 @@ using Serilog;
 
 namespace ArchiveMaster.ViewModels;
 
-public partial class AiProvidersViewModel(ViewModelServices services)
-    : ViewModelBase(services)
+public partial class AiProvidersViewModel : ObservableObject
 {
-    [ObservableProperty]
-    private AiProviderConfigViewModel selectedProvider;
+    [ObservableProperty] private AiProviderConfigViewModel selectedProvider;
 
-    [ObservableProperty]
-    private ObservableCollection<AiProviderConfigViewModel> providers = new();
+    [ObservableProperty] private ObservableCollection<AiProviderConfigViewModel> providers = new();
 
-    public AiProvidersConfig Config { get; } = services.AppConfig.GetOrCreateConfigWithDefaultKey<AiProvidersConfig>();
+    public AiProvidersViewModel(ViewModelServices services)
+    {
+    }
+
+    public AiProvidersConfig Config { get; } = GlobalConfigs.Instance.AiProviders;
 
     [RelayCommand]
     private void AddProvider()
@@ -49,10 +51,9 @@ public partial class AiProvidersViewModel(ViewModelServices services)
         }
     }
 
-    public override void OnEnter()
+    [RelayCommand]
+    private void ViewLoaded()
     {
-        base.OnEnter();
-        //转换到ViewModel的配置
         Providers.Clear();
         foreach (var (index, provider) in Config.Providers.Index())
         {
@@ -81,7 +82,8 @@ public partial class AiProvidersViewModel(ViewModelServices services)
         SelectedProvider = Providers.First(p => p.IsDefault);
     }
 
-    public override Task OnExitAsync(CancelEventArgs args)
+    [RelayCommand]
+    private void ViewUnloaded()
     {
         Config.Providers.Clear();
         foreach (var (index, vmProvider) in Providers.Index())
@@ -92,16 +94,14 @@ public partial class AiProvidersViewModel(ViewModelServices services)
                 Config.CurrentProviderIndex = index;
             }
         }
-
-        return base.OnExitAsync(args);
     }
 
     [RelayCommand]
-    private void MakeCurrent()
+    private void MakeCurrent(AiProviderConfigViewModel provider)
     {
         foreach (var (index, vmProvider) in Providers.Index())
         {
-            if (vmProvider == SelectedProvider)
+            if (vmProvider == provider)
             {
                 Config.CurrentProviderIndex = index;
                 vmProvider.IsDefault = true;

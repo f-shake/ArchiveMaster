@@ -5,6 +5,7 @@ using Avalonia.Controls.Documents;
 using Avalonia.Media;
 using System.Collections;
 using System.Collections.Specialized;
+using ArchiveMaster.Models;
 using Avalonia.Data;
 using Avalonia.Threading;
 
