@@ -3,7 +3,7 @@ using ArchiveMaster.ViewModels;
 
 namespace ArchiveMaster.Views
 {
-    public partial class TypoCheckerPanel : TwoStepPanelBase
+    public partial class TypoCheckerPanel : VerticalTwoStepPanelBase
     {
         public TypoCheckerPanel()
         {

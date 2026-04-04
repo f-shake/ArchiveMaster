@@ -1,4 +1,4 @@
-<v:TwoStepPanelBase
+<v:VerticalTwoStepPanelBase
     x:Class="ArchiveMaster.Views.TextRewriterPanel"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -13,7 +13,7 @@
     x:DataType="vm:TextRewriterViewModel"
     ShowBottomBar="False"
     mc:Ignorable="d">
-    <v:TwoStepPanelBase.ConfigsContent>
+    <v:VerticalTwoStepPanelBase.ConfigsContent>
         <ct:StackFormItemGroup
             x:Name="stkForm"
             IsEnabled="{Binding !AiConversation.SendCommand.IsRunning}">
@@ -38,9 +38,9 @@
             </ct:FormItem>
 
         </ct:StackFormItemGroup>
-    </v:TwoStepPanelBase.ConfigsContent>
+    </v:VerticalTwoStepPanelBase.ConfigsContent>
 
-    <v:TwoStepPanelBase.ResultsContent>
+    <v:VerticalTwoStepPanelBase.ResultsContent>
         <v:AiChatPanel Conversation="{Binding AiConversation}" />
-    </v:TwoStepPanelBase.ResultsContent>
-</v:TwoStepPanelBase>
+    </v:VerticalTwoStepPanelBase.ResultsContent>
+</v:VerticalTwoStepPanelBase>

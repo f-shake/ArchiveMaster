@@ -62,13 +62,29 @@ public class SimpleFileDataGrid : DataGrid
                             ic.Add(new InlineUIContainer(new Button()
                             {
                                 Content = new FluentIcon { Icon = Icon.FolderOpen, Width = 20 },
-                                Command = GlobalCommands.Instance.OpenFileCommand,
-                                CommandParameter = f.Path,
                                 Padding = new Thickness(),
                                 Height = 16,
                                 Classes = { "Link" },
                                 VerticalAlignment = VerticalAlignment.Bottom,
-                                Margin = new Thickness(8, -2)
+                                Margin = new Thickness(8, -2),
+                                Flyout = new MenuFlyout
+                                {
+                                    Items =
+                                    {
+                                        new MenuItem
+                                        {
+                                            Header = "打开文件",
+                                            Command = GlobalCommands.Instance.OpenFileCommand,
+                                            CommandParameter = f.Path,
+                                        },
+                                        new MenuItem
+                                        {
+                                            Header = "打开目录",
+                                            Command = GlobalCommands.Instance.OpenParentDirCommand,
+                                            CommandParameter = f.Path,
+                                        }
+                                    }
+                                }
                             }));
                         }
 
@@ -78,6 +94,7 @@ public class SimpleFileDataGrid : DataGrid
                             return ic;
                         }
 
+                        //无相对路径，显示绝对路径
                         if (string.IsNullOrEmpty(f.RelativePath))
                         {
                             ic.Add(new Run(f.Path));
@@ -85,6 +102,7 @@ public class SimpleFileDataGrid : DataGrid
                             return ic;
                         }
 
+                        //相对路径和绝对路径不一致，均显示
                         if (!f.Path.EndsWith(f.RelativePath))
                         {
                             ic.Add(new Run($"{f.Path}（{f.RelativePath}）"));
@@ -92,6 +110,7 @@ public class SimpleFileDataGrid : DataGrid
                             return ic;
                         }
 
+                        //普通情况，显示绝对路径，并且标识相对路径
                         var relPath = f.Path[..^f.RelativePath.Length];
                         ic.Add(new Run(relPath));
                         ic.Add(new Run(f.RelativePath) { TextDecorations = TextDecorations.Underline });
@@ -157,17 +176,25 @@ public class SimpleFileDataGrid : DataGrid
 
     public virtual double ColumnLengthIndex { get; init; } = 0.5;
 
+    public virtual double ColumnLengthMaxWidth { get; init; } = 120;
+
     public virtual string ColumnMessageHeader { get; init; } = "信息";
 
     public virtual double ColumnMessageIndex { get; init; } = 999;
 
+    public virtual DataGridLength ColumnMessageWidth { get; init; } = new DataGridLength(400);
+
     public virtual string ColumnNameHeader { get; init; } = "文件名";
+
+    public virtual DataGridLength ColumnNameWidth { get; init; } = new DataGridLength(400);
 
     public virtual double ColumnNameIndex { get; init; } = 0.3;
 
     public virtual string ColumnPathHeader { get; init; } = "路径";
 
     public virtual double ColumnPathIndex { get; init; } = 0.4;
+
+    public virtual DataGridLength ColumnPathWidth { get; init; } = new DataGridLength(400);
 
     public virtual string ColumnStatusHeader { get; init; } = "状态";
 
@@ -226,7 +253,7 @@ public class SimpleFileDataGrid : DataGrid
         };
         var cellTemplate = new FuncDataTemplate<SimpleFileInfo>((value, namescope) =>
         {
-            var rootPanel = this.GetLogicalAncestors().OfType<TwoStepPanelBase>().FirstOrDefault();
+            var rootPanel = this.GetLogicalAncestors().OfType<VerticalTwoStepPanelBase>().FirstOrDefault();
             return new ContentControl
             {
                 Content = new CheckBox()
@@ -254,7 +281,7 @@ public class SimpleFileDataGrid : DataGrid
                 { Converter = FileDirLength2StringConverter, Mode = BindingMode.OneWay },
             SortMemberPath = nameof(SimpleFileInfo.Length),
             IsReadOnly = true,
-            MaxWidth = 120,
+            MaxWidth = ColumnLengthMaxWidth,
             CellStyleClasses = { "Right" }
         };
     }
@@ -266,7 +293,7 @@ public class SimpleFileDataGrid : DataGrid
             Header = ColumnMessageHeader,
             Binding = new Binding(nameof(SimpleFileInfo.Message)),
             IsReadOnly = true,
-            Width = new DataGridLength(400),
+            Width = ColumnMessageWidth
         };
     }
 
@@ -277,7 +304,7 @@ public class SimpleFileDataGrid : DataGrid
             Header = ColumnNameHeader,
             Binding = new Binding(nameof(SimpleFileInfo.Name)),
             IsReadOnly = true,
-            Width = new DataGridLength(400),
+            Width = ColumnNameWidth,
         };
     }
 
@@ -288,7 +315,7 @@ public class SimpleFileDataGrid : DataGrid
             Header = ColumnPathHeader,
             Binding = new Binding(nameof(SimpleFileInfo.RelativePath)),
             IsReadOnly = true,
-            Width = new DataGridLength(400),
+            Width = ColumnPathWidth
         };
     }
 

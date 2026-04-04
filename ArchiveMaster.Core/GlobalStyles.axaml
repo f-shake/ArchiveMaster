@@ -16,6 +16,38 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceInclude Source="GlobalResources.axaml" />
             </ResourceDictionary.MergedDictionaries>
+
+            <ControlTheme
+                x:Key="FluentButtonSpinnerRepeatButton"
+                TargetType="RepeatButton">
+                <Setter Property="MinWidth" Value="20" />
+                <Setter Property="Template">
+                    <ControlTemplate>
+                        <ContentPresenter
+                            x:Name="PART_ContentPresenter"
+                            Padding="{TemplateBinding Padding}"
+                            HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                            Background="Transparent"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            Content="{TemplateBinding Content}"
+                            ContentTemplate="{TemplateBinding ContentTemplate}" />
+                    </ControlTemplate>
+                </Setter>
+                <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                    <Setter Property="Background" Value="{DynamicResource RepeatButtonBackgroundPointerOver}" />
+                </Style>
+
+                <Style Selector="^:pressed /template/ ContentPresenter#PART_ContentPresenter">
+                    <Setter Property="Background" Value="{DynamicResource RepeatButtonBackgroundPressed}" />
+                </Style>
+
+                <Style Selector="^:disabled /template/ ContentPresenter#PART_ContentPresenter">
+                    <Setter Property="Background" Value="{DynamicResource RepeatButtonBackgroundDisabled}" />
+                    <Setter Property="Foreground" Value="{DynamicResource RepeatButtonForegroundDisabled}" />
+                </Style>
+            </ControlTheme>
         </ResourceDictionary>
     </Styles.Resources>
 
@@ -179,5 +211,71 @@
     <Style Selector="ctrl|RadioButtonGroup">
         <Setter Property="Background" Value="{DynamicResource Background3}" />
         <Setter Property="Layout" Value="HorizontalWrap" />
+    </Style>
+
+
+    <Style Selector="ButtonSpinner">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate>
+                    <DataValidationErrors>
+                        <Border
+                            Name="border"
+                            Margin="{TemplateBinding Padding}"
+                            HorizontalAlignment="{TemplateBinding HorizontalAlignment}"
+                            VerticalAlignment="{TemplateBinding VerticalAlignment}"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="{TemplateBinding CornerRadius}">
+                            <DockPanel>
+                                <UniformGrid
+                                    Name="PART_SpinnerPanel"
+                                    DockPanel.Dock="Right"
+                                    IsVisible="{TemplateBinding ShowButtonSpinner}"
+                                    Rows="2"
+                                    TabIndex="2">
+                                    <RepeatButton
+                                        Name="PART_IncreaseButton"
+                                        IsTabStop="{TemplateBinding IsTabStop}"
+                                        Theme="{StaticResource FluentButtonSpinnerRepeatButton}">
+                                        <Path
+                                            Width="8"
+                                            Height="4"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            Data="M0,5 L4.5,.5 9,5 6,5 4.5,3.5 3,5 z"
+                                            Fill="{DynamicResource Foreground0}"
+                                            Stretch="Uniform" />
+                                    </RepeatButton>
+                                    <RepeatButton
+                                        Name="PART_DecreaseButton"
+                                        IsTabStop="{TemplateBinding IsTabStop}"
+                                        Theme="{StaticResource FluentButtonSpinnerRepeatButton}">
+                                        <Path
+                                            Width="8"
+                                            Height="4"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            Data="M0,0 L3,0 4.5,1.5 6,0 9,0 4.5,4.5 z"
+                                            Fill="{DynamicResource Foreground0}"
+                                            Stretch="Uniform" />
+                                    </RepeatButton>
+                                </UniformGrid>
+                                <ContentPresenter
+                                    Name="PART_ContentPresenter"
+                                    Grid.Column="1"
+                                    Padding="{TemplateBinding Padding}"
+                                    HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                    VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                                    Content="{TemplateBinding Content}"
+                                    ContentTemplate="{TemplateBinding ContentTemplate}"
+                                    TabIndex="1" />
+                            </DockPanel>
+                        </Border>
+                    </DataValidationErrors>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
 </Styles>

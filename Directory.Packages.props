@@ -5,19 +5,18 @@
   <ItemGroup>
     <PackageVersion Include="Avalonia" Version="$(AvaloniaVersion)" />
     <PackageVersion Include="Avalonia.Android" Version="$(AvaloniaVersion)" />
+    <PackageVersion Include="Avalonia.Controls.ColorPicker" Version="$(AvaloniaVersion)" />
     <PackageVersion Include="Avalonia.Controls.DataGrid" Version="$(AvaloniaVersion)" />
     <PackageVersion Include="Avalonia.Themes.Fluent" Version="$(AvaloniaVersion)" />
     <PackageVersion Include="DiscUtils.Iso9660" Version="0.16.13" />
     <PackageVersion Include="DocumentFormat.OpenXml" Version="3.5.1" />
     <PackageVersion Include="FluentIcons.Avalonia" Version="2.0.321" />
     <PackageVersion Include="HtmlAgilityPack" Version="1.12.4" />
-    <PackageVersion Include="Markdig" Version="1.1.1" />
-    <PackageVersion Include="Microsoft.Extensions.AI" Version="10.2.0" />
-    <PackageVersion Include="Microsoft.Extensions.AI.OpenAI" Version="9.9.1-preview.1.25474.6" />
+    <PackageVersion Include="Markdig" Version="1.1.2" />
     <PackageVersion Include="NPOI" Version="2.7.5" />
     <PackageVersion Include="OllamaSharp" Version="5.4.16" />
     <PackageVersion Include="OpenAI" Version="2.8.0" />
-    <PackageVersion Include="PdfPig" Version="0.1.13" />
+    <PackageVersion Include="PdfPig" Version="0.1.14" />
     <PackageVersion Include="RtfPipe" Version="2.0.7677.4303" />
     <PackageVersion Include="SkiaSharp" Version="3.119.2" />
     <PackageVersion Include="SkiaSharp.NativeAssets.Linux" Version="3.119.2" />
@@ -26,17 +25,17 @@
     <PackageVersion Include="System.Reactive" Version="6.1.0" />
     <PackageVersion Include="UTF.Unknown" Version="2.6.0" />
     <PackageVersion Include="Xaml.Behaviors.Avalonia" Version="11.3.9.5" />
-    <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.1" />
+    <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.2" />
     <PackageVersion Include="ExifLibNet.Updated" Version="2.1.5" />
     <PackageVersion Include="ExifLibrary" Version="1.0.13" />
     <PackageVersion Include="FzLib.Avalonia" Version="$(FzLibVersion)" />
     <PackageVersion Include="FzLib" Version="$(FzLibVersion)" />
     <PackageVersion Include="Irihi.Ursa" Version="1.6.0" />
     <PackageVersion Include="Irihi.Ursa.Themes.Semi" Version="1.6.0.2" />
-    <PackageVersion Include="Magick.NET-Q16-AnyCPU" Version="14.11.0" />
+    <PackageVersion Include="Magick.NET-Q16-AnyCPU" Version="14.11.1" />
     <PackageVersion Include="MetadataExtractor" Version="2.9.2" />
     <PackageVersion Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="$(AvaloniaVersion)" />
-    <PackageVersion Include="Mapster" Version="10.0.3" />
+    <PackageVersion Include="Mapster" Version="10.0.6" />
     <PackageVersion Include="Avalonia.Svg.Skia" Version="11.1.0" />
     <PackageVersion Include="Avalonia.Desktop" Version="$(AvaloniaVersion)" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="5.3.0" />
@@ -53,7 +52,7 @@
     <PackageVersion Include="Serilog.Sinks.File" Version="7.0.0" />
     <PackageVersion Include="SixLabors.ImageSharp" Version="3.1.8" />
     <!--谨慎升级Svg.Controls.Skia.Avalonia，会导致SkiSharp版本不一致报错-->
-    <PackageVersion Include="Svg.Controls.Skia.Avalonia" Version="11.3.9.4" />
+    <PackageVersion Include="Svg.Controls.Skia.Avalonia" Version="11.3.9.5" />
     <PackageVersion Include="Xamarin.AndroidX.Core.SplashScreen" Version="1.2.0.2" />
     <PackageVersion Include="Swashbuckle.AspNetCore" Version="6.7.3" />
     <PackageVersion Include="HotAvalonia" Version="3.1.0" PrivateAssets="All" Publish="True" />

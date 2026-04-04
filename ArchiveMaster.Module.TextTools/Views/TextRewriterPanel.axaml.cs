@@ -10,7 +10,7 @@ using FzLib.Avalonia.Controls;
 
 namespace ArchiveMaster.Views
 {
-    public partial class TextRewriterPanel : TwoStepPanelBase
+    public partial class TextRewriterPanel : VerticalTwoStepPanelBase
     {
         public TextRewriterPanel()
         {

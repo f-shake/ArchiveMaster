@@ -10,7 +10,7 @@ namespace ArchiveMaster.Views
     /// <summary>
     /// UpdatePanel.xaml 的交互逻辑
     /// </summary>
-    public partial class FileCopyTestPanel : TwoStepPanelBase
+    public partial class FileCopyTestPanel : VerticalTwoStepPanelBase
     {
         public FileCopyTestPanel()
         {

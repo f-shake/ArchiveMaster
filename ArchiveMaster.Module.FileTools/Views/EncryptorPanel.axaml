@@ -1,4 +1,4 @@
-<v:TwoStepPanelBase
+<v:VerticalTwoStepPanelBase
     x:Class="ArchiveMaster.Views.EncryptorPanel"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -16,12 +16,12 @@
     d:DesignWidth="800"
     x:DataType="vm:EncryptorViewModel"
     mc:Ignorable="d">
-    <v:TwoStepPanelBase.Styles>
+    <v:VerticalTwoStepPanelBase.Styles>
         <Style Selector="ct|FormItem">
             <Setter Property="LabelWidth" Value="96" />
         </Style>
-    </v:TwoStepPanelBase.Styles>
-    <v:TwoStepPanelBase.ConfigsContent>
+    </v:VerticalTwoStepPanelBase.Styles>
+    <v:VerticalTwoStepPanelBase.ConfigsContent>
         <ct:StackFormItemGroup>
             <ct:FormItem Label="未加密目录：">
                 <v:FilePickerTextBox
@@ -88,8 +88,8 @@
                 </ct:RadioButtonGroup>
             </ct:FormItem>
         </ct:StackFormItemGroup>
-    </v:TwoStepPanelBase.ConfigsContent>
-    <v:TwoStepPanelBase.ResultsContent>
+    </v:VerticalTwoStepPanelBase.ConfigsContent>
+    <v:VerticalTwoStepPanelBase.ResultsContent>
         <v:SimpleFileDataGrid
             ColumnLengthIndex="2.1"
             ColumnPathHeader="源文件路径"
@@ -113,5 +113,5 @@
             </DataGrid.Columns>
         </v:SimpleFileDataGrid>
 
-    </v:TwoStepPanelBase.ResultsContent>
-</v:TwoStepPanelBase>
+    </v:VerticalTwoStepPanelBase.ResultsContent>
+</v:VerticalTwoStepPanelBase>

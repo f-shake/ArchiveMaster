@@ -27,7 +27,6 @@ namespace ArchiveMaster
 
         public string HelpFileName { get; } = "writeOnce.md";
         
-        public int Order => 4;
         public IList<Type> SingletonServices { get; }
 
         public IList<Type> TransientServices { get; } =

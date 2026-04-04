@@ -1,4 +1,4 @@
-<v:TwoStepPanelBase
+<v:VerticalTwoStepPanelBase
     x:Class="ArchiveMaster.Views.LineByLineProcessorPanel"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -21,7 +21,7 @@
     x:DataType="vm:LineByLineProcessorViewModel"
     ExecuteButtonContent="处理"
     mc:Ignorable="d">
-    <v:TwoStepPanelBase.ConfigsContent>
+    <v:VerticalTwoStepPanelBase.ConfigsContent>
         <UniformGrid
             ColumnSpacing="16"
             Columns="2"
@@ -158,9 +158,9 @@
                 </DockPanel>
             </HeaderedContentControl>
         </UniformGrid>
-    </v:TwoStepPanelBase.ConfigsContent>
+    </v:VerticalTwoStepPanelBase.ConfigsContent>
 
-    <v:TwoStepPanelBase.ResultsContent>
+    <v:VerticalTwoStepPanelBase.ResultsContent>
         <Grid RowDefinitions="*,8,Auto">
             <DataGrid
                 IsReadOnly="True"
@@ -219,5 +219,5 @@
                 ItemsSource="{Binding Results}"
                 Properties="{Binding TableProperties}" />
         </Grid>
-    </v:TwoStepPanelBase.ResultsContent>
-</v:TwoStepPanelBase>
+    </v:VerticalTwoStepPanelBase.ResultsContent>
+</v:VerticalTwoStepPanelBase>

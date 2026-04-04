@@ -3,7 +3,7 @@ using ArchiveMaster.ViewModels;
 
 namespace ArchiveMaster.Views
 {
-    public partial class FileReadabilityScannerPanel : TwoStepPanelBase
+    public partial class FileReadabilityScannerPanel : VerticalTwoStepPanelBase
     {
         public FileReadabilityScannerPanel()
         {

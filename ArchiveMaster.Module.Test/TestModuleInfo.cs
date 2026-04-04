@@ -38,8 +38,6 @@ namespace ArchiveMaster
         public string ModuleName => "测试";
         public string ModuleDescription => "测试";
         public string HelpFileName { get; } = null;
-
-        public int Order => -100;
         public IList<Type> SingletonServices { get; }
 
         public IList<Type> TransientServices { get; } =

@@ -3,7 +3,7 @@ using ArchiveMaster.ViewModels;
 
 namespace ArchiveMaster.Views
 {
-    public partial class LineByLineProcessorPanel : TwoStepPanelBase
+    public partial class LineByLineProcessorPanel : VerticalTwoStepPanelBase
     {
         public LineByLineProcessorPanel()
         {

@@ -313,7 +313,7 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
     /// <summary>
     /// 执行后检查
     /// </summary>
-    /// <param name="token"></param>
+    /// <param name="ct"></param>
     /// <returns>如果不存在需要处理的文件，返回true</returns>
     private async Task CheckWarningFilesOnExecutedAsync(CancellationToken ct)
     {

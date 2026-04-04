@@ -40,7 +40,7 @@ public static class Initializer
     public static event EventHandler<ServiceInitializingEventArgs> ServiceInitializing;
 
     private static bool stopped = false;
-    private static List<ToolPanelGroupInfo> views = new List<ToolPanelGroupInfo>();
+    private static List<ToolPanelGroupInfo> groups = new List<ToolPanelGroupInfo>();
     public static IHost AppHost { get; private set; }
     public static bool IsInitialized { get; private set; }
 
@@ -53,19 +53,19 @@ public static class Initializer
 #endif
         new FileToolsModuleInfo(),
         new PhotoToolsModuleInfo(),
+        new VideoToolsModuleInfo(),
         new TextToolsModuleInfo(),
         new OfflineSyncModuleInfo(),
-        // new DiscArchiveModuleInfo(),
         new WriteOnceArchiveModuleInfo(),
         new FileBackupperModuleInfo(),
     ];
 #endif
 
-    public static IReadOnlyList<ToolPanelGroupInfo> Views => views.AsReadOnly();
+    public static IReadOnlyList<ToolPanelGroupInfo> Views => groups.AsReadOnly();
 
     public static void ClearViewsInstance()
     {
-        foreach (var group in views)
+        foreach (var group in groups)
         {
             foreach (var panel in group.Panels)
             {
@@ -129,7 +129,6 @@ public static class Initializer
 
     private static void InitializeModules(IServiceCollection services, AppConfig appConfig)
     {
-        List<(int Order, ToolPanelGroupInfo Group)> viewsWithOrder = new List<(int, ToolPanelGroupInfo)>();
 
 #if DYNAMIC_DLL
         List<IModuleInfo> ModuleInitializers = new List<IModuleInfo>();
@@ -189,8 +188,8 @@ public static class Initializer
                     services.AddTransient(service);
                 }
 
-                var views = moduleInitializer.Views;
-                if (views == null)
+                var groupViews = moduleInitializer.Views;
+                if (groupViews == null)
                 {
                     Log.Warning("模块{ModuleInitializerModuleName}没有定义视图", moduleInitializer.ModuleName);
                     throw new Exception($"模块{moduleInitializer.ModuleName}没有定义视图");
@@ -203,7 +202,7 @@ public static class Initializer
                 }
 
                 //注册视图和视图模型
-                foreach (var panel in views.Panels ?? [])
+                foreach (var panel in groupViews.Panels ?? [])
                 {
                     services.AddTransient(panel.ViewType, s =>
                     {
@@ -233,17 +232,15 @@ public static class Initializer
                         }
                     });
 
-                    views.MenuItems.Add(new ModuleMenuItemInfo("在线帮助", command));
+                    groupViews.MenuItems.Add(new ModuleMenuItemInfo("在线帮助", command));
                 }
 
-                viewsWithOrder.Add((moduleInitializer.Order, views));
+                groups.Add(groupViews);
             }
             catch (Exception ex)
             {
                 throw new Exception($"加载模块{moduleInitializer.ModuleName}时出错: {ex.Message}");
             }
         }
-
-        views = viewsWithOrder.OrderBy(p => p.Order).Select(p => p.Group).ToList();
     }
 }

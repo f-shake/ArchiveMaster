@@ -1,4 +1,4 @@
-﻿<v:TwoStepPanelBase
+﻿<v:VerticalTwoStepPanelBase
     x:Class="ArchiveMaster.Views.DirStructureSyncPanel"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -16,7 +16,7 @@
     d:DesignWidth="800"
     x:DataType="vm:DirStructureSyncViewModel"
     mc:Ignorable="d">
-    <v:TwoStepPanelBase.Resources>
+    <v:VerticalTwoStepPanelBase.Resources>
         <DataTemplate
             x:Key="DataGridDetailTemplate"
             x:DataType="fileSystem:MatchingFileInfo">
@@ -95,9 +95,9 @@
                 </ctrl:FormItem>
             </Grid>
         </DataTemplate>
-    </v:TwoStepPanelBase.Resources>
+    </v:VerticalTwoStepPanelBase.Resources>
 
-    <v:TwoStepPanelBase.ConfigsContent>
+    <v:VerticalTwoStepPanelBase.ConfigsContent>
         <ctrl:StackFormItemGroup>
             <ctrl:FormItem Label="模板目录：">
                 <v:FilePickerTextBox
@@ -142,8 +142,8 @@
                 </ctrl:WrapFormItemGroup>
             </ctrl:FormItem>
         </ctrl:StackFormItemGroup>
-    </v:TwoStepPanelBase.ConfigsContent>
-    <v:TwoStepPanelBase.ResultsContent>
+    </v:VerticalTwoStepPanelBase.ConfigsContent>
+    <v:VerticalTwoStepPanelBase.ResultsContent>
         <Grid
             Grid.Row="2"
             RowDefinitions="*,8,Auto">
@@ -219,5 +219,5 @@
 
             </Grid>
         </Grid>
-    </v:TwoStepPanelBase.ResultsContent>
-</v:TwoStepPanelBase>
+    </v:VerticalTwoStepPanelBase.ResultsContent>
+</v:VerticalTwoStepPanelBase>

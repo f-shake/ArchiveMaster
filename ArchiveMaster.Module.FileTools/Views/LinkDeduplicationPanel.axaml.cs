@@ -3,7 +3,7 @@ using ArchiveMaster.ViewModels;
 
 namespace ArchiveMaster.Views
 {
-    public partial class LinkDeduplicationPanel : TwoStepPanelBase
+    public partial class LinkDeduplicationPanel : VerticalTwoStepPanelBase
     {
         public LinkDeduplicationPanel()
         {

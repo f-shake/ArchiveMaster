@@ -1,4 +1,4 @@
-﻿<v:TwoStepPanelBase
+﻿<v:VerticalTwoStepPanelBase
     x:Class="ArchiveMaster.Views.DirStructureClonePanel"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -14,7 +14,7 @@
     d:DesignWidth="800"
     x:DataType="vm:DirStructureCloneViewModel"
     mc:Ignorable="d">
-    <v:TwoStepPanelBase.ConfigsContent>
+    <v:VerticalTwoStepPanelBase.ConfigsContent>
         <ctrl:StackFormItemGroup>
             <ctrl:StackFormItemGroup.Resources>
                 <cfz:BoolToStringConverter
@@ -77,12 +77,12 @@
                 <!--  Description="导出为一个包含文件基本信息的JSON文件"  -->
             </ctrl:FormItem>
         </ctrl:StackFormItemGroup>
-    </v:TwoStepPanelBase.ConfigsContent>
+    </v:VerticalTwoStepPanelBase.ConfigsContent>
 
-    <v:TwoStepPanelBase.ResultsContent>
+    <v:VerticalTwoStepPanelBase.ResultsContent>
         <v:TreeFileDataGrid
             ColumnIsCheckedIndex="-1"
             ItemsSource="{Binding TreeFiles}" />
 
-    </v:TwoStepPanelBase.ResultsContent>
-</v:TwoStepPanelBase>
+    </v:VerticalTwoStepPanelBase.ResultsContent>
+</v:VerticalTwoStepPanelBase>

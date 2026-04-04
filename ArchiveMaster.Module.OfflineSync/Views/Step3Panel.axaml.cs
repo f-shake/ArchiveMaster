@@ -8,7 +8,7 @@ namespace ArchiveMaster.Views
     /// <summary>
     /// RebuildPanel.xaml 的交互逻辑
     /// </summary>
-    public partial class Step3Panel : TwoStepPanelBase
+    public partial class Step3Panel : VerticalTwoStepPanelBase
     {
         public Step3Panel()
         {

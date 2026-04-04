@@ -3,7 +3,7 @@ using ArchiveMaster.ViewModels;
 
 namespace ArchiveMaster.Views
 {
-    public partial class TimeClassifyPanel : TwoStepPanelBase
+    public partial class TimeClassifyPanel : VerticalTwoStepPanelBase
     {
         public TimeClassifyPanel()
         {

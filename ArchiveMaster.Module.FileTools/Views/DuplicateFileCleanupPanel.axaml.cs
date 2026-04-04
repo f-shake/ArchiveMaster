@@ -3,7 +3,7 @@ using ArchiveMaster.ViewModels;
 
 namespace ArchiveMaster.Views
 {
-    public partial class DuplicateFileCleanupPanel : TwoStepPanelBase
+    public partial class DuplicateFileCleanupPanel : VerticalTwoStepPanelBase
     {
         public DuplicateFileCleanupPanel()
         {

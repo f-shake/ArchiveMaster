@@ -62,13 +62,16 @@ namespace ArchiveMaster.ViewModels.FileSystem
             FileSystemInfo = file;
             Name = file.Name;
             Path = file.FullName;
-            if (System.IO.Path.IsPathRooted(topDir))
+            if (topDir != null)
             {
-                TopDirectory = topDir;
-            }
-            else
-            {
-                throw new ArgumentException($"提供的{nameof(topDir)}不是{nameof(file)}的父级");
+                if (System.IO.Path.IsPathRooted(topDir))
+                {
+                    TopDirectory = topDir;
+                }
+                else
+                {
+                    throw new ArgumentException($"提供的{nameof(topDir)}不是{nameof(file)}的父级");
+                }
             }
 
             Time = file.LastWriteTime;

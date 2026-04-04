@@ -3,7 +3,7 @@ using ArchiveMaster.ViewModels;
 
 namespace ArchiveMaster.Views
 {
-    public partial class EncodingConverterPanel : TwoStepPanelBase
+    public partial class EncodingConverterPanel : VerticalTwoStepPanelBase
     {
         public EncodingConverterPanel()
         {

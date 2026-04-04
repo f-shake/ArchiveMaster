@@ -3,7 +3,7 @@ using ArchiveMaster.ViewModels;
 
 namespace ArchiveMaster.Views
 {
-    public partial class EncryptorPanel : TwoStepPanelBase
+    public partial class EncryptorPanel : VerticalTwoStepPanelBase
     {
         public EncryptorPanel()
         {

@@ -3,7 +3,7 @@ using ArchiveMaster.ViewModels;
 
 namespace ArchiveMaster.Views
 {
-    public partial class RepairModifiedTimePanel : TwoStepPanelBase
+    public partial class RepairModifiedTimePanel : VerticalTwoStepPanelBase
     {
         public RepairModifiedTimePanel()
         {

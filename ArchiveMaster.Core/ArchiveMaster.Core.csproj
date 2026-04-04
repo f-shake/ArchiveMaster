@@ -10,9 +10,6 @@
     <Compile Remove="obj\**" />
     <EmbeddedResource Remove="obj\**" />
     <None Remove="obj\**" />
-    <Compile Update="Views\FileFilterControl.axaml.cs">
-      <DependentUpon>FileFilterTextBox.axaml</DependentUpon>
-    </Compile>
     <Compile Update="Views\ProgressDialog.axaml.cs">
       <DependentUpon>ProgressDialog.axaml</DependentUpon>
       <SubType>Code</SubType>
@@ -21,16 +18,24 @@
       <DependentUpon>OfflineSyncPanelBase.axaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="Views\FileFilterPanel.axaml.cs">
+    <Compile Update="Views\FilePickerAndFilter\FileFilterBar.axaml.cs">
+      <DependentUpon>FileFilterBar.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\FilePickerAndFilter\FileFilterControl.axaml.cs">
+      <DependentUpon>FileFilterControl.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\FilePickerAndFilter\FileFilterPanel.axaml.cs">
       <DependentUpon>FileFilterPanel.axaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="Views\FilterTestResultDialog.axaml.cs">
-      <DependentUpon>SettingDialog.axaml</DependentUpon>
+    <Compile Update="Views\FilePickerAndFilter\FilePickerTextBox.axaml.cs">
+      <DependentUpon>FilePickerTextBox.axaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="Views\FileFilterBar.axaml.cs">
-      <DependentUpon>FileFilterBar.axaml</DependentUpon>
+    <Compile Update="Views\FilePickerAndFilter\FilterTestResultDialog.axaml.cs">
+      <DependentUpon>FilterTestResultDialog.axaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>

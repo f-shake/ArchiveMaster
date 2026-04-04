@@ -158,7 +158,7 @@ public class TreeFileDataGrid : SimpleFileDataGrid
         };
         var cellTemplate = new FuncDataTemplate<SimpleFileInfo>((value, namescope) =>
         {
-            var rootPanel = this.GetLogicalAncestors().OfType<TwoStepPanelBase>().FirstOrDefault();
+            var rootPanel = this.GetLogicalAncestors().OfType<VerticalTwoStepPanelBase>().FirstOrDefault();
 
             var chk = new CheckBox()
             {

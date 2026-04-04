@@ -21,7 +21,6 @@
                 MaxLines="3"
                 Text="{Binding #root.FileNames}"
                 TextChanged="OnTextChanged"
-                TextWrapping="{Binding #root.AllowMultiple, Converter={x:Static cvt:Converters.TextWrapping}}"
                 Watermark="{Binding #root.Watermark}" />
             <Button
                 Grid.Column="1"

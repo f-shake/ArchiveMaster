@@ -3,7 +3,7 @@ using ArchiveMaster.ViewModels;
 
 namespace ArchiveMaster.Views
 {
-    public partial class BatchCommandLinePanel : TwoStepPanelBase
+    public partial class BatchCommandLinePanel : VerticalTwoStepPanelBase
     {
         public BatchCommandLinePanel()
         {

@@ -1,4 +1,4 @@
-﻿<v:TwoStepPanelBase
+﻿<v:VerticalTwoStepPanelBase
     x:Class="ArchiveMaster.Views.Step2Panel"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -20,10 +20,10 @@
     ExecuteButtonContent="3.导出补丁"
     InitializeButtonContent="2.分析差异"
     mc:Ignorable="d">
-    <v:TwoStepPanelBase.Styles>
+    <v:VerticalTwoStepPanelBase.Styles>
         <StyleInclude Source="Styles.axaml" />
-    </v:TwoStepPanelBase.Styles>
-    <v:TwoStepPanelBase.ConfigsContent>
+    </v:VerticalTwoStepPanelBase.Styles>
+    <v:VerticalTwoStepPanelBase.ConfigsContent>
         <Grid ColumnDefinitions="2*,8,*">
             <ctrl:StackFormItemGroup x:Name="configs">
                 <ctrl:FormItem Label="异地快照文件：">
@@ -154,9 +154,9 @@
 
         </Grid>
 
-    </v:TwoStepPanelBase.ConfigsContent>
-    <v:TwoStepPanelBase.ResultsContent>
+    </v:VerticalTwoStepPanelBase.ConfigsContent>
+    <v:VerticalTwoStepPanelBase.ResultsContent>
         <v:SyncFilesList />
-    </v:TwoStepPanelBase.ResultsContent>
+    </v:VerticalTwoStepPanelBase.ResultsContent>
 
-</v:TwoStepPanelBase>
+</v:VerticalTwoStepPanelBase>

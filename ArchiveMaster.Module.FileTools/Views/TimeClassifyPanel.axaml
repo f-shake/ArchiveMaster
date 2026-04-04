@@ -1,4 +1,4 @@
-<v:TwoStepPanelBase
+<v:VerticalTwoStepPanelBase
     x:Class="ArchiveMaster.Views.TimeClassifyPanel"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -12,7 +12,7 @@
     d:DesignWidth="800"
     x:DataType="vm:TimeClassifyViewModel"
     mc:Ignorable="d">
-    <v:TwoStepPanelBase.ConfigsContent>
+    <v:VerticalTwoStepPanelBase.ConfigsContent>
         <ct:StackFormItemGroup>
             <ct:FormItem Label="目录：">
                 <v:FilePickerTextBox
@@ -27,8 +27,8 @@
                     Value="{Binding Config.MinTimeInterval, Converter={x:Static cvt:Converters.TimeSpanNumber}, ConverterParameter=m}" />
             </ct:FormItem>
         </ct:StackFormItemGroup>
-    </v:TwoStepPanelBase.ConfigsContent>
-    <v:TwoStepPanelBase.ResultsContent>
+    </v:VerticalTwoStepPanelBase.ConfigsContent>
+    <v:VerticalTwoStepPanelBase.ResultsContent>
         <Grid ColumnDefinitions="*,8,*">
             <HeaderedContentControl
                 Classes="GroupBox"
@@ -48,5 +48,5 @@
                     ItemsSource="{Binding #lstDirs.SelectedItem.Subs}" />
             </HeaderedContentControl>
         </Grid>
-    </v:TwoStepPanelBase.ResultsContent>
-</v:TwoStepPanelBase>
+    </v:VerticalTwoStepPanelBase.ResultsContent>
+</v:VerticalTwoStepPanelBase>
