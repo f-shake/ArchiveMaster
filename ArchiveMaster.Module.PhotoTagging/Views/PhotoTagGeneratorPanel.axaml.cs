@@ -3,9 +3,9 @@ using ArchiveMaster.ViewModels;
 
 namespace ArchiveMaster.Views
 {
-    public partial class PhotoTextTaggingPanel : PanelBase
+    public partial class PhotoTagGeneratorPanel : VerticalTwoStepPanelBase
     {
-        public PhotoTextTaggingPanel()
+        public PhotoTagGeneratorPanel()
         {
             InitializeComponent();
         }

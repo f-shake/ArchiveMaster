@@ -53,6 +53,7 @@ public static class Initializer
 #endif
         new FileToolsModuleInfo(),
         new PhotoToolsModuleInfo(),
+        new PhotoTaggingModuleInfo(),
         new VideoToolsModuleInfo(),
         new TextToolsModuleInfo(),
         new OfflineSyncModuleInfo(),

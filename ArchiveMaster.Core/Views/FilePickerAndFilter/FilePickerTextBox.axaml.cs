@@ -11,6 +11,7 @@ using FzLib.Avalonia.Converters;
 using FzLib.Avalonia.Dialogs;
 using FzLib.IO;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using ArchiveMaster.ViewModels.FileSystem;
@@ -34,16 +35,24 @@ public partial class FilePickerTextBox : UserControl
             nameof(FileSelectedCommand));
 
     public static readonly StyledProperty<FileFilterRule> FilterProperty =
-            FileFilterBar.FilterProperty.AddOwner<FilePickerTextBox>();
-    //AvaloniaProperty.Register<FilePickerTextBox, FileFilterRule>(nameof(Filter));
+        FileFilterBar.FilterProperty.AddOwner<FilePickerTextBox>();
 
     public static readonly StyledProperty<bool> IsFilterBarVisibleProperty =
         AvaloniaProperty.Register<FilePickerTextBox, bool>(nameof(IsFilterBarVisible));
 
+    public static readonly StyledProperty<string> OpenFileMenuItemHeaderProperty =
+        AvaloniaProperty.Register<FilePickerTextBox, string>(
+            nameof(OpenFileMenuItemHeader), "打开文件");
+
+    //AvaloniaProperty.Register<FilePickerTextBox, FileFilterRule>(nameof(Filter));
     public static readonly DirectProperty<FilePickerTextBox, string> SaveFileDefaultExtensionProperty =
         AvaloniaProperty.RegisterDirect<FilePickerTextBox, string>(nameof(SaveFileDefaultExtension),
             o => o.SaveFileDefaultExtension,
             (o, v) => o.SaveFileDefaultExtension = v);
+
+    public static readonly StyledProperty<string> SaveFileMenuItemHeaderProperty =
+        AvaloniaProperty.Register<FilePickerTextBox, string>(
+            nameof(SaveFileMenuItemHeader), "保存文件");
 
     public static readonly DirectProperty<FilePickerTextBox, string> SaveFileSuggestedFileNameProperty =
         AvaloniaProperty.RegisterDirect<FilePickerTextBox, string>(nameof(SaveFileSuggestedFileName),
@@ -60,15 +69,22 @@ public partial class FilePickerTextBox : UserControl
             nameof(TextChangedCommand));
 
     public static readonly StyledProperty<string> TitleProperty =
-            AvaloniaProperty.Register<FilePickerTextBox, string>(nameof(Title));
+        AvaloniaProperty.Register<FilePickerTextBox, string>(nameof(Title));
+
+    public static readonly DirectProperty<FilePickerTextBox, FilePickerType> typeProperty =
+        AvaloniaProperty.RegisterDirect<FilePickerTextBox, FilePickerType>(
+            nameof(Type), o => o.Type, (o, v) => o.Type = v);
 
     public static readonly StyledProperty<string> WatermarkProperty =
-        TextBox.WatermarkProperty.AddOwner<FilePickerTextBox>();
+            TextBox.WatermarkProperty.AddOwner<FilePickerTextBox>();
+
     private string saveFileDefaultExtension = default;
 
     private string saveFileSuggestedFileName = default;
 
     private string suggestedStartLocation = default;
+
+    private FilePickerType type;
 
     public FilePickerTextBox()
     {
@@ -77,12 +93,6 @@ public partial class FilePickerTextBox : UserControl
         txt.AddHandler(DragDrop.DropEvent, Drop);
     }
 
-    public enum PickerType
-    {
-        OpenFile,
-        OpenFolder,
-        SaveFile
-    }
 
     public bool AllowMultiple
     {
@@ -107,6 +117,7 @@ public partial class FilePickerTextBox : UserControl
         get => GetValue(FileSelectedCommandProperty);
         set => SetValue(FileSelectedCommandProperty, value);
     }
+
     public List<FilePickerFileType> FileTypeFilter { get; set; }
 
     public FileFilterRule Filter
@@ -121,10 +132,22 @@ public partial class FilePickerTextBox : UserControl
         set => SetValue(IsFilterBarVisibleProperty, value);
     }
 
+    public string OpenFileMenuItemHeader
+    {
+        get => GetValue(OpenFileMenuItemHeaderProperty);
+        set => SetValue(OpenFileMenuItemHeaderProperty, value);
+    }
+
     public string SaveFileDefaultExtension
     {
         get => saveFileDefaultExtension;
         set => SetAndRaise(SaveFileDefaultExtensionProperty, ref saveFileDefaultExtension, value);
+    }
+
+    public string SaveFileMenuItemHeader
+    {
+        get => GetValue(SaveFileMenuItemHeaderProperty);
+        set => SetValue(SaveFileMenuItemHeaderProperty, value);
     }
 
     public string SaveFileSuggestedFileName
@@ -151,19 +174,24 @@ public partial class FilePickerTextBox : UserControl
         get => GetValue(TextChangedCommandProperty);
         set => SetValue(TextChangedCommandProperty, value);
     }
+
     public string Title
     {
         get => this.GetValue(TitleProperty);
         set => SetValue(TitleProperty, value);
     }
-
-    public PickerType Type { get; set; } = PickerType.OpenFile;
+    public FilePickerType Type
+    {
+        get => type;
+        set => SetAndRaise(typeProperty, ref type, value);
+    }
 
     public string Watermark
     {
         get => GetValue(WatermarkProperty);
         set => SetValue(WatermarkProperty, value);
     }
+
     public void DragEnter(object sender, DragEventArgs e)
     {
         if (CanDrop(e))
@@ -188,89 +216,18 @@ public partial class FilePickerTextBox : UserControl
 
     private async void Button_Click(object sender, RoutedEventArgs e)
     {
-        var storageProvider = TopLevel.GetTopLevel(this).StorageProvider;
-        string suggestedStartLocation = SuggestedStartLocation;
-        if (suggestedStartLocation == null && !string.IsNullOrWhiteSpace(FileNames))
-        {
-            var file = FileNames.Split(Environment.NewLine)[0];
-            if (Type is PickerType.OpenFile or PickerType.SaveFile && File.Exists(file))
-            {
-                suggestedStartLocation = Path.GetDirectoryName(file);
-            }
-            else if (Type is PickerType.OpenFolder && Directory.Exists(file))
-            {
-                suggestedStartLocation = file;
-            }
-        }
-
-        IStorageFolder suggestedStartLocationUri = null;
         try
         {
-            suggestedStartLocationUri = suggestedStartLocation == null
-                ? null
-                : await storageProvider.TryGetFolderFromPathAsync(suggestedStartLocation);
+            if (Type == FilePickerType.OpenOrSaveFile)
+            {
+                return;
+            }
+
+            await OpenPickerDialogAsync(Type);
         }
         catch
         {
-        }
-
-        switch (Type)
-        {
-            case PickerType.OpenFile:
-                var openFiles = await storageProvider.OpenFilePickerAsync(new FilePickerOpenOptions()
-                {
-                    AllowMultiple = AllowMultiple,
-                    FileTypeFilter = FileTypeFilter,
-                    Title = Title,
-                    SuggestedStartLocation = suggestedStartLocationUri
-                });
-                if (openFiles != null && openFiles.Count > 0)
-                {
-                    FileNames = string.Join(Environment.NewLine, openFiles.Select(p => p.GetPath()));
-                    if (FileSelectedCommand?.CanExecute(FileNames) == true)
-                    {
-                        FileSelectedCommand.Execute(FileNames);
-                    }
-                }
-
-                break;
-            case PickerType.OpenFolder:
-                var folders = await storageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions()
-                {
-                    Title = Title,
-                    AllowMultiple = AllowMultiple,
-                    SuggestedStartLocation = suggestedStartLocationUri
-                });
-                if (folders != null && folders.Count > 0)
-                {
-                    FileNames = string.Join(Environment.NewLine, folders.Select(p => p.GetPath()));
-                    if (FileSelectedCommand?.CanExecute(FileNames) == true)
-                    {
-                        FileSelectedCommand.Execute(FileNames);
-                    }
-                }
-
-                break;
-            case PickerType.SaveFile:
-                var saveFiles = await storageProvider.SaveFilePickerAsync(new FilePickerSaveOptions()
-                {
-                    Title = Title,
-                    FileTypeChoices = FileTypeFilter,
-                    DefaultExtension = SaveFileDefaultExtension,
-                    ShowOverwritePrompt = ShowOverwritePrompt,
-                    SuggestedFileName = SaveFileSuggestedFileName,
-                    SuggestedStartLocation = suggestedStartLocationUri
-                });
-                if (saveFiles != null)
-                {
-                    FileNames = saveFiles.GetPath();
-                    if (FileSelectedCommand?.CanExecute(FileNames) == true)
-                    {
-                        FileSelectedCommand.Execute(FileNames);
-                    }
-                }
-
-                break;
+            Debug.Assert(false);
         }
     }
 
@@ -282,7 +239,7 @@ public partial class FilePickerTextBox : UserControl
                 .Select(p => p.TryGetLocalPath())
                 .Select(File.GetAttributes)
                 .ToList();
-            if (Type == PickerType.SaveFile && fileAttributes.Count > 1)
+            if (Type == FilePickerType.SaveFile && fileAttributes.Count > 1)
             {
                 return false;
             }
@@ -291,8 +248,9 @@ public partial class FilePickerTextBox : UserControl
             var isAllFile = fileAttributes.All(p => !p.HasFlag(FileAttributes.Directory));
             switch (Type)
             {
-                case PickerType.OpenFile:
-                case PickerType.SaveFile:
+                case FilePickerType.OpenFile:
+                case FilePickerType.SaveFile:
+                case FilePickerType.OpenOrSaveFile:
                     if (AllowMultiple && isAllFile)
                     {
                         return true;
@@ -303,7 +261,7 @@ public partial class FilePickerTextBox : UserControl
                     }
 
                     break;
-                case PickerType.OpenFolder:
+                case FilePickerType.OpenFolder:
                     if (AllowMultiple && isAllDir)
                     {
                         return true;
@@ -330,6 +288,118 @@ public partial class FilePickerTextBox : UserControl
         }
     }
 
+    private async void OpenOrSaveFileMenuItem_OnClick(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            var typeStr = (sender as Control).Tag as string;
+            switch (typeStr)
+            {
+                case "open":
+                    await OpenPickerDialogAsync(FilePickerType.OpenFile);
+                    break;
+                case "save":
+                    await OpenPickerDialogAsync(FilePickerType.SaveFile);
+                    break;
+                default:
+                    throw new InvalidOperationException($"未知的菜单项：{typeStr}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.Assert(false);
+        }
+    }
+
+    private async Task OpenPickerDialogAsync(FilePickerType browseType)
+    {
+        var storageProvider = TopLevel.GetTopLevel(this).StorageProvider;
+        string suggestedStartLocation = SuggestedStartLocation;
+        if (suggestedStartLocation == null && !string.IsNullOrWhiteSpace(FileNames))
+        {
+            var file = FileNames.Split(Environment.NewLine)[0];
+            if (Type is FilePickerType.OpenFile or FilePickerType.SaveFile && File.Exists(file))
+            {
+                suggestedStartLocation = Path.GetDirectoryName(file);
+            }
+            else if (Type is FilePickerType.OpenFolder && Directory.Exists(file))
+            {
+                suggestedStartLocation = file;
+            }
+        }
+
+        IStorageFolder suggestedStartLocationUri = null;
+        try
+        {
+            suggestedStartLocationUri = suggestedStartLocation == null
+                ? null
+                : await storageProvider.TryGetFolderFromPathAsync(suggestedStartLocation);
+        }
+        catch
+        {
+        }
+
+        switch (browseType)
+        {
+            case FilePickerType.OpenFile:
+                var openFiles = await storageProvider.OpenFilePickerAsync(new FilePickerOpenOptions()
+                {
+                    AllowMultiple = AllowMultiple,
+                    FileTypeFilter = FileTypeFilter,
+                    Title = Title,
+                    SuggestedStartLocation = suggestedStartLocationUri
+                });
+                if (openFiles != null && openFiles.Count > 0)
+                {
+                    FileNames = string.Join(Environment.NewLine, openFiles.Select(p => p.GetPath()));
+                    if (FileSelectedCommand?.CanExecute(FileNames) == true)
+                    {
+                        FileSelectedCommand.Execute(FileNames);
+                    }
+                }
+
+                break;
+            case FilePickerType.OpenFolder:
+                var folders = await storageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions()
+                {
+                    Title = Title,
+                    AllowMultiple = AllowMultiple,
+                    SuggestedStartLocation = suggestedStartLocationUri
+                });
+                if (folders != null && folders.Count > 0)
+                {
+                    FileNames = string.Join(Environment.NewLine, folders.Select(p => p.GetPath()));
+                    if (FileSelectedCommand?.CanExecute(FileNames) == true)
+                    {
+                        FileSelectedCommand.Execute(FileNames);
+                    }
+                }
+
+                break;
+            case FilePickerType.SaveFile:
+                var saveFiles = await storageProvider.SaveFilePickerAsync(new FilePickerSaveOptions()
+                {
+                    Title = Title,
+                    FileTypeChoices = FileTypeFilter,
+                    DefaultExtension = SaveFileDefaultExtension,
+                    ShowOverwritePrompt = ShowOverwritePrompt,
+                    SuggestedFileName = SaveFileSuggestedFileName,
+                    SuggestedStartLocation = suggestedStartLocationUri
+                });
+                if (saveFiles != null)
+                {
+                    FileNames = saveFiles.GetPath();
+                    if (FileSelectedCommand?.CanExecute(FileNames) == true)
+                    {
+                        FileSelectedCommand.Execute(FileNames);
+                    }
+                }
+
+                break;
+            default:
+                throw new NotSupportedException($"不支持的文件选择类型：{browseType}");
+        }
+    }
     private async void TestButton_Click(object sender, RoutedEventArgs e)
     {
         var progress = HostServices.GetRequiredService<IProgressOverlayService>();
@@ -340,7 +410,7 @@ public partial class FilePickerTextBox : UserControl
 
         async Task MainTask(CancellationToken ct)
         {
-            if (Type is not PickerType.OpenFolder)
+            if (Type is not FilePickerType.OpenFolder)
             {
                 throw new Exception("只有目录可供筛选测试");
             }

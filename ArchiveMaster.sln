@@ -45,6 +45,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArchiveMaster.Module.VideoT
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArchiveMaster.Core.AI", "ArchiveMaster.Core.AI\ArchiveMaster.Core.AI.csproj", "{B8F4AB7F-17AF-4534-AFFC-8FAA34129737}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArchiveMaster.Module.PhotoTagging", "ArchiveMaster.Module.PhotoTagging\ArchiveMaster.Module.PhotoTagging.csproj", "{32BA951B-7C8F-4B83-AE3D-0B3A40666402}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -105,6 +107,10 @@ Global
 		{B8F4AB7F-17AF-4534-AFFC-8FAA34129737}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B8F4AB7F-17AF-4534-AFFC-8FAA34129737}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B8F4AB7F-17AF-4534-AFFC-8FAA34129737}.Release|Any CPU.Build.0 = Release|Any CPU
+		{32BA951B-7C8F-4B83-AE3D-0B3A40666402}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{32BA951B-7C8F-4B83-AE3D-0B3A40666402}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{32BA951B-7C8F-4B83-AE3D-0B3A40666402}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{32BA951B-7C8F-4B83-AE3D-0B3A40666402}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -118,6 +124,7 @@ Global
 		{63C94058-33B8-431A-8C6F-E78E9A12A531} = {C4072B96-4E0F-46D1-8C0A-85E327F35C40}
 		{DE26E5FD-6F38-4E45-9C2A-E039E69F7278} = {C4072B96-4E0F-46D1-8C0A-85E327F35C40}
 		{E5F8DDEA-058F-46DD-B7F8-607550AE6D65} = {C4072B96-4E0F-46D1-8C0A-85E327F35C40}
+		{32BA951B-7C8F-4B83-AE3D-0B3A40666402} = {C4072B96-4E0F-46D1-8C0A-85E327F35C40}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {1FDF463E-CFE7-477B-94E8-5D38744ECC9A}

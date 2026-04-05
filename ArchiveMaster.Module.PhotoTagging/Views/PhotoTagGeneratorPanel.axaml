@@ -1,0 +1,46 @@
+<v:VerticalTwoStepPanelBase
+    x:Class="ArchiveMaster.Views.PhotoTagGeneratorPanel"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ct="using:FzLib.Avalonia.Controls"
+    xmlns:cvt="using:ArchiveMaster.Converters"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:v="using:ArchiveMaster.Views"
+    xmlns:vm="clr-namespace:ArchiveMaster.ViewModels"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
+    <v:VerticalTwoStepPanelBase.ConfigsContent>
+        <ct:StackFormItemGroup>
+            <ct:FormItem Label="目录：">
+                <v:FilePickerTextBox
+                    FileNames="{Binding Config.Dir}"
+                    Type="OpenFolder" />
+            </ct:FormItem>
+            <ct:FormItem Label="标签文件：">
+                <v:FilePickerTextBox
+                    FileNames="{Binding Config.TagFile}"
+                    OpenFileMenuItemHeader="打开已有标签文件"
+                    SaveFileMenuItemHeader="新建标签文件"
+                    StringFileTypeFilter="ArchiveMaster Photo Tags（图像标签库）文件;*.ampt;;"
+                    Type="OpenOrSaveFile" />
+            </ct:FormItem>
+            <ct:FormItem Label="图像处理选项：">
+                <ct:WrapFormItemGroup>
+                    <ct:FormItem Header="限制最大尺寸（万像素）">
+                        <NumericUpDown
+                            Maximum="2000"
+                            Minimum="10"
+                            Value="{Binding Config.ResizingTargetResolutionIn10k}" />
+                    </ct:FormItem>
+                </ct:WrapFormItemGroup>
+            </ct:FormItem>
+            <ct:FormItem Label="AI生成选项：">
+                <ct:WrapFormItemGroup>
+                    <ct:FormItem Header="" />
+                </ct:WrapFormItemGroup>
+            </ct:FormItem>
+        </ct:StackFormItemGroup>
+    </v:VerticalTwoStepPanelBase.ConfigsContent>
+</v:VerticalTwoStepPanelBase>
