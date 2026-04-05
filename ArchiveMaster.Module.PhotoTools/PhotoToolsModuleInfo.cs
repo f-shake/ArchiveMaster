@@ -25,6 +25,7 @@ namespace ArchiveMaster
             new ConfigMetadata(typeof(PhotoSlimmingConfig)),
             new ConfigMetadata(typeof(PhotoGeoTaggingConfig)),
             new ConfigMetadata(typeof(PhotoGeoSorterConfig)),
+            new ConfigMetadata(typeof(PhotoTextTaggingConfig)),
         ];
 
         public IList<JsonConverter> JsonConverters { get; }
@@ -40,6 +41,7 @@ namespace ArchiveMaster
             typeof(RepairModifiedTimeService),
             typeof(PhotoGeoTaggingService),
             typeof(PhotoGeoSorterService),
+            typeof(PhotoTextTaggingConfig),
         ];
 
         public ToolPanelGroupInfo Views => new ToolPanelGroupInfo()
@@ -54,6 +56,8 @@ namespace ArchiveMaster
                     "将GPX轨迹中的GPS位置信息，根据拍摄时间自动匹配并写入照片Exif", baseUrl + "location.svg"),
                 new ToolPanelInfo(typeof(PhotoGeoSorterPanel), typeof(PhotoGeoSorterViewModel), "照片位置分类",
                     "根据照片的GPS位置信息，将照片分为不同地理区域的多个目录", baseUrl + "map.svg"),
+                new ToolPanelInfo(typeof(PhotoTextTaggingPanel), typeof(PhotoTextTaggingViewModel), "照片标签管理",
+                    "通过AI，自动生成照片的关键词标签，并进行管理", baseUrl + "location.svg", true),
             },
             GroupName = ModuleName,
             GroupDescription = ModuleDescription

@@ -17,6 +17,7 @@ public abstract partial class AiChatMessage : INotifyPropertyChanged
     private string frozenFullText;
     private readonly StringBuilder fullTextBuilder = new StringBuilder();
     private bool isFrozen;
+
     protected AiChatMessage()
     {
     }
@@ -33,13 +34,14 @@ public abstract partial class AiChatMessage : INotifyPropertyChanged
     public bool IsFrozen => isFrozen;
     public abstract AiChatMessageSender Sender { get; }
     protected StringBuilder FullTextBuilder => fullTextBuilder;
+
     public static AiAssistantChatMessage CreateAssistantMessage()
     {
         var message = new AiAssistantChatMessage();
         return message;
     }
 
-    public static AiSystemChatMessage CreateSystemMessage(string systemPrompt, bool fold, int maxLength)
+    public static AiSystemChatMessage CreateSystemMessage(string systemPrompt, bool fold = false, int maxLength = 0)
     {
         var message = new AiSystemChatMessage();
         message.AddInline(systemPrompt);
@@ -48,7 +50,7 @@ public abstract partial class AiChatMessage : INotifyPropertyChanged
         return message;
     }
 
-    public static AiUserChatMessage CreateUserMessage(string userPrompt, bool fold, int maxLength)
+    public static AiUserChatMessage CreateUserMessage(string userPrompt, bool fold = false, int maxLength = 0)
     {
         var message = new AiUserChatMessage();
         message.AddInline(userPrompt);
@@ -56,6 +58,23 @@ public abstract partial class AiChatMessage : INotifyPropertyChanged
         message.Freeze(fold, maxLength);
         return message;
     }
+
+    public static AiUserChatMessage CreateUserMessage(string userPrompt,IEnumerable<byte[]> images, bool fold = false, int maxLength = 0)
+    {
+        var message = new AiUserChatMessage();
+        message.AddInline(userPrompt);
+        message.fullTextBuilder.Append(userPrompt);
+        if (images != null)
+        {
+            foreach (var image in images)
+            {
+                message.AddImage(image);
+            }
+        }
+        message.Freeze(fold, maxLength);
+        return message;
+    }
+
     public static string RemoveThink(string text)
     {
         return ThinkPartRegex().Replace(text, string.Empty);
@@ -81,6 +100,7 @@ public abstract partial class AiChatMessage : INotifyPropertyChanged
         Inlines.Add(inline);
         MessageAppended?.Invoke(this, EventArgs.Empty);
     }
+
     protected virtual void Freeze(bool fold = false, int maxLength = 50)
     {
         isFrozen = true;
@@ -103,6 +123,7 @@ public abstract partial class AiChatMessage : INotifyPropertyChanged
         OnPropertyChanged(nameof(IsFrozen));
         OnPropertyChanged(nameof(FullText));
     }
+
     protected virtual void OnPropertyChanged(PropertyChangedEventArgs e)
     {
         PropertyChanged?.Invoke(this, e);
@@ -115,6 +136,6 @@ public abstract partial class AiChatMessage : INotifyPropertyChanged
 
 
     [GeneratedRegex(@"^\s*<Think>.*?</Think>\s*$\r?\n?",
-                    RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.Singleline, "zh-CN")]
+        RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.Singleline, "zh-CN")]
     private static partial Regex ThinkPartRegex();
 }

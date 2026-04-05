@@ -78,11 +78,43 @@ public abstract class BaseChatClient<TConfig> : IChatClient where TConfig : IAiP
 
         foreach (var m in messages)
         {
-            messageArray.Add(new JsonObject
+            var messageObj = new JsonObject
             {
                 ["role"] = m.Sender.ToString().ToLower(),
-                ["content"] = m.FullText
-            });
+            };
+            if (m is not AiUserChatMessage um //非用户
+                || um.Images == null || um.Images.Count == 0) //没有图
+            {
+                messageObj["content"] = m.FullText;
+            }
+            else
+            {
+                JsonArray messageContents = new JsonArray();
+                messageObj["content"] = messageContents;
+                if (!string.IsNullOrEmpty(m.FullText))
+                {
+                    messageContents.Add(new JsonObject
+                    {
+                        ["type"] = "text",
+                        ["text"] = m.FullText
+                    });
+                }
+
+                foreach (var image in um.Images)
+                {
+                    var base64 = Convert.ToBase64String(image);
+                    messageContents.Add(new JsonObject
+                    {
+                        ["type"] = "image_url",
+                        ["image_url"] = new JsonObject
+                        {
+                            ["url"] = $"data:image/png;base64,{base64}"
+                        }
+                    });
+                }
+            }
+
+            messageArray.Add(messageObj);
         }
 
         return new JsonObject

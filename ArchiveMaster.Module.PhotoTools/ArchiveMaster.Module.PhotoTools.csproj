@@ -25,9 +25,14 @@
       <DependentUpon>PhotoGeoSorterPanel.axaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Views\PhotoTextTaggingPanel.axaml.cs">
+      <DependentUpon>PhotoTextTaggingPanel.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\ArchiveMaster.Core.AI\ArchiveMaster.Core.AI.csproj" />
     <ProjectReference Include="..\ArchiveMaster.Core\ArchiveMaster.Core.csproj" />
   </ItemGroup>
 
