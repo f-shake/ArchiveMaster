@@ -33,10 +33,6 @@ namespace ArchiveMaster.Views;
 
 public class SimpleFileDataGrid : DataGrid
 {
-    public static readonly StyledProperty<SimpleFileRowDetailItemCollection> AppendSimpleFileRowDetailItemsProperty =
-        AvaloniaProperty.Register<SimpleFileDataGrid, SimpleFileRowDetailItemCollection>(
-            nameof(AppendSimpleFileRowDetailItems));
-
     public static readonly StyledProperty<bool> DoubleTappedToOpenFileProperty =
         AvaloniaProperty.Register<TreeFileDataGrid, bool>(
             nameof(DoubleTappedToOpenFile), true);
@@ -48,97 +44,6 @@ public class SimpleFileDataGrid : DataGrid
     public static readonly StyledProperty<bool> ShowCountProperty = AvaloniaProperty.Register<SimpleFileDataGrid, bool>(
         nameof(ShowCount), true);
 
-    public static readonly StyledProperty<SimpleFileRowDetailItemCollection> SimpleFileRowDetailItemsProperty =
-        AvaloniaProperty.Register<SimpleFileDataGrid, SimpleFileRowDetailItemCollection>(
-            nameof(SimpleFileRowDetailItems), defaultValue:
-            [
-                new SimpleFileRowDetailItem("路径：", ".",
-                    new FuncValueConverter<SimpleFileInfo, InlineCollection>(f =>
-                    {
-                        InlineCollection ic = new InlineCollection();
-
-                        void AddOpenFileButton()
-                        {
-                            ic.Add(new InlineUIContainer(new Button()
-                            {
-                                Content = new FluentIcon { Icon = Icon.FolderOpen, Width = 20 },
-                                Padding = new Thickness(),
-                                Height = 16,
-                                Classes = { "Link" },
-                                VerticalAlignment = VerticalAlignment.Bottom,
-                                Margin = new Thickness(8, -2),
-                                Flyout = new MenuFlyout
-                                {
-                                    Items =
-                                    {
-                                        new MenuItem
-                                        {
-                                            Header = "打开文件",
-                                            Command = GlobalCommands.Instance.OpenFileCommand,
-                                            CommandParameter = f.Path,
-                                        },
-                                        new MenuItem
-                                        {
-                                            Header = "打开目录",
-                                            Command = GlobalCommands.Instance.OpenParentDirCommand,
-                                            CommandParameter = f.Path,
-                                        }
-                                    }
-                                }
-                            }));
-                        }
-
-                        if (string.IsNullOrEmpty(f.Path))
-                        {
-                            ic.Add(new Run("（空）"));
-                            return ic;
-                        }
-
-                        //无相对路径，显示绝对路径
-                        if (string.IsNullOrEmpty(f.RelativePath))
-                        {
-                            ic.Add(new Run(f.Path));
-                            AddOpenFileButton();
-                            return ic;
-                        }
-
-                        //相对路径和绝对路径不一致，均显示
-                        if (!f.Path.EndsWith(f.RelativePath))
-                        {
-                            ic.Add(new Run($"{f.Path}（{f.RelativePath}）"));
-                            AddOpenFileButton();
-                            return ic;
-                        }
-
-                        //普通情况，显示绝对路径，并且标识相对路径
-                        var relPath = f.Path[..^f.RelativePath.Length];
-                        ic.Add(new Run(relPath));
-                        ic.Add(new Run(f.RelativePath) { TextDecorations = TextDecorations.Underline });
-                        AddOpenFileButton();
-                        return ic;
-                    })),
-
-                new SimpleFileRowDetailItem("元数据：", ".",
-                    new FuncValueConverter<SimpleFileInfo, InlineCollection>(f =>
-                    {
-                        InlineCollection ic = new InlineCollection();
-                        if (!f.IsDir)
-                        {
-                            ic.Add(new Run((string)Converters.Converters.FileLength.Convert(f.Length,
-                                typeof(string), null,
-                                CultureInfo.CurrentCulture))
-                            {
-                                FontStyle = FontStyle.Italic
-                            });
-                        }
-
-                        ic.Add("    ");
-                        ic.Add(new Run(f.Time.ToString("yyyy-MM-dd HH:mm:ss")));
-                        return ic;
-                    })),
-
-                new SimpleFileRowDetailItem("信息：", nameof(SimpleFileInfo.Message))
-            ]);
 
     protected static readonly DateTimeConverter DateTimeConverter = new DateTimeConverter();
 
@@ -160,12 +65,6 @@ public class SimpleFileDataGrid : DataGrid
         CanUserResizeColumns = true;
         this[!IsReadOnlyProperty] = new Binding("IsWorking");
         DoubleTapped += SimpleFileDataGrid_DoubleTapped;
-    }
-
-    public SimpleFileRowDetailItemCollection AppendSimpleFileRowDetailItems
-    {
-        get => GetValue(AppendSimpleFileRowDetailItemsProperty);
-        set => SetValue(AppendSimpleFileRowDetailItemsProperty, value);
     }
 
     public virtual string ColumnIsCheckedHeader { get; init; } = "";
@@ -220,12 +119,6 @@ public class SimpleFileDataGrid : DataGrid
     {
         get => GetValue(ShowCountProperty);
         set => SetValue(ShowCountProperty, value);
-    }
-
-    public SimpleFileRowDetailItemCollection SimpleFileRowDetailItems
-    {
-        get => GetValue(SimpleFileRowDetailItemsProperty);
-        set => SetValue(SimpleFileRowDetailItemsProperty, value);
     }
 
     protected virtual (double Index, Func<DataGridColumn> Func)[] PresetColumns =>
@@ -516,11 +409,6 @@ public class SimpleFileDataGrid : DataGrid
             {
                 ((Grid)stk.Parent)?.Children.Remove(stk);
             }
-        }
-
-        if (SimpleFileRowDetailItems != null && AppendSimpleFileRowDetailItems is { Count: > 0 })
-        {
-            SimpleFileRowDetailItems.InsertRange(SimpleFileRowDetailItems.Count - 1, AppendSimpleFileRowDetailItems);
         }
     }
 

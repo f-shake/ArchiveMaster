@@ -3,6 +3,7 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:c="clr-namespace:ArchiveMaster.Converters"
+    xmlns:ct="clr-namespace:FzLib.Avalonia.Controls;assembly=FzLib.Avalonia"
     xmlns:cvt="using:ArchiveMaster.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:enums="clr-namespace:ArchiveMaster.Enums"
@@ -19,17 +20,35 @@
     ItemsSource="{Binding Files}"
     ShowCount="False"
     mc:Ignorable="d">
-    <v:SimpleFileDataGrid.AppendSimpleFileRowDetailItems>
-        <v:SimpleFileRowDetailItemCollection>
-            <v:SimpleFileRowDetailItem
-                BindingPath="TempName"
-                Label="临时文件名：" />
-            <v:SimpleFileRowDetailItem
-                BindingPath="OldRelativePath"
-                Label="移动前文件：" />
-        </v:SimpleFileRowDetailItemCollection>
-    </v:SimpleFileDataGrid.AppendSimpleFileRowDetailItems>
-
+    <DataGrid.RowDetailsTemplate>
+        <DataTemplate>
+            <StackPanel
+                Margin="{StaticResource FileDataGridRowDetailPadding}"
+                Spacing="8">
+                <ContentControl
+                    Content="{Binding}"
+                    ContentTemplate="{StaticResource FileDataGridRowDetailPathTemplate}" />
+                <ContentControl
+                    Content="{Binding}"
+                    ContentTemplate="{StaticResource FileDataGridRowDetailMetadataTemplate}" />
+                <ct:FormItem
+                    Classes="BoldLabel"
+                    Label="临时文件名："
+                    LabelWidth="{StaticResource FileDataGridRowDetailLabelWidth}">
+                    <TextBlock Text="{Binding TempName}" />
+                </ct:FormItem>
+                <ct:FormItem
+                    Classes="BoldLabel"
+                    Label="移动前文件："
+                    LabelWidth="{StaticResource FileDataGridRowDetailLabelWidth}">
+                    <TextBlock Text="{Binding OldRelativePath}" />
+                </ct:FormItem>
+                <ContentControl
+                    Content="{Binding}"
+                    ContentTemplate="{StaticResource FileDataGridRowDetailMessageTemplate}" />
+            </StackPanel>
+        </DataTemplate>
+    </DataGrid.RowDetailsTemplate>
     <DataGrid.Columns>
         <DataGridTemplateColumn
             CanUserResize="False"

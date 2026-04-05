@@ -119,14 +119,31 @@
                     Header="标签"
                     IsReadOnly="True" />
             </DataGrid.Columns>
-            <v:SimpleFileDataGrid.AppendSimpleFileRowDetailItems>
-                <v:SimpleFileRowDetailItemCollection>
-                    <v:SimpleFileRowDetailItem
-                        BindingPath="Tags"
-                        Converter="{x:Static cvt:Converters.StringJoin}"
-                        Label="标签：" />
-                </v:SimpleFileRowDetailItemCollection>
-            </v:SimpleFileDataGrid.AppendSimpleFileRowDetailItems>
+            <DataGrid.RowDetailsTemplate>
+                <DataTemplate>
+                    <StackPanel
+                        Margin="{StaticResource FileDataGridRowDetailPadding}"
+                        Spacing="8">
+                        <ContentControl
+                            Content="{Binding}"
+                            ContentTemplate="{StaticResource FileDataGridRowDetailPathTemplate}" />
+                        <ContentControl
+                            Content="{Binding}"
+                            ContentTemplate="{StaticResource FileDataGridRowDetailMetadataTemplate}" />
+                        <ct:FormItem
+                            Classes="BoldLabel"
+                            Label="标签："
+                            LabelWidth="{StaticResource FileDataGridRowDetailLabelWidth}">
+                            <TextBlock
+                                Text="{Binding Tags, Converter={x:Static cvt:TagsToStringConverter.Instance}}"
+                                TextWrapping="Wrap" />
+                        </ct:FormItem>
+                        <ContentControl
+                            Content="{Binding}"
+                            ContentTemplate="{StaticResource FileDataGridRowDetailMessageTemplate}" />
+                    </StackPanel>
+                </DataTemplate>
+            </DataGrid.RowDetailsTemplate>
         </v:SimpleFileDataGrid>
     </v:VerticalTwoStepPanelBase.ResultsContent>
 </v:VerticalTwoStepPanelBase>

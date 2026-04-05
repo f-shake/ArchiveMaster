@@ -30,7 +30,7 @@ namespace ArchiveMaster.Services
 
         private const string SYSTEM_PROMPT = """
                                              1.角色：图像语义原子化标注员
-                                             2.任务：请对用户提供的图片进行内容提炼，输出 5-20 个核心关键词。
+                                             2.任务：请对用户提供的图片进行内容提炼，输出 {MinTagCount}-{MaxTagCount} 个核心关键词。
                                              3.原子化拆解：每个词语必须是不可再分的最小语义单位。严禁合成词，例如：禁止“夕阳西下”，应拆分为“夕阳，日落”；禁止“城市建筑”，应拆分为“城市，建筑”。
                                              4.字数约束：每个关键词限 2-3 字。
                                              5.输出格式：仅输出结果，禁止任何开场白、解释或总结。词语间固定使用中文逗号（，）分隔。
@@ -38,6 +38,70 @@ namespace ArchiveMaster.Services
                                              7.例如：大桥，斜拉桥，高楼，河流，水面，城市，蓝天，建筑，现代
                                              8.不应该输出例如：水库风光，梯田景观，乡村道路，绿色植被，航拍视角，田园风光，山水相依，农业种植，蜿蜒公路，生态和谐
                                              """;
+
+        private string systemPrompts;
+
+        private async Task<List<TagInfo>> GetTagsAsync(LlmCallerService llm, TaggingPhotoFileInfo file,
+            CancellationToken ct)
+        {
+            IEnumerable<string> GetTags(string tagResult)
+            {
+                return tagResult.Split([",", "，", "、"], StringSplitOptions.RemoveEmptyEntries)
+                    .Select(p => p.Trim())
+                    .Distinct();
+            }
+
+            var imageBytes = GetPhotoBytes(file.Path);
+            var sys = AiChatMessage.CreateSystemMessage(systemPrompts);
+            var user = AiChatMessage.CreateUserMessage("", [imageBytes]);
+            List<TagInfo> tags = new List<TagInfo>();
+            if (Config.EnableMajorityVote)
+            {
+                var tasks = new List<Task<string>>();
+                for (int i = 0; i < Config.VoteCount; i++)
+                {
+                    tasks.Add(llm.CallAsync([sys, user], ct: ct));
+                }
+
+                await Task.WhenAll(tasks);
+                Dictionary<string, int> tagVotes = new Dictionary<string, int>();
+                foreach (var t in tasks)
+                {
+                    var taskResult = t.Result;
+                    var taskTags = GetTags(taskResult);
+                    foreach (var tag in taskTags)
+                    {
+                        if (!tagVotes.TryAdd(tag, 1))
+                        {
+                            tagVotes[tag]++;
+                        }
+                    }
+                }
+
+                foreach (var tagVote in tagVotes)
+                {
+                    if (tagVote.Value < Config.MinVoteThreshold)
+                    {
+                        continue;
+                    }
+
+                    tags.Add(new TagInfo(tagVote.Key, tagVote.Value));
+                }
+
+                tags.Sort((tag1, tag2) =>
+                {
+                    int voteComparison = tag2.Votes.CompareTo(tag1.Votes);
+                    return voteComparison != 0 ? voteComparison : string.Compare(tag1.Tag, tag2.Tag, StringComparison.Ordinal);
+                });
+            }
+            else
+            {
+                var result = await llm.CallAsync([sys, user], ct: ct);
+                tags.AddRange(GetTags(result).Select(p => new TagInfo(p, 1)));
+            }
+
+            return tags;
+        }
 
         public List<TaggingPhotoFileInfo> Files { get; private set; }
 
@@ -66,19 +130,17 @@ namespace ArchiveMaster.Services
         {
             await Task.Run(async () =>
             {
+                systemPrompts = SYSTEM_PROMPT
+                    .Replace("{MinTagCount}", Config.MinTagCount.ToString())
+                    .Replace("{MaxTagCount}", Config.MaxTagCount.ToString());
                 LlmCallerService llm = new LlmCallerService(GlobalConfigs.Instance.AiProviders.CurrentProvider);
                 var files = Files.CheckedOnly().ToList();
                 await TryForFilesAsync(files,
                     async (file, s) =>
                     {
                         NotifyMessage($"正在生成图片标签{s.GetFileNumberMessage()}：{file.RelativePath}");
-                        var imageBytes = GetPhotoBytes(file.Path);
-                        var sys = AiChatMessage.CreateSystemMessage(SYSTEM_PROMPT);
-                        var user = AiChatMessage.CreateUserMessage("", [imageBytes]);
-                        var result = await llm.CallAsync([sys, user], ct: ct);
-                        file.Tags = result.Split([",", "，", "、"], StringSplitOptions.RemoveEmptyEntries)
-                            .Select(p => p.Trim())
-                            .ToHashSet();
+                        file.Tags = await GetTagsAsync(llm, file, ct);
+                        file.HasGenerated = true;
                     },
                     ct,
                     FilesLoopOptions.Builder().AutoApplyFileNumberProgress().AutoApplyStatus().Build());

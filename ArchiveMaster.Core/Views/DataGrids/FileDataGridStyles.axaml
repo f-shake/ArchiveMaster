@@ -19,36 +19,19 @@
         TargetType="v:SimpleFileDataGrid">
         <Setter Property="RowDetailsTemplate">
             <DataTemplate>
-                <Border Padding="8">
-                    <Border.Styles>
-                        <Style Selector="TextBox">
-                            <Setter Property="Background" Value="Transparent" />
-                            <Setter Property="BorderThickness" Value="0" />
-                        </Style>
-                    </Border.Styles>
-                    <ItemsControl
-                        x:Name="items"
-                        ItemsSource="{Binding SimpleFileRowDetailItems, RelativeSource={RelativeSource AncestorType=v:SimpleFileDataGrid}}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate x:DataType="v:SimpleFileRowDetailItem">
-                                <ctrl:FormItem
-                                    Classes="BoldLabel"
-                                    Label="{Binding Label}"
-                                    LabelWidth="{Binding LabelWidth}">
-                                    <SelectableTextBlock>
-                                        <SelectableTextBlock.Inlines>
-                                            <MultiBinding Converter="{x:Static cvt:Converters.StringToBinding}">
-                                                <Binding Path="#items.DataContext" />
-                                                <Binding Path="BindingPath" />
-                                                <Binding Path="Converter" />
-                                            </MultiBinding>
-                                        </SelectableTextBlock.Inlines>
-                                    </SelectableTextBlock>
-                                </ctrl:FormItem>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </Border>
+                <StackPanel
+                    Margin="{StaticResource FileDataGridRowDetailPadding}"
+                    Spacing="8">
+                    <ContentControl
+                        Content="{Binding}"
+                        ContentTemplate="{StaticResource FileDataGridRowDetailPathTemplate}" />
+                    <ContentControl
+                        Content="{Binding}"
+                        ContentTemplate="{StaticResource FileDataGridRowDetailMetadataTemplate}" />
+                    <ContentControl
+                        Content="{Binding}"
+                        ContentTemplate="{StaticResource FileDataGridRowDetailMessageTemplate}" />
+                </StackPanel>
             </DataTemplate>
         </Setter>
         <Setter Property="Template">

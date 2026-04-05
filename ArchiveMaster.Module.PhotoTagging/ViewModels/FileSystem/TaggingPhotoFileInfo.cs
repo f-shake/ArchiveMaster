@@ -1,3 +1,4 @@
+using ArchiveMaster.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace ArchiveMaster.ViewModels.FileSystem;
@@ -12,5 +13,5 @@ public partial class TaggingPhotoFileInfo : SimpleFileInfo
     private bool hasGenerated;
 
     [ObservableProperty]
-    public HashSet<string> tags;
+    public List<TagInfo> tags;
 }

@@ -90,22 +90,47 @@
     <v:VerticalTwoStepPanelBase.ResultsContent>
         <Grid RowDefinitions="*,8,Auto">
             <v:SimpleFileDataGrid ItemsSource="{Binding Files}">
-                <v:SimpleFileDataGrid.AppendSimpleFileRowDetailItems>
-                    <v:SimpleFileRowDetailItemCollection>
-                        <v:SimpleFileRowDetailItem
-                            BindingPath="CommandLine"
-                            Label="命令行：" />
-                        <v:SimpleFileRowDetailItem
-                            BindingPath="AutoCreateDir"
-                            Label="自动创建目录：" />
-                        <v:SimpleFileRowDetailItem
-                            BindingPath="ProcessOutput"
-                            Label="进程输出：" />
-                        <v:SimpleFileRowDetailItem
-                            BindingPath="ProcessError"
-                            Label="进程错误：" />
-                    </v:SimpleFileRowDetailItemCollection>
-                </v:SimpleFileDataGrid.AppendSimpleFileRowDetailItems>
+                <DataGrid.RowDetailsTemplate>
+                    <DataTemplate>
+                        <StackPanel
+                            Margin="{StaticResource FileDataGridRowDetailPadding}"
+                            Spacing="8">
+                            <ContentControl
+                                Content="{Binding}"
+                                ContentTemplate="{StaticResource FileDataGridRowDetailPathTemplate}" />
+                            <ContentControl
+                                Content="{Binding}"
+                                ContentTemplate="{StaticResource FileDataGridRowDetailMetadataTemplate}" />
+                            <ct:FormItem
+                                Classes="BoldLabel"
+                                Label="命令行："
+                                LabelWidth="{StaticResource FileDataGridRowDetailLabelWidth}">
+                                <TextBlock Text="{Binding CommandLine}" />
+                            </ct:FormItem>
+                            <ct:FormItem
+                                Classes="BoldLabel"
+                                Label="自动创建目录："
+                                LabelWidth="{StaticResource FileDataGridRowDetailLabelWidth}">
+                                <TextBlock Text="{Binding AutoCreateDir}" />
+                            </ct:FormItem>
+                            <ct:FormItem
+                                Classes="BoldLabel"
+                                Label="进程输出："
+                                LabelWidth="{StaticResource FileDataGridRowDetailLabelWidth}">
+                                <TextBlock Text="{Binding ProcessOutput}" />
+                            </ct:FormItem>
+                            <ct:FormItem
+                                Classes="BoldLabel"
+                                Label="进程错误："
+                                LabelWidth="{StaticResource FileDataGridRowDetailLabelWidth}">
+                                <TextBlock Text="{Binding ProcessError}" />
+                            </ct:FormItem>
+                            <ContentControl
+                                Content="{Binding}"
+                                ContentTemplate="{StaticResource FileDataGridRowDetailMessageTemplate}" />
+                        </StackPanel>
+                    </DataTemplate>
+                </DataGrid.RowDetailsTemplate>
             </v:SimpleFileDataGrid>
             <TextBlock
                 Grid.Row="2"
