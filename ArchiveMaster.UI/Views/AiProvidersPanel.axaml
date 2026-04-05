@@ -15,14 +15,6 @@
     d:DesignWidth="800"
     x:DataType="vm:AiProvidersViewModel"
     mc:Ignorable="d">
-    <!-- <Interaction.Behaviors> -->
-    <!--     <RoutedEventTriggerBehavior RoutedEvent="{x:Static Control.LoadedEvent}"> -->
-    <!--         <InvokeCommandAction Command="{Binding ViewLoadedCommand}" /> -->
-    <!--     </RoutedEventTriggerBehavior> -->
-    <!--     <RoutedEventTriggerBehavior RoutedEvent="{x:Static Control.}"> -->
-    <!--         <InvokeCommandAction Command="{Binding ViewUnloadedCommand}" /> -->
-    <!--     </RoutedEventTriggerBehavior> -->
-    <!-- </Interaction.Behaviors> -->
     <Grid
         Margin="8"
         ColumnDefinitions="*,8,*">
@@ -34,11 +26,6 @@
                 <ListBox.ItemTemplate>
                     <DataTemplate x:DataType="vm:AiProviderConfigViewModel">
                         <Grid ColumnDefinitions="Auto,8,*,8,Auto">
-                            <!--  <Ellipse  -->
-                            <!--  Width="8"  -->
-                            <!--  Height="8"  -->
-                            <!--  Fill="Green"  -->
-                            <!--  IsVisible="{Binding IsDefault}" />  -->
                             <RadioButton
                                 Command="{Binding $parent[UserControl].DataContext.MakeCurrentCommand}"
                                 CommandParameter="{Binding .}"
@@ -47,20 +34,6 @@
                                 Grid.Column="2"
                                 Text="{Binding Name}"
                                 TextTrimming="CharacterEllipsis" />
-                            <!--  <Button  -->
-                            <!--  Grid.Column="4"  -->
-                            <!--  Padding="0"  -->
-                            <!--  HorizontalAlignment="Center"  -->
-                            <!--  Classes="Link"  -->
-                            <!--  Command="{Binding $parent[UserControl].DataContext.MakeCurrentCommand}"  -->
-                            <!--  Content="设置为当前"  -->
-                            <!--  IsVisible="{Binding !IsDefault}" />  -->
-                            <!--  <TextBlock  -->
-                            <!--  Grid.Column="4"  -->
-                            <!--  HorizontalAlignment="Center"  -->
-                            <!--  Classes="Description"  -->
-                            <!--  IsVisible="{Binding IsDefault}"  -->
-                            <!--  Text="已设置为当前" />  -->
                         </Grid>
                     </DataTemplate>
                 </ListBox.ItemTemplate>
@@ -170,6 +143,11 @@
                                     IsChecked="{Binding SelectedProvider.SpecialMaxTokens}" />
                             </Grid>
                         </ct:FormItem>
+                        <ct:FormItem Label="特性支持：">
+                            <CheckBox
+                                Content="支持JSON输出"
+                                IsChecked="{Binding SelectedProvider.SupportJsonOutput}" />
+                        </ct:FormItem>
                         <ct:FormItem Label="自定义参数：">
                             <TextBox
                                 AcceptsReturn="True"
@@ -181,23 +159,6 @@
                         </ct:FormItem>
                     </ct:StackFormItemGroup>
                 </HeaderedContentControl>
-
-                <!--  <HeaderedContentControl  -->
-                <!--  Classes="GroupBox"  -->
-                <!--  Header="当前提供者">  -->
-                <!--     <StackPanel Orientation="Vertical"> -->
-                <!--  <Button  -->
-                <!--  HorizontalAlignment="Center"  -->
-                <!--  Classes="Primary"  -->
-                <!--  Command="{Binding MakeCurrentCommand}"  -->
-                <!--  Content="设置为当前AI提供者"  -->
-                <!--  IsEnabled="{Binding !SelectedProvider.IsDefault}" />  -->
-                <!--  <TextBlock  -->
-                <!--  HorizontalAlignment="Center"  -->
-                <!--  IsVisible="{Binding SelectedProvider.IsDefault}"  -->
-                <!--  Text="已设置为当前AI提供者" />  -->
-                <!--     </StackPanel> -->
-                <!-- </HeaderedContentControl> -->
             </StackPanel>
         </ScrollViewer>
     </Grid>

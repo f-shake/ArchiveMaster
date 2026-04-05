@@ -18,6 +18,7 @@ namespace ArchiveMaster.Configs
     public interface IOpenAIAiProvider : IAiProvider
     {
         public SecurePassword Key { get; set; }
+        public bool SupportJsonOutput { get; set; }
     }
 
     public interface IOllamaAiProvider : IAiProvider
@@ -53,5 +54,8 @@ namespace ArchiveMaster.Configs
         
         [ObservableProperty]
         private string extraParamsJson = "";
+        
+        [ObservableProperty]
+        private bool supportJsonOutput = true;
     }
 }

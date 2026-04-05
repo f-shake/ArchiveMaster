@@ -11,7 +11,7 @@ using ArchiveMaster.ViewModels;
 
 namespace ArchiveMaster.Services;
 
-public class OpenAICompatibleChatClient(IOpenAIAiProvider config) : BaseChatClient<IOpenAIAiProvider>(config, "/v1/")
+public class OpenAIChatClient(IOpenAIAiProvider config) : BaseChatClient<IOpenAIAiProvider>(config, "/v1/")
 {
     public override async Task<string> GetResponseAsync(IEnumerable<AiChatMessage> messages,
         ChatOptions options = null, CancellationToken cancellationToken = default)
@@ -25,8 +25,7 @@ public class OpenAICompatibleChatClient(IOpenAIAiProvider config) : BaseChatClie
 
     public override IAsyncEnumerable<string> GetStreamingResponseAsync(
         IEnumerable<AiChatMessage> messages, ChatOptions options = null,
-        [EnumeratorCancellation]
-        CancellationToken ct = default)
+        [EnumeratorCancellation] CancellationToken ct = default)
     {
         return GetStreamingResponseAsync(messages, options, "chat/completions",
             line =>
@@ -56,11 +55,12 @@ public class OpenAICompatibleChatClient(IOpenAIAiProvider config) : BaseChatClie
     {
         var root = CreateBasePayload(messages, isStream);
         WriteOptions(root, options, "temperature", "top_p", "max_tokens");
-      
-        if (options?.OutputJson == true)
+
+        if (Config.SupportJsonOutput && options?.OutputJson == true)
         {
             root["response_format"] = new JsonObject { ["type"] = "json_object" };
         }
+
         MergeExtraParams(root);
 
         return root;
@@ -71,32 +71,27 @@ public class OpenAICompatibleChatClient(IOpenAIAiProvider config) : BaseChatClie
 
     private class OpenAIResponse
     {
-        [JsonPropertyName("choices")]
-        public List<Choice> Choices { get; set; }
+        [JsonPropertyName("choices")] public List<Choice> Choices { get; set; }
     }
 
     private class OpenAIStreamResponse
     {
-        [JsonPropertyName("choices")]
-        public List<StreamChoice> Choices { get; set; }
+        [JsonPropertyName("choices")] public List<StreamChoice> Choices { get; set; }
     }
 
     private class Choice
     {
-        [JsonPropertyName("message")]
-        public OpenAIMessage Message { get; set; }
+        [JsonPropertyName("message")] public OpenAIMessage Message { get; set; }
     }
 
     private class StreamChoice
     {
-        [JsonPropertyName("delta")]
-        public OpenAIMessage Delta { get; set; }
+        [JsonPropertyName("delta")] public OpenAIMessage Delta { get; set; }
     }
 
     private class OpenAIMessage
     {
-        [JsonPropertyName("content")]
-        public string Content { get; set; }
+        [JsonPropertyName("content")] public string Content { get; set; }
     }
 
     #endregion

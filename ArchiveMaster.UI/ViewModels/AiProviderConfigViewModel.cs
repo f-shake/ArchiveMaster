@@ -8,9 +8,8 @@ public partial class AiProviderConfigViewModel : ObservableObject
 {
     [ObservableProperty]
     private bool isDefault = false;
-    
-    [property: SecurePassword.SecurePasswordAlwaysRemember]
-    [ObservableProperty]
+
+    [property: SecurePassword.SecurePasswordAlwaysRemember] [ObservableProperty]
     private SecurePassword key = new SecurePassword();
 
     [ObservableProperty]
@@ -46,6 +45,9 @@ public partial class AiProviderConfigViewModel : ObservableObject
     [ObservableProperty]
     private string extraParamsJson = "";
 
+    [ObservableProperty]
+    private bool supportJsonOutput;
+
     public static AiProviderConfigViewModel FromConfig(AiProviderConfig config)
     {
         var viewModel = new AiProviderConfigViewModel
@@ -56,6 +58,7 @@ public partial class AiProviderConfigViewModel : ObservableObject
             ExtraParamsJson = config.ExtraParamsJson,
             Type = config.Type,
             Key = config.Key,
+            SupportJsonOutput =  config.SupportJsonOutput,
         };
         if (config.Temperature.HasValue)
         {
@@ -91,6 +94,7 @@ public partial class AiProviderConfigViewModel : ObservableObject
             Temperature = SpecialTemperature ? Temperature : null,
             TopP = SpecialTopP ? TopP : null,
             MaxTokens = SpecialMaxTokens ? MaxTokens : null,
+            SupportJsonOutput = SupportJsonOutput
         };
         return config;
     }

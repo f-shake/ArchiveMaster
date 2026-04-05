@@ -230,7 +230,7 @@ public class TypoCheckerService(AppConfig appConfig)
             }
 
             string result = await llm.CallAsync(systemPrompt, segment,
-                new ChatOptions { OutputJson = false }, ct);
+                new ChatOptions { OutputJson = true }, ct);
             yield return new LlmOutputItem(result);
             result = AiChatMessage.RemoveThink(result);
 

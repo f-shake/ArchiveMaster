@@ -187,7 +187,7 @@ public class LlmCallerService
     {
         IChatClient chatClient = Config.Type switch
         {
-            AiProviderType.OpenAI => new OpenAICompatibleChatClient(Config),
+            AiProviderType.OpenAI => new OpenAIChatClient(Config),
             AiProviderType.Ollama => new OllamaChatClient(Config),
             // AiProviderType.OpenAICompatible => new OpenAICompatibleChatClient(Config),
             _ => throw new ArgumentOutOfRangeException()
