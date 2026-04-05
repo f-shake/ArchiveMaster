@@ -18,9 +18,18 @@ namespace ArchiveMaster.Configs
 
         [ObservableProperty]
         private int minTagCount = 5;
+        
+        [ObservableProperty]
+        private bool enableMajorityVote = false;
 
         [ObservableProperty]
+        private int voteCount = 3;
+        
+        [ObservableProperty]
         private int resizingTargetResolutionIn10k = 800;
+        
+        [ObservableProperty]
+        private int minVoteThreshold = 2;
 
         [ObservableProperty]
         private string tagFile;

@@ -33,7 +33,7 @@ namespace ArchiveMaster
 
         public IList<Type> TransientServices { get; } =
         [
-            typeof(PhotoTagGeneratorConfig),
+            typeof(PhotoTagGeneratorService),
         ];
 
         public ToolPanelGroupInfo Views => new ToolPanelGroupInfo()

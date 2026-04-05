@@ -38,6 +38,11 @@ public class LlmCallerService
         var user = AiChatMessage.CreateUserMessage(userPrompt, false, 0);
         return await GetResponseAsync([sys, user], options, ct);
     }
+    public async Task<string> CallAsync(IEnumerable<AiChatMessage> messages, ChatOptions options = null,
+        CancellationToken ct = default)
+    {
+        return await GetResponseAsync(messages, options, ct);
+    }
 
     private async Task<string> GetResponseAsync(IEnumerable<AiChatMessage> messages, ChatOptions options = null,
         CancellationToken ct = default)
@@ -158,30 +163,6 @@ public class LlmCallerService
         Log.Logger.Information(str.ToString());
         Debug.WriteLine("AI流式调用完成");
     }
-
-    // private void LogPrompt(string systemPrompt, string userPrompt, bool stream)
-    // {
-    //     var str = new StringBuilder().Append("调用AI")
-    //         .AppendLine(stream ? "（流式）" : "")
-    //         .AppendLine("##系统提示##")
-    //         .AppendLine(GetPreAndSuffixes(systemPrompt))
-    //         .AppendLine("##用户提示##")
-    //         .Append(GetPreAndSuffixes(userPrompt))
-    //         .ToString();
-    //     Debug.WriteLine(str);
-    //     Log.Logger.Information(str);
-    //
-    //     string GetPreAndSuffixes(string str)
-    //     {
-    //         str = str.Replace('\n', ' ').Replace('\r', ' ');
-    //         if (str.Length < 100)
-    //         {
-    //             return str;
-    //         }
-    //
-    //         return $"{str[..50]}...{str[^50..]} (长度为{str.Length})";
-    //     }
-    // }
 
     private IChatClient GetChatClient()
     {

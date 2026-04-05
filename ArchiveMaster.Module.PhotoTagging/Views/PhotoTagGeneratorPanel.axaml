@@ -38,9 +38,95 @@
             </ct:FormItem>
             <ct:FormItem Label="AI生成选项：">
                 <ct:WrapFormItemGroup>
-                    <ct:FormItem Header="" />
+                    <ct:FormItem Header="最少关键词数量">
+                        <Slider
+                            Width="120"
+                            Classes="ThumbLabel"
+                            IsSnapToTickEnabled="True"
+                            Maximum="{Binding Config.MaxTagCount}"
+                            Minimum="1"
+                            TickFrequency="1"
+                            Value="{Binding Config.MinTagCount}" />
+                    </ct:FormItem>
+                    <ct:FormItem Header="最多关键词数量">
+                        <Slider
+                            Width="120"
+                            Classes="ThumbLabel"
+                            IsSnapToTickEnabled="True"
+                            Maximum="30"
+                            Minimum="{Binding Config.MinTagCount}"
+                            TickFrequency="1"
+                            Value="{Binding Config.MaxTagCount}" />
+                    </ct:FormItem>
+                </ct:WrapFormItemGroup>
+            </ct:FormItem>
+            <ct:FormItem Label="AI投票机制：">
+                <ct:WrapFormItemGroup>
+                    <CheckBox
+                        Content="投票机制"
+                        IsChecked="{Binding Config.EnableMajorityVote}"
+                        ToolTip.Tip="通过AI多次判断，提高置信度" />
+
+                    <ct:FormItem
+                        Header="投票次数（轮）"
+                        IsEnabled="{Binding Config.EnableMajorityVote}">
+                        <Slider
+                            Width="120"
+                            Classes="ThumbLabel"
+                            IsSnapToTickEnabled="True"
+                            LargeChange="2"
+                            Maximum="10"
+                            Minimum="3"
+                            SmallChange="1"
+                            TickFrequency="1"
+                            Value="{Binding Config.VoteCount}" />
+                    </ct:FormItem>
+                    <ct:FormItem
+                        Header="最小采纳票数（轮）"
+                        IsEnabled="{Binding Config.EnableMajorityVote}">
+                        <Slider
+                            Width="120"
+                            Classes="ThumbLabel"
+                            IsSnapToTickEnabled="True"
+                            LargeChange="2"
+                            Maximum="{Binding Config.VoteCount}"
+                            Minimum="1"
+                            SmallChange="1"
+                            TickFrequency="1"
+                            Value="{Binding Config.MinVoteThreshold}" />
+                    </ct:FormItem>
+
                 </ct:WrapFormItemGroup>
             </ct:FormItem>
         </ct:StackFormItemGroup>
     </v:VerticalTwoStepPanelBase.ConfigsContent>
+
+    <v:VerticalTwoStepPanelBase.ResultsContent>
+        <v:SimpleFileDataGrid
+            ColumnLengthIndex="2.3"
+            ColumnNameIndex="1.1"
+            ColumnPathIndex="2.2"
+            ColumnTimeIndex="2.4"
+            ItemsSource="{Binding Files}">
+            <DataGrid.Columns>
+                <v:DataGridLightColumn
+                    Fill="{DynamicResource Foreground0}"
+                    Header="已生成"
+                    SortMemberPath="HasGenerated"
+                    VisibleBinding="{Binding HasGenerated}" />
+                <DataGridTextColumn
+                    Binding="{Binding Tags.Count, StringFormat='{}{0}个标签'}"
+                    Header="标签"
+                    IsReadOnly="True" />
+            </DataGrid.Columns>
+            <v:SimpleFileDataGrid.AppendSimpleFileRowDetailItems>
+                <v:SimpleFileRowDetailItemCollection>
+                    <v:SimpleFileRowDetailItem
+                        BindingPath="Tags"
+                        Converter="{x:Static cvt:Converters.StringJoin}"
+                        Label="标签：" />
+                </v:SimpleFileRowDetailItemCollection>
+            </v:SimpleFileDataGrid.AppendSimpleFileRowDetailItems>
+        </v:SimpleFileDataGrid>
+    </v:VerticalTwoStepPanelBase.ResultsContent>
 </v:VerticalTwoStepPanelBase>

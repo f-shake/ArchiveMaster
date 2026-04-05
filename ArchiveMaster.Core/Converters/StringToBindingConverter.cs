@@ -41,7 +41,7 @@ public class StringToBindingConverter : IMultiValueConverter
             value = property.GetValue(obj);
         }
 
-        if (converter == null || converter is UnsetValueType)
+        if (converter is null or UnsetValueType)
         {
             if (targetType == typeof(string))
             {
