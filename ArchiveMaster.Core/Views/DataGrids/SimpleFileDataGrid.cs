@@ -467,7 +467,7 @@ public class SimpleFileDataGrid : DataGrid
     {
         if (e.Source is Visual { DataContext: SimpleFileInfo file })
         {
-            OnFileDoubleTapped(file);
+            // OnFileDoubleTapped(file);
         }
     }
 }

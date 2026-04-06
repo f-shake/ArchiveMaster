@@ -145,8 +145,9 @@
                         </StackPanel>
                         <Image
                             Grid.Column="2"
-                            Width="120"
-                            Source="{Binding Path, Converter={x:Static cvt:BitmapAssetValueConverter.Instance}}" />
+                            Width="160"
+                            Height="120"
+                            Source="{Binding ThumbnailImage, Mode=OneWay}" />
                     </Grid>
                 </DataTemplate>
             </DataGrid.RowDetailsTemplate>
