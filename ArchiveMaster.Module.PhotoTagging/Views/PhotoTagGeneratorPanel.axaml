@@ -121,27 +121,33 @@
             </DataGrid.Columns>
             <DataGrid.RowDetailsTemplate>
                 <DataTemplate>
-                    <StackPanel
+                    <Grid
                         Margin="{StaticResource FileDataGridRowDetailPadding}"
-                        Spacing="8">
-                        <ContentControl
-                            Content="{Binding}"
-                            ContentTemplate="{StaticResource FileDataGridRowDetailPathTemplate}" />
-                        <ContentControl
-                            Content="{Binding}"
-                            ContentTemplate="{StaticResource FileDataGridRowDetailMetadataTemplate}" />
-                        <ct:FormItem
-                            Classes="BoldLabel"
-                            Label="标签："
-                            LabelWidth="{StaticResource FileDataGridRowDetailLabelWidth}">
-                            <TextBlock
-                                Text="{Binding Tags, Converter={x:Static cvt:TagsToStringConverter.Instance}}"
-                                TextWrapping="Wrap" />
-                        </ct:FormItem>
-                        <ContentControl
-                            Content="{Binding}"
-                            ContentTemplate="{StaticResource FileDataGridRowDetailMessageTemplate}" />
-                    </StackPanel>
+                        ColumnDefinitions="*,8,Auto">
+                        <StackPanel Spacing="8">
+                            <ContentControl
+                                Content="{Binding}"
+                                ContentTemplate="{StaticResource FileDataGridRowDetailPathTemplate}" />
+                            <ContentControl
+                                Content="{Binding}"
+                                ContentTemplate="{StaticResource FileDataGridRowDetailMetadataTemplate}" />
+                            <ct:FormItem
+                                Classes="BoldLabel"
+                                Label="标签："
+                                LabelWidth="{StaticResource FileDataGridRowDetailLabelWidth}">
+                                <TextBlock
+                                    Text="{Binding Tags, Converter={x:Static cvt:TagsToStringConverter.Instance}}"
+                                    TextWrapping="Wrap" />
+                            </ct:FormItem>
+                            <ContentControl
+                                Content="{Binding}"
+                                ContentTemplate="{StaticResource FileDataGridRowDetailMessageTemplate}" />
+                        </StackPanel>
+                        <Image
+                            Grid.Column="2"
+                            Width="120"
+                            Source="{Binding Path, Converter={x:Static cvt:BitmapAssetValueConverter.Instance}}" />
+                    </Grid>
                 </DataTemplate>
             </DataGrid.RowDetailsTemplate>
         </v:SimpleFileDataGrid>

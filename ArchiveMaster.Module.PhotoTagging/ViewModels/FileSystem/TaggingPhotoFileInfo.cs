@@ -3,15 +3,13 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace ArchiveMaster.ViewModels.FileSystem;
 
-public partial class TaggingPhotoFileInfo : SimpleFileInfo
+public partial class TaggingPhotoFileInfo(FileInfo file, string topDir) : SimpleFileInfo(file, topDir)
 {
-    public TaggingPhotoFileInfo(FileInfo file, string topDir) : base(file, topDir)
-    {
-    }
+    [ObservableProperty]
+    private List<TagInfo> tags;
 
     [ObservableProperty]
     private bool hasGenerated;
 
-    [ObservableProperty]
-    public List<TagInfo> tags;
+    public PhotoTag ToPhotoTag() => new PhotoTag(RelativePath, Tags);
 }

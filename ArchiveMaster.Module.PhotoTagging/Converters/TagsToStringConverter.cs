@@ -15,15 +15,7 @@ public class TagsToStringConverter : IValueConverter
             return null;
         }
 
-        return string.Join("，", tags.Select(t =>
-        {
-            if (t.Votes == 1)
-            {
-                return t.Tag;
-            }
-
-            return $"{t.Tag} ({t.Votes})";
-        }));
+        return string.Join("，", tags.Select(t => t.Votes == 1 ? t.Tag : $"{t.Tag} ({t.Votes})"));
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

@@ -1,9 +1,6 @@
 ﻿namespace ArchiveMaster.Models;
 
-public class PhotoTagCollection
-{
-    public List<PhotoTag> Photos { get; set; } = new List<PhotoTag>();
-}
+public record PhotoTagCollection(List<PhotoTag> Photos);
 
 public record PhotoTag(string RelativePath, List<TagInfo> Tags);
 
