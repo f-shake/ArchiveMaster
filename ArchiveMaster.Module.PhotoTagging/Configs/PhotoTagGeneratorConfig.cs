@@ -8,31 +8,23 @@ namespace ArchiveMaster.Configs
     public partial class PhotoTagGeneratorConfig : ConfigBase
     {
         [ObservableProperty]
+        private int descriptionLength = 30;
+
+        [ObservableProperty]
         private string dir;
 
         [ObservableProperty]
         private FileFilterRule filter = FileHelper.NoRawImageFileFilterRule;
 
-        [ObservableProperty]
-        private int maxTagCount = 20;
 
-        [ObservableProperty]
-        private int minTagCount = 5;
-        
-        [ObservableProperty]
-        private bool enableMajorityVote = false;
-
-        [ObservableProperty]
-        private int voteCount = 3;
-        
         [ObservableProperty]
         private int resizingTargetResolutionIn10k = 800;
-        
-        [ObservableProperty]
-        private int minVoteThreshold = 2;
 
         [ObservableProperty]
         private string tagFile;
+
+        [ObservableProperty]
+        private int targetTagCount = 5;
         public override void Check()
         {
             CheckDir(Dir, "目录");

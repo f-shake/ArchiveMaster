@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Text.Encodings.Web;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using System.Text.Unicode;
 using System.Threading;
@@ -27,56 +28,55 @@ namespace ArchiveMaster.Services
         private const string SYSTEM_PROMPT = """
                                              1.角色：图像语义原子化标注员
 
-                                             2.任务：对用户提供的图片进行内容提炼，输出 {MinTagCount}-{MaxTagCount} 个核心关键词。
+                                             2.任务：对用户提供的图片进行内容提炼，按维度输出 {TagCount} 个核心关键词。
 
                                              3.【强制原子化规则】：
-                                             每个关键词必须是不可再分的最小语义单位，能够独立表达清晰含义。
-                                             严禁输出任何组合词、修饰结构或短语。
-
-                                             错误示例（禁止出现）：
-                                             晴朗天空、大型机械、建设场景、蓝色海洋、繁忙城市、夕阳西下、城市建筑
-
-                                             正确示例：
-                                             晴朗，天空，机械，建设，场景，蓝色，海洋，城市，夕阳，日落，建筑
+                                             每个关键词必须是不可再分的最小语义单位。
+                                             严禁输出组合词或短语（如：禁止“蓝色海洋”，必须拆分为“蓝色，海洋”）。
 
                                              4.【强制长度规则】：
-                                             每个关键词必须严格为 2 或 3 个汉字。
-
-                                             禁止出现：
-                                             - 1个字词语
-                                             - 4个或以上汉字词语
-
-                                             若产生4字或以上词语，必须拆分为多个2-3字词语后再输出
+                                             每个关键词严格限制在 2~4 个汉字。
 
                                              5.【语义去重规则】：
-                                             禁止输出语义重复或近义词，例如：
-                                             天空，蓝天
-                                             城市，都市
-                                             只保留一个最合适的词
+                                             禁止输出重复或近义词，只保留一个最合适的词。
 
-                                             6.【维度覆盖要求】：
-                                             关键词必须尽量覆盖以下维度：
-                                             - 核心主体（人物、物体）
-                                             - 场景环境（地点、空间）
-                                             - 氛围情绪（如宁静、热闹）
-                                             - 色彩基调（如蓝色、昏暗）
-                                             - 拍摄方式（仅当存在，如航拍、微距）
+                                             6.【维度定义与 JSON 键名】：
+                                             请按以下英文键名对内容归类：
+                                             - `objects`: 核心主体（人物、动物、单体建筑、具体物件）
+                                             - `scene`: 场景环境（地理位置、空间、宏观环境）
+                                             - `mood`: 氛围情绪（如：宁静、热闹、现代、复古）
+                                             - `colors`: 色彩基调（如：蓝色、昏暗、明亮）
+                                             - `technique`: 拍摄方式（如：航拍、微距、特写、仰拍）
+                                             - `text`: 文字内容（图中可见的招牌、标题或文字摘要）
+                                             - `desc`: 对图像的整体概括和描述，大约{DescriptionLength}字
 
-                                             7.【输出前强制自检】：
-                                             在输出前逐个检查所有关键词：
-                                             - 是否为2或3个字
-                                             - 是否仍可拆分
-                                             - 是否包含组合词
-                                             - 是否存在语义重复
+                                             7.【输出格式要求】：
+                                             必须仅输出一个纯 JSON 对象，不得包含 Markdown 代码块标记（如 ```json）或任何额外说明。格式如下：
+                                             {
+                                               "objects": [],
+                                               "scene": [],
+                                               "mood": [],
+                                               "colors": [],
+                                               "technique": [],
+                                               "text": [],
+                                               "desc": "string"
+                                             }
+                                             注：若某维度无内容，数组必须为空 []。
 
-                                             如存在任一问题，必须修改后再输出
-
-                                             8.【输出格式】：
-                                             仅输出关键词列表，不得包含任何解释、说明或额外内容。
-                                             使用中文逗号（，）分隔所有关键词。
+                                             8.【输出前强制自检】：
+                                             - 词数是否在 {MinTagCount} 到 {MaxTagCount} 之间？
+                                             - 所有的词是否均为 2-4 个汉字？
 
                                              9.【示例输出】：
-                                             大桥，斜拉桥，高楼，河流，水面，城市，蓝天，建筑，现代，航拍
+                                             {
+                                               "objects": ["大桥", "斜拉桥", "高楼"],
+                                               "scene": ["河流", "城市"],
+                                               "mood": ["现代", "宏伟"],
+                                               "colors": ["蓝色", "明亮"],
+                                               "technique": ["航拍"],
+                                               "text": [],
+                                               "desc": "晴天下繁忙的工业港口码头，整齐堆放的彩色集装箱与大型起重机械交织，远处可见城市轮廓与河流。"
+                                             }
                                              """;
 
         private static readonly JsonSerializerOptions JsonOptions = new JsonSerializerOptions()
@@ -92,8 +92,8 @@ namespace ArchiveMaster.Services
         public override async Task ExecuteAsync(CancellationToken ct = default)
         {
             systemPrompts = SYSTEM_PROMPT
-                .Replace("{MinTagCount}", Config.MinTagCount.ToString())
-                .Replace("{MaxTagCount}", Config.MaxTagCount.ToString());
+                .Replace("{TagCount}", Config.TargetTagCount.ToString())
+                .Replace("{DescriptionLength}", Config.DescriptionLength.ToString());
 
             var files = Files.CheckedOnly().ToList();
             var llm = new LlmCallerService(GlobalConfigs.Instance.AiProviders.CurrentProvider);
@@ -169,7 +169,6 @@ namespace ArchiveMaster.Services
                     }
                     catch (OperationCanceledException)
                     {
-                        
                     }
                     catch (Exception ex)
                     {
@@ -203,7 +202,7 @@ namespace ArchiveMaster.Services
                     .ApplyFilter(ct, Config.Filter)
                     .Select(p => new TaggingPhotoFileInfo(p, Config.Dir));
 
-                var existingFiles = new Dictionary<string, PhotoTag>();
+                var existingFiles = new Dictionary<string, PhotoTagItem>();
                 if (File.Exists(Config.TagFile))
                 {
                     var fileContent = await File.ReadAllTextAsync(Config.TagFile, ct);
@@ -252,75 +251,56 @@ namespace ArchiveMaster.Services
             return image.ToByteArray();
         }
 
-        private async Task<List<TagInfo>> GetTagsAsync(LlmCallerService llm, byte[] imageBytes,
-            CancellationToken ct)
+        private async Task<PhotoTags> GetTagsAsync(LlmCallerService llm,
+            byte[] imageBytes, CancellationToken ct)
         {
-            IEnumerable<string> GetTags(string tagResult)
-            {
-                return tagResult.Split([",", "，", "、"], StringSplitOptions.RemoveEmptyEntries)
-                    .Select(p => p.Trim())
-                    .Distinct();
-            }
-
             var sys = AiChatMessage.CreateSystemMessage(systemPrompts);
             var user = AiChatMessage.CreateUserMessage("", [imageBytes]);
-            List<TagInfo> tags = new List<TagInfo>();
-            if (Config.EnableMajorityVote)
-            {
-                var tasks = new List<Task<string>>();
-                for (int i = 0; i < Config.VoteCount; i++)
-                {
-                    tasks.Add(llm.CallAsync([sys, user], ct: ct));
-                }
 
-                await Task.WhenAll(tasks);
-                Dictionary<string, int> tagVotes = new Dictionary<string, int>();
-                foreach (var t in tasks)
-                {
-                    var taskResult = t.Result;
-                    var taskTags = GetTags(taskResult);
-                    foreach (var tag in taskTags)
-                    {
-                        if (!tagVotes.TryAdd(tag, 1))
-                        {
-                            tagVotes[tag]++;
-                        }
-                    }
-                }
-
-                foreach (var tagVote in tagVotes)
-                {
-                    if (tagVote.Value < Config.MinVoteThreshold)
-                    {
-                        continue;
-                    }
-
-                    tags.Add(new TagInfo(tagVote.Key, tagVote.Value));
-                }
-
-                tags.Sort((tag1, tag2) =>
-                {
-                    int voteComparison = tag2.Votes.CompareTo(tag1.Votes);
-                    return voteComparison != 0
-                        ? voteComparison
-                        : string.Compare(tag1.Tag, tag2.Tag, StringComparison.Ordinal);
-                });
-            }
-            else
-            {
-                var result = await llm.CallAsync([sys, user], ct: ct);
-                tags.AddRange(GetTags(result).Select(p => new TagInfo(p, 1)));
-            }
-
-            return tags;
+            var result = await llm.CallAsync([sys, user], ct: ct);
+            return ParseTags(result);
         }
 
+        private PhotoTags ParseTags(string tagResult)
+        {
+            List<string> ParseTags(JsonNode jNode)
+            {
+                if (jNode is not JsonArray jArray)
+                {
+                    throw new JsonException("AI返回的JSON格式不正确");
+                }
+
+                return jArray.Select(p => p.GetValue<string>()).ToList();
+            }
+
+            var jObj = (JsonObject)JsonNode.Parse(tagResult);
+            if (jObj.ContainsKey("objects")
+                && jObj.ContainsKey("scene")
+                && jObj.ContainsKey("mood")
+                && jObj.ContainsKey("colors")
+                && jObj.ContainsKey("technique")
+                && jObj.ContainsKey("text")
+                && jObj.ContainsKey("desc"))
+            {
+                return new PhotoTags(
+                    ParseTags(jObj["objects"]),
+                    ParseTags(jObj["scene"]),
+                    ParseTags(jObj["mood"]),
+                    ParseTags(jObj["colors"]),
+                    ParseTags(jObj["technique"]),
+                    ParseTags(jObj["text"]),
+                    jObj["desc"].GetValue<string>()
+                );
+            }
+
+            throw new JsonException("AI返回的JSON格式不正确");
+        }
         private async Task SaveTagsAsync()
         {
             var photoTags = Files
                 .Where(p => p.HasGenerated)
-                .Select(p => p.ToPhotoTag())
                 .OrderBy(p => p.RelativePath)
+                .Select(p => new PhotoTagItem(p.RelativePath, p.Tags))
                 .ToList();
             var photoTagCollection = new PhotoTagCollection(photoTags);
             await File.WriteAllTextAsync(Config.TagFile, JsonSerializer.Serialize(photoTagCollection, JsonOptions));

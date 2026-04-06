@@ -7,11 +7,8 @@ namespace ArchiveMaster.ViewModels.FileSystem;
 public partial class TaggingPhotoFileInfo(FileInfo file, string topDir) : ImageFileInfo(file, topDir)
 {
     [ObservableProperty]
-    private List<TagInfo> tags;
-
-    [ObservableProperty]
     private bool hasGenerated;
 
-    public PhotoTag ToPhotoTag() => new PhotoTag(RelativePath, Tags);
-    
+    [ObservableProperty]
+    private PhotoTags tags;
 }

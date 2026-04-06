@@ -26,7 +26,7 @@
                     StringFileTypeFilter="ArchiveMaster Photo Tags（图像标签库）文件;*.ampt;;"
                     Type="OpenOrSaveFile" />
             </ct:FormItem>
-            <ct:FormItem Label="图像处理选项：">
+            <ct:FormItem Label="选项：">
                 <ct:WrapFormItemGroup>
                     <ct:FormItem Header="限制最大尺寸（万像素）">
                         <NumericUpDown
@@ -34,70 +34,30 @@
                             Minimum="10"
                             Value="{Binding Config.ResizingTargetResolutionIn10k}" />
                     </ct:FormItem>
-                </ct:WrapFormItemGroup>
-            </ct:FormItem>
-            <ct:FormItem Label="AI生成选项：">
-                <ct:WrapFormItemGroup>
-                    <ct:FormItem Header="最少关键词数量">
-                        <Slider
-                            Width="120"
-                            Classes="ThumbLabel"
-                            IsSnapToTickEnabled="True"
-                            Maximum="{Binding Config.MaxTagCount}"
-                            Minimum="1"
-                            TickFrequency="1"
-                            Value="{Binding Config.MinTagCount}" />
-                    </ct:FormItem>
-                    <ct:FormItem Header="最多关键词数量">
+
+                    <ct:FormItem Header="目标关键词数量">
                         <Slider
                             Width="120"
                             Classes="ThumbLabel"
                             IsSnapToTickEnabled="True"
                             Maximum="30"
-                            Minimum="{Binding Config.MinTagCount}"
+                            Minimum="10"
                             TickFrequency="1"
-                            Value="{Binding Config.MaxTagCount}" />
+                            Value="{Binding Config.TargetTagCount}" />
                     </ct:FormItem>
-                </ct:WrapFormItemGroup>
-            </ct:FormItem>
-            <ct:FormItem Label="AI投票机制：">
-                <ct:WrapFormItemGroup>
-                    <CheckBox
-                        Content="投票机制"
-                        IsChecked="{Binding Config.EnableMajorityVote}"
-                        ToolTip.Tip="通过AI多次判断，提高置信度" />
-
-                    <ct:FormItem
-                        Header="投票次数（轮）"
-                        IsEnabled="{Binding Config.EnableMajorityVote}">
+                    <ct:FormItem Header="目标描述字数">
                         <Slider
                             Width="120"
                             Classes="ThumbLabel"
                             IsSnapToTickEnabled="True"
-                            LargeChange="2"
-                            Maximum="10"
-                            Minimum="3"
-                            SmallChange="1"
+                            Maximum="100"
+                            Minimum="20"
                             TickFrequency="1"
-                            Value="{Binding Config.VoteCount}" />
+                            Value="{Binding Config.DescriptionLength}" />
                     </ct:FormItem>
-                    <ct:FormItem
-                        Header="最小采纳票数（轮）"
-                        IsEnabled="{Binding Config.EnableMajorityVote}">
-                        <Slider
-                            Width="120"
-                            Classes="ThumbLabel"
-                            IsSnapToTickEnabled="True"
-                            LargeChange="2"
-                            Maximum="{Binding Config.VoteCount}"
-                            Minimum="1"
-                            SmallChange="1"
-                            TickFrequency="1"
-                            Value="{Binding Config.MinVoteThreshold}" />
-                    </ct:FormItem>
-
                 </ct:WrapFormItemGroup>
             </ct:FormItem>
+
         </ct:StackFormItemGroup>
     </v:VerticalTwoStepPanelBase.ConfigsContent>
 
@@ -135,8 +95,16 @@
                                 Classes="BoldLabel"
                                 Label="标签："
                                 LabelWidth="{StaticResource FileDataGridRowDetailLabelWidth}">
-                                <TextBlock
+                                <SelectableTextBlock
                                     Text="{Binding Tags, Converter={x:Static cvt:TagsToStringConverter.Instance}}"
+                                    TextWrapping="Wrap" />
+                            </ct:FormItem>
+                            <ct:FormItem
+                                Classes="BoldLabel"
+                                Label="描述："
+                                LabelWidth="{StaticResource FileDataGridRowDetailLabelWidth}">
+                                <SelectableTextBlock
+                                    Text="{Binding Tags.Description}"
                                     TextWrapping="Wrap" />
                             </ct:FormItem>
                             <ContentControl
@@ -147,6 +115,7 @@
                             Grid.Column="2"
                             Width="160"
                             Height="120"
+                            RenderOptions.BitmapInterpolationMode="HighQuality"
                             Source="{Binding ThumbnailImage, Mode=OneWay}" />
                     </Grid>
                 </DataTemplate>

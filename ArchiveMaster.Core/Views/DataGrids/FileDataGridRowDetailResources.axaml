@@ -16,7 +16,7 @@
             Classes="BoldLabel"
             Label="路径："
             LabelWidth="{StaticResource FileDataGridRowDetailLabelWidth}">
-            <TextBlock Inlines="{Binding ., Converter={x:Static v:FileDataGridRowDetailConverters.FilePathToInlineConverter}}" />
+            <SelectableTextBlock Inlines="{Binding ., Converter={x:Static v:FileDataGridRowDetailConverters.FilePathToInlineConverter}}" />
         </ctrl:FormItem>
     </DataTemplate>
 
@@ -25,7 +25,7 @@
             Classes="BoldLabel"
             Label="元数据："
             LabelWidth="{StaticResource FileDataGridRowDetailLabelWidth}">
-            <TextBlock Inlines="{Binding ., Converter={x:Static v:FileDataGridRowDetailConverters.FileMetadataToInlineConverter}}" />
+            <SelectableTextBlock Inlines="{Binding ., Converter={x:Static v:FileDataGridRowDetailConverters.FileMetadataToInlineConverter}}" />
         </ctrl:FormItem>
     </DataTemplate>
 
@@ -34,7 +34,7 @@
             Classes="BoldLabel"
             Label="信息："
             LabelWidth="{StaticResource FileDataGridRowDetailLabelWidth}">
-            <TextBlock Text="{Binding Message}" />
+            <SelectableTextBlock Text="{Binding Message}" />
         </ctrl:FormItem>
     </DataTemplate>
 </ResourceDictionary>
