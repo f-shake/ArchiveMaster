@@ -1,0 +1,44 @@
+<v:PanelBase
+    x:Class="ArchiveMaster.Views.PhotoTagSearcherPanel"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ct="using:FzLib.Avalonia.Controls"
+    xmlns:cvt="using:ArchiveMaster.Converters"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:ic="clr-namespace:FluentIcons.Avalonia.Markup;assembly=FluentIcons.Avalonia"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:v="using:ArchiveMaster.Views"
+    xmlns:vm="clr-namespace:ArchiveMaster.ViewModels"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
+    <v:PanelBase.PanelContent>
+        <Grid
+            Margin="8"
+            RowDefinitions="Auto,8,Auto,8,*">
+            <ct:FormItem Label="标签数据库文件：">
+                <Grid ColumnDefinitions="*,8,Auto">
+                    <v:FilePickerTextBox
+                        FileNames="{Binding Config.TagFile}"
+                        StringFileTypeFilter="ArchiveMaster Photo Tags（图像标签库）文件;*.ampt;;"
+                        Type="OpenFile" />
+                    <Button
+                        Grid.Column="2"
+                        Classes="Primary"
+                        Content="加载" />
+                </Grid>
+            </ct:FormItem>
+            <Grid
+                Grid.Row="2"
+                ColumnDefinitions="Auto,8,*,8,Auto">
+                <ComboBox />
+                <TextBox
+                    Grid.Column="2"
+                    Watermark="请输入关键词" />
+                <Button
+                    Grid.Column="4"
+                    Content="搜索" />
+            </Grid>
+        </Grid>
+    </v:PanelBase.PanelContent>
+</v:PanelBase>

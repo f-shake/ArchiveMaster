@@ -25,9 +25,11 @@ namespace ArchiveMaster.Configs
 
         [ObservableProperty]
         private int targetTagCount = 5;
+        
         public override void Check()
         {
             CheckDir(Dir, "目录");
+            CheckDir(TagFile, "标签文件");
         }
     }
 }

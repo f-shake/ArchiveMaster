@@ -1,6 +1,7 @@
 ﻿using ArchiveMaster.Configs;
 using ArchiveMaster.Services;
 using ArchiveMaster.ViewModels.FileSystem;
+using Avalonia.Collections;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using FzLib.Avalonia.Dialogs;
@@ -11,11 +12,11 @@ public partial class PhotoTagGeneratorViewModel(ViewModelServices services)
     : TwoStepViewModelBase<PhotoTagGeneratorService, PhotoTagGeneratorConfig>(services)
 {
     [ObservableProperty]
-    private List<TaggingPhotoFileInfo> files = new List<TaggingPhotoFileInfo>();
+    private AvaloniaList<TaggingPhotoFileInfo> files = new AvaloniaList<TaggingPhotoFileInfo>();
 
     protected override Task OnInitializedAsync()
     {
-        Files = Service.Files;
+        Files = new AvaloniaList<TaggingPhotoFileInfo>(Service.Files);
         return base.OnInitializedAsync();
     }
 

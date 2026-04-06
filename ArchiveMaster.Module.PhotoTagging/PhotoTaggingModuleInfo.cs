@@ -22,6 +22,7 @@ namespace ArchiveMaster
         public IList<ConfigMetadata> Configs =>
         [
             new ConfigMetadata(typeof(PhotoTagGeneratorConfig)),
+            new ConfigMetadata(typeof(PhotoTagSearcherConfig)),
         ];
 
         public IList<JsonConverter> JsonConverters { get; }
@@ -42,6 +43,8 @@ namespace ArchiveMaster
             {
                 new ToolPanelInfo(typeof(PhotoTagGeneratorPanel), typeof(PhotoTagGeneratorViewModel), "照片标签生成",
                     "通过AI，自动生成照片的关键词标签", baseUrl + "tag.svg", true),
+                new ToolPanelInfo(typeof(PhotoTagSearcherPanel), typeof(PhotoTagSearcherViewModel), "根据关键词查找",
+                    "根据关键词，查找指定标签的图像", baseUrl + "pic_search.svg")
             },
             GroupName = ModuleName,
             GroupDescription = ModuleDescription
