@@ -115,7 +115,7 @@
                     SortMemberPath="HasGenerated"
                     VisibleBinding="{Binding HasGenerated}" />
                 <DataGridTextColumn
-                    Binding="{Binding Tags.Count, StringFormat='{}{0}个标签'}"
+                    Binding="{Binding Tags.Count, FallbackValue=' ', StringFormat='{}{0}个标签'}"
                     Header="标签"
                     IsReadOnly="True" />
             </DataGrid.Columns>
