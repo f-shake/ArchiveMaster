@@ -53,14 +53,31 @@
                     IsChecked="{Binding Partial}" />
                 <Button
                     Grid.Column="6"
+                    Classes="Primary"
                     Command="{Binding SearchCommand}"
-                    Content="搜索" />
+                    Content="搜索"
+                    IsEnabled="{Binding SearchKeyword, Converter={x:Static cvt:Converters.IsNotNull}}" />
             </Grid>
 
             <Grid
                 Grid.Row="2"
                 RowDefinitions="*,8,Auto">
                 <ListBox ItemsSource="{Binding Files}">
+                    <ListBox.Styles>
+                        <Style Selector="ListBoxItem">
+                            <Setter Property="BorderBrush" Value="{DynamicResource Background3}" />
+                            <Setter Property="BorderThickness" Value="0,0,0,1" />
+                            <Style Selector="^:selected /template/ ContentPresenter">
+                                <Setter Property="Background" Value="Transparent" />
+                            </Style>
+                            <Style Selector="^:pointerover /template/ ContentPresenter">
+                                <Setter Property="Background" Value="Transparent" />
+                            </Style>
+                            <Style Selector="^:pressed /template/ ContentPresenter">
+                                <Setter Property="Background" Value="Transparent" />
+                            </Style>
+                        </Style>
+                    </ListBox.Styles>
                     <ListBox.ItemTemplate>
                         <DataTemplate x:DataType="vmfs:TaggingPhotoFileInfo">
                             <Grid ColumnDefinitions="Auto,8,*">
@@ -68,28 +85,50 @@
                                     Grid.RowSpan="5"
                                     Width="160"
                                     Height="96"
+                                    Cursor="Hand"
                                     RenderOptions.BitmapInterpolationMode="HighQuality"
-                                    Source="{Binding ThumbnailImage, Mode=OneWay}" />
+                                    Source="{Binding ThumbnailImage, Mode=OneWay}">
+                                    <Interaction.Behaviors>
+                                        <RoutedEventTriggerBehavior RoutedEvent="{x:Static InputElement.TappedEvent}">
+                                            <InvokeCommandAction
+                                                Command="{Binding OpenFileCommand, Source={x:Static vm:GlobalCommands.Instance}}"
+                                                CommandParameter="{Binding Path}" />
+                                        </RoutedEventTriggerBehavior>
+                                    </Interaction.Behaviors>
+                                </Image>
                                 <StackPanel
                                     Grid.Column="2"
                                     Spacing="8">
-                                    <Grid ColumnDefinitions="*,8,Auto,4,Auto">
+                                    <Grid ColumnDefinitions="*,8,Auto,8,Auto,4,Auto">
                                         <SelectableTextBlock
                                             FontWeight="Bold"
                                             Text="{Binding RelativePath}"
                                             TextTrimming="CharacterEllipsis" />
-                                        <Button
+                                        <TextBlock
                                             Grid.Column="2"
-                                            Classes="Icon"
-                                            Command="{Binding OpenFileCommand, Source={x:Static vm:GlobalCommands.Instance}}"
-                                            CommandParameter="{Binding Path}"
-                                            Content="{ic:FluentIcon Icon=Document}" />
+                                            IsVisible="{Binding ExistsFile}"
+                                            Text="{Binding Length, Converter={x:Static cvt:Converters.FileLength}}" />
                                         <Button
                                             Grid.Column="4"
-                                            Classes="Icon"
+                                            Classes="Link"
+                                            Command="{Binding OpenFileCommand, Source={x:Static vm:GlobalCommands.Instance}}"
+                                            CommandParameter="{Binding Path}"
+                                            Content="{ic:FluentIcon Icon=Document}"
+                                            IsVisible="{Binding ExistsFile}" />
+                                        <Button
+                                            Grid.Column="6"
+                                            Classes="Link"
                                             Command="{Binding OpenParentDirCommand, Source={x:Static vm:GlobalCommands.Instance}}"
                                             CommandParameter="{Binding Path}"
-                                            Content="{ic:FluentIcon Icon=FolderOpen}" />
+                                            Content="{ic:FluentIcon Icon=FolderOpen}"
+                                            Foreground="{DynamicResource Accent0}"
+                                            IsVisible="{Binding ExistsFile}" />
+                                        <ContentControl
+                                            Grid.Column="6"
+                                            Content="{ic:FluentIcon Icon=ErrorCircle}"
+                                            Foreground="Red"
+                                            IsVisible="{Binding !ExistsFile}"
+                                            ToolTip.Tip="文件不存在" />
                                     </Grid>
                                     <SelectableTextBlock
                                         Text="{Binding Tags, Converter={x:Static cvt:TagsToStringConverter.Instance}}"
