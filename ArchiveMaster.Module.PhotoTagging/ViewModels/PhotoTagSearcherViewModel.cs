@@ -21,11 +21,31 @@ public partial class PhotoTagSearcherViewModel(ViewModelServices services)
     private string searchKeyword = "";
 
     [ObservableProperty]
+    private bool partial = false;
+
+    [ObservableProperty]
     private List<TaggingPhotoFileInfo> files;
+
+    [ObservableProperty]
+    private bool hasLoaded = false;
 
     protected override Task OnExecutedAsync(CancellationToken ct)
     {
-        Files = Service.Files;
+        Files = Service.AllFiles;
+        HasLoaded = true;
         return base.OnExecutedAsync(ct);
+    }
+
+    [RelayCommand]
+    private async Task SearchAsync()
+    {
+        Files = await Service.SearchAsync(TagType, SearchKeyword, Partial);
+    }
+
+    protected override void OnReset()
+    {
+        Files = null;
+        SearchKeyword = "";
+        HasLoaded = false;
     }
 }

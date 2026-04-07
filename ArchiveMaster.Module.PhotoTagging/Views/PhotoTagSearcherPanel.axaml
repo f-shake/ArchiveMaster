@@ -36,8 +36,9 @@
     <v:VerticalTwoStepPanelBase.ResultsContent>
         <Grid
             Margin="8"
+            IsEnabled="{Binding HasLoaded}"
             RowDefinitions="Auto,8,*">
-            <Grid ColumnDefinitions="Auto,8,*,8,Auto">
+            <Grid ColumnDefinitions="Auto,8,*,8,Auto,8,Auto">
                 <ComboBox
                     DisplayMemberBinding="{Binding ., Converter={x:Static cvt:Converters.Description}}"
                     ItemsSource="{ne:EnumValues enums:TagType}"
@@ -46,57 +47,67 @@
                     Grid.Column="2"
                     Text="{Binding SearchKeyword}"
                     Watermark="请输入关键词" />
-                <Button
+                <CheckBox
                     Grid.Column="4"
+                    Content="模糊匹配"
+                    IsChecked="{Binding Partial}" />
+                <Button
+                    Grid.Column="6"
+                    Command="{Binding SearchCommand}"
                     Content="搜索" />
             </Grid>
 
-            <ListBox
+            <Grid
                 Grid.Row="2"
-                ItemsSource="{Binding Files}">
-                <ListBox.ItemTemplate>
-                    <DataTemplate x:DataType="vmfs:TaggingPhotoFileInfo">
-                        <Grid ColumnDefinitions="Auto,8,*">
-                            <Image
-                                Grid.RowSpan="5"
-                                Width="160"
-                                Height="96"
-                                RenderOptions.BitmapInterpolationMode="HighQuality"
-                                Source="{Binding ThumbnailImage, Mode=OneWay}" />
-                            <StackPanel
-                                Grid.Column="2"
-                                Spacing="8">
-                                <Grid ColumnDefinitions="*,8,Auto,4,Auto">
+                RowDefinitions="*,8,Auto">
+                <ListBox ItemsSource="{Binding Files}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate x:DataType="vmfs:TaggingPhotoFileInfo">
+                            <Grid ColumnDefinitions="Auto,8,*">
+                                <Image
+                                    Grid.RowSpan="5"
+                                    Width="160"
+                                    Height="96"
+                                    RenderOptions.BitmapInterpolationMode="HighQuality"
+                                    Source="{Binding ThumbnailImage, Mode=OneWay}" />
+                                <StackPanel
+                                    Grid.Column="2"
+                                    Spacing="8">
+                                    <Grid ColumnDefinitions="*,8,Auto,4,Auto">
+                                        <SelectableTextBlock
+                                            FontWeight="Bold"
+                                            Text="{Binding RelativePath}"
+                                            TextTrimming="CharacterEllipsis" />
+                                        <Button
+                                            Grid.Column="2"
+                                            Classes="Icon"
+                                            Command="{Binding OpenFileCommand, Source={x:Static vm:GlobalCommands.Instance}}"
+                                            CommandParameter="{Binding Path}"
+                                            Content="{ic:FluentIcon Icon=Document}" />
+                                        <Button
+                                            Grid.Column="4"
+                                            Classes="Icon"
+                                            Command="{Binding OpenParentDirCommand, Source={x:Static vm:GlobalCommands.Instance}}"
+                                            CommandParameter="{Binding Path}"
+                                            Content="{ic:FluentIcon Icon=FolderOpen}" />
+                                    </Grid>
                                     <SelectableTextBlock
-                                        FontWeight="Bold"
-                                        Text="{Binding RelativePath}"
+                                        Text="{Binding Tags, Converter={x:Static cvt:TagsToStringConverter.Instance}}"
+                                        TextTrimming="CharacterEllipsis"
+                                        TextWrapping="Wrap" />
+                                    <TextBlock
+                                        Classes="Description"
+                                        Text="{Binding Tags.Description}"
                                         TextTrimming="CharacterEllipsis" />
-                                    <Button
-                                        Grid.Column="2"
-                                        Classes="Icon"
-                                        Command="{Binding OpenFileCommand, Source={x:Static vm:GlobalCommands.Instance}}"
-                                        CommandParameter="{Binding Path}"
-                                        Content="{ic:FluentIcon Icon=Document}" />
-                                    <Button
-                                        Grid.Column="4"
-                                        Classes="Icon"
-                                        Command="{Binding OpenParentDirCommand, Source={x:Static vm:GlobalCommands.Instance}}"
-                                        CommandParameter="{Binding Path}"
-                                        Content="{ic:FluentIcon Icon=FolderOpen}" />
-                                </Grid>
-                                <SelectableTextBlock
-                                    Text="{Binding Tags, Converter={x:Static cvt:TagsToStringConverter.Instance}}"
-                                    TextTrimming="CharacterEllipsis"
-                                    TextWrapping="Wrap" />
-                                <TextBlock
-                                    Classes="Description"
-                                    Text="{Binding Tags.Description}"
-                                    TextTrimming="CharacterEllipsis" />
-                            </StackPanel>
-                        </Grid>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
+                                </StackPanel>
+                            </Grid>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+                <TextBlock
+                    Grid.Row="2"
+                    Text="{Binding Files.Count, StringFormat='{}共{0}项'}" />
+            </Grid>
         </Grid>
     </v:VerticalTwoStepPanelBase.ResultsContent>
 </v:VerticalTwoStepPanelBase>

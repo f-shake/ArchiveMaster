@@ -14,6 +14,7 @@ using System.Text.Unicode;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
+using ArchiveMaster.Enums;
 using ArchiveMaster.Helpers;
 using ArchiveMaster.Models;
 using ArchiveMaster.ViewModels;
@@ -25,7 +26,7 @@ namespace ArchiveMaster.Services
     public class PhotoTagSearcherService(AppConfig appConfig)
         : TwoStepServiceBase<PhotoTagSearcherConfig>(appConfig)
     {
-        public List<TaggingPhotoFileInfo> Files { get; private set; }
+        public List<TaggingPhotoFileInfo> AllFiles { get; private set; }
 
         public override async Task ExecuteAsync(CancellationToken ct = default)
         {
@@ -39,7 +40,7 @@ namespace ArchiveMaster.Services
                 throw new FileNotFoundException($"标签文件不存在: {Config.TagFile}");
             }
 
-            var tagFile = await File.ReadAllTextAsync(Config.TagFile);
+            var tagFile = await File.ReadAllTextAsync(Config.TagFile, ct);
             List<TaggingPhotoFileInfo> result = new List<TaggingPhotoFileInfo>();
             await Task.Run(() =>
             {
@@ -49,7 +50,17 @@ namespace ArchiveMaster.Services
                     result.Add(new TaggingPhotoFileInfo(photo, Config.RootDir));
                 }
             });
-            Files = result;
+            AllFiles = result;
+        }
+
+        public Task<List<TaggingPhotoFileInfo>> SearchAsync(TagType type, string keyword, bool partial)
+        {
+            return Task.Run(() =>
+            {
+                return partial
+                    ? AllFiles.Where(p => p.Tags.Matches(keyword,type)).ToList()
+                    : AllFiles.Where(p => p.Tags.Contains(keyword,type)).ToList();
+            });
         }
 
         public override IEnumerable<SimpleFileInfo> GetInitializedFiles()
