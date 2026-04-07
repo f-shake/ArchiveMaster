@@ -23,30 +23,25 @@ internal static class FileDataGridRowDetailConverters
             {
                 ic.Add(new InlineUIContainer(new Button()
                 {
+                    Content = new FluentIcon { Icon = Icon.Document,Height = 16,Width = 16 },
+                    Padding = new Thickness(),
+                    Height = 16,
+                    Classes = { "Link" },
+                    VerticalAlignment = VerticalAlignment.Bottom,
+                    Margin = new Thickness(8, -2),
+                    Command = GlobalCommands.Instance.OpenFileCommand,
+                    CommandParameter = f.Path
+                }));
+                ic.Add(new InlineUIContainer(new Button()
+                {
                     Content = new FluentIcon { Icon = Icon.FolderOpen, Width = 20 },
                     Padding = new Thickness(),
                     Height = 16,
                     Classes = { "Link" },
                     VerticalAlignment = VerticalAlignment.Bottom,
                     Margin = new Thickness(8, -2),
-                    Flyout = new MenuFlyout
-                    {
-                        Items =
-                        {
-                            new MenuItem
-                            {
-                                Header = "打开文件",
-                                Command = GlobalCommands.Instance.OpenFileCommand,
-                                CommandParameter = f.Path,
-                            },
-                            new MenuItem
-                            {
-                                Header = "打开目录",
-                                Command = GlobalCommands.Instance.OpenParentDirCommand,
-                                CommandParameter = f.Path,
-                            }
-                        }
-                    }
+                    Command = GlobalCommands.Instance.OpenParentDirCommand,
+                    CommandParameter = f.Path
                 }));
             }
 

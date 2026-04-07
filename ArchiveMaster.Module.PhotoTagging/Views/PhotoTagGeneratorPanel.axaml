@@ -12,7 +12,7 @@
     d:DesignWidth="800"
     mc:Ignorable="d">
     <v:VerticalTwoStepPanelBase.ConfigsContent>
-        <ct:StackFormItemGroup>
+        <ct:StackFormItemGroup> 
             <ct:FormItem Label="目录：">
                 <v:FilePickerTextBox
                     FileNames="{Binding Config.Dir}"
@@ -23,6 +23,7 @@
                     FileNames="{Binding Config.TagFile}"
                     OpenFileMenuItemHeader="打开已有标签文件"
                     SaveFileMenuItemHeader="新建标签文件"
+                    SaveFileSuggestedFileName="照片标签数据库.ampt"
                     StringFileTypeFilter="ArchiveMaster Photo Tags（图像标签库）文件;*.ampt;;"
                     Type="OpenOrSaveFile" />
             </ct:FormItem>

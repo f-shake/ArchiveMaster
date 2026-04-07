@@ -3,7 +3,7 @@ using ArchiveMaster.ViewModels;
 
 namespace ArchiveMaster.Views
 {
-    public partial class PhotoTagSearcherPanel : PanelBase
+    public partial class PhotoTagSearcherPanel : VerticalTwoStepPanelBase
     {
         public PhotoTagSearcherPanel()
         {

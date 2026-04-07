@@ -29,7 +29,7 @@ namespace ArchiveMaster.Configs
         public override void Check()
         {
             CheckDir(Dir, "目录");
-            CheckDir(TagFile, "标签文件");
+            CheckEmpty(TagFile, "标签文件");
         }
     }
 }

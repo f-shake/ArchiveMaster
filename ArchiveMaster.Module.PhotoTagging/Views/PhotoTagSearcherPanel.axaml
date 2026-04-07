@@ -1,44 +1,102 @@
-<v:PanelBase
+<v:VerticalTwoStepPanelBase
     x:Class="ArchiveMaster.Views.PhotoTagSearcherPanel"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:ct="using:FzLib.Avalonia.Controls"
     xmlns:cvt="using:ArchiveMaster.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:enums="clr-namespace:ArchiveMaster.Enums"
     xmlns:ic="clr-namespace:FluentIcons.Avalonia.Markup;assembly=FluentIcons.Avalonia"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ne="clr-namespace:FzLib.Avalonia.MarkupExtensions;assembly=FzLib.Avalonia"
     xmlns:v="using:ArchiveMaster.Views"
-    xmlns:vm="clr-namespace:ArchiveMaster.ViewModels"
+    xmlns:vm="using:ArchiveMaster.ViewModels"
+    xmlns:vmfs="clr-namespace:ArchiveMaster.ViewModels.FileSystem"
     d:DesignHeight="450"
     d:DesignWidth="800"
+    ExecuteButtonContent="加载数据库"
     mc:Ignorable="d">
-    <v:PanelBase.PanelContent>
+    <v:VerticalTwoStepPanelBase.ConfigsContent>
+        <ct:StackFormItemGroup>
+            <ct:FormItem Label="根目录：">
+                <v:FilePickerTextBox
+                    FileNames="{Binding Config.RootDir}"
+                    Type="OpenFolder" />
+            </ct:FormItem>
+            <ct:FormItem
+                Grid.Row="2"
+                Label="标签数据库文件：">
+                <v:FilePickerTextBox
+                    FileNames="{Binding Config.TagFile}"
+                    StringFileTypeFilter="ArchiveMaster Photo Tags（图像标签库）文件;*.ampt;;"
+                    Type="OpenFile" />
+            </ct:FormItem>
+        </ct:StackFormItemGroup>
+    </v:VerticalTwoStepPanelBase.ConfigsContent>
+    <v:VerticalTwoStepPanelBase.ResultsContent>
         <Grid
             Margin="8"
-            RowDefinitions="Auto,8,Auto,8,*">
-            <ct:FormItem Label="标签数据库文件：">
-                <Grid ColumnDefinitions="*,8,Auto">
-                    <v:FilePickerTextBox
-                        FileNames="{Binding Config.TagFile}"
-                        StringFileTypeFilter="ArchiveMaster Photo Tags（图像标签库）文件;*.ampt;;"
-                        Type="OpenFile" />
-                    <Button
-                        Grid.Column="2"
-                        Classes="Primary"
-                        Content="加载" />
-                </Grid>
-            </ct:FormItem>
-            <Grid
-                Grid.Row="2"
-                ColumnDefinitions="Auto,8,*,8,Auto">
-                <ComboBox />
+            RowDefinitions="Auto,8,*">
+            <Grid ColumnDefinitions="Auto,8,*,8,Auto">
+                <ComboBox
+                    DisplayMemberBinding="{Binding ., Converter={x:Static cvt:Converters.Description}}"
+                    ItemsSource="{ne:EnumValues enums:TagType}"
+                    SelectedItem="{Binding TagType}" />
                 <TextBox
                     Grid.Column="2"
+                    Text="{Binding SearchKeyword}"
                     Watermark="请输入关键词" />
                 <Button
                     Grid.Column="4"
                     Content="搜索" />
             </Grid>
+
+            <ListBox
+                Grid.Row="2"
+                ItemsSource="{Binding Files}">
+                <ListBox.ItemTemplate>
+                    <DataTemplate x:DataType="vmfs:TaggingPhotoFileInfo">
+                        <Grid ColumnDefinitions="Auto,8,*">
+                            <Image
+                                Grid.RowSpan="5"
+                                Width="160"
+                                Height="96"
+                                RenderOptions.BitmapInterpolationMode="HighQuality"
+                                Source="{Binding ThumbnailImage, Mode=OneWay}" />
+                            <StackPanel
+                                Grid.Column="2"
+                                Spacing="8">
+                                <Grid ColumnDefinitions="*,8,Auto,4,Auto">
+                                    <SelectableTextBlock
+                                        FontWeight="Bold"
+                                        Text="{Binding RelativePath}"
+                                        TextTrimming="CharacterEllipsis" />
+                                    <Button
+                                        Grid.Column="2"
+                                        Classes="Icon"
+                                        Command="{Binding OpenFileCommand, Source={x:Static vm:GlobalCommands.Instance}}"
+                                        CommandParameter="{Binding Path}"
+                                        Content="{ic:FluentIcon Icon=Document}" />
+                                    <Button
+                                        Grid.Column="4"
+                                        Classes="Icon"
+                                        Command="{Binding OpenParentDirCommand, Source={x:Static vm:GlobalCommands.Instance}}"
+                                        CommandParameter="{Binding Path}"
+                                        Content="{ic:FluentIcon Icon=FolderOpen}" />
+                                </Grid>
+                                <SelectableTextBlock
+                                    Text="{Binding Tags, Converter={x:Static cvt:TagsToStringConverter.Instance}}"
+                                    TextTrimming="CharacterEllipsis"
+                                    TextWrapping="Wrap" />
+                                <TextBlock
+                                    Classes="Description"
+                                    Text="{Binding Tags.Description}"
+                                    TextTrimming="CharacterEllipsis" />
+                            </StackPanel>
+                        </Grid>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
         </Grid>
-    </v:PanelBase.PanelContent>
-</v:PanelBase>
+    </v:VerticalTwoStepPanelBase.ResultsContent>
+</v:VerticalTwoStepPanelBase>

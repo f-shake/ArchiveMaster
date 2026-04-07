@@ -10,9 +10,13 @@ namespace ArchiveMaster.Configs
         [ObservableProperty]
         private string tagFile;
 
+        [ObservableProperty]
+        private string rootDir;
+
         public override void Check()
         {
-            CheckDir(TagFile, "标签文件");
+            CheckFile(TagFile, "标签文件");
+            CheckDir(RootDir, "根目录");
         }
     }
 }
