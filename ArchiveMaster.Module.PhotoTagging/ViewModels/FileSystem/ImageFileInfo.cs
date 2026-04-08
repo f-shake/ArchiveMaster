@@ -1,13 +1,14 @@
-﻿using Avalonia.Media.Imaging;
+﻿using ArchiveMaster.Services;
+using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 using ImageMagick;
 
 namespace ArchiveMaster.ViewModels.FileSystem;
 
-public class ImageFileInfo : SimpleFileInfo
+public class ImageFileInfo : SimpleFileInfo, IDisposable
 {
     public static int MaxPixels = 500_000;
-    
+
     private bool imageLoaded;
 
     private bool isLoadingImage;
@@ -17,6 +18,10 @@ public class ImageFileInfo : SimpleFileInfo
     }
 
     public ImageFileInfo() : base()
+    {
+    }
+    
+    public ImageFileInfo(string relativePath, string topDir) : base(relativePath, topDir)
     {
     }
 
@@ -33,19 +38,17 @@ public class ImageFileInfo : SimpleFileInfo
             {
                 return null;
             }
-
-            _ = LoadImageAsync();
+           
+            ThumbnailScheduler.Enqueue(this, LoadImage);
             return null;
         }
         private set => SetProperty(ref field, value);
     }
 
-    private async Task LoadImageAsync()
+    private  void LoadImage()
     {
         isLoadingImage = true;
         Bitmap newImage = null;
-        await Task.Run(() =>
-        {
             try
             {
                 if (Path == null)
@@ -90,6 +93,15 @@ public class ImageFileInfo : SimpleFileInfo
                     Dispatcher.UIThread.Invoke(() => { ThumbnailImage = newImage; });
                 }
             }
-        });
+    }
+
+    public void Dispose()
+    {
+        ThumbnailImage?.Dispose();
+    }
+
+    ~ImageFileInfo()
+    {
+        Dispose();
     }
 }

@@ -40,6 +40,7 @@ namespace ArchiveMaster.Services
                 throw new FileNotFoundException($"标签文件不存在: {Config.TagFile}");
             }
 
+            NotifyMessage("正在读取标签文件");
             AllFiles = await TagFileHelper.GetPhotoTaggingFileInfosAsync(Config.TagFile, Config.RootDir, ct);
         }
 

@@ -10,10 +10,11 @@ public static class TagFileHelper
         CancellationToken ct)
     {
         var tagFileContent = await File.ReadAllTextAsync(tagFile, ct);
-        List<TaggingPhotoFileInfo> result = new List<TaggingPhotoFileInfo>();
+        List<TaggingPhotoFileInfo> result = null;
         await Task.Run(() =>
         {
             var photos = JsonSerializer.Deserialize<PhotoTagCollection>(tagFileContent);
+            result = new List<TaggingPhotoFileInfo>(photos.Photos.Count + 4);
             foreach (var photo in photos.Photos)
             {
                 result.Add(new TaggingPhotoFileInfo(photo, rootDir));

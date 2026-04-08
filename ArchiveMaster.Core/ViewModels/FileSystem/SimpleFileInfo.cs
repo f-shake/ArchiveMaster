@@ -82,6 +82,14 @@ namespace ArchiveMaster.ViewModels.FileSystem
             }
         }
 
+        public SimpleFileInfo(string relativePath, string topDir)
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(relativePath);
+            ArgumentException.ThrowIfNullOrWhiteSpace(topDir);
+            Name = System.IO.Path.GetFileName(relativePath);
+            Path = System.IO.Path.Combine(topDir, relativePath);
+        }
+
         public static IEqualityComparer<SimpleFileInfo> EqualityComparer { get; }
             = EqualityComparer<SimpleFileInfo>.Create(
                 (s1, s2) => s1.Path == s2.Path,
