@@ -41,7 +41,7 @@ namespace ArchiveMaster.Services
             }
 
             NotifyMessage("正在读取标签文件");
-            AllFiles = await TagFileHelper.GetPhotoTaggingFileInfosAsync(Config.TagFile, Config.RootDir, ct);
+            AllFiles = await TagFileHelper.GetPhotoTaggingFileInfosAsync(Config.TagFile, Config.RootDir, false, ct);
         }
 
         public Task<List<TaggingPhotoFileInfo>> SearchAsync(TagType type, string keyword, bool partial)
@@ -49,8 +49,8 @@ namespace ArchiveMaster.Services
             return Task.Run(() =>
             {
                 return partial
-                    ? AllFiles.Where(p => p.Tags.Matches(keyword,type)).ToList()
-                    : AllFiles.Where(p => p.Tags.Contains(keyword,type)).ToList();
+                    ? AllFiles.Where(p => p.Tags.Matches(keyword, type)).ToList()
+                    : AllFiles.Where(p => p.Tags.Contains(keyword, type)).ToList();
             });
         }
 

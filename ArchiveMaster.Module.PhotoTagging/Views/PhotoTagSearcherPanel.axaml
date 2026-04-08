@@ -104,10 +104,10 @@
                                             FontWeight="Bold"
                                             Text="{Binding RelativePath}"
                                             TextTrimming="CharacterEllipsis" />
-                                        <TextBlock
-                                            Grid.Column="2"
-                                            IsVisible="{Binding ExistsFile}"
-                                            Text="{Binding Length, Converter={x:Static cvt:Converters.FileLength}}" />
+                                        <!--  <TextBlock  -->
+                                        <!--  Grid.Column="2"  -->
+                                        <!--  IsVisible="{Binding ExistsFile}"  -->
+                                        <!--  Text="{Binding Length, Converter={x:Static cvt:Converters.FileLength}}" />  -->
                                         <Button
                                             Grid.Column="4"
                                             Classes="Link"

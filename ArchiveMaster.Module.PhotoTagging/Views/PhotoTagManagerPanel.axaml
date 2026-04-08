@@ -43,58 +43,56 @@
                 SelectedItem="{Binding SelectedFile}">
                 <v:TreeFileDataGrid.Columns>
                     <DataGridTextColumn
-                        Binding="{Binding Tag.Tags.Count, FallbackValue=' ', StringFormat='{}{0}个标签'}"
+                        Binding="{Binding Tag.Count, FallbackValue=' ', StringFormat='{}{0}个标签'}"
                         Header="标签"
                         IsReadOnly="True" />
                 </v:TreeFileDataGrid.Columns>
             </v:TreeFileDataGrid>
             <ScrollViewer
                 Grid.Row="2"
-                HorizontalScrollBarVisibility="Auto"
-                VerticalScrollBarVisibility="Visible">
-                <StackPanel
-                    IsVisible="{Binding SelectedTags, Converter={x:Static cvt:Converters.IsNotNull}}"
-                    Orientation="Horizontal"
-                    Spacing="16">
+                Padding="0,0,20,0"
+                HorizontalScrollBarVisibility="Disabled"
+                VerticalScrollBarVisibility="Auto">
+                <StackPanel Spacing="8">
+                    <StackPanel.IsVisible>
+                        <MultiBinding Converter="{x:Static cvt:Converters.AndLogic}">
+                            <Binding
+                                Converter="{x:Static cvt:Converters.IsNotNull}"
+                                Path="SelectedTags" />
+                            <Binding
+                                Converter="{x:Static cvt:Converters.InverseBool}"
+                                Path="SelectedFile.IsDir" />
+                        </MultiBinding>
+                    </StackPanel.IsVisible>
                     <StackPanel.Styles>
                         <Style Selector="ct|StringListEditor">
-                            <Setter Property="AddButtonPosition" Value="Bottom" />
-                            <Setter Property="Layout" Value="VerticalStack" />
+                            <Setter Property="AddButtonPosition" Value="Right" />
+                            <Setter Property="Layout" Value="HorizontalStack" />
+                        </Style>
+                        <Style Selector="ct|FormItem /template/ ContentPresenter#PART_Header">
+                            <Setter Property="FontWeight" Value="Bold" />
                         </Style>
                     </StackPanel.Styles>
-                    <ct:FormItem
-                        Classes="BoldHeader"
-                        Header="对象">
+                    <ct:FormItem Header="对象">
                         <ct:StringListEditor ItemsSource="{Binding SelectedTags.ObjectTags}" />
                     </ct:FormItem>
-                    <ct:FormItem
-                        Classes="BoldHeader"
-                        Header="场景">
+                    <ct:FormItem Header="场景">
                         <ct:StringListEditor ItemsSource="{Binding SelectedTags.SceneTags}" />
                     </ct:FormItem>
-                    <ct:FormItem
-                        Classes="BoldHeader"
-                        Header="情绪">
+                    <ct:FormItem Header="情绪">
                         <ct:StringListEditor ItemsSource="{Binding SelectedTags.MoodTags}" />
                     </ct:FormItem>
-                    <ct:FormItem
-                        Classes="BoldHeader"
-                        Header="颜色">
+                    <ct:FormItem Header="颜色">
                         <ct:StringListEditor ItemsSource="{Binding SelectedTags.ColorTags}" />
                     </ct:FormItem>
-                    <ct:FormItem
-                        Classes="BoldHeader"
-                        Header="拍摄">
+                    <ct:FormItem Header="拍摄">
                         <ct:StringListEditor ItemsSource="{Binding SelectedTags.TechniqueTags}" />
                     </ct:FormItem>
-                    <ct:FormItem
-                        Classes="BoldHeader"
-                        Header="文字">
+                    <ct:FormItem Header="文字">
                         <ct:StringListEditor ItemsSource="{Binding SelectedTags.TextTags}" />
                     </ct:FormItem>
                     <ct:FormItem Header="描述">
                         <TextBox
-                            Width="240"
                             Text="{Binding SelectedTags.Description}"
                             TextWrapping="Wrap" />
                     </ct:FormItem>

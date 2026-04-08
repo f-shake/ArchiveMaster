@@ -30,12 +30,17 @@ namespace ArchiveMaster.Services
 
         public override async Task ExecuteAsync(CancellationToken ct = default)
         {
-            var tags = await TagFileHelper.GetPhotoTaggingFileInfosAsync(Config.TagFile, Config.RootDir, ct);
-            var relativePathToTags = tags.ToDictionary(p => p.RelativePath, p => p);
+            NotifyMessage("正在读取标签文件");
+            var tags = await TagFileHelper.GetPhotoTagCollectionAsync(Config.TagFile, ct);
+            var relativePathToTags = tags.Photos.ToDictionary(p => p.RelativePath, p => p.Tags);
+
+            NotifyMessage("正在枚举目录文件");
             var tree = await TreeDirInfo.BuildTreeAsync(Config.RootDir, Config.Filter, ct);
+
+            NotifyMessage("正在匹配标签");
             foreach (var file in tree.Flatten())
             {
-                if (relativePathToTags.TryGetValue(file.RelativePath, out TaggingPhotoFileInfo value))
+                if (relativePathToTags.TryGetValue(file.RelativePath, out PhotoTags value))
                 {
                     file.Tag = value;
                 }

@@ -13,6 +13,8 @@ public class ImageFileInfo : SimpleFileInfo, IDisposable
 
     private bool isLoadingImage;
 
+    private Bitmap thumbnailImage;
+
     public ImageFileInfo(FileInfo file, string topDir) : base(file, topDir)
     {
     }
@@ -20,7 +22,7 @@ public class ImageFileInfo : SimpleFileInfo, IDisposable
     public ImageFileInfo() : base()
     {
     }
-    
+
     public ImageFileInfo(string relativePath, string topDir) : base(relativePath, topDir)
     {
     }
@@ -31,73 +33,73 @@ public class ImageFileInfo : SimpleFileInfo, IDisposable
         {
             if (imageLoaded)
             {
-                return field;
+                return thumbnailImage;
             }
 
-            if (isLoadingImage)
+            if (isLoadingImage || !ExistsFile)
             {
                 return null;
             }
-           
+
             ThumbnailScheduler.Enqueue(this, LoadImage);
             return null;
         }
-        private set => SetProperty(ref field, value);
+        private set => SetProperty(ref thumbnailImage, value);
     }
 
-    private  void LoadImage()
+    private void LoadImage()
     {
         isLoadingImage = true;
         Bitmap newImage = null;
+        try
+        {
+            if (Path == null)
+            {
+                return;
+            }
+
+            if (!ExistsFile)
+            {
+                return;
+            }
+
             try
             {
-                if (Path == null)
+                using var magickImage = new MagickImage(Path);
+                long currentPixels = (long)magickImage.Width * magickImage.Height;
+
+                if (currentPixels > MaxPixels)
                 {
-                    return;
+                    double ratio = Math.Sqrt((double)MaxPixels / currentPixels);
+                    magickImage.Resize(new Percentage(ratio * 100), FilterType.Lanczos);
                 }
 
-                var file = new FileInfo(Path);
-                if (!file.Exists)
-                {
-                    return;
-                }
-
-                try
-                {
-                    using var magickImage = new MagickImage(file);
-                    long currentPixels = (long)magickImage.Width * magickImage.Height;
-
-                    if (currentPixels > MaxPixels)
-                    {
-                        double ratio = Math.Sqrt((double)MaxPixels / currentPixels);
-                        magickImage.Resize(new Percentage(ratio * 100), FilterType.Lanczos);
-                    }
-
-                    magickImage.Format = MagickFormat.Jpeg;
-                    using var ms = new MemoryStream();
-                    magickImage.Write(ms);
-                    ms.Seek(0, SeekOrigin.Begin);
-                    newImage = new Bitmap(ms);
-                }
-                catch (Exception ex)
-                {
-                    return;
-                }
+                magickImage.Format = MagickFormat.Jpeg;
+                using var ms = new MemoryStream();
+                magickImage.Write(ms);
+                ms.Seek(0, SeekOrigin.Begin);
+                newImage = new Bitmap(ms);
             }
-            finally
+            catch (Exception ex)
             {
-                isLoadingImage = false;
-                imageLoaded = true;
-                if (newImage != null)
-                {
-                    Dispatcher.UIThread.Invoke(() => { ThumbnailImage = newImage; });
-                }
+                return;
             }
+        }
+        finally
+        {
+            isLoadingImage = false;
+            imageLoaded = true;
+            if (newImage != null)
+            {
+                Dispatcher.UIThread.Invoke(() => { ThumbnailImage = newImage; });
+            }
+        }
     }
 
     public void Dispose()
     {
-        ThumbnailImage?.Dispose();
+        thumbnailImage?.Dispose();
+        GC.SuppressFinalize(this);
     }
 
     ~ImageFileInfo()

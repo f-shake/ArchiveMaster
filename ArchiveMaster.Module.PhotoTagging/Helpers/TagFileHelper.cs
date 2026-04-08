@@ -7,7 +7,7 @@ namespace ArchiveMaster.Helpers;
 public static class TagFileHelper
 {
     public static async Task<List<TaggingPhotoFileInfo>> GetPhotoTaggingFileInfosAsync(string tagFile, string rootDir,
-        CancellationToken ct)
+        bool generateFileInfo, CancellationToken ct)
     {
         var tagFileContent = await File.ReadAllTextAsync(tagFile, ct);
         List<TaggingPhotoFileInfo> result = null;
@@ -17,7 +17,16 @@ public static class TagFileHelper
             result = new List<TaggingPhotoFileInfo>(photos.Photos.Count + 4);
             foreach (var photo in photos.Photos)
             {
-                result.Add(new TaggingPhotoFileInfo(photo, rootDir));
+                if (generateFileInfo)
+                {
+                    result.Add(new TaggingPhotoFileInfo(
+                        new FileInfo(Path.Combine(rootDir, photo.RelativePath)),
+                        photo.Tags, rootDir));
+                }
+                else
+                {
+                    result.Add(new TaggingPhotoFileInfo(photo, rootDir));
+                }
             }
         }, ct);
         return result;

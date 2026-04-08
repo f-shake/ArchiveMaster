@@ -16,8 +16,15 @@ public partial class TaggingPhotoFileInfo : ImageFileInfo
     {
     }
 
+    public TaggingPhotoFileInfo(FileInfo file, PhotoTags tags, string topDir) : base(file, topDir)
+    {
+        HasGenerated = true;
+        Tags = tags;
+    }
+
     public TaggingPhotoFileInfo(PhotoTagItem tagItem, string topDir) : base(tagItem.RelativePath, topDir)
-    { HasGenerated = true;
+    {
+        HasGenerated = true;
         Tags = tagItem.Tags;
     }
 }

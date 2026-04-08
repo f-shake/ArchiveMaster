@@ -1,5 +1,6 @@
 ﻿using ArchiveMaster.Configs;
 using ArchiveMaster.Enums;
+using ArchiveMaster.Models;
 using ArchiveMaster.Services;
 using ArchiveMaster.ViewModels.FileSystem;
 using Avalonia.Collections;
@@ -15,7 +16,7 @@ public partial class PhotoTagManagerViewModel(ViewModelServices services)
     public override bool EnableInitialize => false;
 
     [ObservableProperty]
-    private AvaloniaList<TreeFileDirInfo> treeFiles;
+    private AvaloniaList<SimpleFileInfo> treeFiles;
 
     [ObservableProperty]
     private TreeFileDirInfo selectedFile;
@@ -23,28 +24,32 @@ public partial class PhotoTagManagerViewModel(ViewModelServices services)
     [ObservableProperty]
     private ObservablePhotoTags selectedTags;
 
-    partial void OnSelectedFileChanged(TreeFileDirInfo value)
+    partial void OnSelectedFileChanged(TreeFileDirInfo oldValue, TreeFileDirInfo newValue)
     {
-        if (value == null)
+        if (SelectedTags != null && oldValue != null)
+        {
+            oldValue.Tag=selectedTags.ToPhotoTags();
+        }
+        
+        if (newValue == null)
         {
             SelectedTags = null;
             return;
         }
 
-        if (value.Tag is TaggingPhotoFileInfo tagPhoto)
+        if (newValue.Tag is PhotoTags tagPhoto)
         {
-            SelectedTags = new ObservablePhotoTags(tagPhoto.Tags);
+            SelectedTags = new ObservablePhotoTags(tagPhoto);
         }
         else
         {
             SelectedTags = new ObservablePhotoTags();
         }
-        
     }
 
     protected override Task OnExecutedAsync(CancellationToken ct)
     {
-        TreeFiles = new AvaloniaList<TreeFileDirInfo>(Service.Tree.Subs);
+        TreeFiles = new AvaloniaList<SimpleFileInfo>(Service.Tree.Subs);
         return base.OnExecutedAsync(ct);
     }
 
