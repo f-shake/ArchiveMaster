@@ -4,7 +4,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace ArchiveMaster.ViewModels.FileSystem;
 
-public partial class TreeFileDirInfo : FileSystem.SimpleFileInfo
+public partial class TreeFileDirInfo : SimpleFileInfo
 {
     [ObservableProperty]
     private int depth;
@@ -12,6 +12,10 @@ public partial class TreeFileDirInfo : FileSystem.SimpleFileInfo
     [property: JsonIgnore]
     [ObservableProperty]
     private int index;
+
+    [property: JsonIgnore]
+    [ObservableProperty]
+    private object tag;
 
     private bool? isTreeItemChecked = false;
 
@@ -103,11 +107,8 @@ public partial class TreeFileDirInfo : FileSystem.SimpleFileInfo
     protected internal void SetTreeItemChecked(bool? value)
     {
         SetProperty(ref isTreeItemChecked, value, nameof(IsTreeItemChecked));
-        if (RawFileInfo != null)
-        {
-            //同步到原始数据
-            RawFileInfo.IsChecked = value ?? false;
-        }
+        //同步到原始数据
+        RawFileInfo?.IsChecked = value ?? false;
     }
     private void File_PropertyChanged(object sender, PropertyChangedEventArgs e)
     {

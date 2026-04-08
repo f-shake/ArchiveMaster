@@ -33,6 +33,10 @@
       <DependentUpon>PhotoTagSearcherPanel.axaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Views\PhotoTagManagerPanel.axaml.cs">
+      <DependentUpon>PhotoTagManagerPanel.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>

@@ -22,6 +22,7 @@ namespace ArchiveMaster
         public IList<ConfigMetadata> Configs =>
         [
             new ConfigMetadata(typeof(PhotoTagGeneratorConfig)),
+            new ConfigMetadata(typeof(PhotoTagManagerConfig)),
             new ConfigMetadata(typeof(PhotoTagSearcherConfig)),
         ];
 
@@ -35,6 +36,7 @@ namespace ArchiveMaster
         public IList<Type> TransientServices { get; } =
         [
             typeof(PhotoTagGeneratorService),
+            typeof(PhotoTagManagerService),
             typeof(PhotoTagSearcherService)
         ];
 
@@ -44,6 +46,8 @@ namespace ArchiveMaster
             {
                 new ToolPanelInfo(typeof(PhotoTagGeneratorPanel), typeof(PhotoTagGeneratorViewModel), "照片标签生成",
                     "通过AI，自动生成照片的关键词标签", baseUrl + "tag.svg", true),
+                new ToolPanelInfo(typeof(PhotoTagManagerPanel), typeof(PhotoTagManagerViewModel), "图像标签管理",
+                    "管理各图像的标签，进行新增、修改或和删除", baseUrl + "tag_manage.svg"),
                 new ToolPanelInfo(typeof(PhotoTagSearcherPanel), typeof(PhotoTagSearcherViewModel), "根据关键词查找",
                     "根据关键词，查找指定标签的图像", baseUrl + "pic_search.svg")
             },

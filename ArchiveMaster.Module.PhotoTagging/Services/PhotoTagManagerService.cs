@@ -23,34 +23,25 @@ using ImageMagick;
 
 namespace ArchiveMaster.Services
 {
-    public class PhotoTagSearcherService(AppConfig appConfig)
-        : TwoStepServiceBase<PhotoTagSearcherConfig>(appConfig)
+    public class PhotoTagManagerService(AppConfig appConfig)
+        : TwoStepServiceBase<PhotoTagManagerConfig>(appConfig)
     {
-        public List<TaggingPhotoFileInfo> AllFiles { get; private set; }
+        public TreeDirInfo Tree { get; private set; }
 
         public override async Task ExecuteAsync(CancellationToken ct = default)
         {
-            if (string.IsNullOrWhiteSpace(Config.TagFile))
+            var tags = await TagFileHelper.GetPhotoTagCollectionAsync(Config.TagFile, ct);
+            var relativePathToTags = tags.Photos.ToDictionary(p => p.RelativePath, p => p.Tags);
+            var tree = await TreeDirInfo.BuildTreeAsync(Config.RootDir, null, ct);
+            foreach (var file in tree.Flatten())
             {
-                throw new Exception("标签文件未指定");
+                if (relativePathToTags.TryGetValue(file.RelativePath, out PhotoTags value))
+                {
+                    file.Tag = value;
+                }
             }
 
-            if (!File.Exists(Config.TagFile))
-            {
-                throw new FileNotFoundException($"标签文件不存在: {Config.TagFile}");
-            }
-
-            AllFiles = await TagFileHelper.GetPhotoTaggingFileInfosAsync(Config.TagFile, Config.RootDir, ct);
-        }
-
-        public Task<List<TaggingPhotoFileInfo>> SearchAsync(TagType type, string keyword, bool partial)
-        {
-            return Task.Run(() =>
-            {
-                return partial
-                    ? AllFiles.Where(p => p.Tags.Matches(keyword,type)).ToList()
-                    : AllFiles.Where(p => p.Tags.Contains(keyword,type)).ToList();
-            });
+            Tree = tree;
         }
 
         public override IEnumerable<SimpleFileInfo> GetInitializedFiles()
