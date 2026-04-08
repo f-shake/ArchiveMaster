@@ -16,7 +16,6 @@ namespace ArchiveMaster.Configs
         [ObservableProperty]
         private FileFilterRule filter = FileHelper.NoRawImageFileFilterRule;
 
-
         [ObservableProperty]
         private int resizingTargetResolutionIn10k = 800;
 

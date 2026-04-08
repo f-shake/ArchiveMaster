@@ -12,6 +12,9 @@ namespace ArchiveMaster.Configs
 
         [ObservableProperty]
         private string rootDir;
+        
+        [ObservableProperty]
+        private FileFilterRule filter = FileHelper.NoRawImageFileFilterRule;
 
         public override void Check()
         {

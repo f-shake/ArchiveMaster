@@ -13,13 +13,44 @@ public partial class PhotoTagManagerViewModel(ViewModelServices services)
     : TwoStepViewModelBase<PhotoTagManagerService, PhotoTagManagerConfig>(services)
 {
     public override bool EnableInitialize => false;
+
+    [ObservableProperty]
+    private AvaloniaList<TreeFileDirInfo> treeFiles;
+
+    [ObservableProperty]
+    private TreeFileDirInfo selectedFile;
     
     [ObservableProperty]
-    private AvaloniaList<SimpleFileInfo> treeFiles;
+    private ObservablePhotoTags selectedTags;
+
+    partial void OnSelectedFileChanged(TreeFileDirInfo value)
+    {
+        if (value == null)
+        {
+            SelectedTags = null;
+            return;
+        }
+
+        if (value.Tag is TaggingPhotoFileInfo tagPhoto)
+        {
+            SelectedTags = new ObservablePhotoTags(tagPhoto.Tags);
+        }
+        else
+        {
+            SelectedTags = new ObservablePhotoTags();
+        }
+        
+    }
 
     protected override Task OnExecutedAsync(CancellationToken ct)
     {
-        TreeFiles = new AvaloniaList<SimpleFileInfo>(Service.Tree.Subs);
+        TreeFiles = new AvaloniaList<TreeFileDirInfo>(Service.Tree.Subs);
         return base.OnExecutedAsync(ct);
+    }
+
+    protected override void OnReset()
+    {
+        base.OnReset();
+        TreeFiles = null;
     }
 }
