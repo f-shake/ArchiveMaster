@@ -202,11 +202,11 @@ namespace ArchiveMaster.Services
                     .ApplyFilter(ct, Config.Filter)
                     .Select(p => new TaggingPhotoFileInfo(p, Config.Dir));
 
-                var existingFiles = new Dictionary<string, PhotoTagItem>();
+                var existingFiles = new Dictionary<string, TaggedPhoto>();
                 if (File.Exists(Config.TagFile))
                 {
                     var fileContent = await File.ReadAllTextAsync(Config.TagFile, ct);
-                    existingFiles = JsonSerializer.Deserialize<PhotoTagCollection>(fileContent, JsonOptions)
+                    existingFiles = JsonSerializer.Deserialize<TaggedPhotoCollection>(fileContent, JsonOptions)
                         .Photos
                         .ToDictionary(p => p.RelativePath);
                 }
@@ -300,9 +300,9 @@ namespace ArchiveMaster.Services
             var photoTags = Files
                 .Where(p => p.HasGenerated)
                 .OrderBy(p => p.RelativePath)
-                .Select(p => new PhotoTagItem(p.RelativePath, p.Tags))
+                .Select(p => new TaggedPhoto(p.RelativePath, p.Tags))
                 .ToList();
-            var photoTagCollection = new PhotoTagCollection(photoTags);
+            var photoTagCollection = new TaggedPhotoCollection(photoTags);
             await File.WriteAllTextAsync(Config.TagFile, JsonSerializer.Serialize(photoTagCollection, JsonOptions));
         }
     }

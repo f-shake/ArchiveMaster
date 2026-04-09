@@ -21,31 +21,6 @@ public partial class PhotoTagManagerViewModel(ViewModelServices services)
     [ObservableProperty]
     private TreeFileDirInfo selectedFile;
     
-    [ObservableProperty]
-    private ObservablePhotoTags selectedTags;
-
-    partial void OnSelectedFileChanged(TreeFileDirInfo oldValue, TreeFileDirInfo newValue)
-    {
-        if (SelectedTags != null && oldValue != null)
-        {
-            oldValue.Tag=selectedTags.ToPhotoTags();
-        }
-        
-        if (newValue == null)
-        {
-            SelectedTags = null;
-            return;
-        }
-
-        if (newValue.Tag is PhotoTags tagPhoto)
-        {
-            SelectedTags = new ObservablePhotoTags(tagPhoto);
-        }
-        else
-        {
-            SelectedTags = new ObservablePhotoTags();
-        }
-    }
 
     protected override Task OnExecutedAsync(CancellationToken ct)
     {

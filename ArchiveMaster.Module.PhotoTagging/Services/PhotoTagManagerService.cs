@@ -42,7 +42,11 @@ namespace ArchiveMaster.Services
             {
                 if (relativePathToTags.TryGetValue(file.RelativePath, out PhotoTags value))
                 {
-                    file.Tag = value;
+                    file.Tag = new EditableTaggingFileInfo(value, file.RelativePath, Config.RootDir);
+                }
+                else
+                {
+                    file.Tag = new EditableTaggingFileInfo(file.RelativePath, Config.RootDir);
                 }
             }
 

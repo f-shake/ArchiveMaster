@@ -22,7 +22,7 @@ public partial class TaggingPhotoFileInfo : ImageFileInfo
         Tags = tags;
     }
 
-    public TaggingPhotoFileInfo(PhotoTagItem tagItem, string topDir) : base(tagItem.RelativePath, topDir)
+    public TaggingPhotoFileInfo(TaggedPhoto tagItem, string topDir) : base(tagItem.RelativePath, topDir)
     {
         HasGenerated = true;
         Tags = tagItem.Tags;

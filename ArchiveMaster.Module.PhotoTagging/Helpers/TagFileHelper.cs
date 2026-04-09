@@ -13,7 +13,7 @@ public static class TagFileHelper
         List<TaggingPhotoFileInfo> result = null;
         await Task.Run(() =>
         {
-            var photos = JsonSerializer.Deserialize<PhotoTagCollection>(tagFileContent);
+            var photos = JsonSerializer.Deserialize<TaggedPhotoCollection>(tagFileContent);
             result = new List<TaggingPhotoFileInfo>(photos.Photos.Count + 4);
             foreach (var photo in photos.Photos)
             {
@@ -32,11 +32,11 @@ public static class TagFileHelper
         return result;
     }
 
-    public static async Task<PhotoTagCollection> GetPhotoTagCollectionAsync(string tagFile, CancellationToken ct)
+    public static async Task<TaggedPhotoCollection> GetPhotoTagCollectionAsync(string tagFile, CancellationToken ct)
     {
         var tagFileContent = await File.ReadAllTextAsync(tagFile, ct);
-        PhotoTagCollection result = null;
-        await Task.Run(() => { result = JsonSerializer.Deserialize<PhotoTagCollection>(tagFileContent); }, ct);
+        TaggedPhotoCollection result = null;
+        await Task.Run(() => { result = JsonSerializer.Deserialize<TaggedPhotoCollection>(tagFileContent); }, ct);
         return result;
     }
 }

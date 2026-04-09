@@ -43,61 +43,94 @@
                 SelectedItem="{Binding SelectedFile}">
                 <v:TreeFileDataGrid.Columns>
                     <DataGridTextColumn
-                        Binding="{Binding Tag.Count, FallbackValue=' ', StringFormat='{}{0}个标签'}"
+                        Binding="{Binding Tag.Tags.Count, FallbackValue=' ', StringFormat='{}{0}个标签'}"
                         Header="标签"
                         IsReadOnly="True" />
                 </v:TreeFileDataGrid.Columns>
+                <v:TreeFileDataGrid.Footer>
+                    <StackPanel
+                        Orientation="Horizontal"
+                        Spacing="8">
+                        <Button
+                            Classes="Link"
+                            Content="保存标签数据库" />
+                        <Button
+                            Classes="Link"
+                            Content="另存为标签数据库" />
+                    </StackPanel>
+                </v:TreeFileDataGrid.Footer>
             </v:TreeFileDataGrid>
-            <ScrollViewer
+            <Grid
                 Grid.Row="2"
-                Padding="0,0,20,0"
-                HorizontalScrollBarVisibility="Disabled"
-                VerticalScrollBarVisibility="Auto">
-                <StackPanel Spacing="8">
-                    <StackPanel.IsVisible>
-                        <MultiBinding Converter="{x:Static cvt:Converters.AndLogic}">
-                            <Binding
-                                Converter="{x:Static cvt:Converters.IsNotNull}"
-                                Path="SelectedTags" />
-                            <Binding
-                                Converter="{x:Static cvt:Converters.InverseBool}"
-                                Path="SelectedFile.IsDir" />
-                        </MultiBinding>
-                    </StackPanel.IsVisible>
-                    <StackPanel.Styles>
-                        <Style Selector="ct|StringListEditor">
-                            <Setter Property="AddButtonPosition" Value="Right" />
-                            <Setter Property="Layout" Value="HorizontalStack" />
-                        </Style>
-                        <Style Selector="ct|FormItem /template/ ContentPresenter#PART_Header">
-                            <Setter Property="FontWeight" Value="Bold" />
-                        </Style>
-                    </StackPanel.Styles>
-                    <ct:FormItem Header="对象">
-                        <ct:StringListEditor ItemsSource="{Binding SelectedTags.ObjectTags}" />
-                    </ct:FormItem>
-                    <ct:FormItem Header="场景">
-                        <ct:StringListEditor ItemsSource="{Binding SelectedTags.SceneTags}" />
-                    </ct:FormItem>
-                    <ct:FormItem Header="情绪">
-                        <ct:StringListEditor ItemsSource="{Binding SelectedTags.MoodTags}" />
-                    </ct:FormItem>
-                    <ct:FormItem Header="颜色">
-                        <ct:StringListEditor ItemsSource="{Binding SelectedTags.ColorTags}" />
-                    </ct:FormItem>
-                    <ct:FormItem Header="拍摄">
-                        <ct:StringListEditor ItemsSource="{Binding SelectedTags.TechniqueTags}" />
-                    </ct:FormItem>
-                    <ct:FormItem Header="文字">
-                        <ct:StringListEditor ItemsSource="{Binding SelectedTags.TextTags}" />
-                    </ct:FormItem>
-                    <ct:FormItem Header="描述">
-                        <TextBox
-                            Text="{Binding SelectedTags.Description}"
-                            TextWrapping="Wrap" />
-                    </ct:FormItem>
-                </StackPanel>
-            </ScrollViewer>
+                ColumnDefinitions="*,8,Auto"
+                DataContext="{Binding SelectedFile}">
+                <Grid.IsVisible>
+                    <MultiBinding Converter="{x:Static cvt:Converters.AndLogic}">
+                        <Binding
+                            Converter="{x:Static cvt:Converters.IsNotNull}"
+                            Path="." />
+                        <Binding
+                            Converter="{x:Static cvt:Converters.InverseBool}"
+                            Path="IsDir" />
+                    </MultiBinding>
+                </Grid.IsVisible>
+                <ScrollViewer
+                    Padding="0,0,20,0"
+                    HorizontalScrollBarVisibility="Disabled"
+                    VerticalScrollBarVisibility="Auto">
+                    <StackPanel
+                        DataContext="{Binding Tag.Tags}"
+                        Spacing="8">
+                        <StackPanel.Styles>
+                            <Style Selector="ct|StringListEditor">
+                                <Setter Property="AddButtonPosition" Value="Right" />
+                                <Setter Property="Layout" Value="HorizontalStack" />
+                            </Style>
+                            <Style Selector="ct|FormItem /template/ ContentPresenter#PART_Header">
+                                <Setter Property="FontWeight" Value="Bold" />
+                            </Style>
+                        </StackPanel.Styles>
+                        <ct:FormItem Header="对象">
+                            <ct:StringListEditor ItemsSource="{Binding ObjectTags}" />
+                        </ct:FormItem>
+                        <ct:FormItem Header="场景">
+                            <ct:StringListEditor ItemsSource="{Binding SceneTags}" />
+                        </ct:FormItem>
+                        <ct:FormItem Header="情绪">
+                            <ct:StringListEditor ItemsSource="{Binding MoodTags}" />
+                        </ct:FormItem>
+                        <ct:FormItem Header="颜色">
+                            <ct:StringListEditor ItemsSource="{Binding ColorTags}" />
+                        </ct:FormItem>
+                        <ct:FormItem Header="拍摄">
+                            <ct:StringListEditor ItemsSource="{Binding TechniqueTags}" />
+                        </ct:FormItem>
+                        <ct:FormItem Header="文字">
+                            <ct:StringListEditor ItemsSource="{Binding TextTags}" />
+                        </ct:FormItem>
+                        <ct:FormItem Header="描述">
+                            <TextBox
+                                Text="{Binding Description}"
+                                TextWrapping="Wrap" />
+                        </ct:FormItem>
+                    </StackPanel>
+                </ScrollViewer>
+                <Image
+                    Grid.Column="2"
+                    Width="160"
+                    Height="96"
+                    Cursor="Hand"
+                    RenderOptions.BitmapInterpolationMode="HighQuality"
+                    Source="{Binding Tag.ThumbnailImage, Mode=OneWay}">
+                    <Interaction.Behaviors>
+                        <RoutedEventTriggerBehavior RoutedEvent="{x:Static InputElement.TappedEvent}">
+                            <InvokeCommandAction
+                                Command="{Binding OpenFileCommand, Source={x:Static vm:GlobalCommands.Instance}}"
+                                CommandParameter="{Binding Path}" />
+                        </RoutedEventTriggerBehavior>
+                    </Interaction.Behaviors>
+                </Image>
+            </Grid>
         </Grid>
     </v:VerticalTwoStepPanelBase.ResultsContent>
 </v:VerticalTwoStepPanelBase>
