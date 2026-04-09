@@ -41,7 +41,7 @@ namespace ArchiveMaster.Services
             }
 
             NotifyMessage("正在读取标签文件");
-            AllFiles = await TagFileHelper.GetPhotoTaggingFileInfosAsync(Config.TagFile, Config.RootDir, false, ct);
+            AllFiles = await TagFileHelper.ReadPhotoTaggingFileInfosAsync(Config.TagFile, Config.RootDir, false, ct);
         }
 
         public Task<List<TaggingPhotoFileInfo>> SearchAsync(TagType type, string keyword, bool partial)

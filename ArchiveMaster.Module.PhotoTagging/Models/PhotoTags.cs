@@ -1,4 +1,5 @@
-﻿using ArchiveMaster.Enums;
+﻿using System.Text.Json.Serialization;
+using ArchiveMaster.Enums;
 
 namespace ArchiveMaster.Models;
 
@@ -11,6 +12,7 @@ public record PhotoTags(
     List<string> TextTags,
     string Description)
 {
+    [JsonIgnore]
     public int Count => ObjectTags.Count
                         + SceneTags.Count
                         + MoodTags.Count

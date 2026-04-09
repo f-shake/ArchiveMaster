@@ -53,9 +53,12 @@
                         Spacing="8">
                         <Button
                             Classes="Link"
-                            Content="保存标签数据库" />
+                            Command="{Binding SaveTagsCommand}"
+                            Content="保存标签数据库"
+                            IsEnabled="{Binding HasChanged}" />
                         <Button
                             Classes="Link"
+                            Command="{Binding SaveTagsAsCommand}"
                             Content="另存为标签数据库" />
                     </StackPanel>
                 </v:TreeFileDataGrid.Footer>

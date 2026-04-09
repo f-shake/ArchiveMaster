@@ -31,7 +31,7 @@ namespace ArchiveMaster.Services
         public override async Task ExecuteAsync(CancellationToken ct = default)
         {
             NotifyMessage("正在读取标签文件");
-            var tags = await TagFileHelper.GetPhotoTagCollectionAsync(Config.TagFile, ct);
+            var tags = await TagFileHelper.ReadPhotoTagCollectionAsync(Config.TagFile, ct);
             var relativePathToTags = tags.Photos.ToDictionary(p => p.RelativePath, p => p.Tags);
 
             NotifyMessage("正在枚举目录文件");
@@ -61,6 +61,29 @@ namespace ArchiveMaster.Services
         public override Task InitializeAsync(CancellationToken ct = default)
         {
             throw new InvalidOperationException();
+        }
+
+        public async Task SaveTagsAsync(string tagFile, CancellationToken ct = default)
+        {
+            List<TaggedPhoto> tags = new List<TaggedPhoto>();
+            foreach (var file in Tree.Flatten())
+            {
+                ct.ThrowIfCancellationRequested();
+                var editableTaggingFile = file.Tag as EditableTaggingFileInfo;
+                if (editableTaggingFile == null)
+                {
+                    throw new Exception($"文件{file.RelativePath}没有标签");
+                }
+
+                if (editableTaggingFile.Tags.Count > 0 || !string.IsNullOrEmpty(editableTaggingFile.Tags.Description))
+                {
+                    tags.Add(new TaggedPhoto(file.RelativePath, editableTaggingFile.Tags.ToPhotoTags()));
+                }
+            }
+
+            TaggedPhotoCollection result = new TaggedPhotoCollection(tags);
+
+            await TagFileHelper.WritePhotoTagCollectionAsync(tagFile, result, ct);
         }
     }
 }

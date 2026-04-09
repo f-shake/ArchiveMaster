@@ -79,11 +79,6 @@ namespace ArchiveMaster.Services
                                              }
                                              """;
 
-        private static readonly JsonSerializerOptions JsonOptions = new JsonSerializerOptions()
-        {
-            Encoder = JavaScriptEncoder.Create(UnicodeRanges.All),
-            WriteIndented = true,
-        };
 
         private string systemPrompts;
 
@@ -205,9 +200,7 @@ namespace ArchiveMaster.Services
                 var existingFiles = new Dictionary<string, TaggedPhoto>();
                 if (File.Exists(Config.TagFile))
                 {
-                    var fileContent = await File.ReadAllTextAsync(Config.TagFile, ct);
-                    existingFiles = JsonSerializer.Deserialize<TaggedPhotoCollection>(fileContent, JsonOptions)
-                        .Photos
+                    existingFiles = (await TagFileHelper.ReadPhotoTagCollectionAsync(Config.TagFile, ct)).Photos
                         .ToDictionary(p => p.RelativePath);
                 }
 
@@ -295,6 +288,7 @@ namespace ArchiveMaster.Services
 
             throw new JsonException("AI返回的JSON格式不正确");
         }
+
         private async Task SaveTagsAsync()
         {
             var photoTags = Files
@@ -302,8 +296,7 @@ namespace ArchiveMaster.Services
                 .OrderBy(p => p.RelativePath)
                 .Select(p => new TaggedPhoto(p.RelativePath, p.Tags))
                 .ToList();
-            var photoTagCollection = new TaggedPhotoCollection(photoTags);
-            await File.WriteAllTextAsync(Config.TagFile, JsonSerializer.Serialize(photoTagCollection, JsonOptions));
+            await TagFileHelper.WritePhotoTagCollectionAsync(Config.TagFile, new TaggedPhotoCollection(photoTags));
         }
     }
 }

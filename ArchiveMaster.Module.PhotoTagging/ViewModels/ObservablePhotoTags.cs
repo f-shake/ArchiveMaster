@@ -4,14 +4,14 @@ using FzLib.Text;
 
 namespace ArchiveMaster.ViewModels;
 
-public class ObservablePhotoTags : ObservableObject
+public partial class ObservablePhotoTags : ObservableObject
 {
     public ObservablePhotoTags()
     {
         SetOnCollectionChanged();
     }
 
-    public ObservablePhotoTags(PhotoTags tags) 
+    public ObservablePhotoTags(PhotoTags tags)
     {
         ObjectTags = new ObservableStringList(tags.ObjectTags);
         SceneTags = new ObservableStringList(tags.SceneTags);
@@ -23,7 +23,7 @@ public class ObservablePhotoTags : ObservableObject
         SetOnCollectionChanged();
     }
 
-    private void  SetOnCollectionChanged()
+    private void SetOnCollectionChanged()
     {
         ObjectTags.CollectionChanged += (sender, e) => OnPropertyChanged(nameof(Count));
         SceneTags.CollectionChanged += (sender, e) => OnPropertyChanged(nameof(Count));
@@ -35,11 +35,13 @@ public class ObservablePhotoTags : ObservableObject
 
     public ObservableStringList ObjectTags { get; } = new();
     public ObservableStringList SceneTags { get; } = new();
-    public ObservableStringList MoodTags { get;  } = new();
-    public ObservableStringList ColorTags { get;  } = new();
-    public ObservableStringList TechniqueTags { get;  } = new();
-    public ObservableStringList TextTags { get;  } = new();
-    public string Description { get; set; }
+    public ObservableStringList MoodTags { get; } = new();
+    public ObservableStringList ColorTags { get; } = new();
+    public ObservableStringList TechniqueTags { get; } = new();
+    public ObservableStringList TextTags { get; } = new();
+
+    [ObservableProperty]
+    private string description;
 
     public int Count => ObjectTags.Trimmed.Count()
                         + SceneTags.Trimmed.Count()
