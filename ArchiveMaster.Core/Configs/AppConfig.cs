@@ -186,6 +186,12 @@ namespace ArchiveMaster.Configs
                     throw new Exception("配置文件内不是Json Object");
                 }
 
+                //反序列化两次。第一次时，MasterPassword还没反序列化，导致GlobalConfigs中的SecurePassword类型的属性无法被反序列化。
+                //所以，进行第二次反序列化。
+                //虽然不是合适的解决方案，但能用。
+                GlobalConfigs.Instance = jobj.ContainsKey(JkeyGlobals)
+                    ? (jobj[JkeyGlobals].Deserialize<GlobalConfigs>(JsonOptions) ?? new GlobalConfigs())
+                    : GlobalConfigs.GetEmptyInstance();
                 GlobalConfigs.Instance = jobj.ContainsKey(JkeyGlobals)
                     ? (jobj[JkeyGlobals].Deserialize<GlobalConfigs>(JsonOptions) ?? new GlobalConfigs())
                     : GlobalConfigs.GetEmptyInstance();

@@ -6,7 +6,7 @@ public class AiUserChatMessage : AiChatMessage
 {
     public override AiChatMessageSender Sender => AiChatMessageSender.User;
 
-    public IReadOnlyList<byte[]> Images => images.AsReadOnly();
+    public IReadOnlyList<byte[]> Images => images?.AsReadOnly();
 
     private List<byte[]> images;
 

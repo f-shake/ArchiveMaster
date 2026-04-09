@@ -134,47 +134,60 @@ namespace ArchiveMaster.Services
             }, ct);
 
             // 消费者：负责AI调用
+            // 消费者：负责AI调用
             var consumer = Task.Run(async () =>
             {
                 int index = 0;
+                // --- 修改点 1: 定义最大并行数 ---
+                // 建议 4060Ti 跑 Qwen 设为 2，如果显存大（16G版）且模型小，可以试着设为 3
+                int maxDegreeOfParallelism = 1; 
+                var semaphore = new SemaphoreSlim(maxDegreeOfParallelism);
+                var tasks = new List<Task>();
+
                 await foreach (var item in channel.Reader.ReadAllAsync(ct))
                 {
                     ct.ThrowIfCancellationRequested();
-                    index++;
-                    Debug.WriteLine($"正在AI打标签第{index}张图片");
-                    NotifyMessage($"正在生成图片标签（{index}/{files.Count}）：{item.File.RelativePath}");
-                    NotifyProgress(index, files.Count);
-                    try
+                    await semaphore.WaitAsync(ct); // 等待空闲槽位
+
+                    var task = Task.Run(async () =>
                     {
-                        if (item.Bytes == null)
+                        try
                         {
-                            if (photoProcessingErrors.TryGetValue(item.File.RelativePath, out var ex))
+                            int currentIndex = Interlocked.Increment(ref index);
+                            NotifyMessage($"正在生成图片标签（{currentIndex}/{files.Count}）：{item.File.RelativePath}");
+                            NotifyProgress(currentIndex, files.Count);
+
+                            if (item.Bytes == null)
                             {
-                                throw new Exception("图片处理失败", ex);
+                                throw new Exception("图片处理失败");
                             }
-                            else
+
+                            // AI 调用
+                            item.File.Tags = await GetTagsAsync(llm, item.Bytes, ct);
+                            item.File.HasGenerated = true;
+                            item.File.Success();
+
+                            // 每10张保存一次（注意：多线程环境下 SaveTagsAsync 需要考虑线程安全，
+                            // 或者在这里只更新状态，由主线程定时保存）
+                            if (currentIndex % 10 == 0)
                             {
-                                throw new Exception("图片处理失败，未知错误");
+                                await SaveTagsAsync(); 
                             }
                         }
+                        catch (Exception ex)
+                        {
+                            item.File.Error(ex);
+                        }
+                        finally
+                        {
+                            semaphore.Release(); // 释放槽位
+                        }
+                    }, ct);
 
-                        item.File.Tags = await GetTagsAsync(llm, item.Bytes, ct);
-                        item.File.HasGenerated = true;
-                        item.File.Success();
-                    }
-                    catch (OperationCanceledException)
-                    {
-                    }
-                    catch (Exception ex)
-                    {
-                        item.File.Error(ex);
-                    }
-
-                    if (index % 10 == 0)
-                    {
-                        await SaveTagsAsync();
-                    }
+                    tasks.Add(task);
                 }
+
+                await Task.WhenAll(tasks); // 等待所有已启动的任务完成
             }, ct);
 
             await Task.WhenAll(producer, consumer);
