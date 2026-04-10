@@ -43,7 +43,7 @@
                             Width="120"
                             Classes="ThumbLabel"
                             IsSnapToTickEnabled="True"
-                            Maximum="30"
+                            Maximum="50"
                             Minimum="10"
                             TickFrequency="1"
                             Value="{Binding Config.TargetTagCount}" />
@@ -53,7 +53,7 @@
                             Width="120"
                             Classes="ThumbLabel"
                             IsSnapToTickEnabled="True"
-                            Maximum="100"
+                            Maximum="200"
                             Minimum="20"
                             TickFrequency="1"
                             Value="{Binding Config.DescriptionLength}" />

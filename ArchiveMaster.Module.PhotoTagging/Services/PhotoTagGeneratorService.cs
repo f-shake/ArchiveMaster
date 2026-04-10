@@ -35,19 +35,23 @@ namespace ArchiveMaster.Services
                                              严禁输出组合词或短语（如：禁止“蓝色海洋”，必须拆分为“蓝色，海洋”）。
 
                                              4.【强制长度规则】：
-                                             每个关键词严格限制在 2~4 个汉字。
+                                             每个关键词严格限制在 1~4 个汉字。
 
                                              5.【语义去重规则】：
                                              禁止输出重复或近义词，只保留一个最合适的词。
 
                                              6.【维度定义与输出规范】：
-                                             - `objects`: (核心主体) 粒度引导：人物（如：男性、小孩、集体）、建筑（如：高楼、古建、桥梁）、动植物（如：猫狗、花卉、森林）、交通工具（如：轿车、飞机、轮船）、其他物品（纸张、屏幕、桌子、椅子）。以上仅为建议，非约束条件。
-                                             - `scene`: (场景环境) 图像发生的空间。引导：室内、户外、街头、公园、海滨、办公室、商场、山地、工业区等。以上仅为建议，非约束条件。
-                                             - `mood`: (氛围情绪) 优先从以下词库选择：[宁静、热闹、孤独、现代、复古、唯美、压抑、明快、自然、庄严、温馨、生活化、工业感、赛博朋克]。以上仅为建议，非约束条件。
-                                             - `colors`: (色彩基调) 描述画面主色调及光影。引导：常用颜色（红/蓝/绿等，单字）、冷色调、暖色调、明亮、昏暗、高饱和、黑白。以上仅为建议，非约束条件。
-                                             - `technique`: (拍摄方式) 优先从以下词库选择：[航拍、俯拍、仰拍、平视、特写、微距、全景、长曝光、大场景、剪影、抓拍、对称构图、扫描]。以上仅为建议，非约束条件。
-                                             - `ocr`: (文字内容) 图中可见的文字。尽可能忠于原文，无文字则为空字符串。
-                                             - `desc`: (整体描述) 图像整体概括，限制在 {DescriptionLength} 字左右。
+                                             - `objects`: 核心主体。参考：男性、小孩、集体、高楼、桥梁、猫、狗、花、森林、轿车、飞机、轮船、纸张、屏幕、桌子、椅子。
+                                             - `scene`: 场景环境。参考：室内、户外、街头、公园、海滨、办公室、商场、山地、工业区等。以上仅为建议，非约束条件。
+                                             - `mood`: 氛围情绪。参考：宁静、热闹、孤独、现代、复古、唯美、压抑、明快、自然、庄严、温馨、生活化、工业感。
+                                             - `colors`: 色彩基调。参考：红色、蓝色、绿色、冷色调、暖色调、明亮、昏暗、高饱和、黑白。
+                                             - `technique`: 拍摄方式。参考：航拍、俯拍、仰拍、平视、特写、微距、全景、长曝光、大场景、剪影、抓拍、对称构图、扫描、夜景。
+                                             - `ocr`: 文字内容。 图中可见的文字。尽可能忠于原文，无文字则为空字符串。
+                                             - `desc`: 整体描述。图像整体概括，限制在{DescriptionLength}字左右。
+                                             
+                                             注意：
+                                             - 标签（不含ocr和desc）的总数量应当在{TagCount}左右。若图像内容过少，无法达到这个数量，可以略微减少。
+                                             - 以上提到的参考，仅为建议，非约束条件。
 
                                              7.【输出格式要求】：
                                              必须仅输出一个纯 JSON 对象，不得包含 Markdown 代码块标记（如 ```json）或任何额外说明。格式如下：
@@ -61,14 +65,16 @@ namespace ArchiveMaster.Services
                                                "desc": "string"
                                              }
                                              注：若某维度无内容，数组必须为空 []，字符串应当为空字符串""。
+                                             严禁输出任何非JSON文本，包括但不限于开场白、解释或总结。
 
                                              8.【输出前强制自检】：
-                                             - 词数是否在 {MinTagCount} 到 {MaxTagCount} 之间？
+                                             - 词数是否在{TagCount}左右？
                                              - 每个标签的词是否均为 1-4 个汉字？
                                              - 非标签字段（ocr、desc）是否为字符串类型？
                                              - 标签字段（objects、scene、mood、colors、technique）是否为数组类型？
+                                             - 是否以{开头并以}结尾？
 
-                                             9.【示例输出】：
+                                             9.【示例输出】（仅供格式参考，标签数量和描述长度请以上面的要求为准）：
                                              {
                                                "objects": ["大桥", "斜拉桥", "高楼"],
                                                "scene": ["河流", "城市"],
@@ -95,7 +101,7 @@ namespace ArchiveMaster.Services
             var llm = new LlmCallerService(GlobalConfigs.Instance.AiProviders.CurrentProvider);
 
             //存在两个耗时操作：图片处理和AI调用。使用流水线，避免等待时候的浪费。
-            var channel = Channel.CreateBounded<(TaggingPhotoFileInfo File, byte[] Bytes)>(new BoundedChannelOptions(10)
+            var channel = Channel.CreateBounded<(TaggingPhotoFileInfo File, byte[] Bytes)>(new BoundedChannelOptions(5)
             {
                 FullMode = BoundedChannelFullMode.Wait,
                 SingleReader = true,
@@ -160,13 +166,13 @@ namespace ArchiveMaster.Services
                             }
 
                             int retryCount = Config.RetryCount;
+                            int currentTry = 0;
                             if (retryCount <= 0)
                             {
                                 item.File.Tags = await GetTagsAsync(llm, item.Bytes, ct);
                             }
                             else
                             {
-                                int currentTry = 0;
                                 bool isSuccess = false;
                                 while (currentTry <= retryCount)
                                 {
@@ -198,7 +204,14 @@ namespace ArchiveMaster.Services
 
 
                             item.File.HasGenerated = true;
-                            item.File.Success();
+                            if (currentTry > 0)
+                            {
+                                item.File.Success($"重试{currentTry}次后成功");
+                            }
+                            else
+                            {
+                                item.File.Success();
+                            }
 
                             if (Config.AutoSaveInterval > 0)
                             {
