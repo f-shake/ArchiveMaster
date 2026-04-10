@@ -29,7 +29,7 @@
                     StringFileTypeFilter="ArchiveMaster Photo Tags（图像标签库）文件;*.ampt;;"
                     Type="OpenOrSaveFile" />
             </ct:FormItem>
-            <ct:FormItem Label="选项：">
+            <ct:FormItem Label="生成选项：">
                 <ct:WrapFormItemGroup>
                     <ct:FormItem Header="限制最大尺寸（万像素）">
                         <NumericUpDown
@@ -58,6 +58,11 @@
                             TickFrequency="1"
                             Value="{Binding Config.DescriptionLength}" />
                     </ct:FormItem>
+                </ct:WrapFormItemGroup>
+            </ct:FormItem>
+
+            <ct:FormItem Label="执行选项：">
+                <ct:WrapFormItemGroup>
                     <ct:FormItem Header="最大并行数量">
                         <Slider
                             Width="120"
@@ -67,6 +72,26 @@
                             Minimum="1"
                             TickFrequency="1"
                             Value="{Binding Config.MaxDegreeOfParallelism}" />
+                    </ct:FormItem>
+                    <ct:FormItem Header="自动保存间隔（个文件）">
+                        <Slider
+                            Width="120"
+                            Classes="ThumbLabel"
+                            IsSnapToTickEnabled="True"
+                            Maximum="100"
+                            Minimum="0"
+                            TickFrequency="1"
+                            Value="{Binding Config.AutoSaveInterval}" />
+                    </ct:FormItem>
+                    <ct:FormItem Header="自动重试次数：">
+                        <Slider
+                            Width="120"
+                            Classes="ThumbLabel"
+                            IsSnapToTickEnabled="True"
+                            Maximum="10"
+                            Minimum="0"
+                            TickFrequency="1"
+                            Value="{Binding Config.RetryCount}" />
                     </ct:FormItem>
                 </ct:WrapFormItemGroup>
             </ct:FormItem>

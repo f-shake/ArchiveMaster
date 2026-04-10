@@ -40,15 +40,14 @@ namespace ArchiveMaster.Services
                                              5.【语义去重规则】：
                                              禁止输出重复或近义词，只保留一个最合适的词。
 
-                                             6.【维度定义与 JSON 键名】：
-                                             请按以下英文键名对内容归类：
-                                             - `objects`: 核心主体（人物、动物、单体建筑、具体物件）
-                                             - `scene`: 场景环境（地理位置、空间、宏观环境）
-                                             - `mood`: 氛围情绪（如：宁静、热闹、现代、复古）
-                                             - `colors`: 色彩基调（如：蓝色、昏暗、明亮）
-                                             - `technique`: 拍摄方式（如：航拍、微距、特写、仰拍）
-                                             - `ocr`: 文字内容（图中可见的任何文字内容，尽可能忠于原有排版，不要进行任何转义等变换）
-                                             - `desc`: 对图像的整体概括和描述，大约{DescriptionLength}字
+                                             6.【维度定义与输出规范】：
+                                             - `objects`: (核心主体) 粒度引导：人物（如：男性、小孩、集体）、建筑（如：高楼、古建、桥梁）、动植物（如：猫狗、花卉、森林）、交通工具（如：轿车、飞机、轮船）、其他物品（纸张、屏幕、桌子、椅子）。以上仅为建议，非约束条件。
+                                             - `scene`: (场景环境) 图像发生的空间。引导：室内、户外、街头、公园、海滨、办公室、商场、山地、工业区等。以上仅为建议，非约束条件。
+                                             - `mood`: (氛围情绪) 优先从以下词库选择：[宁静、热闹、孤独、现代、复古、唯美、压抑、明快、自然、庄严、温馨、生活化、工业感、赛博朋克]。以上仅为建议，非约束条件。
+                                             - `colors`: (色彩基调) 描述画面主色调及光影。引导：常用颜色（红/蓝/绿等，单字）、冷色调、暖色调、明亮、昏暗、高饱和、黑白。以上仅为建议，非约束条件。
+                                             - `technique`: (拍摄方式) 优先从以下词库选择：[航拍、俯拍、仰拍、平视、特写、微距、全景、长曝光、大场景、剪影、抓拍、对称构图、扫描]。以上仅为建议，非约束条件。
+                                             - `ocr`: (文字内容) 图中可见的文字。尽可能忠于原文，无文字则为空字符串。
+                                             - `desc`: (整体描述) 图像整体概括，限制在 {DescriptionLength} 字左右。
 
                                              7.【输出格式要求】：
                                              必须仅输出一个纯 JSON 对象，不得包含 Markdown 代码块标记（如 ```json）或任何额外说明。格式如下：
@@ -139,7 +138,7 @@ namespace ArchiveMaster.Services
             var consumer = Task.Run(async () =>
             {
                 int index = 0;
-                var semaphore = new SemaphoreSlim(Math.Min(Math.Max(1,Config.MaxDegreeOfParallelism),8));
+                var semaphore = new SemaphoreSlim(Math.Min(Math.Max(1, Config.MaxDegreeOfParallelism), 8));
                 var tasks = new List<Task>();
 
                 await foreach (var item in channel.Reader.ReadAllAsync(ct))
@@ -153,23 +152,60 @@ namespace ArchiveMaster.Services
                         {
                             int currentIndex = Interlocked.Increment(ref index);
                             NotifyMessage($"正在生成图片标签（{currentIndex}/{files.Count}）：{item.File.RelativePath}");
-                            NotifyProgress(currentIndex, files.Count);
+                            NotifyProgress(currentIndex - 1, files.Count);
 
                             if (item.Bytes == null)
                             {
                                 throw new Exception("图片处理失败");
                             }
 
-                            // AI 调用
-                            item.File.Tags = await GetTagsAsync(llm, item.Bytes, ct);
+                            int retryCount = Config.RetryCount;
+                            if (retryCount <= 0)
+                            {
+                                item.File.Tags = await GetTagsAsync(llm, item.Bytes, ct);
+                            }
+                            else
+                            {
+                                int currentTry = 0;
+                                bool isSuccess = false;
+                                while (currentTry <= retryCount)
+                                {
+                                    try
+                                    {
+                                        item.File.Tags = await GetTagsAsync(llm, item.Bytes, ct);
+                                        isSuccess = true;
+                                        break;
+                                    }
+                                    catch (Exception ex) when (currentTry < retryCount && !ct.IsCancellationRequested)
+                                    {
+                                        currentTry++;
+                                        // 计算等待时间：例如 2s, 4s, 8s...
+                                        int delayMs = (int)Math.Pow(2, currentTry) * 200;
+
+                                        Debug.WriteLine(
+                                            $"图片 {item.File.RelativePath} 生成失败，正在进行第 {currentTry} 次重试。错误: {ex.Message}");
+
+                                        // 在重试前等待，注意传入 ct 以支持取消操作
+                                        await Task.Delay(delayMs, ct);
+                                    }
+                                }
+
+                                if (!isSuccess)
+                                {
+                                    throw new Exception($"在重试 {retryCount} 次后依然失败。");
+                                }
+                            }
+
+
                             item.File.HasGenerated = true;
                             item.File.Success();
 
-                            // 每10张保存一次（注意：多线程环境下 SaveTagsAsync 需要考虑线程安全，
-                            // 或者在这里只更新状态，由主线程定时保存）
-                            if (currentIndex % 10 == 0)
+                            if (Config.AutoSaveInterval > 0)
                             {
-                                await SaveTagsAsync(); 
+                                if (currentIndex % Config.AutoSaveInterval == 0)
+                                {
+                                    await SaveTagsAsync();
+                                }
                             }
                         }
                         catch (Exception ex)
@@ -178,7 +214,7 @@ namespace ArchiveMaster.Services
                         }
                         finally
                         {
-                            semaphore.Release(); // 释放槽位
+                            semaphore.Release();
                         }
                     }, ct);
 
@@ -276,6 +312,7 @@ namespace ArchiveMaster.Services
 
                 return jArray.Select(p => p.GetValue<string>()).ToList();
             }
+
             string ParseText(JsonNode jNode)
             {
                 if (jNode is not JsonValue jValue || !jValue.TryGetValue(out string value))
