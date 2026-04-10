@@ -12,10 +12,12 @@
     d:DesignWidth="800"
     mc:Ignorable="d">
     <v:VerticalTwoStepPanelBase.ConfigsContent>
-        <ct:StackFormItemGroup> 
+        <ct:StackFormItemGroup>
             <ct:FormItem Label="目录：">
                 <v:FilePickerTextBox
                     FileNames="{Binding Config.Dir}"
+                    Filter="{Binding Config.Filter}"
+                    IsFilterBarVisible="True"
                     Type="OpenFolder" />
             </ct:FormItem>
             <ct:FormItem Label="标签文件：">
@@ -36,7 +38,7 @@
                             Value="{Binding Config.ResizingTargetResolutionIn10k}" />
                     </ct:FormItem>
 
-                    <ct:FormItem Header="目标关键词数量">
+                    <ct:FormItem Header="目标标签数量">
                         <Slider
                             Width="120"
                             Classes="ThumbLabel"
@@ -55,6 +57,16 @@
                             Minimum="20"
                             TickFrequency="1"
                             Value="{Binding Config.DescriptionLength}" />
+                    </ct:FormItem>
+                    <ct:FormItem Header="最大并行数量">
+                        <Slider
+                            Width="120"
+                            Classes="ThumbLabel"
+                            IsSnapToTickEnabled="True"
+                            Maximum="8"
+                            Minimum="1"
+                            TickFrequency="1"
+                            Value="{Binding Config.MaxDegreeOfParallelism}" />
                     </ct:FormItem>
                 </ct:WrapFormItemGroup>
             </ct:FormItem>
@@ -102,11 +114,22 @@
                             </ct:FormItem>
                             <ct:FormItem
                                 Classes="BoldLabel"
+                                IsVisible="{Binding Tags.OcrText, Converter={x:Static cvt:Converters.IsNotNull}}"
+                                Label="文本："
+                                LabelWidth="{StaticResource FileDataGridRowDetailLabelWidth}">
+                                <SelectableTextBlock
+                                    Text="{Binding Tags.OcrText, Converter={x:Static cvt:OneLineStringConverter.Instance}}"
+                                    TextTrimming="CharacterEllipsis"
+                                    ToolTip.Tip="{Binding Tags.OcrText}" />
+                            </ct:FormItem>
+                            <ct:FormItem
+                                Classes="BoldLabel"
                                 Label="描述："
                                 LabelWidth="{StaticResource FileDataGridRowDetailLabelWidth}">
                                 <SelectableTextBlock
-                                    Text="{Binding Tags.Description}"
-                                    TextWrapping="Wrap" />
+                                    Text="{Binding Tags.Description, Converter={x:Static cvt:OneLineStringConverter.Instance}}"
+                                    TextTrimming="CharacterEllipsis"
+                                    ToolTip.Tip="{Binding Tags.Description}" />
                             </ct:FormItem>
                             <ContentControl
                                 Content="{Binding}"

@@ -109,7 +109,9 @@
                             <ct:StringListEditor ItemsSource="{Binding TechniqueTags}" />
                         </ct:FormItem>
                         <ct:FormItem Header="文字">
-                            <ct:StringListEditor ItemsSource="{Binding TextTags}" />
+                            <TextBox
+                                Text="{Binding OcrText}"
+                                TextWrapping="Wrap" />
                         </ct:FormItem>
                         <ct:FormItem Header="描述">
                             <TextBox

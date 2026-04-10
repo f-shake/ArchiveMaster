@@ -99,7 +99,7 @@
                                 <StackPanel
                                     Grid.Column="2"
                                     Spacing="8">
-                                    <Grid ColumnDefinitions="*,8,Auto,8,Auto,4,Auto">
+                                    <Grid ColumnDefinitions="*,8,Auto,4,Auto,4,Auto">
                                         <SelectableTextBlock
                                             FontWeight="Bold"
                                             Text="{Binding RelativePath}"
@@ -109,12 +109,35 @@
                                         <!--  IsVisible="{Binding ExistsFile}"  -->
                                         <!--  Text="{Binding Length, Converter={x:Static cvt:Converters.FileLength}}" />  -->
                                         <Button
+                                            Grid.Column="2"
+                                            Classes="Link"
+                                            Content="{ic:FluentIcon Icon=Copy}"
+                                            ToolTip.Tip="复制信息">
+                                            <Button.Flyout>
+                                                <MenuFlyout>
+                                                    <MenuItem
+                                                        Command="{Binding CopyTextCommand, Source={x:Static vm:GlobalCommands.Instance}}"
+                                                        CommandParameter="{Binding Tags, Converter={x:Static cvt:TagsToStringConverter.Instance}}"
+                                                        Header="复制标签" />
+                                                    <MenuItem
+                                                        Command="{Binding CopyTextCommand, Source={x:Static vm:GlobalCommands.Instance}}"
+                                                        CommandParameter="{Binding Tags.OcrText}"
+                                                        Header="复制文本" />
+                                                    <MenuItem
+                                                        Command="{Binding CopyTextCommand, Source={x:Static vm:GlobalCommands.Instance}}"
+                                                        CommandParameter="{Binding Tags.Description}"
+                                                        Header="复制描述" />
+                                                </MenuFlyout>
+                                            </Button.Flyout>
+                                        </Button>
+                                        <Button
                                             Grid.Column="4"
                                             Classes="Link"
                                             Command="{Binding OpenFileCommand, Source={x:Static vm:GlobalCommands.Instance}}"
                                             CommandParameter="{Binding Path}"
                                             Content="{ic:FluentIcon Icon=Document}"
-                                            IsVisible="{Binding ExistsFile}" />
+                                            IsVisible="{Binding ExistsFile}"
+                                            ToolTip.Tip="打开文件" />
                                         <Button
                                             Grid.Column="6"
                                             Classes="Link"
@@ -122,7 +145,8 @@
                                             CommandParameter="{Binding Path}"
                                             Content="{ic:FluentIcon Icon=FolderOpen}"
                                             Foreground="{DynamicResource Accent0}"
-                                            IsVisible="{Binding ExistsFile}" />
+                                            IsVisible="{Binding ExistsFile}"
+                                            ToolTip.Tip="打开文件所在目录" />
                                         <ContentControl
                                             Grid.Column="6"
                                             Content="{ic:FluentIcon Icon=ErrorCircle}"
@@ -130,14 +154,25 @@
                                             IsVisible="{Binding !ExistsFile}"
                                             ToolTip.Tip="文件不存在" />
                                     </Grid>
+
                                     <SelectableTextBlock
                                         Text="{Binding Tags, Converter={x:Static cvt:TagsToStringConverter.Instance}}"
-                                        TextTrimming="CharacterEllipsis"
                                         TextWrapping="Wrap" />
                                     <TextBlock
                                         Classes="Description"
-                                        Text="{Binding Tags.Description}"
-                                        TextTrimming="CharacterEllipsis" />
+                                        FontStyle="Italic"
+                                        IsVisible="{Binding Tags.OcrText, Converter={x:Static cvt:Converters.IsNotNull}}"
+                                        Text="{Binding Tags.OcrText, Converter={x:Static cvt:OneLineStringConverter.Instance}}"
+                                        TextTrimming="CharacterEllipsis"
+                                        ToolTip.Tip="{Binding Tags.OcrText}" />
+
+
+                                    <TextBlock
+                                        Classes="Description"
+                                        Text="{Binding Tags.Description, Converter={x:Static cvt:OneLineStringConverter.Instance}}"
+                                        TextTrimming="CharacterEllipsis"
+                                        ToolTip.Tip="{Binding Tags.Description}" />
+
                                 </StackPanel>
                             </Grid>
                         </DataTemplate>

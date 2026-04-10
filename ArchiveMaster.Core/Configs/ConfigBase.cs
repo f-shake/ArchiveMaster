@@ -42,5 +42,13 @@ namespace ArchiveMaster.Configs
                 }
             }
         }
+
+        protected static void CheckRange<T>(T value, T min, T max, string name) where T : IComparable
+        {
+            if (value.CompareTo(min) > 0 || value.CompareTo(max) < 0)
+            {
+                throw new Exception($"{name}超出范围");
+            }
+        }
     }
 }

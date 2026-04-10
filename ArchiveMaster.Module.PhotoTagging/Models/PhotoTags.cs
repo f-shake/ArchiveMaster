@@ -9,7 +9,7 @@ public record PhotoTags(
     List<string> MoodTags,
     List<string> ColorTags,
     List<string> TechniqueTags,
-    List<string> TextTags,
+    string OcrText,
     string Description)
 {
     [JsonIgnore]
@@ -17,8 +17,7 @@ public record PhotoTags(
                         + SceneTags.Count
                         + MoodTags.Count
                         + ColorTags.Count
-                        + TechniqueTags.Count
-                        + TextTags.Count;
+                        + TechniqueTags.Count;
 
     public bool Contains(string tag, TagType type)
     {
@@ -29,14 +28,14 @@ public record PhotoTags(
                            || MoodTags.Contains(tag)
                            || ColorTags.Contains(tag)
                            || TechniqueTags.Contains(tag)
-                           || TextTags.Contains(tag)
+                           || OcrText.Contains(tag)
                            || Description == tag,
             TagType.Object => ObjectTags.Contains(tag),
             TagType.Scene => SceneTags.Contains(tag),
             TagType.Mood => MoodTags.Contains(tag),
             TagType.Color => ColorTags.Contains(tag),
             TagType.Technique => TechniqueTags.Contains(tag),
-            TagType.Text => TextTags.Contains(tag),
+            TagType.Text => OcrText.Contains(tag),
             TagType.Description => Description.Contains(tag),
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
         };
@@ -58,14 +57,14 @@ public record PhotoTags(
                            || ListMatch(MoodTags)
                            || ListMatch(ColorTags)
                            || ListMatch(TechniqueTags)
-                           || ListMatch(TextTags)
+                           || OcrText.Contains(OcrText)
                            || Description.Contains(query, comparison),
             TagType.Object => ListMatch(ObjectTags),
             TagType.Scene => ListMatch(SceneTags),
             TagType.Mood => ListMatch(MoodTags),
             TagType.Color => ListMatch(ColorTags),
             TagType.Technique => ListMatch(TechniqueTags),
-            TagType.Text => ListMatch(TextTags),
+            TagType.Text => OcrText.Contains(OcrText),
             TagType.Description => Description.Contains(query, comparison),
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
         };

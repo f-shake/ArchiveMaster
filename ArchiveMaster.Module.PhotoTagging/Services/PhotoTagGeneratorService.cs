@@ -47,7 +47,7 @@ namespace ArchiveMaster.Services
                                              - `mood`: 氛围情绪（如：宁静、热闹、现代、复古）
                                              - `colors`: 色彩基调（如：蓝色、昏暗、明亮）
                                              - `technique`: 拍摄方式（如：航拍、微距、特写、仰拍）
-                                             - `text`: 文字内容（图中可见的招牌、标题或文字摘要）
+                                             - `ocr`: 文字内容（图中可见的任何文字内容，尽可能忠于原有排版，不要进行任何转义等变换）
                                              - `desc`: 对图像的整体概括和描述，大约{DescriptionLength}字
 
                                              7.【输出格式要求】：
@@ -58,14 +58,16 @@ namespace ArchiveMaster.Services
                                                "mood": [],
                                                "colors": [],
                                                "technique": [],
-                                               "text": [],
+                                               "ocr": "string",
                                                "desc": "string"
                                              }
-                                             注：若某维度无内容，数组必须为空 []。
+                                             注：若某维度无内容，数组必须为空 []，字符串应当为空字符串""。
 
                                              8.【输出前强制自检】：
                                              - 词数是否在 {MinTagCount} 到 {MaxTagCount} 之间？
-                                             - 所有的词是否均为 2-4 个汉字？
+                                             - 每个标签的词是否均为 1-4 个汉字？
+                                             - 非标签字段（ocr、desc）是否为字符串类型？
+                                             - 标签字段（objects、scene、mood、colors、technique）是否为数组类型？
 
                                              9.【示例输出】：
                                              {
@@ -74,7 +76,7 @@ namespace ArchiveMaster.Services
                                                "mood": ["现代", "宏伟"],
                                                "colors": ["蓝色", "明亮"],
                                                "technique": ["航拍"],
-                                               "text": [],
+                                               "ocr": "宁波舟山港北仑港区",
                                                "desc": "晴天下繁忙的工业港口码头，整齐堆放的彩色集装箱与大型起重机械交织，远处可见城市轮廓与河流。"
                                              }
                                              """;
@@ -134,14 +136,10 @@ namespace ArchiveMaster.Services
             }, ct);
 
             // 消费者：负责AI调用
-            // 消费者：负责AI调用
             var consumer = Task.Run(async () =>
             {
                 int index = 0;
-                // --- 修改点 1: 定义最大并行数 ---
-                // 建议 4060Ti 跑 Qwen 设为 2，如果显存大（16G版）且模型小，可以试着设为 3
-                int maxDegreeOfParallelism = 1; 
-                var semaphore = new SemaphoreSlim(maxDegreeOfParallelism);
+                var semaphore = new SemaphoreSlim(Math.Min(Math.Max(1,Config.MaxDegreeOfParallelism),8));
                 var tasks = new List<Task>();
 
                 await foreach (var item in channel.Reader.ReadAllAsync(ct))
@@ -278,6 +276,15 @@ namespace ArchiveMaster.Services
 
                 return jArray.Select(p => p.GetValue<string>()).ToList();
             }
+            string ParseText(JsonNode jNode)
+            {
+                if (jNode is not JsonValue jValue || !jValue.TryGetValue(out string value))
+                {
+                    throw new JsonException("AI返回的JSON格式不正确");
+                }
+
+                return value;
+            }
 
             var jObj = (JsonObject)JsonNode.Parse(tagResult);
             if (jObj.ContainsKey("objects")
@@ -285,7 +292,7 @@ namespace ArchiveMaster.Services
                 && jObj.ContainsKey("mood")
                 && jObj.ContainsKey("colors")
                 && jObj.ContainsKey("technique")
-                && jObj.ContainsKey("text")
+                && jObj.ContainsKey("ocr")
                 && jObj.ContainsKey("desc"))
             {
                 return new PhotoTags(
@@ -294,8 +301,8 @@ namespace ArchiveMaster.Services
                     ParseTags(jObj["mood"]),
                     ParseTags(jObj["colors"]),
                     ParseTags(jObj["technique"]),
-                    ParseTags(jObj["text"]),
-                    jObj["desc"].GetValue<string>()
+                    ParseText(jObj["ocr"]),
+                    ParseText(jObj["desc"])
                 );
             }
 

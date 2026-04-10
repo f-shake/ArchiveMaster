@@ -18,7 +18,7 @@ public partial class ObservablePhotoTags : ObservableObject
         MoodTags = new ObservableStringList(tags.MoodTags);
         ColorTags = new ObservableStringList(tags.ColorTags);
         TechniqueTags = new ObservableStringList(tags.TechniqueTags);
-        TextTags = new ObservableStringList(tags.TextTags);
+        OcrText = tags.OcrText;
         Description = tags.Description;
         SetOnCollectionChanged();
     }
@@ -30,7 +30,6 @@ public partial class ObservablePhotoTags : ObservableObject
         MoodTags.CollectionChanged += (sender, e) => OnPropertyChanged(nameof(Count));
         ColorTags.CollectionChanged += (sender, e) => OnPropertyChanged(nameof(Count));
         TechniqueTags.CollectionChanged += (sender, e) => OnPropertyChanged(nameof(Count));
-        TextTags.CollectionChanged += (sender, e) => OnPropertyChanged(nameof(Count));
     }
 
     public ObservableStringList ObjectTags { get; } = new();
@@ -38,8 +37,10 @@ public partial class ObservablePhotoTags : ObservableObject
     public ObservableStringList MoodTags { get; } = new();
     public ObservableStringList ColorTags { get; } = new();
     public ObservableStringList TechniqueTags { get; } = new();
-    public ObservableStringList TextTags { get; } = new();
 
+    [ObservableProperty]
+    private string ocrText;
+    
     [ObservableProperty]
     private string description;
 
@@ -47,8 +48,7 @@ public partial class ObservablePhotoTags : ObservableObject
                         + SceneTags.Trimmed.Count()
                         + MoodTags.Trimmed.Count()
                         + ColorTags.Trimmed.Count()
-                        + TechniqueTags.Trimmed.Count()
-                        + TextTags.Trimmed.Count();
+                        + TechniqueTags.Trimmed.Count();
 
     public PhotoTags ToPhotoTags()
     {
@@ -58,7 +58,7 @@ public partial class ObservablePhotoTags : ObservableObject
             MoodTags.Trimmed.Distinct().ToList(),
             ColorTags.Trimmed.Distinct().ToList(),
             TechniqueTags.Trimmed.Distinct().ToList(),
-            TextTags.Trimmed.Distinct().ToList(),
+            OcrText,
             Description);
     }
 }

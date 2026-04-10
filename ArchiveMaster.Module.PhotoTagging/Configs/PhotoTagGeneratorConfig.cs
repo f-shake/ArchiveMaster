@@ -24,11 +24,15 @@ namespace ArchiveMaster.Configs
 
         [ObservableProperty]
         private int targetTagCount = 5;
-        
+
+        [ObservableProperty]
+        private int maxDegreeOfParallelism = 1;
+
         public override void Check()
         {
             CheckDir(Dir, "目录");
             CheckEmpty(TagFile, "标签文件");
+            CheckRange(1, 8, MaxDegreeOfParallelism, "最大并行数量");
         }
     }
 }

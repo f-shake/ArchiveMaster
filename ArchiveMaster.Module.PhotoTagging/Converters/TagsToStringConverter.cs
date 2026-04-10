@@ -19,7 +19,6 @@ public class TagsToStringConverter : IValueConverter
             AddToString(sb, "情绪", tags.MoodTags);
             AddToString(sb, "颜色", tags.ColorTags);
             AddToString(sb, "拍摄", tags.TechniqueTags);
-            AddToString(sb, "文本", tags.TextTags);
 
             return sb.ToString();
         }
