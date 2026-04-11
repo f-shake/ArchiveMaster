@@ -45,7 +45,7 @@ namespace ArchiveMaster.Services
                                              - `scene`: 场景环境。参考：室内、户外、街头、公园、海滨、办公室、商场、山地、工业区等。以上仅为建议，非约束条件。
                                              - `mood`: 氛围情绪。参考：宁静、热闹、孤独、现代、复古、唯美、压抑、明快、自然、庄严、温馨、生活化、工业感。
                                              - `colors`: 色彩基调。参考：红色、蓝色、绿色、冷色调、暖色调、明亮、昏暗、高饱和、黑白。
-                                             - `technique`: 拍摄方式。参考：航拍、俯拍、仰拍、平视、特写、微距、全景、长曝光、大场景、剪影、抓拍、对称构图、扫描、夜景。
+                                             - `technique`: 拍摄方式。参考：航拍、俯拍、仰拍、平视、特写、微距、全景、长曝光、大场景、剪影、抓拍、对称构图、扫描、夜景、截屏。
                                              - `ocr`: 文字内容。 图中可见的文字。尽可能忠于原文，无文字则为空字符串。
                                              - `desc`: 整体描述。图像整体概括，限制在{DescriptionLength}字左右。
 
@@ -144,6 +144,7 @@ namespace ArchiveMaster.Services
             var consumer = Task.Run(async () =>
             {
                 int index = 0;
+                int generated = Files.Count(f => f.HasGenerated);
                 var semaphore = new SemaphoreSlim(Math.Min(Math.Max(1, Config.MaxDegreeOfParallelism), 8));
                 var tasks = new List<Task>();
 
@@ -157,7 +158,8 @@ namespace ArchiveMaster.Services
                         try
                         {
                             int currentIndex = Interlocked.Increment(ref index);
-                            NotifyMessage($"正在生成图片标签（{currentIndex}/{files.Count}）：{item.File.RelativePath}");
+                            NotifyMessage(
+                                $"正在生成图片标签（{currentIndex}/{files.Count}，累计{generated + 1}/{Files.Count}）：{item.File.RelativePath}");
                             NotifyProgress(currentIndex - 1, files.Count);
 
                             if (item.Bytes == null)
@@ -165,6 +167,7 @@ namespace ArchiveMaster.Services
                                 throw new Exception("图片处理失败");
                             }
 
+                            bool hasGenerated = item.File.HasGenerated;
                             item.File.Processing();
                             UpdateCurrentProcessingFile(item.File, true);
 
@@ -207,6 +210,11 @@ namespace ArchiveMaster.Services
 
 
                             item.File.HasGenerated = true;
+                            if (!hasGenerated) //如果原来没有生成，现在生成了，那么累计生成数量+1
+                            {
+                                Interlocked.Increment(ref generated);
+                            }
+
                             if (currentTry > 0)
                             {
                                 item.File.Success($"重试{currentTry}次后成功");
