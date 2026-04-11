@@ -45,6 +45,9 @@ public class SimpleFileDataGrid : DataGrid
         nameof(ShowCount), true);
 
 
+    protected static readonly FuncValueConverter<bool, double> BoolToOpacityConverter =
+        new FuncValueConverter<bool, double>(b => b ? 1.0 : 0.5);
+
     protected static readonly DateTimeConverter DateTimeConverter = new DateTimeConverter();
 
     protected static readonly FileDirLength2StringConverter FileDirLength2StringConverter =
@@ -54,10 +57,6 @@ public class SimpleFileDataGrid : DataGrid
 
     protected static readonly ProcessStatusColorConverter ProcessStatusColorConverter =
         new ProcessStatusColorConverter();
-
-    protected static readonly FuncValueConverter<bool, double> BoolToOpacityConverter =
-        new FuncValueConverter<bool, double>(b => b ? 1.0 : 0.5);
-
     public SimpleFileDataGrid()
     {
         AreRowDetailsFrozen = true;
@@ -65,6 +64,7 @@ public class SimpleFileDataGrid : DataGrid
         CanUserResizeColumns = true;
         this[!IsReadOnlyProperty] = new Binding("IsWorking");
         DoubleTapped += SimpleFileDataGrid_DoubleTapped;
+        SetAutoScrollToSelectedItem();
     }
 
     public virtual string ColumnIsCheckedHeader { get; init; } = "";
@@ -85,9 +85,9 @@ public class SimpleFileDataGrid : DataGrid
 
     public virtual string ColumnNameHeader { get; init; } = "文件名";
 
-    public virtual DataGridLength ColumnNameWidth { get; init; } = new DataGridLength(400);
-
     public virtual double ColumnNameIndex { get; init; } = 0.3;
+
+    public virtual DataGridLength ColumnNameWidth { get; init; } = new DataGridLength(400);
 
     public virtual string ColumnPathHeader { get; init; } = "路径";
 
@@ -154,7 +154,7 @@ public class SimpleFileDataGrid : DataGrid
                     HorizontalAlignment = HorizontalAlignment.Center,
                     [!ToggleButton.IsCheckedProperty] = new Binding(nameof(SimpleFileInfo.IsChecked)),
                     [!IsEnabledProperty] = new Binding("DataContext.IsWorking") //执行命令时，这CheckBox不可以Enable
-                        { Source = rootPanel, Converter = InverseBoolConverter },
+                    { Source = rootPanel, Converter = InverseBoolConverter },
                 },
                 [!IsEnabledProperty] = new Binding(nameof(SimpleFileInfo.CanCheck)), //套两层控件，实现任一禁止选择则不允许选择
                 [!OpacityProperty] = new Binding(nameof(SimpleFileInfo.CanCheck)) { Converter = BoolToOpacityConverter }
@@ -171,7 +171,7 @@ public class SimpleFileDataGrid : DataGrid
         {
             Header = ColumnLengthHeader,
             Binding = new Binding(".")
-                { Converter = FileDirLength2StringConverter, Mode = BindingMode.OneWay },
+            { Converter = FileDirLength2StringConverter, Mode = BindingMode.OneWay },
             SortMemberPath = nameof(SimpleFileInfo.Length),
             IsReadOnly = true,
             MaxWidth = ColumnLengthMaxWidth,
@@ -463,6 +463,16 @@ public class SimpleFileDataGrid : DataGrid
             : DataGridRowDetailsVisibilityMode.Collapsed;
     }
 
+    private void SetAutoScrollToSelectedItem()
+    {
+        this.GetObservable(SelectedItemProperty).Subscribe(item =>
+        {
+            if (item != null)
+            {
+                ScrollIntoView(item, null);
+            }
+        });
+    }
     private void SimpleFileDataGrid_DoubleTapped(object sender, TappedEventArgs e)
     {
         if (e.Source is Visual { DataContext: SimpleFileInfo file })

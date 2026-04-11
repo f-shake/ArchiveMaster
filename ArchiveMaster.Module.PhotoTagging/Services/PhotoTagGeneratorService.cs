@@ -48,7 +48,7 @@ namespace ArchiveMaster.Services
                                              - `technique`: 拍摄方式。参考：航拍、俯拍、仰拍、平视、特写、微距、全景、长曝光、大场景、剪影、抓拍、对称构图、扫描、夜景。
                                              - `ocr`: 文字内容。 图中可见的文字。尽可能忠于原文，无文字则为空字符串。
                                              - `desc`: 整体描述。图像整体概括，限制在{DescriptionLength}字左右。
-                                             
+
                                              注意：
                                              - 标签（不含ocr和desc）的总数量应当在{TagCount}左右。若图像内容过少，无法达到这个数量，可以略微减少。
                                              - 以上提到的参考，仅为建议，非约束条件。
@@ -165,6 +165,9 @@ namespace ArchiveMaster.Services
                                 throw new Exception("图片处理失败");
                             }
 
+                            item.File.Processing();
+                            UpdateCurrentProcessingFile(item.File, true);
+
                             int retryCount = Config.RetryCount;
                             int currentTry = 0;
                             if (retryCount <= 0)
@@ -220,6 +223,11 @@ namespace ArchiveMaster.Services
                                     await SaveTagsAsync();
                                 }
                             }
+                        }
+                        catch (OperationCanceledException)
+                        {
+                            item.File.Cancel();
+                            throw;
                         }
                         catch (Exception ex)
                         {

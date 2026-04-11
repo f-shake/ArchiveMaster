@@ -14,9 +14,10 @@ public class ProcessStatusColorConverter : IValueConverter
             ProcessStatus.Ready => Colors.Transparent,
             ProcessStatus.Warn => Colors.Orange,
             ProcessStatus.Error => Colors.Red,
-            ProcessStatus.Processing => Colors.Transparent,
+            ProcessStatus.Processing => Colors.Gray,
             ProcessStatus.Success => Colors.Green,
             ProcessStatus.Skip => Colors.GreenYellow,
+            ProcessStatus.Cancel => Colors.LightPink,
             _ => throw new ArgumentOutOfRangeException(nameof(value), value, null)
         };
         if (targetType == typeof(Color))

@@ -169,6 +169,7 @@
 
 
                                 <TextBlock
+                                    x:Name="PART_MessageOneLine"
                                     Text="{Binding Message}"
                                     TextTrimming="CharacterEllipsis"
                                     ToolTip.Tip="{Binding Message}" />
@@ -220,6 +221,7 @@
 
 
                                 <TextBlock
+                                    x:Name="PART_MessageTwoLine"
                                     Text="{Binding Message}"
                                     TextTrimming="CharacterEllipsis"
                                     ToolTip.Tip="{Binding Message}" />
@@ -383,6 +385,7 @@
 
 
                                 <TextBlock
+                                    x:Name="PART_MessageOneLine"
                                     Text="{Binding Message}"
                                     TextTrimming="CharacterEllipsis"
                                     ToolTip.Tip="{Binding Message}" />

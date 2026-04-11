@@ -6,18 +6,18 @@ using ArchiveMaster.ViewModels.FileSystem;
 
 namespace ArchiveMaster.Services
 {
-    public abstract class TwoStepServiceBase<TConfig>(AppConfig appConfig) : ServiceBase<TConfig>(appConfig)
+    public abstract class TwoStepServiceBase<TConfig>(AppConfig appConfig)
+        : ServiceBase<TConfig>(appConfig), ITwoStepService
         where TConfig : ConfigBase
     {
         public abstract Task ExecuteAsync(CancellationToken ct = default);
-
-        public abstract IEnumerable<SimpleFileInfo> GetInitializedFiles();
 
         public virtual IEnumerable<SimpleFileInfo> GetExecutedFiles()
         {
             return GetInitializedFiles();
         }
 
+        public abstract IEnumerable<SimpleFileInfo> GetInitializedFiles();
         public abstract Task InitializeAsync(CancellationToken ct = default);
     }
 }

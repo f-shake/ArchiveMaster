@@ -21,4 +21,7 @@ public enum ProcessStatus
     
     [Description("跳过")]
     Skip,
+    
+    [Description("取消")]
+    Cancel,
 }

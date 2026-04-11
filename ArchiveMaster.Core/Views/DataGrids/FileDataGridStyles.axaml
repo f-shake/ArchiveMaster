@@ -203,6 +203,7 @@
                 </Grid>
             </ControlTemplate>
         </Setter>
+        <Setter Property="SelectedItem" Value="{Binding SelectedFile}" />
     </ControlTheme>
 
     <ControlTheme
