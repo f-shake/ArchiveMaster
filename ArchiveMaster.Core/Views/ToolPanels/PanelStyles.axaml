@@ -11,6 +11,208 @@
     xmlns:v="using:ArchiveMaster.Views"
     xmlns:vm="clr-namespace:ArchiveMaster.ViewModels">
 
+    <!--  顶栏  -->
+    <ControlTemplate x:Key="PanelHeaderTemplate">
+        <Grid
+            Margin="8"
+            ColumnDefinitions="Auto,8,*,8,Auto"
+            RowDefinitions="*,*">
+
+            <TextBlock
+                Grid.Column="2"
+                FontSize="16"
+                FontWeight="Bold"
+                Text="{Binding Title, RelativeSource={RelativeSource AncestorType=v:PanelBase}}" />
+
+            <TextBlock
+                Grid.Row="1"
+                Grid.Column="2"
+                Margin="0,4,0,0"
+                MaxLines="2"
+                Text="{Binding Description, RelativeSource={RelativeSource AncestorType=v:PanelBase}}"
+                TextTrimming="CharacterEllipsis"
+                TextWrapping="Wrap" />
+
+            <ContentPresenter
+                Grid.RowSpan="2"
+                Grid.Column="4"
+                Content="{Binding RightTopContent, RelativeSource={RelativeSource AncestorType=v:PanelBase}}" />
+        </Grid>
+    </ControlTemplate>
+
+    <!--  预设区  -->
+    <ControlTemplate x:Key="PanelPresetHeaderTemplate">
+        <Grid
+            Margin="8"
+            ColumnDefinitions="Auto,8,*,8,Auto"
+            RowDefinitions="*,*">
+
+            <TextBlock
+                Grid.Column="2"
+                FontSize="16"
+                FontWeight="Bold"
+                Text="{Binding Title, RelativeSource={RelativeSource AncestorType=v:PanelBase}}" />
+
+            <TextBlock
+                Grid.Row="1"
+                Grid.Column="2"
+                Margin="0,4,0,0"
+                MaxLines="2"
+                Text="{Binding Description, RelativeSource={RelativeSource AncestorType=v:PanelBase}}"
+                TextTrimming="CharacterEllipsis"
+                TextWrapping="Wrap" />
+
+            <StackPanel
+                Grid.RowSpan="2"
+                Grid.Column="4"
+                VerticalAlignment="Top"
+                IsEnabled="{Binding !IsWorking}"
+                Orientation="Horizontal">
+
+                <ComboBox
+                    Width="128"
+                    VerticalAlignment="Center"
+                    ItemsSource="{Binding PresetNames}"
+                    SelectedItem="{Binding PresetName}"
+                    ToolTip.Tip="切换预设" />
+
+                <Button
+                    Classes="Icon"
+                    Command="{Binding AddPresetCommand}"
+                    Content="{ic:FluentIcon Icon=Add}" />
+
+                <Button
+                    Classes="Icon"
+                    Command="{Binding RemovePresetCommand}"
+                    Content="{ic:FluentIcon Icon=Delete}" />
+
+                <Button
+                    Classes="Icon"
+                    Command="{Binding ModifyPresetNameCommand}"
+                    Content="{ic:FluentIcon Icon=Edit}" />
+
+                <Button
+                    Classes="Icon"
+                    Command="{Binding ClonePresetCommand}"
+                    Content="{ic:FluentIcon Icon=Copy}" />
+            </StackPanel>
+        </Grid>
+
+    </ControlTemplate>
+
+    <!--  底栏  -->
+    <ControlTemplate x:Key="BottomBarTemplate">
+        <Panel
+            Margin="16"
+            IsVisible="{Binding ShowBottomBar, RelativeSource={RelativeSource AncestorType=v:PanelBase}}">
+            <Panel.Styles>
+                <Style Selector="ProgressBar:horizontal">
+                    <Setter Property="MinWidth" Value="24" />
+                    <Setter Property="Minimum" Value="0" />
+                    <Setter Property="Maximum" Value="1" />
+                    <Setter Property="ProgressTextFormat" Value="{}{1:0.0}%" />
+                </Style>
+            </Panel.Styles>
+            <!--  单行  -->
+            <Grid
+                x:Name="PART_BottomOneLine"
+                ColumnDefinitions="4*,8,*,16,Auto,8,Auto,8,Auto,8,Auto"
+                IsEnabled="{Binding Config, Converter={x:Static cvt:Converters.IsNotNull}}">
+
+                <TextBlock
+                    x:Name="PART_MessageOneLine"
+                    Text="{Binding Message}"
+                    TextTrimming="CharacterEllipsis"
+                    ToolTip.Tip="{Binding Message}" />
+
+                <ProgressBar
+                    Grid.Column="2"
+                    Height="24"
+                    IsIndeterminate="{Binding ProgressIndeterminate}"
+                    IsVisible="{Binding IsWorking}"
+                    ShowProgressText="{Binding !ProgressIndeterminate}"
+                    Value="{Binding Progress}" />
+
+                <Button
+                    Grid.Column="4"
+                    Classes="Long Primary"
+                    Command="{Binding InitializeCommand}"
+                    Content="{Binding InitializeButtonContent, RelativeSource={RelativeSource AncestorType=v:PanelBase}}"
+                    IsVisible="{Binding EnableInitialize}" />
+
+                <Button
+                    Grid.Column="6"
+                    Classes="Long Primary"
+                    Command="{Binding ExecuteCommand}"
+                    Content="{Binding ExecuteButtonContent, RelativeSource={RelativeSource AncestorType=v:PanelBase}}" />
+
+                <Button
+                    Grid.Column="8"
+                    Classes="Middle"
+                    Command="{Binding CancelCommand}"
+                    Content="{Binding StopButtonContent, RelativeSource={RelativeSource AncestorType=v:PanelBase}}" />
+
+                <Button
+                    Grid.Column="10"
+                    Classes="Middle"
+                    Command="{Binding ResetCommand}"
+                    Content="{Binding ResetButtonContent, RelativeSource={RelativeSource AncestorType=v:PanelBase}}" />
+            </Grid>
+
+            <!--  双行  -->
+            <Grid
+                x:Name="PART_BottomTwoLine"
+                Margin="0,8,0,0"
+                ColumnDefinitions="*,16,Auto,8,Auto"
+                IsEnabled="{Binding Config, Converter={x:Static cvt:Converters.IsNotNull}}"
+                RowDefinitions="Auto,8,Auto">
+
+                <TextBlock
+                    x:Name="PART_MessageTwoLine"
+                    Text="{Binding Message}"
+                    TextTrimming="CharacterEllipsis"
+                    ToolTip.Tip="{Binding Message}" />
+
+                <ProgressBar
+                    Grid.Row="2"
+                    Height="24"
+                    MinWidth="72"
+                    IsIndeterminate="{Binding ProgressIndeterminate}"
+                    IsVisible="{Binding IsWorking}"
+                    ShowProgressText="{Binding !ProgressIndeterminate}"
+                    Value="{Binding Progress}" />
+
+                <Button
+                    Grid.Column="2"
+                    Classes="Long Primary"
+                    Command="{Binding InitializeCommand}"
+                    Content="{Binding InitializeButtonContent, RelativeSource={RelativeSource AncestorType=v:PanelBase}}"
+                    IsVisible="{Binding EnableInitialize}" />
+
+                <Button
+                    Grid.Row="2"
+                    Grid.Column="2"
+                    Classes="Long Primary"
+                    Command="{Binding ExecuteCommand}"
+                    Content="{Binding ExecuteButtonContent, RelativeSource={RelativeSource AncestorType=v:PanelBase}}" />
+
+                <Button
+                    Grid.Column="4"
+                    Classes="Middle"
+                    Command="{Binding CancelCommand}"
+                    Content="{Binding StopButtonContent, RelativeSource={RelativeSource AncestorType=v:PanelBase}}" />
+
+                <Button
+                    Grid.Row="2"
+                    Grid.Column="4"
+                    Classes="Middle"
+                    Command="{Binding ResetCommand}"
+                    Content="{Binding ResetButtonContent, RelativeSource={RelativeSource AncestorType=v:PanelBase}}" />
+            </Grid>
+        </Panel>
+    </ControlTemplate>
+
+    <!--  基础面板  -->
     <ControlTheme
         x:Key="{x:Type v:PanelBase}"
         TargetType="v:PanelBase">
@@ -18,39 +220,8 @@
         <Setter Property="Template">
             <ControlTemplate>
                 <Grid RowDefinitions="Auto,8,*">
-                    <Grid
-                        ColumnDefinitions="Auto,8,*,8,Auto"
-                        RowDefinitions="*,*">
 
-                        <TextBlock
-                            Grid.Column="2"
-                            FontSize="16"
-                            FontWeight="Bold"
-                            Text="{TemplateBinding Title}" />
-                        <TextBlock
-                            Grid.Row="1"
-                            Grid.Column="2"
-                            Margin="0,4,0,0"
-                            MaxLines="2"
-                            Text="{TemplateBinding Description}"
-                            TextTrimming="CharacterEllipsis"
-                            TextWrapping="Wrap" />
-
-                        <ContentControl
-                            Grid.Row="0"
-                            Grid.RowSpan="2"
-                            Grid.Column="4"
-                            Content="{TemplateBinding RightTopContent}"
-                            IsEnabled="{Binding !IsWorking}">
-                            <ContentControl.Styles>
-                                <Style Selector="Button:disabled /template/ ContentPresenter#PART_ContentPresenter">
-                                    <Setter Property="Background" Value="Transparent" />
-                                </Style>
-                            </ContentControl.Styles>
-                        </ContentControl>
-
-                    </Grid>
-
+                    <ContentControl Template="{StaticResource PanelHeaderTemplate}" />
                     <ContentControl
                         Grid.Row="2"
                         Content="{TemplateBinding PanelContent}" />
@@ -60,6 +231,7 @@
         </Setter>
     </ControlTheme>
 
+    <!--  上下结构两步面板  -->
     <ControlTheme
         x:Key="{x:Type v:VerticalTwoStepPanelBase}"
         BasedOn="{StaticResource {x:Type v:PanelBase}}"
@@ -67,60 +239,7 @@
         <Setter Property="Template">
             <ControlTemplate>
                 <Grid RowDefinitions="Auto,*">
-                    <Grid
-                        Margin="8"
-                        ColumnDefinitions="Auto,8,*,8,Auto"
-                        RowDefinitions="*,*">
-
-                        <TextBlock
-                            Grid.Column="2"
-                            FontSize="16"
-                            FontWeight="Bold"
-                            Text="{TemplateBinding Title}" />
-                        <TextBlock
-                            Grid.Row="1"
-                            Grid.Column="2"
-                            Margin="0,4,0,0"
-                            MaxLines="2"
-                            Text="{TemplateBinding Description}"
-                            TextTrimming="CharacterEllipsis"
-                            TextWrapping="Wrap" />
-
-
-                        <StackPanel
-                            Grid.RowSpan="2"
-                            Grid.Column="4"
-                            VerticalAlignment="Top"
-                            IsEnabled="{Binding !IsWorking}"
-                            Orientation="Horizontal">
-                            <ComboBox
-                                Width="128"
-                                VerticalAlignment="Center"
-                                ItemsSource="{Binding PresetNames}"
-                                SelectedItem="{Binding PresetName}"
-                                ToolTip.Tip="切换预设" />
-                            <Button
-                                Classes="Icon"
-                                Command="{Binding AddPresetCommand}"
-                                Content="{ic:FluentIcon Icon=Add}"
-                                ToolTip.Tip="新增预设" />
-                            <Button
-                                Classes="Icon"
-                                Command="{Binding RemovePresetCommand}"
-                                Content="{ic:FluentIcon Icon=Delete}"
-                                ToolTip.Tip="删除当前预设" />
-                            <Button
-                                Classes="Icon"
-                                Command="{Binding ModifyPresetNameCommand}"
-                                Content="{ic:FluentIcon Icon=Edit}"
-                                ToolTip.Tip="修改当前预设名称" />
-                            <Button
-                                Classes="Icon"
-                                Command="{Binding ClonePresetCommand}"
-                                Content="{ic:FluentIcon Icon=Copy}"
-                                ToolTip.Tip="建立当前预设的副本" />
-                        </StackPanel>
-                    </Grid>
+                    <ContentControl Template="{StaticResource PanelPresetHeaderTemplate}" />
 
                     <Grid
                         x:Name="PART_ContentContainer"
@@ -158,116 +277,11 @@
                             Content="{TemplateBinding ResultsContent}" />
 
                         <!--  信息、进度、按钮  -->
-                        <Panel
+                        <ContentControl
+                            x:Name="PART_Bottom"
                             Grid.Row="4"
-                            Margin="16"
-                            IsVisible="{TemplateBinding ShowBottomBar}">
-                            <Grid
-                                x:Name="PART_BottomOneLine"
-                                ColumnDefinitions="4*,8,*,16,Auto,8,Auto,8,Auto,8,Auto"
-                                IsEnabled="{Binding Config, Converter={x:Static cvt:Converters.IsNotNull}}">
+                            Template="{StaticResource BottomBarTemplate}" />
 
-
-                                <TextBlock
-                                    x:Name="PART_MessageOneLine"
-                                    Text="{Binding Message}"
-                                    TextTrimming="CharacterEllipsis"
-                                    ToolTip.Tip="{Binding Message}" />
-
-                                <ProgressBar
-                                    Grid.Column="2"
-                                    Height="24"
-                                    IsIndeterminate="{Binding ProgressIndeterminate}"
-                                    IsVisible="{Binding IsWorking}"
-                                    Maximum="1"
-                                    Minimum="0"
-                                    ProgressTextFormat="{}{1:0.0}%"
-                                    ShowProgressText="{Binding !ProgressIndeterminate}"
-                                    Value="{Binding Progress}">
-                                    <ProgressBar.Styles>
-                                        <Style Selector="ProgressBar:horizontal">
-                                            <Setter Property="MinWidth" Value="72" />
-                                        </Style>
-                                    </ProgressBar.Styles>
-                                </ProgressBar>
-                                <Button
-                                    Grid.Column="4"
-                                    Classes="Long Primary"
-                                    Command="{Binding InitializeCommand}"
-                                    Content="{TemplateBinding InitializeButtonContent}"
-                                    IsVisible="{Binding EnableInitialize}" />
-                                <Button
-                                    Grid.Column="6"
-                                    Classes="Long Primary"
-                                    Command="{Binding ExecuteCommand}"
-                                    Content="{TemplateBinding ExecuteButtonContent}" />
-                                <Button
-                                    Grid.Column="8"
-                                    Classes="Middle"
-                                    Command="{Binding CancelCommand}"
-                                    Content="{TemplateBinding StopButtonContent}" />
-                                <Button
-                                    Grid.Column="10"
-                                    Classes="Middle"
-                                    Command="{Binding ResetCommand}"
-                                    Content="{TemplateBinding ResetButtonContent}" />
-                            </Grid>
-
-                            <Grid
-                                x:Name="PART_BottomTwoLine"
-                                ColumnDefinitions="*,16,Auto,8,Auto"
-                                IsEnabled="{Binding Config, Converter={x:Static cvt:Converters.IsNotNull}}"
-                                RowDefinitions="Auto,8,Auto">
-
-
-                                <TextBlock
-                                    x:Name="PART_MessageTwoLine"
-                                    Text="{Binding Message}"
-                                    TextTrimming="CharacterEllipsis"
-                                    ToolTip.Tip="{Binding Message}" />
-
-                                <ProgressBar
-                                    Grid.Row="2"
-                                    Height="24"
-                                    IsIndeterminate="{Binding ProgressIndeterminate}"
-                                    IsVisible="{Binding IsWorking}"
-                                    Maximum="1"
-                                    Minimum="0"
-                                    ProgressTextFormat="{}{1:0.0}%"
-                                    ShowProgressText="{Binding !ProgressIndeterminate}"
-                                    Value="{Binding Progress}">
-                                    <ProgressBar.Styles>
-                                        <Style Selector="ProgressBar:horizontal">
-                                            <Setter Property="MinWidth" Value="72" />
-                                        </Style>
-                                    </ProgressBar.Styles>
-                                </ProgressBar>
-
-                                <Button
-                                    Grid.Column="2"
-                                    Classes="Long Primary"
-                                    Command="{Binding InitializeCommand}"
-                                    Content="{TemplateBinding InitializeButtonContent}"
-                                    IsVisible="{Binding EnableInitialize}" />
-                                <Button
-                                    Grid.Row="2"
-                                    Grid.Column="2"
-                                    Classes="Long Primary"
-                                    Command="{Binding ExecuteCommand}"
-                                    Content="{TemplateBinding ExecuteButtonContent}" />
-                                <Button
-                                    Grid.Column="4"
-                                    Classes="Middle"
-                                    Command="{Binding CancelCommand}"
-                                    Content="{TemplateBinding StopButtonContent}" />
-                                <Button
-                                    Grid.Row="2"
-                                    Grid.Column="4"
-                                    Classes="Middle"
-                                    Command="{Binding ResetCommand}"
-                                    Content="{TemplateBinding ResetButtonContent}" />
-                            </Grid>
-                        </Panel>
                     </Grid>
                 </Grid>
             </ControlTemplate>
@@ -282,60 +296,8 @@
         <Setter Property="Template">
             <ControlTemplate>
                 <Grid RowDefinitions="Auto,*">
-                    <Grid
-                        Margin="8"
-                        ColumnDefinitions="Auto,8,*,8,Auto"
-                        RowDefinitions="*,*">
 
-                        <TextBlock
-                            Grid.Column="2"
-                            FontSize="16"
-                            FontWeight="Bold"
-                            Text="{TemplateBinding Title}" />
-                        <TextBlock
-                            Grid.Row="1"
-                            Grid.Column="2"
-                            Margin="0,4,0,0"
-                            MaxLines="2"
-                            Text="{TemplateBinding Description}"
-                            TextTrimming="CharacterEllipsis"
-                            TextWrapping="Wrap" />
-
-
-                        <StackPanel
-                            Grid.RowSpan="2"
-                            Grid.Column="4"
-                            VerticalAlignment="Top"
-                            IsEnabled="{Binding !IsWorking}"
-                            Orientation="Horizontal">
-                            <ComboBox
-                                Width="128"
-                                VerticalAlignment="Center"
-                                ItemsSource="{Binding PresetNames}"
-                                SelectedItem="{Binding PresetName}"
-                                ToolTip.Tip="切换预设" />
-                            <Button
-                                Classes="Icon"
-                                Command="{Binding AddPresetCommand}"
-                                Content="{ic:FluentIcon Icon=Add}"
-                                ToolTip.Tip="新增预设" />
-                            <Button
-                                Classes="Icon"
-                                Command="{Binding RemovePresetCommand}"
-                                Content="{ic:FluentIcon Icon=Delete}"
-                                ToolTip.Tip="删除当前预设" />
-                            <Button
-                                Classes="Icon"
-                                Command="{Binding ModifyPresetNameCommand}"
-                                Content="{ic:FluentIcon Icon=Edit}"
-                                ToolTip.Tip="修改当前预设名称" />
-                            <Button
-                                Classes="Icon"
-                                Command="{Binding ClonePresetCommand}"
-                                Content="{ic:FluentIcon Icon=Copy}"
-                                ToolTip.Tip="建立当前预设的副本" />
-                        </StackPanel>
-                    </Grid>
+                    <ContentControl Template="{StaticResource PanelPresetHeaderTemplate}" />
 
                     <Grid
                         x:Name="PART_ContentContainer"
@@ -372,117 +334,11 @@
                             Margin="8"
                             Content="{TemplateBinding ResultsContent}" />
 
-                        <!--  信息、进度、按钮  -->
-                        <Panel
+                        <ContentControl
+                            x:Name="PART_Bottom"
                             Grid.Row="2"
                             Grid.ColumnSpan="3"
-                            Margin="16"
-                            IsVisible="{TemplateBinding ShowBottomBar}">
-                            <Grid
-                                x:Name="PART_BottomOneLine"
-                                ColumnDefinitions="4*,8,*,16,Auto,8,Auto,8,Auto,8,Auto"
-                                IsEnabled="{Binding Config, Converter={x:Static cvt:Converters.IsNotNull}}">
-
-
-                                <TextBlock
-                                    x:Name="PART_MessageOneLine"
-                                    Text="{Binding Message}"
-                                    TextTrimming="CharacterEllipsis"
-                                    ToolTip.Tip="{Binding Message}" />
-
-                                <ProgressBar
-                                    Grid.Column="2"
-                                    Height="24"
-                                    IsIndeterminate="{Binding ProgressIndeterminate}"
-                                    IsVisible="{Binding IsWorking}"
-                                    Maximum="1"
-                                    Minimum="0"
-                                    ProgressTextFormat="{}{1:0.0}%"
-                                    ShowProgressText="{Binding !ProgressIndeterminate}"
-                                    Value="{Binding Progress}">
-                                    <ProgressBar.Styles>
-                                        <Style Selector="ProgressBar:horizontal">
-                                            <Setter Property="MinWidth" Value="72" />
-                                        </Style>
-                                    </ProgressBar.Styles>
-                                </ProgressBar>
-                                <Button
-                                    Grid.Column="4"
-                                    Classes="Long Primary"
-                                    Command="{Binding InitializeCommand}"
-                                    Content="{TemplateBinding InitializeButtonContent}"
-                                    IsVisible="{Binding EnableInitialize}" />
-                                <Button
-                                    Grid.Column="6"
-                                    Classes="Long Primary"
-                                    Command="{Binding ExecuteCommand}"
-                                    Content="{TemplateBinding ExecuteButtonContent}" />
-                                <Button
-                                    Grid.Column="8"
-                                    Classes="Middle"
-                                    Command="{Binding CancelCommand}"
-                                    Content="{TemplateBinding StopButtonContent}" />
-                                <Button
-                                    Grid.Column="10"
-                                    Classes="Middle"
-                                    Command="{Binding ResetCommand}"
-                                    Content="{TemplateBinding ResetButtonContent}" />
-                            </Grid>
-
-                            <Grid
-                                x:Name="PART_BottomTwoLine"
-                                ColumnDefinitions="*,16,Auto,8,Auto"
-                                IsEnabled="{Binding Config, Converter={x:Static cvt:Converters.IsNotNull}}"
-                                RowDefinitions="Auto,8,Auto">
-
-
-                                <TextBlock
-                                    Text="{Binding Message}"
-                                    TextTrimming="CharacterEllipsis"
-                                    ToolTip.Tip="{Binding Message}" />
-
-                                <ProgressBar
-                                    Grid.Row="2"
-                                    Height="24"
-                                    IsIndeterminate="{Binding ProgressIndeterminate}"
-                                    IsVisible="{Binding IsWorking}"
-                                    Maximum="1"
-                                    Minimum="0"
-                                    ProgressTextFormat="{}{1:0.0}%"
-                                    ShowProgressText="{Binding !ProgressIndeterminate}"
-                                    Value="{Binding Progress}">
-                                    <ProgressBar.Styles>
-                                        <Style Selector="ProgressBar:horizontal">
-                                            <Setter Property="MinWidth" Value="72" />
-                                        </Style>
-                                    </ProgressBar.Styles>
-                                </ProgressBar>
-
-                                <Button
-                                    Grid.Column="2"
-                                    Classes="Long Primary"
-                                    Command="{Binding InitializeCommand}"
-                                    Content="{TemplateBinding InitializeButtonContent}"
-                                    IsVisible="{Binding EnableInitialize}" />
-                                <Button
-                                    Grid.Row="2"
-                                    Grid.Column="2"
-                                    Classes="Long Primary"
-                                    Command="{Binding ExecuteCommand}"
-                                    Content="{TemplateBinding ExecuteButtonContent}" />
-                                <Button
-                                    Grid.Column="4"
-                                    Classes="Middle"
-                                    Command="{Binding CancelCommand}"
-                                    Content="{TemplateBinding StopButtonContent}" />
-                                <Button
-                                    Grid.Row="2"
-                                    Grid.Column="4"
-                                    Classes="Middle"
-                                    Command="{Binding ResetCommand}"
-                                    Content="{TemplateBinding ResetButtonContent}" />
-                            </Grid>
-                        </Panel>
+                            Template="{StaticResource BottomBarTemplate}" />
                     </Grid>
                 </Grid>
             </ControlTemplate>
