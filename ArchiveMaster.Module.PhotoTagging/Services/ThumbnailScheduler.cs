@@ -1,4 +1,6 @@
-﻿using System.Collections.Concurrent;
+﻿//#define WRITE_DEBUG_MESSAGE
+
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using ArchiveMaster.ViewModels.FileSystem;
 
@@ -19,11 +21,14 @@ public static class ThumbnailScheduler
         taskStack.Push(new LoadRequest(item, loadAction));
 
         int waitingCount = taskStack.Count;
+#if WRITE_DEBUG_MESSAGE
         Debug.WriteLine($"[Scheduler] 任务入栈。当前排队中: {waitingCount}");
-
+#endif
         if (Interlocked.CompareExchange(ref isProcessing, 1, 0) == 0)
         {
+#if WRITE_DEBUG_MESSAGE
             Debug.WriteLine("[Scheduler] 启动新的调度循环...");
+#endif
             _ = Task.Run(ProcessQueueAsync);
         }
     }
@@ -43,7 +48,9 @@ public static class ThumbnailScheduler
                     // 双重检查防止退出瞬间又有新任务进入
                     if (taskStack.IsEmpty)
                     {
+#if WRITE_DEBUG_MESSAGE
                         Debug.WriteLine("[Scheduler] 所有任务处理完毕，调度循环退出。");
+#endif
                         break;
                     }
                     else
@@ -72,12 +79,16 @@ public static class ThumbnailScheduler
                 {
                     try
                     {
+#if WRITE_DEBUG_MESSAGE
                         Debug.WriteLine($"[Worker] 开始执行。剩余排队: {taskStack.Count}");
+#endif
                         current.Action();
                     }
                     catch (Exception ex)
                     {
+#if WRITE_DEBUG_MESSAGE
                         Debug.WriteLine($"[Worker] 任务执行出错: {ex.Message}");
+#endif
                     }
                     finally
                     {
@@ -88,7 +99,9 @@ public static class ThumbnailScheduler
         }
         catch (Exception ex)
         {
+#if WRITE_DEBUG_MESSAGE
             Debug.WriteLine($"[Scheduler] 调度循环崩溃: {ex.Message}");
+#endif
             Interlocked.Exchange(ref isProcessing, 0);
         }
     }

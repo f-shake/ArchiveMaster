@@ -28,15 +28,15 @@ public record PhotoTags(
                            || MoodTags.Contains(tag)
                            || ColorTags.Contains(tag)
                            || TechniqueTags.Contains(tag)
-                           || OcrText.Contains(tag)
-                           || Description == tag,
+                           || OcrText != null && OcrText.Contains(tag)
+                           || Description != null && Description.Contains(tag),
             TagType.Object => ObjectTags.Contains(tag),
             TagType.Scene => SceneTags.Contains(tag),
             TagType.Mood => MoodTags.Contains(tag),
             TagType.Color => ColorTags.Contains(tag),
             TagType.Technique => TechniqueTags.Contains(tag),
-            TagType.Text => OcrText.Contains(tag),
-            TagType.Description => Description.Contains(tag),
+            TagType.Text => OcrText != null && OcrText.Contains(tag),
+            TagType.Description => Description != null && Description.Contains(tag),
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
         };
     }
@@ -57,15 +57,15 @@ public record PhotoTags(
                            || ListMatch(MoodTags)
                            || ListMatch(ColorTags)
                            || ListMatch(TechniqueTags)
-                           || OcrText.Contains(OcrText)
-                           || Description.Contains(query, comparison),
+                           || OcrText != null && OcrText.Contains(OcrText)
+                           || Description != null && Description.Contains(query, comparison),
             TagType.Object => ListMatch(ObjectTags),
             TagType.Scene => ListMatch(SceneTags),
             TagType.Mood => ListMatch(MoodTags),
             TagType.Color => ListMatch(ColorTags),
             TagType.Technique => ListMatch(TechniqueTags),
-            TagType.Text => OcrText.Contains(OcrText),
-            TagType.Description => Description.Contains(query, comparison),
+            TagType.Text => OcrText != null && OcrText.Contains(OcrText),
+            TagType.Description => Description != null && Description.Contains(query, comparison),
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
         };
     }

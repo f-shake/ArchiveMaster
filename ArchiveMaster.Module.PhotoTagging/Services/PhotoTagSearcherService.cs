@@ -1,25 +1,7 @@
-﻿using FzLib;
-using ArchiveMaster.Configs;
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Text.Encodings.Web;
-using System.Text.Json;
-using System.Text.Json.Nodes;
-using System.Text.RegularExpressions;
-using System.Text.Unicode;
-using System.Threading;
-using System.Threading.Channels;
-using System.Threading.Tasks;
+﻿using ArchiveMaster.Configs;
 using ArchiveMaster.Enums;
 using ArchiveMaster.Helpers;
-using ArchiveMaster.Models;
-using ArchiveMaster.ViewModels;
 using ArchiveMaster.ViewModels.FileSystem;
-using ImageMagick;
 
 namespace ArchiveMaster.Services
 {
@@ -44,9 +26,14 @@ namespace ArchiveMaster.Services
             AllFiles = await TagFileHelper.ReadPhotoTaggingFileInfosAsync(Config.TagFile, Config.RootDir, false, ct);
         }
 
-        public Task<List<TaggingPhotoFileInfo>> SearchAsync(TagType type, string keyword, bool partial)
+        public async Task<List<TaggingPhotoFileInfo>> SearchAsync(TagType type, string keyword, bool partial)
         {
-            return Task.Run(() =>
+            if (string.IsNullOrWhiteSpace(keyword))
+            {
+                return [];
+            }
+
+            return await Task.Run(() =>
             {
                 return partial
                     ? AllFiles.Where(p => p.Tags.Matches(keyword, type)).ToList()
@@ -54,14 +41,8 @@ namespace ArchiveMaster.Services
             });
         }
 
-        public override IEnumerable<SimpleFileInfo> GetInitializedFiles()
-        {
-            return [];
-        }
+        public override IEnumerable<SimpleFileInfo> GetInitializedFiles() => [];
 
-        public override Task InitializeAsync(CancellationToken ct = default)
-        {
-            throw new InvalidOperationException();
-        }
+        public override Task InitializeAsync(CancellationToken ct = default) => throw new InvalidOperationException();
     }
 }
