@@ -12,6 +12,16 @@ public record PhotoTags(
     string OcrText,
     string Description)
 {
+    public ISet<string> GetAllTags()
+    {
+        HashSet<string> allTags = new(ObjectTags);
+        allTags.UnionWith(SceneTags);
+        allTags.UnionWith(MoodTags);
+        allTags.UnionWith(ColorTags);
+        allTags.UnionWith(TechniqueTags);
+        return allTags;
+    }
+    
     [JsonIgnore]
     public int Count => ObjectTags.Count
                         + SceneTags.Count
@@ -19,7 +29,7 @@ public record PhotoTags(
                         + ColorTags.Count
                         + TechniqueTags.Count;
 
-    public bool Contains(string tag, TagType type)
+    public bool ContainsTag(string tag, TagType type)
     {
         return type switch
         {
@@ -27,9 +37,7 @@ public record PhotoTags(
                            || SceneTags.Contains(tag)
                            || MoodTags.Contains(tag)
                            || ColorTags.Contains(tag)
-                           || TechniqueTags.Contains(tag)
-                           || OcrText != null && OcrText.Contains(tag)
-                           || Description != null && Description.Contains(tag),
+                           || TechniqueTags.Contains(tag),
             TagType.Object => ObjectTags.Contains(tag),
             TagType.Scene => SceneTags.Contains(tag),
             TagType.Mood => MoodTags.Contains(tag),

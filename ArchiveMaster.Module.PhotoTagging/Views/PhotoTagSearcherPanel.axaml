@@ -2,6 +2,7 @@
     x:Class="ArchiveMaster.Views.PhotoTagSearcherPanel"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:b="using:ArchiveMaster.Behaviors"
     xmlns:ct="using:FzLib.Avalonia.Controls"
     xmlns:cvt="using:ArchiveMaster.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -41,12 +42,30 @@
             <Grid ColumnDefinitions="Auto,8,*,8,Auto,8,Auto">
                 <ComboBox
                     DisplayMemberBinding="{Binding ., Converter={x:Static cvt:Converters.Description}}"
-                    ItemsSource="{ne:EnumValues enums:TagType}"
+                    ItemsSource="{Binding TagTypes}"
                     SelectedItem="{Binding TagType}" />
-                <TextBox
+                <AutoCompleteBox
                     Grid.Column="2"
+                    ItemsSource="{Binding Tags}"
                     Text="{Binding SearchKeyword}"
-                    Watermark="请输入关键词" />
+                    ValueMemberBinding="{Binding Tag}"
+                    Watermark="请输入关键词">
+                    <AutoCompleteBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock>
+                                <TextBlock.Text>
+                                    <MultiBinding StringFormat="{}{0}（{1}）">
+                                        <Binding Path="Tag" />
+                                        <Binding Path="Count" />
+                                    </MultiBinding>
+                                </TextBlock.Text>
+                            </TextBlock>
+                        </DataTemplate>
+                    </AutoCompleteBox.ItemTemplate>
+                    <Interaction.Behaviors>
+                        <b:AutoCompleteZeroMinimumPrefixLengthDropdownBehaviour />
+                    </Interaction.Behaviors>
+                </AutoCompleteBox>
                 <CheckBox
                     Grid.Column="4"
                     Content="模糊匹配"
