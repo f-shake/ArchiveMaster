@@ -87,11 +87,19 @@ namespace ArchiveMaster.Services
                 return [];
             }
 
+            var keywords = keyword.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            if (keywords.Length == 0)
+            {
+                 return [];
+            }
+
             return await Task.Run(() =>
             {
-                return partial
-                    ? AllFiles.Where(p => p.Tags.Matches(keyword, type)).ToList()
-                    : AllFiles.Where(p => p.Tags.ContainsTag(keyword, type)).ToList();
+                return AllFiles.Where(p => 
+                    keywords.All(k => partial 
+                        ? p.Tags.Matches(k, type) 
+                        : p.Tags.ContainsTag(k, type))
+                ).ToList();
             });
         }
     }

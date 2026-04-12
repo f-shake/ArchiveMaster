@@ -49,7 +49,7 @@
                     ItemsSource="{Binding Tags}"
                     Text="{Binding SearchKeyword}"
                     ValueMemberBinding="{Binding Tag}"
-                    Watermark="请输入关键词">
+                    Watermark="请输入关键词，多个词用空格分隔">
                     <AutoCompleteBox.ItemTemplate>
                         <DataTemplate>
                             <TextBlock>

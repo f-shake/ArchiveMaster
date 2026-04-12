@@ -56,7 +56,9 @@ public record PhotoTags(
             return false;
         }
 
+        // 提取通用列表匹配逻辑
         bool ListMatch(List<string> list) => list.Any(t => t.Contains(query, comparison));
+        bool TextMatch(string text) => text != null && text.Contains(query, comparison);
 
         return type switch
         {
@@ -65,15 +67,15 @@ public record PhotoTags(
                            || ListMatch(MoodTags)
                            || ListMatch(ColorTags)
                            || ListMatch(TechniqueTags)
-                           || OcrText != null && OcrText.Contains(OcrText)
-                           || Description != null && Description.Contains(query, comparison),
+                           || TextMatch(OcrText)
+                           || TextMatch(Description),
             TagType.Object => ListMatch(ObjectTags),
             TagType.Scene => ListMatch(SceneTags),
             TagType.Mood => ListMatch(MoodTags),
             TagType.Color => ListMatch(ColorTags),
             TagType.Technique => ListMatch(TechniqueTags),
-            TagType.Text => OcrText != null && OcrText.Contains(OcrText),
-            TagType.Description => Description != null && Description.Contains(query, comparison),
+            TagType.Text => TextMatch(OcrText),
+            TagType.Description => TextMatch(Description),
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
         };
     }
