@@ -191,13 +191,11 @@ namespace ArchiveMaster.Services
                                     catch (Exception ex) when (currentTry < retryCount && !ct.IsCancellationRequested)
                                     {
                                         currentTry++;
-                                        // 计算等待时间：例如 2s, 4s, 8s...
                                         int delayMs = (int)Math.Pow(2, currentTry) * 200;
 
                                         Debug.WriteLine(
                                             $"图片 {item.File.RelativePath} 生成失败，正在进行第 {currentTry} 次重试。错误: {ex.Message}");
 
-                                        // 在重试前等待，注意传入 ct 以支持取消操作
                                         await Task.Delay(delayMs, ct);
                                     }
                                 }
@@ -235,6 +233,7 @@ namespace ArchiveMaster.Services
                         catch (OperationCanceledException)
                         {
                             item.File.Cancel();
+                            await SaveTagsAsync();
                             throw;
                         }
                         catch (Exception ex)

@@ -200,7 +200,7 @@ namespace ArchiveMaster.Services
         {
             if (options.AutoApplyStatus)
             {
-                if (file.Status == ProcessStatus.Ready)
+                if (file.Status is ProcessStatus.Ready or ProcessStatus.Processing)
                 {
                     file.Success();
                 }
