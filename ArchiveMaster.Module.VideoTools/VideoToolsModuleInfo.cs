@@ -37,7 +37,7 @@ namespace ArchiveMaster
 
         public string ModuleName => "视频工具";
         public string ModuleDescription => "关于视频的一些处理工作";
-        public string HelpFileName { get; } = null;
+        public string HelpFileName { get; } = "video.md";
         public IList<Type> SingletonServices { get; }
 
         public IList<Type> TransientServices { get; } =

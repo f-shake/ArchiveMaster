@@ -30,7 +30,7 @@ namespace ArchiveMaster
 
         public string ModuleName => "照片标签工具";
         public string ModuleDescription => "通过AI生成照片的文字标签，方便对大量照片的搜索和管理";
-        public string HelpFileName { get; } 
+        public string HelpFileName { get; } = "photoTagging.md";
         public IList<Type> SingletonServices { get; }
 
         public IList<Type> TransientServices { get; } =
@@ -48,7 +48,7 @@ namespace ArchiveMaster
                     "通过AI，自动生成照片的关键词标签", baseUrl + "tag.svg", true),
                 new ToolPanelInfo(typeof(PhotoTagManagerPanel), typeof(PhotoTagManagerViewModel), "图像标签管理",
                     "管理各图像的标签，进行新增、修改或和删除", baseUrl + "tag_manage.svg"),
-                new ToolPanelInfo(typeof(PhotoTagSearcherPanel), typeof(PhotoTagSearcherViewModel), "根据关键词查找",
+                new ToolPanelInfo(typeof(PhotoTagSearcherPanel), typeof(PhotoTagSearcherViewModel), "照片标签搜索",
                     "根据关键词，查找指定标签的图像", baseUrl + "pic_search.svg")
             },
             GroupName = ModuleName,
