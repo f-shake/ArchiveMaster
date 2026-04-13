@@ -421,24 +421,21 @@ namespace ArchiveMaster.ViewModels.FileSystem
         /// </summary>
         /// <param name="includingDir"></param>
         /// <returns></returns>
-        public IEnumerable<FileSystem.SimpleFileInfo> Flatten(bool includingDir = false)
+        public IEnumerable<TreeFileDirInfo> Flatten(bool includingDir = false)
         {
             Stack<TreeDirInfo> stack = new Stack<TreeDirInfo>();
             stack.Push(this);
-            // List<SimpleFileInfo> files = new List<SimpleFileInfo>();
             while (stack.Count > 0)
             {
                 var current = stack.Pop();
                 if (includingDir)
                 {
                     yield return current;
-                    // files.Add(current);
                 }
 
                 foreach (var subFile in current.SubFiles)
                 {
                     yield return subFile;
-                    // files.Add(subFile);
                 }
 
                 foreach (var subDir in current.SubDirs.Reverse())
@@ -446,8 +443,6 @@ namespace ArchiveMaster.ViewModels.FileSystem
                     stack.Push(subDir);
                 }
             }
-
-            // return files;
         }
 
         public void Reorder()

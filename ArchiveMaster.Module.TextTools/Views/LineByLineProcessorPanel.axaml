@@ -92,7 +92,7 @@
                                 Minimum="3"
                                 SmallChange="2"
                                 TickFrequency="2"
-                                Value="{Binding Config.EnableMajorityVote}" />
+                                Value="{Binding Config.VoteCount}" />
                             <TextBlock
                                 IsVisible="{Binding Config.EnableMajorityVote}"
                                 Text="轮" />

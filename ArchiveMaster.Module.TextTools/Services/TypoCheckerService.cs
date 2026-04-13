@@ -196,7 +196,7 @@ public class TypoCheckerService(AppConfig appConfig)
         return segments;
     }
 
-    public async IAsyncEnumerable<ICheckItem> CheckAsync(IList<DocFilePart> parts,
+    public async IAsyncEnumerable<object> CheckAsync(IList<DocFilePart> parts,
         [EnumeratorCancellation]
         CancellationToken ct)
     {

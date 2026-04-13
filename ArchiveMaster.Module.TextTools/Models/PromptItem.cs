@@ -1,6 +1,6 @@
 ﻿namespace ArchiveMaster.Models;
 
-public class PromptItem : ICheckItem
+public class PromptItem
 {
     public PromptItem()
     {

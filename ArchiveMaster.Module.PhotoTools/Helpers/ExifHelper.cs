@@ -82,7 +82,7 @@ public static class ExifHelper
                 return (gps.Latitude, gps.Longitude);
             }
 
-            //2. 使用更全面的 ImageMagisk 读取，速度慢很多
+            //2. 使用更全面的 ImageMagick 读取，速度慢很多
             using var image = new MagickImage(file);
             var profile = image.GetExifProfile();
             if (profile == null)

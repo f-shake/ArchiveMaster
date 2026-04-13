@@ -1,0 +1,165 @@
+<UserControl
+    x:Class="ArchiveMaster.Views.AiProvidersPanel"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ct="using:FzLib.Avalonia.Controls"
+    xmlns:cvt="clr-namespace:ArchiveMaster.Converters;assembly=ArchiveMaster.Core"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:enums="using:ArchiveMaster.Enums"
+    xmlns:ic="using:FluentIcons.Avalonia.Markup"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:me="using:FzLib.Avalonia.MarkupExtensions"
+    xmlns:vm="using:ArchiveMaster.ViewModels"
+    x:Name="root"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    x:DataType="vm:AiProvidersViewModel"
+    mc:Ignorable="d">
+    <Grid
+        Margin="8"
+        ColumnDefinitions="*,8,*">
+        <Grid RowDefinitions="Auto,8,*,8,Auto">
+            <ListBox
+                Grid.Row="2"
+                ItemsSource="{Binding Providers}"
+                SelectedItem="{Binding SelectedProvider}">
+                <ListBox.ItemTemplate>
+                    <DataTemplate x:DataType="vm:AiProviderConfigViewModel">
+                        <Grid ColumnDefinitions="Auto,8,*,8,Auto">
+                            <RadioButton
+                                Command="{Binding $parent[UserControl].DataContext.MakeCurrentCommand}"
+                                CommandParameter="{Binding .}"
+                                IsChecked="{Binding IsDefault}" />
+                            <TextBlock
+                                Grid.Column="2"
+                                Text="{Binding Name}"
+                                TextTrimming="CharacterEllipsis" />
+                        </Grid>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+            <StackPanel
+                Grid.Row="4"
+                Margin="0,0,8,0"
+                Orientation="Horizontal"
+                Spacing="8">
+                <Button
+                    Classes="Icon"
+                    Command="{Binding AddProviderCommand}"
+                    Content="{ic:FluentIcon Icon=Add}"
+                    ToolTip.Tip="新增" />
+                <Button
+                    Classes="Icon"
+                    Command="{Binding DeleteSelectedProviderCommand}"
+                    Content="{ic:FluentIcon Icon=Delete}"
+                    IsEnabled="{Binding SelectedProvider, Converter={x:Static cvt:Converters.IsNotNull}}"
+                    ToolTip.Tip="删除" />
+            </StackPanel>
+        </Grid>
+        <ScrollViewer
+            Grid.Column="2"
+            HorizontalScrollBarVisibility="Disabled"
+            IsEnabled="{Binding SelectedProvider, Converter={x:Static cvt:Converters.IsNotNull}}"
+            VerticalScrollBarVisibility="Auto">
+            <StackPanel Orientation="Vertical">
+                <HeaderedContentControl
+                    Classes="GroupBox"
+                    Header="基本信息">
+                    <ct:StackFormItemGroup>
+                        <ct:FormItem Label="名称：">
+                            <TextBox Text="{Binding SelectedProvider.Name}" />
+                        </ct:FormItem>
+                        <ct:FormItem Label="类型">
+                            <ct:RadioButtonGroup
+                                ItemsSource="{me:EnumValues enums:AiProviderType}"
+                                SelectedItem="{Binding SelectedProvider.Type}" />
+                        </ct:FormItem>
+                        <ct:FormItem Label="地址：">
+                            <TextBox Text="{Binding SelectedProvider.Url}" />
+                        </ct:FormItem>
+                        <ct:FormItem Label="密钥：">
+                            <TextBox
+                                Classes="revealPasswordButton"
+                                PasswordChar="*"
+                                Text="{Binding SelectedProvider.Key.Password}" />
+                        </ct:FormItem>
+                        <ct:FormItem Label="模型：">
+                            <TextBox Text="{Binding SelectedProvider.Model}" />
+                        </ct:FormItem>
+                    </ct:StackFormItemGroup>
+                </HeaderedContentControl>
+
+                <HeaderedContentControl
+                    Classes="GroupBox"
+                    Header="高级设置">
+                    <ct:StackFormItemGroup>
+                        <ct:FormItem Label="温度：">
+                            <Grid ColumnDefinitions="*,8,Auto">
+                                <Slider
+                                    Classes="ThumbLabelF1"
+                                    IsEnabled="{Binding SelectedProvider.SpecialTemperature}"
+                                    IsSnapToTickEnabled="True"
+                                    LargeChange="0.2"
+                                    Maximum="2"
+                                    Minimum="0"
+                                    SmallChange="0.1"
+                                    TickFrequency="0.1"
+                                    Value="{Binding SelectedProvider.Temperature}" />
+                                <CheckBox
+                                    Grid.Column="2"
+                                    Content="启用"
+                                    IsChecked="{Binding SelectedProvider.SpecialTemperature}" />
+                            </Grid>
+                        </ct:FormItem>
+                        <ct:FormItem Label="TopP：">
+                            <Grid ColumnDefinitions="*,8,Auto">
+                                <Slider
+                                    Classes="ThumbLabelF1"
+                                    IsEnabled="{Binding SelectedProvider.SpecialTopP}"
+                                    IsSnapToTickEnabled="True"
+                                    LargeChange="0.2"
+                                    Maximum="1"
+                                    Minimum="0"
+                                    SmallChange="0.1"
+                                    TickFrequency="0.1"
+                                    Value="{Binding SelectedProvider.TopP}" />
+                                <CheckBox
+                                    Grid.Column="2"
+                                    Content="启用"
+                                    IsChecked="{Binding SelectedProvider.SpecialTopP}" />
+                            </Grid>
+                        </ct:FormItem>
+                        <ct:FormItem Label="最大输出Token：">
+                            <Grid ColumnDefinitions="*,8,Auto">
+                                <NumericUpDown
+                                    FormatString="0"
+                                    IsEnabled="{Binding SelectedProvider.SpecialMaxTokens}"
+                                    Maximum="1048576"
+                                    Minimum="2048"
+                                    Value="{Binding SelectedProvider.MaxTokens}" />
+                                <CheckBox
+                                    Grid.Column="2"
+                                    Content="启用"
+                                    IsChecked="{Binding SelectedProvider.SpecialMaxTokens}" />
+                            </Grid>
+                        </ct:FormItem>
+                        <ct:FormItem Label="特性支持：">
+                            <CheckBox
+                                Content="支持JSON输出"
+                                IsChecked="{Binding SelectedProvider.SupportJsonOutput}" />
+                        </ct:FormItem>
+                        <ct:FormItem Label="自定义参数：">
+                            <TextBox
+                                AcceptsReturn="True"
+                                MaxLines="10"
+                                MinLines="3"
+                                Text="{Binding SelectedProvider.ExtraParamsJson}"
+                                TextWrapping="Wrap"
+                                Watermark="{}{&#10;    &quot;think&quot;: false&#10;}" />
+                        </ct:FormItem>
+                    </ct:StackFormItemGroup>
+                </HeaderedContentControl>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

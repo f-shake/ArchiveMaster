@@ -121,6 +121,20 @@
         </Style>
     </Style>
 
+    <Style Selector="SelectableTextBlock">
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Style Selector="^.Description">
+            <Setter Property="Foreground" Value="{DynamicResource SystemBaseMediumColor}" />
+            <Style Selector="^:disabled">
+                <Setter Property="Foreground" Value="{DynamicResource SystemBaseMediumLowColor}" />
+            </Style>
+        </Style>
+
+        <Style Selector="^:disabled">
+            <Setter Property="Foreground" Value="{DynamicResource SystemBaseMediumLowColor}" />
+        </Style>
+    </Style>
+
     <Style Selector="DataGridCell.Right">
         <Setter Property="HorizontalContentAlignment" Value="Right" />
     </Style>

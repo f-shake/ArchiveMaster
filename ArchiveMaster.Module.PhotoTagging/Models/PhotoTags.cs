@@ -1,0 +1,82 @@
+﻿using System.Text.Json.Serialization;
+using ArchiveMaster.Enums;
+
+namespace ArchiveMaster.Models;
+
+public record PhotoTags(
+    List<string> ObjectTags,
+    List<string> SceneTags,
+    List<string> MoodTags,
+    List<string> ColorTags,
+    List<string> TechniqueTags,
+    string OcrText,
+    string Description)
+{
+    public ISet<string> GetAllTags()
+    {
+        HashSet<string> allTags = new(ObjectTags);
+        allTags.UnionWith(SceneTags);
+        allTags.UnionWith(MoodTags);
+        allTags.UnionWith(ColorTags);
+        allTags.UnionWith(TechniqueTags);
+        return allTags;
+    }
+    
+    [JsonIgnore]
+    public int Count => ObjectTags.Count
+                        + SceneTags.Count
+                        + MoodTags.Count
+                        + ColorTags.Count
+                        + TechniqueTags.Count;
+
+    public bool ContainsTag(string tag, TagType type)
+    {
+        return type switch
+        {
+            TagType.All => ObjectTags.Contains(tag)
+                           || SceneTags.Contains(tag)
+                           || MoodTags.Contains(tag)
+                           || ColorTags.Contains(tag)
+                           || TechniqueTags.Contains(tag),
+            TagType.Object => ObjectTags.Contains(tag),
+            TagType.Scene => SceneTags.Contains(tag),
+            TagType.Mood => MoodTags.Contains(tag),
+            TagType.Color => ColorTags.Contains(tag),
+            TagType.Technique => TechniqueTags.Contains(tag),
+            TagType.Text => OcrText != null && OcrText.Contains(tag),
+            TagType.Description => Description != null && Description.Contains(tag),
+            _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+        };
+    }
+
+    public bool Matches(string query, TagType type, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
+    {
+        if (string.IsNullOrWhiteSpace(query))
+        {
+            return false;
+        }
+
+        // 提取通用列表匹配逻辑
+        bool ListMatch(List<string> list) => list.Any(t => t.Contains(query, comparison));
+        bool TextMatch(string text) => text != null && text.Contains(query, comparison);
+
+        return type switch
+        {
+            TagType.All => ListMatch(ObjectTags)
+                           || ListMatch(SceneTags)
+                           || ListMatch(MoodTags)
+                           || ListMatch(ColorTags)
+                           || ListMatch(TechniqueTags)
+                           || TextMatch(OcrText)
+                           || TextMatch(Description),
+            TagType.Object => ListMatch(ObjectTags),
+            TagType.Scene => ListMatch(SceneTags),
+            TagType.Mood => ListMatch(MoodTags),
+            TagType.Color => ListMatch(ColorTags),
+            TagType.Technique => ListMatch(TechniqueTags),
+            TagType.Text => TextMatch(OcrText),
+            TagType.Description => TextMatch(Description),
+            _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+        };
+    }
+}

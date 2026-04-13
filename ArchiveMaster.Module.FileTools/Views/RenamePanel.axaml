@@ -114,13 +114,29 @@
                 ColumnStatusIndex="1"
                 ColumnTimeIndex="-1"
                 ItemsSource="{Binding Files}">
-                <v:SimpleFileDataGrid.AppendSimpleFileRowDetailItems>
-                    <v:SimpleFileRowDetailItemCollection>
-                        <v:SimpleFileRowDetailItem
-                            BindingPath="NewName"
-                            Label="新文件名：" />
-                    </v:SimpleFileRowDetailItemCollection>
-                </v:SimpleFileDataGrid.AppendSimpleFileRowDetailItems>
+                <DataGrid.RowDetailsTemplate>
+                    <DataTemplate>
+                        <StackPanel
+                            Margin="{StaticResource FileDataGridRowDetailPadding}"
+                            Spacing="8">
+                            <ContentControl
+                                Content="{Binding}"
+                                ContentTemplate="{StaticResource FileDataGridRowDetailPathTemplate}" />
+                            <ContentControl
+                                Content="{Binding}"
+                                ContentTemplate="{StaticResource FileDataGridRowDetailMetadataTemplate}" />
+                            <ct:FormItem
+                                Classes="BoldLabel"
+                                Label="新文件名："
+                                LabelWidth="{StaticResource FileDataGridRowDetailLabelWidth}">
+                                <TextBlock Text="{Binding NewName}" />
+                            </ct:FormItem>
+                            <ContentControl
+                                Content="{Binding}"
+                                ContentTemplate="{StaticResource FileDataGridRowDetailMessageTemplate}" />
+                        </StackPanel>
+                    </DataTemplate>
+                </DataGrid.RowDetailsTemplate>
                 <DataGrid.Columns>
                     <DataGridTemplateColumn CanUserResize="False">
                         <DataGridTemplateColumn.CellTemplate>

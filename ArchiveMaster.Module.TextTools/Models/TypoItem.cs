@@ -1,5 +1,5 @@
 ﻿namespace ArchiveMaster.Models;
-public class TypoItem : ICheckItem
+public class TypoItem
 {
     public string Context { get; init; }
     public string Corrected { get; init; }

@@ -3,8 +3,9 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:ctrl="using:FzLib.Avalonia.Controls">
     <ResourceDictionary.MergedDictionaries>
-        <ResourceInclude Source="Views/DataGrids/FileDataGridStyle.axaml" />
+        <ResourceInclude Source="Views/DataGrids/FileDataGridStyles.axaml" />
         <ResourceInclude Source="Views/ToolPanels/PanelStyles.axaml" />
+        <ResourceInclude Source="Views/DataGrids/FileDataGridRowDetailResources.axaml" />
     </ResourceDictionary.MergedDictionaries>
 
     <GridLength x:Key="SliderPreContentMargin">6</GridLength>

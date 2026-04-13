@@ -1,0 +1,141 @@
+<v:VerticalTwoStepPanelBase
+    x:Class="ArchiveMaster.Views.PhotoTagManagerPanel"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ct="using:FzLib.Avalonia.Controls"
+    xmlns:cvt="using:ArchiveMaster.Converters"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:enums="clr-namespace:ArchiveMaster.Enums"
+    xmlns:ic="clr-namespace:FluentIcons.Avalonia.Markup;assembly=FluentIcons.Avalonia"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ne="clr-namespace:FzLib.Avalonia.MarkupExtensions;assembly=FzLib.Avalonia"
+    xmlns:v="using:ArchiveMaster.Views"
+    xmlns:vm="using:ArchiveMaster.ViewModels"
+    xmlns:vmfs="clr-namespace:ArchiveMaster.ViewModels.FileSystem"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    ExecuteButtonContent="加载"
+    mc:Ignorable="d">
+    <v:VerticalTwoStepPanelBase.ConfigsContent>
+        <ct:StackFormItemGroup>
+            <ct:FormItem Label="根目录：">
+                <v:FilePickerTextBox
+                    FileNames="{Binding Config.RootDir}"
+                    Filter="{Binding Config.Filter}"
+                    IsFilterBarVisible="True"
+                    Type="OpenFolder" />
+            </ct:FormItem>
+            <ct:FormItem
+                Grid.Row="2"
+                Label="标签数据库文件：">
+                <v:FilePickerTextBox
+                    FileNames="{Binding Config.TagFile}"
+                    StringFileTypeFilter="ArchiveMaster Photo Tags（图像标签库）文件;*.ampt;;"
+                    Type="OpenFile" />
+            </ct:FormItem>
+        </ct:StackFormItemGroup>
+    </v:VerticalTwoStepPanelBase.ConfigsContent>
+    <v:VerticalTwoStepPanelBase.ResultsContent>
+        <Grid RowDefinitions="2*,8,*">
+            <v:TreeFileDataGrid
+                ColumnIsCheckedIndex="-1"
+                ItemsSource="{Binding TreeFiles}"
+                SelectedItem="{Binding SelectedFile}">
+                <v:TreeFileDataGrid.Columns>
+                    <DataGridTextColumn
+                        Binding="{Binding Tag.Tags.Count, FallbackValue=' ', StringFormat='{}{0}个标签'}"
+                        Header="标签"
+                        IsReadOnly="True" />
+                </v:TreeFileDataGrid.Columns>
+                <v:TreeFileDataGrid.Footer>
+                    <StackPanel
+                        Orientation="Horizontal"
+                        Spacing="8">
+                        <Button
+                            Classes="Link"
+                            Command="{Binding SaveTagsCommand}"
+                            Content="保存标签数据库"
+                            IsEnabled="{Binding HasChanged}" />
+                        <Button
+                            Classes="Link"
+                            Command="{Binding SaveTagsAsCommand}"
+                            Content="另存为标签数据库" />
+                    </StackPanel>
+                </v:TreeFileDataGrid.Footer>
+            </v:TreeFileDataGrid>
+            <Grid
+                Grid.Row="2"
+                ColumnDefinitions="*,8,Auto"
+                DataContext="{Binding SelectedFile}">
+                <Grid.IsVisible>
+                    <MultiBinding Converter="{x:Static cvt:Converters.AndLogic}">
+                        <Binding
+                            Converter="{x:Static cvt:Converters.IsNotNull}"
+                            Path="." />
+                        <Binding
+                            Converter="{x:Static cvt:Converters.InverseBool}"
+                            Path="IsDir" />
+                    </MultiBinding>
+                </Grid.IsVisible>
+                <ScrollViewer
+                    Padding="0,0,20,0"
+                    HorizontalScrollBarVisibility="Disabled"
+                    VerticalScrollBarVisibility="Auto">
+                    <StackPanel
+                        DataContext="{Binding Tag.Tags}"
+                        Spacing="8">
+                        <StackPanel.Styles>
+                            <Style Selector="ct|StringListEditor">
+                                <Setter Property="AddButtonPosition" Value="Right" />
+                                <Setter Property="Layout" Value="HorizontalStack" />
+                            </Style>
+                            <Style Selector="ct|FormItem /template/ ContentPresenter#PART_Header">
+                                <Setter Property="FontWeight" Value="Bold" />
+                            </Style>
+                        </StackPanel.Styles>
+                        <ct:FormItem Header="对象">
+                            <ct:StringListEditor ItemsSource="{Binding ObjectTags}" />
+                        </ct:FormItem>
+                        <ct:FormItem Header="场景">
+                            <ct:StringListEditor ItemsSource="{Binding SceneTags}" />
+                        </ct:FormItem>
+                        <ct:FormItem Header="情绪">
+                            <ct:StringListEditor ItemsSource="{Binding MoodTags}" />
+                        </ct:FormItem>
+                        <ct:FormItem Header="颜色">
+                            <ct:StringListEditor ItemsSource="{Binding ColorTags}" />
+                        </ct:FormItem>
+                        <ct:FormItem Header="拍摄">
+                            <ct:StringListEditor ItemsSource="{Binding TechniqueTags}" />
+                        </ct:FormItem>
+                        <ct:FormItem Header="文字">
+                            <TextBox
+                                Text="{Binding OcrText}"
+                                TextWrapping="Wrap" />
+                        </ct:FormItem>
+                        <ct:FormItem Header="描述">
+                            <TextBox
+                                Text="{Binding Description}"
+                                TextWrapping="Wrap" />
+                        </ct:FormItem>
+                    </StackPanel>
+                </ScrollViewer>
+                <Image
+                    Grid.Column="2"
+                    Width="160"
+                    Height="96"
+                    Cursor="Hand"
+                    RenderOptions.BitmapInterpolationMode="HighQuality"
+                    Source="{Binding Tag.ThumbnailImage, Mode=OneWay}">
+                    <Interaction.Behaviors>
+                        <RoutedEventTriggerBehavior RoutedEvent="{x:Static InputElement.TappedEvent}">
+                            <InvokeCommandAction
+                                Command="{Binding OpenFileCommand, Source={x:Static vm:GlobalCommands.Instance}}"
+                                CommandParameter="{Binding Path}" />
+                        </RoutedEventTriggerBehavior>
+                    </Interaction.Behaviors>
+                </Image>
+            </Grid>
+        </Grid>
+    </v:VerticalTwoStepPanelBase.ResultsContent>
+</v:VerticalTwoStepPanelBase>

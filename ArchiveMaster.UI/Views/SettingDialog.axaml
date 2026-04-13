@@ -5,18 +5,20 @@
     xmlns:ct="using:FzLib.Avalonia.Controls"
     xmlns:cvt="using:ArchiveMaster.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:di="using:FzLib.Avalonia.DependencyInjection"
     xmlns:dialog="using:FzLib.Avalonia.Dialogs"
     xmlns:enums="clr-namespace:ArchiveMaster.Enums;assembly=ArchiveMaster.Core"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:me="clr-namespace:FzLib.Avalonia.MarkupExtensions;assembly=FzLib.Avalonia"
     xmlns:sys="using:System"
-    xmlns:views="clr-namespace:ArchiveMaster.Views;assembly=ArchiveMaster.Core"
+    xmlns:v="using:ArchiveMaster.Views"
     xmlns:vm="using:ArchiveMaster.ViewModels"
     Title="设置"
-    Width="450"
-    Height="500"
+    Width="700"
+    Height="700"
     d:DesignHeight="450"
     d:DesignWidth="800"
+    Loaded="Control_OnLoaded"
     PrimaryButtonContent="完成"
     mc:Ignorable="d">
     <TabControl>
@@ -126,13 +128,18 @@
         <TabItem Header="依赖">
             <ct:StackFormItemGroup>
                 <ct:FormItem Header="ffmpeg所在目录">
-                    <views:FilePickerTextBox
+                    <v:FilePickerTextBox
                         FileNames="{Binding Configs.FFmpegDir}"
                         Type="OpenFolder"
                         Watermark="若为空，表示使用环境变量" />
                 </ct:FormItem>
             </ct:StackFormItemGroup>
         </TabItem>
+
+        <TabItem Header="AI配置">
+            <v:AiProvidersPanel DataContext="{Binding AiProvidersViewModel}" />
+        </TabItem>
+
         <TabItem Header="配置项">
             <StackPanel
                 HorizontalAlignment="Left"

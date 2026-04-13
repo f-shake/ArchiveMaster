@@ -82,6 +82,14 @@ namespace ArchiveMaster.ViewModels.FileSystem
             }
         }
 
+        public SimpleFileInfo(string relativePath, string topDir)
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(relativePath);
+            ArgumentException.ThrowIfNullOrWhiteSpace(topDir);
+            Name = System.IO.Path.GetFileName(relativePath);
+            Path = System.IO.Path.Combine(topDir, relativePath);
+        }
+
         public static IEqualityComparer<SimpleFileInfo> EqualityComparer { get; }
             = EqualityComparer<SimpleFileInfo>.Create(
                 (s1, s2) => s1.Path == s2.Path,
@@ -119,67 +127,6 @@ namespace ArchiveMaster.ViewModels.FileSystem
             }
         }
 
-        public void SetRelativePath(string relativePath)
-        {
-            this.relativePath = relativePath;
-        }
-
-
-        #region 进度
-        [JsonIgnore]
-        public ProcessStatus Status => status;
-
-        public void Success(string message)
-        {
-            Success();
-            this.message = message;
-            NotifyStatusProperties();
-        }
-
-        public void Success()
-        {
-            status = ProcessStatus.Success;
-            NotifyStatusProperties();
-        }
-
-        public void Skip()
-        {
-            message = "文件已存在，跳过";
-            status = ProcessStatus.Skip;
-            NotifyStatusProperties();
-        }
-
-        public void Error(Exception ex)
-        {
-            Error(ex.Message);
-        }
-
-        public void Error(string message)
-        {
-            status = ProcessStatus.Error;
-            this.message = message;
-        }
-
-        private void NotifyStatusProperties()
-        {
-            OnPropertyChanged(nameof(Status));
-            OnPropertyChanged(nameof(Message));
-        }
-
-        public void Warn(string msg)
-        {
-            status = ProcessStatus.Warn;
-            message = msg;
-            NotifyStatusProperties();
-        }
-
-        public void Processing()
-        {
-            status = ProcessStatus.Processing;
-            NotifyStatusProperties();
-        }
-        #endregion
-
         public override int GetHashCode()
         {
             int hash = default;
@@ -196,5 +143,70 @@ namespace ArchiveMaster.ViewModels.FileSystem
             }
         }
 
+        public void SetRelativePath(string relativePath)
+        {
+            this.relativePath = relativePath;
+        }
+
+
+        #region 进度
+        [JsonIgnore]
+        public ProcessStatus Status => status;
+
+        public void Cancel()
+        {
+            status = ProcessStatus.Cancel;
+            NotifyStatusProperties();
+        }
+
+        public void Error(Exception ex)
+        {
+            Error(ex.Message);
+        }
+
+        public void Error(string message)
+        {
+            status = ProcessStatus.Error;
+            this.message = message;
+        }
+
+        public void Processing()
+        {
+            status = ProcessStatus.Processing;
+            NotifyStatusProperties();
+        }
+
+        public void Skip()
+        {
+            message = "文件已存在，跳过";
+            status = ProcessStatus.Skip;
+            NotifyStatusProperties();
+        }
+
+        public void Success(string message)
+        {
+            Success();
+            this.message = message;
+            NotifyStatusProperties();
+        }
+
+        public void Success()
+        {
+            status = ProcessStatus.Success;
+            NotifyStatusProperties();
+        }
+        public void Warn(string msg)
+        {
+            status = ProcessStatus.Warn;
+            message = msg;
+            NotifyStatusProperties();
+        }
+
+        private void NotifyStatusProperties()
+        {
+            OnPropertyChanged(nameof(Status));
+            OnPropertyChanged(nameof(Message));
+        }
+        #endregion
     }
 }

@@ -18,31 +18,17 @@ namespace ArchiveMaster.Services
 
     public abstract class ServiceBase : IDisposable
     {
-        /// <summary>
-        /// 消息最短通知间隔（毫秒）
-        /// </summary>
-        private const int DebounceIntervalMs = 50;
+        #region 基本成员
 
         private readonly AppConfig appConfig;
 
-        private readonly object syncLock = new object();
-
-        private Timer debounceTimer;
-
         private bool isDisposed = false;
-        private DateTime lastMessageTime = DateTime.MinValue;
-
-        private string pendingMessage;
 
         protected ServiceBase(AppConfig appConfig)
         {
             this.appConfig = appConfig;
             InitializeDebounceTimer();
         }
-
-        public event EventHandler<MessageUpdateEventArgs> MessageUpdate;
-
-        public event EventHandler<ProgressUpdateEventArgs> ProgressUpdate;
 
         public void Dispose()
         {
@@ -56,6 +42,36 @@ namespace ArchiveMaster.Services
             GC.SuppressFinalize(this);
         }
 
+        #endregion
+
+        #region 消息和进度
+
+        private readonly object syncLock = new object();
+
+        private Timer debounceTimer;
+
+        private DateTime lastMessageTime = DateTime.MinValue;
+
+        private string pendingMessage;
+
+        public event EventHandler<MessageUpdateEventArgs> MessageUpdate;
+
+        public event EventHandler<ProgressUpdateEventArgs> ProgressUpdate;
+
+        private void InitializeDebounceTimer()
+        {
+            debounceTimer = new Timer(_ =>
+            {
+                lock (syncLock)
+                {
+                    if (pendingMessage != null)
+                    {
+                        SendPendingMessage();
+                    }
+                }
+            }, null, Timeout.Infinite, Timeout.Infinite);
+        }
+
         protected internal void NotifyMessage(string message)
         {
 #if DEBUG && WRITEMESSAGE
@@ -64,12 +80,12 @@ namespace ArchiveMaster.Services
             MessageUpdate?.Invoke(this, new MessageUpdateEventArgs(message));
         }
 
-        protected internal void NotifyProgress<T>(T current,T total) where T : struct, INumber<T>
+        protected internal void NotifyProgress<T>(T current, T total) where T : struct, INumber<T>
         {
             double percent = Convert.ToDouble(current) / Convert.ToDouble(total);
             NotifyProgress(percent);
         }
-        
+
         protected internal void NotifyProgress(double percent)
         {
 #if DEBUG && WRITEMESSAGE
@@ -84,63 +100,37 @@ namespace ArchiveMaster.Services
             NotifyProgress(double.NaN);
         }
 
-        protected FilesLoopStates TryForFiles<T>(IEnumerable<T> files, Action<T, FilesLoopStates> body,
-            CancellationToken cancellationToken,
-            FilesLoopOptions options = null)
-            where T : SimpleFileInfo
+
+        private void SendPendingMessage()
         {
-            options ??= FilesLoopOptions.DoNothing();
-            var states = new FilesLoopStates(this, options);
-
-            PreProcessStatistic(files, options, states);
-
-            switch (options.Threads)
+            if (isDisposed)
             {
-                case 1:
-                    ForEachFileCore(files, body, cancellationToken, options, states);
-                    break;
-                case >= 2 or 0:
-                    ParallelForEachFileCore(files, body, cancellationToken, options, states);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException("Threads应为大于等于0的整数，其中1表示单线程，0表示自动多线程，>=2表示指定线程数");
+                return;
             }
 
-            return states;
-        }
-
-        protected async Task<FilesLoopStates> TryForFilesAsync<T>(IEnumerable<T> files, Action<T, FilesLoopStates> body,
-            CancellationToken cancellationToken, FilesLoopOptions options = null)
-            where T : SimpleFileInfo
-        {
-            FilesLoopStates states = null;
-            await Task.Run(() => { states = TryForFiles(files, body, cancellationToken, options); }, cancellationToken);
-            return states;
-        }
-
-        protected async Task<FilesLoopStates> TryForFilesAsync<T>(IEnumerable<T> files,
-            Func<T, FilesLoopStates, Task> asyncBody,
-            CancellationToken cancellationToken, FilesLoopOptions options = null)
-            where T : SimpleFileInfo
-        {
-            options ??= FilesLoopOptions.DoNothing();
-            var states = new FilesLoopStates(this, options);
-
-            PreProcessStatistic(files, options, states);
-
-            switch (options.Threads)
+            if (pendingMessage == null)
             {
-                case 1:
-                    await ForEachFileCoreAsync(files, asyncBody, cancellationToken, options, states);
-                    break;
-                case >= 2 or 0:
-                    await ParallelForEachFileCoreAsync(files, asyncBody, cancellationToken, options, states);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException("Threads应为大于等于0的整数，其中1表示单线程，0表示自动多线程，>=2表示指定线程数");
+                return;
             }
 
-            return states;
+            MessageUpdate?.Invoke(this, new MessageUpdateEventArgs(pendingMessage));
+            lastMessageTime = DateTime.Now;
+            pendingMessage = null;
+        }
+
+        #endregion
+
+        #region 更新状态和统计信息
+
+        public SimpleFileInfo CurrentProcessingFile { get; private set; }
+
+        protected void UpdateCurrentProcessingFile(SimpleFileInfo file, bool setFileStatusAsProcessing = false)
+        {
+            CurrentProcessingFile = file;
+            if (setFileStatusAsProcessing)
+            {
+                file.Processing();
+            }
         }
 
         private static void PreProcessStatistic<T>(IEnumerable<T> files, FilesLoopOptions options,
@@ -183,17 +173,6 @@ namespace ArchiveMaster.Services
             }
         }
 
-        private static void ProcessAutoApplyStatus<T>(FilesLoopOptions options, T file) where T : SimpleFileInfo
-        {
-            if (options.AutoApplyStatus)
-            {
-                if (file.Status == ProcessStatus.Ready)
-                {
-                    file.Success();
-                }
-            }
-        }
-
         private static void ProcessException<T>(FilesLoopOptions options, T file, Exception ex) where T : SimpleFileInfo
         {
             file.Error(ex);
@@ -203,6 +182,123 @@ namespace ArchiveMaster.Services
                 throw ex;
             }
         }
+
+        private void ProcessAutoApplyProcessingStatus<T>(FilesLoopOptions options, T file) where T : SimpleFileInfo
+        {
+            if (options.AutoApplyStatus)
+            {
+                if (file.Status == ProcessStatus.Ready)
+                {
+                    file.Processing();
+                }
+            }
+
+            UpdateCurrentProcessingFile(file);
+        }
+
+        private void ProcessAutoApplySuccessStatus<T>(FilesLoopOptions options, T file) where T : SimpleFileInfo
+        {
+            if (options.AutoApplyStatus)
+            {
+                if (file.Status is ProcessStatus.Ready or ProcessStatus.Processing)
+                {
+                    file.Success();
+                }
+            }
+        }
+
+        private void ProcessFinally<T>(FilesLoopOptions options, T file, FilesLoopStates states)
+            where T : SimpleFileInfo
+        {
+            if (states.CanAccessTotalLength)
+            {
+                states.IncreaseFileLength(file.Length);
+            }
+
+            states.IncreaseFileIndex();
+
+            switch (options.AutoApplyProgress)
+            {
+                case AutoApplyProgressMode.FileLength:
+                    NotifyProgress(1.0 * states.AccumulatedLength / states.TotalLength);
+                    break;
+                case AutoApplyProgressMode.FileNumber:
+                    NotifyProgress(1.0 * states.FileIndex / states.FileCount);
+                    break;
+            }
+
+            UpdateCurrentProcessingFile(null);
+
+            options.FinallyAction?.Invoke(file);
+        }
+
+        #endregion
+
+        #region 预设的文件集合循环
+
+        protected FilesLoopStates TryForFiles<T>(IEnumerable<T> files, Action<T, FilesLoopStates> body,
+            CancellationToken cancellationToken,
+            FilesLoopOptions options = null)
+            where T : SimpleFileInfo
+        {
+            options ??= FilesLoopOptions.DoNothing();
+            var states = new FilesLoopStates(this, options);
+
+            PreProcessStatistic(files, options, states);
+
+            switch (options.Threads)
+            {
+                case 1:
+                    ForEachFileCore(files, body, cancellationToken, options, states);
+                    break;
+                case >= 2 or 0:
+                    ParallelForEachFileCore(files, body, cancellationToken, options, states);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(options.Threads),
+                        "Threads应为大于等于0的整数，其中1表示单线程，0表示自动多线程，>=2表示指定线程数");
+            }
+
+            return states;
+        }
+
+        protected async Task<FilesLoopStates> TryForFilesAsync<T>(IEnumerable<T> files, Action<T, FilesLoopStates> body,
+            CancellationToken cancellationToken, FilesLoopOptions options = null)
+            where T : SimpleFileInfo
+        {
+            FilesLoopStates states = null;
+            await Task.Run(() => { states = TryForFiles(files, body, cancellationToken, options); }, cancellationToken);
+            return states;
+        }
+
+        protected async Task<FilesLoopStates> TryForFilesAsync<T>(IEnumerable<T> files,
+            Func<T, FilesLoopStates, Task> asyncBody,
+            CancellationToken cancellationToken, FilesLoopOptions options = null)
+            where T : SimpleFileInfo
+        {
+            options ??= FilesLoopOptions.DoNothing();
+            var states = new FilesLoopStates(this, options);
+
+            PreProcessStatistic(files, options, states);
+
+            switch (options.Threads)
+            {
+                case 1:
+                    await ForEachFileCoreAsync(files, asyncBody, cancellationToken, options, states);
+                    break;
+                case >= 2 or 0:
+                    await ParallelForEachFileCoreAsync(files, asyncBody, cancellationToken, options, states);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException("Threads应为大于等于0的整数，其中1表示单线程，0表示自动多线程，>=2表示指定线程数");
+            }
+
+            return states;
+        }
+
+        #endregion
+
+        #region 预设的文件集合循环内部方法
 
         private void ForEachFileCore<T>(IEnumerable<T> files, Action<T, FilesLoopStates> body,
             CancellationToken cancellationToken,
@@ -232,19 +328,6 @@ namespace ArchiveMaster.Services
             }
         }
 
-        private void InitializeDebounceTimer()
-        {
-            debounceTimer = new Timer(_ =>
-            {
-                lock (syncLock)
-                {
-                    if (pendingMessage != null)
-                    {
-                        SendPendingMessage();
-                    }
-                }
-            }, null, Timeout.Infinite, Timeout.Infinite);
-        }
 
         private void ParallelForEachFileCore<T>(IEnumerable<T> files, Action<T, FilesLoopStates> body,
             CancellationToken cancellationToken,
@@ -276,45 +359,6 @@ namespace ArchiveMaster.Services
             }, async (file, c) => { await TryForFilesSingleAsync(asyncBody, c, options, file, states); });
         }
 
-        private void ProcessFinally<T>(FilesLoopOptions options, T file, FilesLoopStates states)
-            where T : SimpleFileInfo
-        {
-            if (states.CanAccessTotalLength)
-            {
-                states.IncreaseFileLength(file.Length);
-            }
-
-            states.IncreaseFileIndex();
-
-            switch (options.AutoApplyProgress)
-            {
-                case AutoApplyProgressMode.FileLength:
-                    NotifyProgress(1.0 * states.AccumulatedLength / states.TotalLength);
-                    break;
-                case AutoApplyProgressMode.FileNumber:
-                    NotifyProgress(1.0 * states.FileIndex / states.FileCount);
-                    break;
-            }
-
-            options.FinallyAction?.Invoke(file);
-        }
-
-        private void SendPendingMessage()
-        {
-            if (isDisposed)
-            {
-                return;
-            }
-
-            if (pendingMessage == null)
-            {
-                return;
-            }
-
-            MessageUpdate?.Invoke(this, new MessageUpdateEventArgs(pendingMessage));
-            lastMessageTime = DateTime.Now;
-            pendingMessage = null;
-        }
 
         private void TryForFilesSingle<T>(Action<T, FilesLoopStates> body, CancellationToken cancellationToken,
             FilesLoopOptions options, T file,
@@ -323,11 +367,17 @@ namespace ArchiveMaster.Services
             cancellationToken.ThrowIfCancellationRequested();
             try
             {
+                ProcessAutoApplyProcessingStatus(options, file);
                 body(file, states);
-                ProcessAutoApplyStatus(options, file);
+                ProcessAutoApplySuccessStatus(options, file);
             }
             catch (OperationCanceledException)
             {
+                if (options.AutoApplyStatus)
+                {
+                    file.Cancel();
+                }
+
                 throw;
             }
             catch (Exception ex)
@@ -354,11 +404,17 @@ namespace ArchiveMaster.Services
             cancellationToken.ThrowIfCancellationRequested();
             try
             {
+                ProcessAutoApplyProcessingStatus(options, file);
                 await asyncBody(file, states);
-                ProcessAutoApplyStatus(options, file);
+                ProcessAutoApplySuccessStatus(options, file);
             }
             catch (OperationCanceledException)
             {
+                if (options.AutoApplyStatus)
+                {
+                    file.Cancel();
+                }
+
                 throw;
             }
             catch (System.Security.Cryptography.CryptographicException ex)
@@ -380,5 +436,7 @@ namespace ArchiveMaster.Services
                 Thread.Sleep(GlobalConfigs.Instance.DebugModeLoopDelay);
             }
         }
+
+        #endregion
     }
 }

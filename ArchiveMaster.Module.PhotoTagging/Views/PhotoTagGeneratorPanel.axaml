@@ -1,0 +1,174 @@
+<v:VerticalTwoStepPanelBase
+    x:Class="ArchiveMaster.Views.PhotoTagGeneratorPanel"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ct="using:FzLib.Avalonia.Controls"
+    xmlns:cvt="using:ArchiveMaster.Converters"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:v="using:ArchiveMaster.Views"
+    xmlns:vm="clr-namespace:ArchiveMaster.ViewModels"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
+    <v:VerticalTwoStepPanelBase.ConfigsContent>
+        <ct:StackFormItemGroup>
+            <ct:FormItem Label="目录：">
+                <v:FilePickerTextBox
+                    FileNames="{Binding Config.Dir}"
+                    Filter="{Binding Config.Filter}"
+                    IsFilterBarVisible="True"
+                    Type="OpenFolder" />
+            </ct:FormItem>
+            <ct:FormItem Label="标签文件：">
+                <v:FilePickerTextBox
+                    FileNames="{Binding Config.TagFile}"
+                    OpenFileMenuItemHeader="打开已有标签文件"
+                    SaveFileMenuItemHeader="新建标签文件"
+                    SaveFileSuggestedFileName="照片标签数据库.ampt"
+                    StringFileTypeFilter="ArchiveMaster Photo Tags（图像标签库）文件;*.ampt;;"
+                    Type="OpenOrSaveFile" />
+            </ct:FormItem>
+            <ct:FormItem Label="生成选项：">
+                <ct:WrapFormItemGroup>
+                    <ct:FormItem Header="限制最大尺寸（万像素）">
+                        <NumericUpDown
+                            Maximum="2000"
+                            Minimum="10"
+                            Value="{Binding Config.ResizingTargetResolutionIn10k}" />
+                    </ct:FormItem>
+
+                    <ct:FormItem Header="目标标签数量">
+                        <Slider
+                            Width="120"
+                            Classes="ThumbLabel"
+                            IsSnapToTickEnabled="True"
+                            Maximum="50"
+                            Minimum="10"
+                            TickFrequency="1"
+                            Value="{Binding Config.TargetTagCount}" />
+                    </ct:FormItem>
+                    <ct:FormItem Header="目标描述字数">
+                        <Slider
+                            Width="120"
+                            Classes="ThumbLabel"
+                            IsSnapToTickEnabled="True"
+                            Maximum="200"
+                            Minimum="20"
+                            TickFrequency="1"
+                            Value="{Binding Config.DescriptionLength}" />
+                    </ct:FormItem>
+                </ct:WrapFormItemGroup>
+            </ct:FormItem>
+
+            <ct:FormItem Label="执行选项：">
+                <ct:WrapFormItemGroup>
+                    <ct:FormItem Header="最大并行数量">
+                        <Slider
+                            Width="120"
+                            Classes="ThumbLabel"
+                            IsSnapToTickEnabled="True"
+                            Maximum="8"
+                            Minimum="1"
+                            TickFrequency="1"
+                            Value="{Binding Config.MaxDegreeOfParallelism}" />
+                    </ct:FormItem>
+                    <ct:FormItem Header="自动保存间隔（个文件）">
+                        <Slider
+                            Width="120"
+                            Classes="ThumbLabel"
+                            IsSnapToTickEnabled="True"
+                            Maximum="100"
+                            Minimum="0"
+                            TickFrequency="1"
+                            Value="{Binding Config.AutoSaveInterval}" />
+                    </ct:FormItem>
+                    <ct:FormItem Header="自动重试次数：">
+                        <Slider
+                            Width="120"
+                            Classes="ThumbLabel"
+                            IsSnapToTickEnabled="True"
+                            Maximum="10"
+                            Minimum="0"
+                            TickFrequency="1"
+                            Value="{Binding Config.RetryCount}" />
+                    </ct:FormItem>
+                </ct:WrapFormItemGroup>
+            </ct:FormItem>
+
+        </ct:StackFormItemGroup>
+    </v:VerticalTwoStepPanelBase.ConfigsContent>
+
+    <v:VerticalTwoStepPanelBase.ResultsContent>
+        <v:SimpleFileDataGrid
+            ColumnLengthIndex="2.3"
+            ColumnNameIndex="1.1"
+            ColumnPathIndex="2.2"
+            ColumnTimeIndex="2.4"
+            ItemsSource="{Binding Files}">
+            <DataGrid.Columns>
+                <v:DataGridLightColumn
+                    Fill="{DynamicResource Foreground0}"
+                    Header="已生成"
+                    SortMemberPath="HasGenerated"
+                    VisibleBinding="{Binding HasGenerated}" />
+                <DataGridTextColumn
+                    Binding="{Binding Tags.Count, FallbackValue=' ', StringFormat='{}{0}个标签'}"
+                    Header="标签"
+                    IsReadOnly="True" />
+            </DataGrid.Columns>
+            <DataGrid.RowDetailsTemplate>
+                <DataTemplate>
+                    <Grid
+                        Margin="{StaticResource FileDataGridRowDetailPadding}"
+                        ColumnDefinitions="*,8,Auto">
+                        <StackPanel Spacing="8">
+                            <ContentControl
+                                Content="{Binding}"
+                                ContentTemplate="{StaticResource FileDataGridRowDetailPathTemplate}" />
+                            <ContentControl
+                                Content="{Binding}"
+                                ContentTemplate="{StaticResource FileDataGridRowDetailMetadataTemplate}" />
+                            <ct:FormItem
+                                Classes="BoldLabel"
+                                Label="标签："
+                                LabelWidth="{StaticResource FileDataGridRowDetailLabelWidth}">
+                                <SelectableTextBlock
+                                    Text="{Binding Tags, Converter={x:Static cvt:TagsToStringConverter.Instance}}"
+                                    TextWrapping="Wrap" />
+                            </ct:FormItem>
+                            <ct:FormItem
+                                Classes="BoldLabel"
+                                IsVisible="{Binding Tags.OcrText, Converter={x:Static cvt:Converters.IsNotNull}}"
+                                Label="文本："
+                                LabelWidth="{StaticResource FileDataGridRowDetailLabelWidth}">
+                                <SelectableTextBlock
+                                    Text="{Binding Tags.OcrText, Converter={x:Static cvt:OneLineStringConverter.Instance}}"
+                                    TextTrimming="CharacterEllipsis"
+                                    ToolTip.Tip="{Binding Tags.OcrText}" />
+                            </ct:FormItem>
+                            <ct:FormItem
+                                Classes="BoldLabel"
+                                Label="描述："
+                                LabelWidth="{StaticResource FileDataGridRowDetailLabelWidth}">
+                                <SelectableTextBlock
+                                    Text="{Binding Tags.Description, Converter={x:Static cvt:OneLineStringConverter.Instance}}"
+                                    TextTrimming="CharacterEllipsis"
+                                    ToolTip.Tip="{Binding Tags.Description}" />
+                            </ct:FormItem>
+                            <ContentControl
+                                Content="{Binding}"
+                                ContentTemplate="{StaticResource FileDataGridRowDetailMessageTemplate}" />
+                        </StackPanel>
+                        <Image
+                            Grid.Column="2"
+                            Width="160"
+                            Height="120"
+                            RenderOptions.BitmapInterpolationMode="HighQuality"
+                            Source="{Binding ThumbnailImage, Mode=OneWay}" />
+                    </Grid>
+                </DataTemplate>
+            </DataGrid.RowDetailsTemplate>
+        </v:SimpleFileDataGrid>
+    </v:VerticalTwoStepPanelBase.ResultsContent>
+</v:VerticalTwoStepPanelBase>

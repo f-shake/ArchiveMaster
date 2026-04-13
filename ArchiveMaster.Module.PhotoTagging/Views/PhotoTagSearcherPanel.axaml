@@ -1,0 +1,206 @@
+<v:VerticalTwoStepPanelBase
+    x:Class="ArchiveMaster.Views.PhotoTagSearcherPanel"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:b="using:ArchiveMaster.Behaviors"
+    xmlns:ct="using:FzLib.Avalonia.Controls"
+    xmlns:cvt="using:ArchiveMaster.Converters"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:enums="clr-namespace:ArchiveMaster.Enums"
+    xmlns:ic="clr-namespace:FluentIcons.Avalonia.Markup;assembly=FluentIcons.Avalonia"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ne="clr-namespace:FzLib.Avalonia.MarkupExtensions;assembly=FzLib.Avalonia"
+    xmlns:v="using:ArchiveMaster.Views"
+    xmlns:vm="using:ArchiveMaster.ViewModels"
+    xmlns:vmfs="clr-namespace:ArchiveMaster.ViewModels.FileSystem"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    ExecuteButtonContent="加载数据库"
+    mc:Ignorable="d">
+    <v:VerticalTwoStepPanelBase.ConfigsContent>
+        <ct:StackFormItemGroup>
+            <ct:FormItem Label="根目录：">
+                <v:FilePickerTextBox
+                    FileNames="{Binding Config.RootDir}"
+                    Type="OpenFolder" />
+            </ct:FormItem>
+            <ct:FormItem
+                Grid.Row="2"
+                Label="标签数据库文件：">
+                <v:FilePickerTextBox
+                    FileNames="{Binding Config.TagFile}"
+                    StringFileTypeFilter="ArchiveMaster Photo Tags（图像标签库）文件;*.ampt;;"
+                    Type="OpenFile" />
+            </ct:FormItem>
+        </ct:StackFormItemGroup>
+    </v:VerticalTwoStepPanelBase.ConfigsContent>
+    <v:VerticalTwoStepPanelBase.ResultsContent>
+        <Grid
+            Margin="8"
+            IsEnabled="{Binding HasLoaded}"
+            RowDefinitions="Auto,8,*">
+            <Grid ColumnDefinitions="Auto,8,*,8,Auto,8,Auto">
+                <ComboBox
+                    DisplayMemberBinding="{Binding ., Converter={x:Static cvt:Converters.Description}}"
+                    ItemsSource="{Binding TagTypes}"
+                    SelectedItem="{Binding TagType}" />
+                <AutoCompleteBox
+                    Grid.Column="2"
+                    ItemsSource="{Binding Tags}"
+                    Text="{Binding SearchKeyword}"
+                    ValueMemberBinding="{Binding Tag}"
+                    Watermark="请输入关键词，多个词用空格分隔">
+                    <AutoCompleteBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock>
+                                <TextBlock.Text>
+                                    <MultiBinding StringFormat="{}{0}（{1}）">
+                                        <Binding Path="Tag" />
+                                        <Binding Path="Count" />
+                                    </MultiBinding>
+                                </TextBlock.Text>
+                            </TextBlock>
+                        </DataTemplate>
+                    </AutoCompleteBox.ItemTemplate>
+                    <Interaction.Behaviors>
+                        <b:AutoCompleteZeroMinimumPrefixLengthDropdownBehaviour />
+                    </Interaction.Behaviors>
+                </AutoCompleteBox>
+                <CheckBox
+                    Grid.Column="4"
+                    Content="模糊匹配"
+                    IsChecked="{Binding Partial}" />
+                <Button
+                    Grid.Column="6"
+                    Classes="Primary"
+                    Command="{Binding SearchCommand}"
+                    Content="搜索"
+                    IsEnabled="{Binding SearchKeyword, Converter={x:Static cvt:Converters.IsNotNull}}" />
+            </Grid>
+
+            <Grid
+                Grid.Row="2"
+                RowDefinitions="*,8,Auto">
+                <ListBox ItemsSource="{Binding Files}">
+                    <ListBox.Styles>
+                        <Style Selector="ListBoxItem">
+                            <Setter Property="BorderBrush" Value="{DynamicResource Background3}" />
+                            <Setter Property="BorderThickness" Value="0,0,0,1" />
+                            <Style Selector="^:selected /template/ ContentPresenter">
+                                <Setter Property="Background" Value="Transparent" />
+                            </Style>
+                            <Style Selector="^:pointerover /template/ ContentPresenter">
+                                <Setter Property="Background" Value="Transparent" />
+                            </Style>
+                            <Style Selector="^:pressed /template/ ContentPresenter">
+                                <Setter Property="Background" Value="Transparent" />
+                            </Style>
+                        </Style>
+                    </ListBox.Styles>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate x:DataType="vmfs:TaggingPhotoFileInfo">
+                            <Grid ColumnDefinitions="Auto,8,*">
+                                <Image
+                                    Grid.RowSpan="5"
+                                    Width="160"
+                                    Height="96"
+                                    Cursor="Hand"
+                                    RenderOptions.BitmapInterpolationMode="HighQuality"
+                                    Source="{Binding ThumbnailImage, Mode=OneWay}">
+                                    <Interaction.Behaviors>
+                                        <RoutedEventTriggerBehavior RoutedEvent="{x:Static InputElement.TappedEvent}">
+                                            <InvokeCommandAction
+                                                Command="{Binding OpenFileCommand, Source={x:Static vm:GlobalCommands.Instance}}"
+                                                CommandParameter="{Binding Path}" />
+                                        </RoutedEventTriggerBehavior>
+                                    </Interaction.Behaviors>
+                                </Image>
+                                <StackPanel
+                                    Grid.Column="2"
+                                    Spacing="8">
+                                    <Grid ColumnDefinitions="*,8,Auto,4,Auto,4,Auto">
+                                        <SelectableTextBlock
+                                            FontWeight="Bold"
+                                            Text="{Binding RelativePath}"
+                                            TextTrimming="CharacterEllipsis" />
+                                        <!--  <TextBlock  -->
+                                        <!--  Grid.Column="2"  -->
+                                        <!--  IsVisible="{Binding ExistsFile}"  -->
+                                        <!--  Text="{Binding Length, Converter={x:Static cvt:Converters.FileLength}}" />  -->
+                                        <Button
+                                            Grid.Column="2"
+                                            Classes="Link"
+                                            Content="{ic:FluentIcon Icon=Copy}"
+                                            ToolTip.Tip="复制信息">
+                                            <Button.Flyout>
+                                                <MenuFlyout>
+                                                    <MenuItem
+                                                        Command="{Binding CopyTextCommand, Source={x:Static vm:GlobalCommands.Instance}}"
+                                                        CommandParameter="{Binding Tags, Converter={x:Static cvt:TagsToStringConverter.Instance}}"
+                                                        Header="复制标签" />
+                                                    <MenuItem
+                                                        Command="{Binding CopyTextCommand, Source={x:Static vm:GlobalCommands.Instance}}"
+                                                        CommandParameter="{Binding Tags.OcrText}"
+                                                        Header="复制文本" />
+                                                    <MenuItem
+                                                        Command="{Binding CopyTextCommand, Source={x:Static vm:GlobalCommands.Instance}}"
+                                                        CommandParameter="{Binding Tags.Description}"
+                                                        Header="复制描述" />
+                                                </MenuFlyout>
+                                            </Button.Flyout>
+                                        </Button>
+                                        <Button
+                                            Grid.Column="4"
+                                            Classes="Link"
+                                            Command="{Binding OpenFileCommand, Source={x:Static vm:GlobalCommands.Instance}}"
+                                            CommandParameter="{Binding Path}"
+                                            Content="{ic:FluentIcon Icon=Document}"
+                                            IsVisible="{Binding ExistsFile}"
+                                            ToolTip.Tip="打开文件" />
+                                        <Button
+                                            Grid.Column="6"
+                                            Classes="Link"
+                                            Command="{Binding OpenParentDirCommand, Source={x:Static vm:GlobalCommands.Instance}}"
+                                            CommandParameter="{Binding Path}"
+                                            Content="{ic:FluentIcon Icon=FolderOpen}"
+                                            Foreground="{DynamicResource Accent0}"
+                                            IsVisible="{Binding ExistsFile}"
+                                            ToolTip.Tip="打开文件所在目录" />
+                                        <ContentControl
+                                            Grid.Column="6"
+                                            Content="{ic:FluentIcon Icon=ErrorCircle}"
+                                            Foreground="Red"
+                                            IsVisible="{Binding !ExistsFile}"
+                                            ToolTip.Tip="文件不存在" />
+                                    </Grid>
+
+                                    <SelectableTextBlock
+                                        Text="{Binding Tags, Converter={x:Static cvt:TagsToStringConverter.Instance}}"
+                                        TextWrapping="Wrap" />
+                                    <TextBlock
+                                        Classes="Description"
+                                        FontStyle="Italic"
+                                        IsVisible="{Binding Tags.OcrText, Converter={x:Static cvt:Converters.IsNotNull}}"
+                                        Text="{Binding Tags.OcrText, Converter={x:Static cvt:OneLineStringConverter.Instance}}"
+                                        TextTrimming="CharacterEllipsis"
+                                        ToolTip.Tip="{Binding Tags.OcrText}" />
+
+
+                                    <TextBlock
+                                        Classes="Description"
+                                        Text="{Binding Tags.Description, Converter={x:Static cvt:OneLineStringConverter.Instance}}"
+                                        TextTrimming="CharacterEllipsis"
+                                        ToolTip.Tip="{Binding Tags.Description}" />
+
+                                </StackPanel>
+                            </Grid>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+                <TextBlock
+                    Grid.Row="2"
+                    Text="{Binding Files.Count, StringFormat='{}共{0}项'}" />
+            </Grid>
+        </Grid>
+    </v:VerticalTwoStepPanelBase.ResultsContent>
+</v:VerticalTwoStepPanelBase>

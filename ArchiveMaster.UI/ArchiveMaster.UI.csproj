@@ -22,6 +22,10 @@
       <DependentUpon>MasterPasswordDialog.axaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Views\AiProvidersPanel.axaml.cs">
+      <DependentUpon>AiProvidersPanel.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Hosting"/>
@@ -44,9 +48,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ArchiveMaster.Core\ArchiveMaster.Core.csproj"/>
+    <ProjectReference Include="..\ArchiveMaster.Core.AI\ArchiveMaster.Core.AI.csproj"/>
     <ProjectReference Include="..\ArchiveMaster.Module.FileBackupper\ArchiveMaster.Module.FileBackupper.csproj"/>
     <ProjectReference Include="..\ArchiveMaster.Module.FileTools\ArchiveMaster.Module.FileTools.csproj"/>
     <ProjectReference Include="..\ArchiveMaster.Module.PhotoTools\ArchiveMaster.Module.PhotoTools.csproj"/>
+    <ProjectReference Include="..\ArchiveMaster.Module.PhotoTagging\ArchiveMaster.Module.PhotoTagging.csproj"/>
     <ProjectReference Include="..\ArchiveMaster.Module.VideoTools\ArchiveMaster.Module.VideoTools.csproj"/>
     <ProjectReference Include="..\ArchiveMaster.Module.OfflineSync\ArchiveMaster.Module.OfflineSync.csproj"/>
     <ProjectReference Include="..\ArchiveMaster.Module.WriteOnceArchive\ArchiveMaster.Module.WriteOnceArchive.csproj"/>

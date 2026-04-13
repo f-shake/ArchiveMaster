@@ -20,6 +20,8 @@ public static class FileHelper
                        *.heif
                        *.jpg
                        *.jpeg
+                       *.png
+                       *.tif
                        *.dng
                        *.arw
                        """
@@ -32,6 +34,8 @@ public static class FileHelper
                        *.heif
                        *.jpg
                        *.jpeg
+                       *.png
+                       *.tif
                        """
     };
 

@@ -54,6 +54,8 @@ public static class Converters
 
 
     public static readonly StringListConverter StringList = FzLib.Avalonia.Converters.Converters.StringList;
+    
+    public static readonly StringJoinConverter StringJoin = new StringJoinConverter();
 
     public static readonly BoolToTextWrappingConverter TextWrapping = FzLib.Avalonia.Converters.Converters.TextWrapping;
 

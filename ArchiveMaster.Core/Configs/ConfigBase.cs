@@ -1,4 +1,5 @@
-﻿using ArchiveMaster.Helpers;
+﻿using System.Numerics;
+using ArchiveMaster.Helpers;
 using CommunityToolkit.Mvvm.ComponentModel;
 using FzLib.IO;
 
@@ -40,6 +41,14 @@ namespace ArchiveMaster.Configs
                 {
                     throw new Exception($"{name}不存在");
                 }
+            }
+        }
+
+        protected static void CheckRange<T>(T value, T min, T max, string name) where T : IComparable, INumber<T>
+        {
+            if (value < min || value > max)
+            {
+                throw new Exception($"{name}超出范围（{min}~{max}）");
             }
         }
     }

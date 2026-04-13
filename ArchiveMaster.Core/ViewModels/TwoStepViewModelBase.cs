@@ -18,8 +18,9 @@ using ArchiveMaster.ViewModels.FileSystem;
 
 namespace ArchiveMaster.ViewModels;
 
-public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPresetViewModelBase<TConfig>
-    where TService : TwoStepServiceBase<TConfig>
+public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPresetViewModelBase<TConfig>,
+    ITwoStepViewModel
+    where TService : TwoStepServiceBase<TConfig>, ITwoStepService
     where TConfig : ConfigBase, new()
 {
     #region 构造函数
@@ -114,8 +115,7 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
     /// <summary>
     /// 进度
     /// </summary>
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(ProgressIndeterminate))]
+    [ObservableProperty] [NotifyPropertyChangedFor(nameof(ProgressIndeterminate))]
     private double progress;
 
     /// <summary>
@@ -155,6 +155,11 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
     /// 核心服务
     /// </summary>
     protected TService Service { get; private set; }
+    
+    public ITwoStepService TwoStepService => Service;
+
+    [ObservableProperty]
+    private SimpleFileInfo selectedFile;
 
     /// <summary>
     /// 创建服务，并绑定事件

@@ -16,19 +16,22 @@ public partial class SettingViewModel : ObservableObject
 {
     public const string ConfigExtension = "amcfg";
 
-    [ObservableProperty]
-    private bool isAutoStart;
+    [ObservableProperty] private bool isAutoStart;
 
-    public SettingViewModel(ViewModelServices services, IStartupManager startupManager = null)
+    public SettingViewModel(ViewModelServices services, AiProvidersViewModel aiProvidersViewModel,
+        IStartupManager startupManager = null)
     {
         Services = services;
         StartupManager = startupManager;
         isAutoStart = startupManager?.IsStartupEnabled() ?? false;
+        AiProvidersViewModel = aiProvidersViewModel;
     }
 
     public GlobalConfigs Configs => GlobalConfigs.Instance;
     public ViewModelServices Services { get; }
     public IStartupManager StartupManager { get; }
+
+    public AiProvidersViewModel AiProvidersViewModel { get; }
 
     [RelayCommand]
     private async Task ExportConfigsAsync()
@@ -82,7 +85,12 @@ public partial class SettingViewModel : ObservableObject
         }
     }
 
-    public bool OnClosing()
+    public void OnSettingPanelOpened()
+    {
+        AiProvidersViewModel.ViewLoadedCommand.Execute(null);
+    }
+
+    public bool OnSettingPanelClosing()
     {
         if (Configs.DeleteMode == DeleteMode.MoveToSpecialFolder)
         {
@@ -92,6 +100,7 @@ public partial class SettingViewModel : ObservableObject
                 Services.Dialog.ShowErrorDialogAsync("未指定删除文件夹", "请指定删除文件夹");
                 return false;
             }
+
             if (Path.GetInvalidPathChars().Any(p => Configs.SpecialDeleteFolderName.Contains(p)))
             {
                 Services.Dialog.ShowErrorDialogAsync("文件夹名称包含非法字符", "文件夹名称包含非法字符，请修改后再保存",
@@ -99,6 +108,8 @@ public partial class SettingViewModel : ObservableObject
                 return false;
             }
         }
+        
+        AiProvidersViewModel.ViewUnloadedCommand.Execute(null);
 
         return true;
     }

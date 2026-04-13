@@ -1,0 +1,55 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>ArchiveMaster</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <AvaloniaXaml Remove="obj\**" />
+    <Compile Remove="obj\**" />
+    <EmbeddedResource Remove="obj\**" />
+    <None Remove="obj\**" />
+    <Compile Update="Views\PhotoSlimmingPanel.axaml.cs">
+      <DependentUpon>PhotoSlimmingPanel.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\PhotoGeoTaggingPanel.axaml.cs">
+      <DependentUpon>PhotoGeoTaggingPanel.axaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\RepairModifiedTimePanel.axaml.cs">
+      <DependentUpon>RepairModifiedTimePanel.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\PhotoGeoSorterPanel.axaml.cs">
+      <DependentUpon>PhotoGeoSorterPanel.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\PhotoTagGeneratorPanel.axaml.cs">
+      <DependentUpon>PhotoTextTaggingPanel.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\PhotoTagSearcherPanel.axaml.cs">
+      <DependentUpon>PhotoTagSearcherPanel.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\PhotoTagManagerPanel.axaml.cs">
+      <DependentUpon>PhotoTagManagerPanel.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ArchiveMaster.Core.AI\ArchiveMaster.Core.AI.csproj" />
+    <ProjectReference Include="..\ArchiveMaster.Core\ArchiveMaster.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ExifLibNet.Updated" />
+    <PackageReference Include="Mapster" />
+    <PackageReference Include="MetadataExtractor" />
+    <PackageReference Include="NetTopologySuite" />
+    <PackageReference Include="NetTopologySuite.IO.Esri.Shapefile" />
+    <PackageReference Include="NetTopologySuite.IO.GeoJSON4STJ" />
+  </ItemGroup>
+</Project>
