@@ -13,11 +13,29 @@
         x:Key="DataGridCellFocusVisualSecondaryBrush"
         Color="Transparent" />
 
+    <DataTemplate x:Key="DefaultRowDetailDataTemplate">
+        <StackPanel
+            Margin="{StaticResource FileDataGridRowDetailPadding}"
+            Spacing="8">
+            <ContentControl
+                Content="{Binding}"
+                ContentTemplate="{StaticResource FileDataGridRowDetailPathTemplate}" />
+            <ContentControl
+                Content="{Binding}"
+                ContentTemplate="{StaticResource FileDataGridRowDetailMetadataTemplate}" />
+            <ContentControl
+                Content="{Binding}"
+                ContentTemplate="{StaticResource FileDataGridRowDetailMessageTemplate}" />
+        </StackPanel>
+    </DataTemplate>
+
+
+
     <ControlTheme
         x:Key="{x:Type v:SimpleFileDataGrid}"
         BasedOn="{StaticResource {x:Type DataGrid}}"
         TargetType="v:SimpleFileDataGrid">
-        <Setter Property="RowDetailsTemplate">
+        <Setter Property="RowDetailsPopupTemplate">
             <DataTemplate>
                 <StackPanel
                     Margin="{StaticResource FileDataGridRowDetailPadding}"
@@ -200,10 +218,27 @@
                             VerticalAlignment="Center"
                             Content="{TemplateBinding Footer}" />
                     </Grid>
+
+                    <Popup
+                        x:Name="PART_Popup"
+                        Grid.RowSpan="3"
+                        Placement="BottomEdgeAlignedLeft"
+                        WindowManagerAddShadowHint="True">
+                        <Border
+                            x:Name="PART_PopupBorder"
+                            Background="{DynamicResource Background3}"
+                            CornerRadius="8">
+                            <ContentControl
+                                Content="{TemplateBinding SelectedItem}"
+                                ContentTemplate="{TemplateBinding RowDetailsPopupTemplate}" />
+                        </Border>
+                    </Popup>
                 </Grid>
             </ControlTemplate>
         </Setter>
         <Setter Property="SelectedItem" Value="{Binding SelectedFile}" />
+
+
     </ControlTheme>
 
     <ControlTheme

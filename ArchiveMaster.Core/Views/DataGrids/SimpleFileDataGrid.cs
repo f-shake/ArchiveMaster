@@ -11,11 +11,13 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Documents;
 using Avalonia.Controls.Primitives;
+using Avalonia.Controls.Primitives.PopupPositioning;
 using Avalonia.Controls.Shapes;
 using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Avalonia.Data.Converters;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.LogicalTree;
 using Avalonia.Markup.Xaml.Templates;
@@ -44,6 +46,16 @@ public class SimpleFileDataGrid : DataGrid
     public static readonly StyledProperty<bool> ShowCountProperty = AvaloniaProperty.Register<SimpleFileDataGrid, bool>(
         nameof(ShowCount), true);
 
+    public static readonly StyledProperty<IDataTemplate> RowDetailsPopupTemplateProperty =
+        AvaloniaProperty.Register<SimpleFileDataGrid, IDataTemplate>(
+            nameof(RowDetailsPopupTemplate));
+
+    public IDataTemplate RowDetailsPopupTemplate
+    {
+        get => GetValue(RowDetailsPopupTemplateProperty);
+        set => SetValue(RowDetailsPopupTemplateProperty, value);
+    }
+
 
     protected static readonly FuncValueConverter<bool, double> BoolToOpacityConverter =
         new FuncValueConverter<bool, double>(b => b ? 1.0 : 0.5);
@@ -57,6 +69,56 @@ public class SimpleFileDataGrid : DataGrid
 
     protected static readonly ProcessStatusColorConverter ProcessStatusColorConverter =
         new ProcessStatusColorConverter();
+
+    // protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
+    // {
+    //     base.OnAttachedToVisualTree(e);
+    //     if (TopLevel.GetTopLevel(this) is Window w)
+    //     {
+    //         w.GetObservable(Window.WindowStateProperty).Subscribe(p =>
+    //         {
+    //             if (p == WindowState.Minimized)
+    //             {
+    //                 detailPopup.IsOpen = false;
+    //             }
+    //         });
+    //     }
+    // }
+
+    protected override void OnLostFocus(RoutedEventArgs e)
+    {
+        base.OnLostFocus(e);
+        if (TopLevel.GetTopLevel(this)?.IsFocused == true || IsFocused || detailPopup.IsFocused)
+        {
+            Debug.WriteLine("不关闭Popup（窗口、DataGrid或Popup被Focused）");
+            return;
+        }
+
+        var f = TopLevel.GetTopLevel(this)?.FocusManager?.GetFocusedElement();
+        if (f is Control c && c.GetVisualAncestors().Any(p => p.Name == "PART_PopupBorder"))
+        {
+            Debug.WriteLine("不关闭Popup（内部控件被Focused）");
+            return;
+        }
+
+        if (detailPopup.IsPointerOverPopup || detailPopup.IsPointerOver)
+        {
+            Debug.WriteLine("不关闭Popup（鼠标在Popup上）");
+        }
+
+        Debug.WriteLine($"当前Focus：{f}");
+
+        Debug.WriteLine("关闭Popup");
+        detailPopup.IsOpen = false;
+    }
+
+    protected override void OnSizeChanged(SizeChangedEventArgs e)
+    {
+        base.OnSizeChanged(e);
+        detailPopup.MaxWidth = e.NewSize.Width;
+    }
+
+
     public SimpleFileDataGrid()
     {
         AreRowDetailsFrozen = true;
@@ -66,6 +128,21 @@ public class SimpleFileDataGrid : DataGrid
         DoubleTapped += SimpleFileDataGrid_DoubleTapped;
         SetAutoScrollToSelectedItem();
     }
+
+    protected override void OnLoadingRow(DataGridRowEventArgs e)
+    {
+        base.OnLoadingRow(e);
+        e.Row.GetObservable(DataGridRow.IsSelectedProperty).Subscribe(p =>
+        {
+            if (p)
+            {
+                detailPopup.PlacementTarget = e.Row;
+                detailPopup.IsOpen = true;
+                Focus();
+            }
+        });
+    }
+
 
     public virtual string ColumnIsCheckedHeader { get; init; } = "";
 
@@ -154,7 +231,7 @@ public class SimpleFileDataGrid : DataGrid
                     HorizontalAlignment = HorizontalAlignment.Center,
                     [!ToggleButton.IsCheckedProperty] = new Binding(nameof(SimpleFileInfo.IsChecked)),
                     [!IsEnabledProperty] = new Binding("DataContext.IsWorking") //执行命令时，这CheckBox不可以Enable
-                    { Source = rootPanel, Converter = InverseBoolConverter },
+                        { Source = rootPanel, Converter = InverseBoolConverter },
                 },
                 [!IsEnabledProperty] = new Binding(nameof(SimpleFileInfo.CanCheck)), //套两层控件，实现任一禁止选择则不允许选择
                 [!OpacityProperty] = new Binding(nameof(SimpleFileInfo.CanCheck)) { Converter = BoolToOpacityConverter }
@@ -171,7 +248,7 @@ public class SimpleFileDataGrid : DataGrid
         {
             Header = ColumnLengthHeader,
             Binding = new Binding(".")
-            { Converter = FileDirLength2StringConverter, Mode = BindingMode.OneWay },
+                { Converter = FileDirLength2StringConverter, Mode = BindingMode.OneWay },
             SortMemberPath = nameof(SimpleFileInfo.Length),
             IsReadOnly = true,
             MaxWidth = ColumnLengthMaxWidth,
@@ -240,6 +317,9 @@ public class SimpleFileDataGrid : DataGrid
         };
     }
 
+    private Popup detailPopup;
+
+
     protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
     {
         base.OnApplyTemplate(e);
@@ -251,7 +331,7 @@ public class SimpleFileDataGrid : DataGrid
             var btnProcessCheckedOnly = e.NameScope.Find<ToggleButton>("PART_ProcessCheckedOnlyButton");
             var btnSearch = e.NameScope.Find<Button>("PART_SearchButton");
             var btnFilter = e.NameScope.Find<Button>("PART_FilterButton");
-
+            detailPopup = e.NameScope.Find<Popup>("PART_Popup");
 
             foreach (var btn in new Button[]
                          {
@@ -455,14 +535,6 @@ public class SimpleFileDataGrid : DataGrid
         }
     }
 
-    protected override void OnSelectionChanged(SelectionChangedEventArgs e)
-    {
-        base.OnSelectionChanged(e);
-        RowDetailsVisibilityMode = SelectedItems.Count == 1
-            ? DataGridRowDetailsVisibilityMode.VisibleWhenSelected
-            : DataGridRowDetailsVisibilityMode.Collapsed;
-    }
-
     private void SetAutoScrollToSelectedItem()
     {
         this.GetObservable(SelectedItemProperty).Subscribe(item =>
@@ -473,6 +545,7 @@ public class SimpleFileDataGrid : DataGrid
             }
         });
     }
+
     private void SimpleFileDataGrid_DoubleTapped(object sender, TappedEventArgs e)
     {
         if (e.Source is Visual { DataContext: SimpleFileInfo file })
