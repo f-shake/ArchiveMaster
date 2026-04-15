@@ -5,7 +5,6 @@
     <ResourceDictionary.MergedDictionaries>
         <ResourceInclude Source="Views/DataGrids/FileDataGridStyles.axaml" />
         <ResourceInclude Source="Views/ToolPanels/PanelStyles.axaml" />
-        <ResourceInclude Source="Views/DataGrids/FileDataGridRowDetailResources.axaml" />
     </ResourceDictionary.MergedDictionaries>
 
     <GridLength x:Key="SliderPreContentMargin">6</GridLength>

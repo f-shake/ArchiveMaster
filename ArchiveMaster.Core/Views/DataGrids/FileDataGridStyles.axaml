@@ -4,32 +4,78 @@
     xmlns:ctrl="using:FzLib.Avalonia.Controls"
     xmlns:cvt="using:ArchiveMaster.Converters"
     xmlns:fs="clr-namespace:ArchiveMaster.ViewModels.FileSystem"
-    xmlns:ic="using:FluentIcons.Avalonia.Markup"
-    xmlns:v="using:ArchiveMaster.Views">
+    xmlns:ic="using:FluentIcons.Avalonia"
+    xmlns:icm="using:FluentIcons.Avalonia.Markup"
+    xmlns:system="clr-namespace:System;assembly=System.Runtime"
+    xmlns:v="using:ArchiveMaster.Views"
+    xmlns:vm="clr-namespace:ArchiveMaster.ViewModels">
     <SolidColorBrush
         x:Key="DataGridCellFocusVisualPrimaryBrush"
         Color="Transparent" />
     <SolidColorBrush
         x:Key="DataGridCellFocusVisualSecondaryBrush"
         Color="Transparent" />
+    <Thickness x:Key="FileDataGridRowDetailPopupPadding">8,8,8,8</Thickness>
+    <system:Double x:Key="FileDataGridRowDetailPopupSpacing">8</system:Double>
+    <system:Double x:Key="FileDataGridRowDetailLabelWidth">80</system:Double>
 
-    <DataTemplate x:Key="DefaultRowDetailDataTemplate">
-        <StackPanel
-            Margin="{StaticResource FileDataGridRowDetailPadding}"
-            Spacing="8">
-            <ContentControl
-                Content="{Binding}"
-                ContentTemplate="{StaticResource FileDataGridRowDetailPathTemplate}" />
-            <ContentControl
-                Content="{Binding}"
-                ContentTemplate="{StaticResource FileDataGridRowDetailMetadataTemplate}" />
-            <ContentControl
-                Content="{Binding}"
-                ContentTemplate="{StaticResource FileDataGridRowDetailMessageTemplate}" />
-        </StackPanel>
-    </DataTemplate>
-
-
+    <ControlTheme
+        x:Key="{x:Type v:FileDataGridRowDetailDefaultContent}"
+        TargetType="v:FileDataGridRowDetailDefaultContent">
+        <Setter Property="ContentTemplate">
+            <DataTemplate>
+                <StackPanel Spacing="{StaticResource FileDataGridRowDetailPopupSpacing}">
+                    <ctrl:FormItem
+                        Classes="BoldLabel"
+                        Label="路径："
+                        LabelWidth="{StaticResource FileDataGridRowDetailLabelWidth}">
+                        <Grid ColumnDefinitions="*,8,Auto,8,Auto">
+                            <Grid.Styles>
+                                <Style Selector="Button">
+                                    <Setter Property="Height" Value="20" />
+                                    <Setter Property="Padding" Value="0" />
+                                </Style>
+                            </Grid.Styles>
+                            <Button
+                                Grid.Column="2"
+                                Classes="Link"
+                                Command="{Binding Source={x:Static vm:GlobalCommands.Instance}, Path=OpenFileCommand}"
+                                CommandParameter="{Binding Path}"
+                                IsVisible="{Binding Path, Converter={x:Static cvt:Converters.IsNotNull}}">
+                                <ic:FluentIcon
+                                    Height="16"
+                                    Icon="Document" />
+                            </Button>
+                            <Button
+                                Grid.Column="4"
+                                Classes="Link"
+                                Command="{Binding Source={x:Static vm:GlobalCommands.Instance}, Path=OpenParentDirCommand}"
+                                CommandParameter="{Binding Path}"
+                                IsVisible="{Binding Path, Converter={x:Static cvt:Converters.IsNotNull}}">
+                                <ic:FluentIcon
+                                    Height="16"
+                                    Icon="FolderOpen" />
+                            </Button>
+                            <SelectableTextBlock Inlines="{Binding ., Converter={x:Static v:FileDataGridRowDetailConverters.FilePathToInlineConverter}}" />
+                        </Grid>
+                    </ctrl:FormItem>
+                    <ctrl:FormItem
+                        Classes="BoldLabel"
+                        Label="元数据："
+                        LabelWidth="{StaticResource FileDataGridRowDetailLabelWidth}">
+                        <SelectableTextBlock Inlines="{Binding ., Converter={x:Static v:FileDataGridRowDetailConverters.FileMetadataToInlineConverter}}" />
+                    </ctrl:FormItem>
+                    <ctrl:FormItem
+                        Classes="BoldLabel"
+                        IsVisible="{Binding Message, Converter={x:Static cvt:Converters.IsNotNull}}"
+                        Label="信息："
+                        LabelWidth="{StaticResource FileDataGridRowDetailLabelWidth}">
+                        <SelectableTextBlock Text="{Binding Message}" />
+                    </ctrl:FormItem>
+                </StackPanel>
+            </DataTemplate>
+        </Setter>
+    </ControlTheme>
 
     <ControlTheme
         x:Key="{x:Type v:SimpleFileDataGrid}"
@@ -37,19 +83,7 @@
         TargetType="v:SimpleFileDataGrid">
         <Setter Property="RowDetailsPopupTemplate">
             <DataTemplate>
-                <StackPanel
-                    Margin="{StaticResource FileDataGridRowDetailPadding}"
-                    Spacing="8">
-                    <ContentControl
-                        Content="{Binding}"
-                        ContentTemplate="{StaticResource FileDataGridRowDetailPathTemplate}" />
-                    <ContentControl
-                        Content="{Binding}"
-                        ContentTemplate="{StaticResource FileDataGridRowDetailMetadataTemplate}" />
-                    <ContentControl
-                        Content="{Binding}"
-                        ContentTemplate="{StaticResource FileDataGridRowDetailMessageTemplate}" />
-                </StackPanel>
+                <v:FileDataGridRowDetailDefaultContent Content="{Binding .}" />
             </DataTemplate>
         </Setter>
         <Setter Property="Template">
@@ -144,27 +178,27 @@
                             <Button
                                 x:Name="PART_SelectAllButton"
                                 Classes="Icon"
-                                Content="{ic:FluentIcon Icon=SelectAllOn}"
+                                Content="{icm:FluentIcon Icon=SelectAllOn}"
                                 ToolTip.Tip="全选" />
                             <Button
                                 x:Name="PART_SelectNoneButton"
                                 Classes="Icon"
-                                Content="{ic:FluentIcon Icon=SelectAllOff}"
+                                Content="{icm:FluentIcon Icon=SelectAllOff}"
                                 ToolTip.Tip="全不选" />
                             <Button
                                 x:Name="PART_SwitchSelectionButton"
                                 Classes="Icon"
-                                Content="{ic:FluentIcon Icon=CopySelect}"
+                                Content="{icm:FluentIcon Icon=CopySelect}"
                                 ToolTip.Tip="反选" />
                             <ToggleButton
                                 x:Name="PART_ProcessCheckedOnlyButton"
                                 Classes="Icon"
-                                Content="{ic:FluentIcon Icon=Multiselect}"
+                                Content="{icm:FluentIcon Icon=Multiselect}"
                                 ToolTip.Tip="仅处理选中的行" />
                             <Button
                                 x:Name="PART_SearchButton"
                                 Classes="Icon"
-                                Content="{ic:FluentIcon Icon=Search}"
+                                Content="{icm:FluentIcon Icon=Search}"
                                 ToolTip.Tip="搜索">
                                 <Button.Flyout>
                                     <Flyout>
@@ -173,7 +207,7 @@
                                             <Button
                                                 Grid.Column="2"
                                                 Classes="Icon"
-                                                Content="{ic:FluentIcon Icon=Search}"
+                                                Content="{icm:FluentIcon Icon=Search}"
                                                 ToolTip.Tip="搜索" />
                                         </Grid>
                                     </Flyout>
@@ -182,7 +216,7 @@
                             <Button
                                 x:Name="PART_FilterButton"
                                 Classes="Icon"
-                                Content="{ic:FluentIcon Icon=Filter}"
+                                Content="{icm:FluentIcon Icon=Filter}"
                                 ToolTip.Tip="筛选">
                                 <Button.Flyout>
                                     <Flyout>
@@ -226,6 +260,7 @@
                         WindowManagerAddShadowHint="True">
                         <Border
                             x:Name="PART_PopupBorder"
+                            Padding="{StaticResource FileDataGridRowDetailPopupPadding}"
                             Background="{DynamicResource Background3}"
                             CornerRadius="8">
                             <ContentControl

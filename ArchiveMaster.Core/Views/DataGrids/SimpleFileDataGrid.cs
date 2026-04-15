@@ -43,20 +43,12 @@ public class SimpleFileDataGrid : DataGrid
         AvaloniaProperty.Register<SimpleFileDataGrid, object>(
             nameof(Footer));
 
-    public static readonly StyledProperty<bool> ShowCountProperty = AvaloniaProperty.Register<SimpleFileDataGrid, bool>(
-        nameof(ShowCount), true);
-
     public static readonly StyledProperty<IDataTemplate> RowDetailsPopupTemplateProperty =
         AvaloniaProperty.Register<SimpleFileDataGrid, IDataTemplate>(
             nameof(RowDetailsPopupTemplate));
 
-    public IDataTemplate RowDetailsPopupTemplate
-    {
-        get => GetValue(RowDetailsPopupTemplateProperty);
-        set => SetValue(RowDetailsPopupTemplateProperty, value);
-    }
-
-
+    public static readonly StyledProperty<bool> ShowCountProperty = AvaloniaProperty.Register<SimpleFileDataGrid, bool>(
+            nameof(ShowCount), true);
     protected static readonly FuncValueConverter<bool, double> BoolToOpacityConverter =
         new FuncValueConverter<bool, double>(b => b ? 1.0 : 0.5);
 
@@ -70,54 +62,7 @@ public class SimpleFileDataGrid : DataGrid
     protected static readonly ProcessStatusColorConverter ProcessStatusColorConverter =
         new ProcessStatusColorConverter();
 
-    // protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
-    // {
-    //     base.OnAttachedToVisualTree(e);
-    //     if (TopLevel.GetTopLevel(this) is Window w)
-    //     {
-    //         w.GetObservable(Window.WindowStateProperty).Subscribe(p =>
-    //         {
-    //             if (p == WindowState.Minimized)
-    //             {
-    //                 detailPopup.IsOpen = false;
-    //             }
-    //         });
-    //     }
-    // }
-
-    protected override void OnLostFocus(RoutedEventArgs e)
-    {
-        base.OnLostFocus(e);
-        if (TopLevel.GetTopLevel(this)?.IsFocused == true || IsFocused || detailPopup.IsFocused)
-        {
-            Debug.WriteLine("不关闭Popup（窗口、DataGrid或Popup被Focused）");
-            return;
-        }
-
-        var f = TopLevel.GetTopLevel(this)?.FocusManager?.GetFocusedElement();
-        if (f is Control c && c.GetVisualAncestors().Any(p => p.Name == "PART_PopupBorder"))
-        {
-            Debug.WriteLine("不关闭Popup（内部控件被Focused）");
-            return;
-        }
-
-        if (detailPopup.IsPointerOverPopup || detailPopup.IsPointerOver)
-        {
-            Debug.WriteLine("不关闭Popup（鼠标在Popup上）");
-        }
-
-        Debug.WriteLine($"当前Focus：{f}");
-
-        Debug.WriteLine("关闭Popup");
-        detailPopup.IsOpen = false;
-    }
-
-    protected override void OnSizeChanged(SizeChangedEventArgs e)
-    {
-        base.OnSizeChanged(e);
-        detailPopup.MaxWidth = e.NewSize.Width;
-    }
-
+    private Popup detailPopup;
 
     public SimpleFileDataGrid()
     {
@@ -128,21 +73,6 @@ public class SimpleFileDataGrid : DataGrid
         DoubleTapped += SimpleFileDataGrid_DoubleTapped;
         SetAutoScrollToSelectedItem();
     }
-
-    protected override void OnLoadingRow(DataGridRowEventArgs e)
-    {
-        base.OnLoadingRow(e);
-        e.Row.GetObservable(DataGridRow.IsSelectedProperty).Subscribe(p =>
-        {
-            if (p)
-            {
-                detailPopup.PlacementTarget = e.Row;
-                detailPopup.IsOpen = true;
-                Focus();
-            }
-        });
-    }
-
 
     public virtual string ColumnIsCheckedHeader { get; init; } = "";
 
@@ -192,6 +122,11 @@ public class SimpleFileDataGrid : DataGrid
         set => SetValue(FooterProperty, value);
     }
 
+    public IDataTemplate RowDetailsPopupTemplate
+    {
+        get => GetValue(RowDetailsPopupTemplateProperty);
+        set => SetValue(RowDetailsPopupTemplateProperty, value);
+    }
     public bool ShowCount
     {
         get => GetValue(ShowCountProperty);
@@ -231,7 +166,7 @@ public class SimpleFileDataGrid : DataGrid
                     HorizontalAlignment = HorizontalAlignment.Center,
                     [!ToggleButton.IsCheckedProperty] = new Binding(nameof(SimpleFileInfo.IsChecked)),
                     [!IsEnabledProperty] = new Binding("DataContext.IsWorking") //执行命令时，这CheckBox不可以Enable
-                        { Source = rootPanel, Converter = InverseBoolConverter },
+                    { Source = rootPanel, Converter = InverseBoolConverter },
                 },
                 [!IsEnabledProperty] = new Binding(nameof(SimpleFileInfo.CanCheck)), //套两层控件，实现任一禁止选择则不允许选择
                 [!OpacityProperty] = new Binding(nameof(SimpleFileInfo.CanCheck)) { Converter = BoolToOpacityConverter }
@@ -248,7 +183,7 @@ public class SimpleFileDataGrid : DataGrid
         {
             Header = ColumnLengthHeader,
             Binding = new Binding(".")
-                { Converter = FileDirLength2StringConverter, Mode = BindingMode.OneWay },
+            { Converter = FileDirLength2StringConverter, Mode = BindingMode.OneWay },
             SortMemberPath = nameof(SimpleFileInfo.Length),
             IsReadOnly = true,
             MaxWidth = ColumnLengthMaxWidth,
@@ -317,12 +252,12 @@ public class SimpleFileDataGrid : DataGrid
         };
     }
 
-    private Popup detailPopup;
-
-
     protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
     {
         base.OnApplyTemplate(e);
+        
+        detailPopup = e.NameScope.Find<Popup>("PART_Popup");
+        
         if (ColumnIsCheckedIndex >= 0)
         {
             var btnSelectAll = e.NameScope.Find<Button>("PART_SelectAllButton");
@@ -331,7 +266,6 @@ public class SimpleFileDataGrid : DataGrid
             var btnProcessCheckedOnly = e.NameScope.Find<ToggleButton>("PART_ProcessCheckedOnlyButton");
             var btnSearch = e.NameScope.Find<Button>("PART_SearchButton");
             var btnFilter = e.NameScope.Find<Button>("PART_FilterButton");
-            detailPopup = e.NameScope.Find<Popup>("PART_Popup");
 
             foreach (var btn in new Button[]
                          {
@@ -535,6 +469,60 @@ public class SimpleFileDataGrid : DataGrid
         }
     }
 
+    protected override void OnLoadingRow(DataGridRowEventArgs e)
+    {
+        base.OnLoadingRow(e);
+        e.Row.GetObservable(DataGridRow.IsSelectedProperty).Subscribe(p =>
+        {
+            if (detailPopup == null)
+            {
+                return;
+            }
+            if (p)
+            {
+                detailPopup.PlacementTarget = e.Row;
+                detailPopup.IsOpen = true;
+                Focus();
+            }
+        });
+    }
+
+    protected override void OnLostFocus(RoutedEventArgs e)
+    {
+        base.OnLostFocus(e);
+        if (detailPopup == null)
+        {
+            return;
+        }
+        if (TopLevel.GetTopLevel(this)?.IsFocused == true || IsFocused || detailPopup.IsFocused)
+        {
+            Debug.WriteLine("不关闭Popup（窗口、DataGrid或Popup被Focused）");
+            return;
+        }
+
+        var f = TopLevel.GetTopLevel(this)?.FocusManager?.GetFocusedElement();
+        if (f is Control c && c.GetVisualAncestors().Any(p => p.Name == "PART_PopupBorder"))
+        {
+            Debug.WriteLine("不关闭Popup（内部控件被Focused）");
+            return;
+        }
+
+        if (detailPopup.IsPointerOverPopup || detailPopup.IsPointerOver)
+        {
+            Debug.WriteLine("不关闭Popup（鼠标在Popup上）");
+        }
+
+        Debug.WriteLine($"当前Focus：{f}");
+
+        Debug.WriteLine("关闭Popup");
+        detailPopup.IsOpen = false;
+    }
+
+    protected override void OnSizeChanged(SizeChangedEventArgs e)
+    {
+        base.OnSizeChanged(e);
+        detailPopup?.MaxWidth = e.NewSize.Width;
+    }
     private void SetAutoScrollToSelectedItem()
     {
         this.GetObservable(SelectedItemProperty).Subscribe(item =>

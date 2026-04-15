@@ -117,18 +117,11 @@
                     Header="标签"
                     IsReadOnly="True" />
             </DataGrid.Columns>
-            <DataGrid.RowDetailsTemplate>
+            <v:SimpleFileDataGrid.RowDetailsPopupTemplate>
                 <DataTemplate>
-                    <Grid
-                        Margin="{StaticResource FileDataGridRowDetailPadding}"
-                        ColumnDefinitions="*,8,Auto">
-                        <StackPanel Spacing="8">
-                            <ContentControl
-                                Content="{Binding}"
-                                ContentTemplate="{StaticResource FileDataGridRowDetailPathTemplate}" />
-                            <ContentControl
-                                Content="{Binding}"
-                                ContentTemplate="{StaticResource FileDataGridRowDetailMetadataTemplate}" />
+                    <Grid ColumnDefinitions="*,8,Auto">
+                        <StackPanel Spacing="{StaticResource FileDataGridRowDetailPopupSpacing}">
+                            <v:FileDataGridRowDetailDefaultContent />
                             <ct:FormItem
                                 Classes="BoldLabel"
                                 Label="标签："
@@ -156,9 +149,6 @@
                                     TextTrimming="CharacterEllipsis"
                                     ToolTip.Tip="{Binding Tags.Description}" />
                             </ct:FormItem>
-                            <ContentControl
-                                Content="{Binding}"
-                                ContentTemplate="{StaticResource FileDataGridRowDetailMessageTemplate}" />
                         </StackPanel>
                         <Image
                             Grid.Column="2"
@@ -168,7 +158,7 @@
                             Source="{Binding ThumbnailImage, Mode=OneWay}" />
                     </Grid>
                 </DataTemplate>
-            </DataGrid.RowDetailsTemplate>
+            </v:SimpleFileDataGrid.RowDetailsPopupTemplate>
         </v:SimpleFileDataGrid>
     </v:VerticalTwoStepPanelBase.ResultsContent>
 </v:VerticalTwoStepPanelBase>
