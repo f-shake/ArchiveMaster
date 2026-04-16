@@ -35,6 +35,8 @@ namespace ArchiveMaster.Views;
 
 public class SimpleFileDataGrid : DataGrid
 {
+    #region 基本
+
     public static readonly StyledProperty<bool> DoubleTappedToOpenFileProperty =
         AvaloniaProperty.Register<TreeFileDataGrid, bool>(
             nameof(DoubleTappedToOpenFile), true);
@@ -47,8 +49,14 @@ public class SimpleFileDataGrid : DataGrid
         AvaloniaProperty.Register<SimpleFileDataGrid, IDataTemplate>(
             nameof(RowDetailsPopupTemplate));
 
+    public static readonly StyledProperty<bool> IsRowDetailsPopupVisibleProperty =
+        AvaloniaProperty.Register<SimpleFileDataGrid, bool>(
+            nameof(IsRowDetailsPopupVisible), true);
+
+
     public static readonly StyledProperty<bool> ShowCountProperty = AvaloniaProperty.Register<SimpleFileDataGrid, bool>(
-            nameof(ShowCount), true);
+        nameof(ShowCount), true);
+
     protected static readonly FuncValueConverter<bool, double> BoolToOpacityConverter =
         new FuncValueConverter<bool, double>(b => b ? 1.0 : 0.5);
 
@@ -74,41 +82,6 @@ public class SimpleFileDataGrid : DataGrid
         SetAutoScrollToSelectedItem();
     }
 
-    public virtual string ColumnIsCheckedHeader { get; init; } = "";
-
-    public virtual double ColumnIsCheckedIndex { get; init; } = 0.1;
-
-    public virtual string ColumnLengthHeader { get; init; } = "文件大小";
-
-    public virtual double ColumnLengthIndex { get; init; } = 0.5;
-
-    public virtual double ColumnLengthMaxWidth { get; init; } = 120;
-
-    public virtual string ColumnMessageHeader { get; init; } = "信息";
-
-    public virtual double ColumnMessageIndex { get; init; } = 999;
-
-    public virtual DataGridLength ColumnMessageWidth { get; init; } = new DataGridLength(400);
-
-    public virtual string ColumnNameHeader { get; init; } = "文件名";
-
-    public virtual double ColumnNameIndex { get; init; } = 0.3;
-
-    public virtual DataGridLength ColumnNameWidth { get; init; } = new DataGridLength(400);
-
-    public virtual string ColumnPathHeader { get; init; } = "路径";
-
-    public virtual double ColumnPathIndex { get; init; } = 0.4;
-
-    public virtual DataGridLength ColumnPathWidth { get; init; } = new DataGridLength(400);
-
-    public virtual string ColumnStatusHeader { get; init; } = "状态";
-
-    public virtual double ColumnStatusIndex { get; init; } = 0.2;
-
-    public virtual string ColumnTimeHeader { get; init; } = "修改时间";
-
-    public virtual double ColumnTimeIndex { get; init; } = 0.6;
 
     public bool DoubleTappedToOpenFile
     {
@@ -127,137 +100,32 @@ public class SimpleFileDataGrid : DataGrid
         get => GetValue(RowDetailsPopupTemplateProperty);
         set => SetValue(RowDetailsPopupTemplateProperty, value);
     }
+
+    public bool IsRowDetailsPopupVisible
+    {
+        get => GetValue(IsRowDetailsPopupVisibleProperty);
+        set => SetValue(IsRowDetailsPopupVisibleProperty, value);
+    }
+
     public bool ShowCount
     {
         get => GetValue(ShowCountProperty);
         set => SetValue(ShowCountProperty, value);
     }
 
-    protected virtual (double Index, Func<DataGridColumn> Func)[] PresetColumns =>
-    [
-        (ColumnIsCheckedIndex, GetIsCheckedColumn),
-        (ColumnStatusIndex, GetProcessStatusColumn),
-        (ColumnNameIndex, GetNameColumn),
-        (ColumnPathIndex, GetPathColumn),
-        (ColumnLengthIndex, GetLengthColumn),
-        (ColumnTimeIndex, GetTimeColumn),
-        (ColumnMessageIndex, GetMessageColumn),
-    ];
-
     protected override Type StyleKeyOverride => typeof(SimpleFileDataGrid);
 
-    protected virtual DataGridColumn GetIsCheckedColumn()
-    {
-        var column = new DataGridTemplateColumn
-        {
-            CanUserResize = false,
-            CanUserReorder = false,
-            CanUserSort = false,
-            Header = ColumnIsCheckedHeader,
-            SortMemberPath = nameof(SimpleFileInfo.IsChecked)
-        };
-        var cellTemplate = new FuncDataTemplate<SimpleFileInfo>((value, namescope) =>
-        {
-            var rootPanel = this.GetLogicalAncestors().OfType<VerticalTwoStepPanelBase>().FirstOrDefault();
-            return new ContentControl
-            {
-                Content = new CheckBox()
-                {
-                    HorizontalAlignment = HorizontalAlignment.Center,
-                    [!ToggleButton.IsCheckedProperty] = new Binding(nameof(SimpleFileInfo.IsChecked)),
-                    [!IsEnabledProperty] = new Binding("DataContext.IsWorking") //执行命令时，这CheckBox不可以Enable
-                    { Source = rootPanel, Converter = InverseBoolConverter },
-                },
-                [!IsEnabledProperty] = new Binding(nameof(SimpleFileInfo.CanCheck)), //套两层控件，实现任一禁止选择则不允许选择
-                [!OpacityProperty] = new Binding(nameof(SimpleFileInfo.CanCheck)) { Converter = BoolToOpacityConverter }
-            };
-        });
-
-        column.CellTemplate = cellTemplate;
-        return column;
-    }
-
-    protected virtual DataGridColumn GetLengthColumn()
-    {
-        return new DataGridTextColumn()
-        {
-            Header = ColumnLengthHeader,
-            Binding = new Binding(".")
-            { Converter = FileDirLength2StringConverter, Mode = BindingMode.OneWay },
-            SortMemberPath = nameof(SimpleFileInfo.Length),
-            IsReadOnly = true,
-            MaxWidth = ColumnLengthMaxWidth,
-            CellStyleClasses = { "Right" }
-        };
-    }
-
-    protected virtual DataGridColumn GetMessageColumn()
-    {
-        return new DataGridTextColumn()
-        {
-            Header = ColumnMessageHeader,
-            Binding = new Binding(nameof(SimpleFileInfo.Message)),
-            IsReadOnly = true,
-            Width = ColumnMessageWidth
-        };
-    }
-
-    protected virtual DataGridColumn GetNameColumn()
-    {
-        return new DataGridTextColumn()
-        {
-            Header = ColumnNameHeader,
-            Binding = new Binding(nameof(SimpleFileInfo.Name)),
-            IsReadOnly = true,
-            Width = ColumnNameWidth,
-        };
-    }
-
-    protected virtual DataGridColumn GetPathColumn()
-    {
-        return new DataGridTextColumn()
-        {
-            Header = ColumnPathHeader,
-            Binding = new Binding(nameof(SimpleFileInfo.RelativePath)),
-            IsReadOnly = true,
-            Width = ColumnPathWidth
-        };
-    }
-
-    protected virtual DataGridColumn GetProcessStatusColumn()
-    {
-        var column = new DataGridLightColumn()
-        {
-            Header = ColumnStatusHeader,
-            MaxWidth = 200,
-            FillBinding = new Binding(nameof(SimpleFileInfo.Status)) { Converter = ProcessStatusColorConverter },
-            SortMemberPath = nameof(SimpleFileInfo.Status)
-        };
-
-        return column;
-    }
-
-    protected virtual DataGridColumn GetTimeColumn()
-    {
-        return new DataGridTextColumn()
-        {
-            Header = ColumnTimeHeader,
-            Binding = new Binding(nameof(SimpleFileInfo.Time))
-            {
-                Converter = DateTimeConverter,
-                Mode = BindingMode.OneWay
-            },
-            IsReadOnly = true,
-            CanUserResize = false
-        };
-    }
 
     protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
     {
         base.OnApplyTemplate(e);
-        
+
         detailPopup = e.NameScope.Find<Popup>("PART_Popup");
-        
+        if (detailPopup == null)
+        {
+            throw new Exception("FileDataGrid中找不到PART_Popup");
+        }
+
         if (ColumnIsCheckedIndex >= 0)
         {
             var btnSelectAll = e.NameScope.Find<Button>("PART_SelectAllButton");
@@ -426,25 +294,166 @@ public class SimpleFileDataGrid : DataGrid
         }
     }
 
-    protected virtual void OnFileDoubleTapped(SimpleFileInfo file)
+    #endregion
+
+    #region 自动生成DataGridColumn
+
+    public virtual string ColumnIsCheckedHeader { get; init; } = "";
+
+    public virtual double ColumnIsCheckedIndex { get; init; } = 0.1;
+
+    public virtual string ColumnLengthHeader { get; init; } = "文件大小";
+
+    public virtual double ColumnLengthIndex { get; init; } = 0.5;
+
+    public virtual double ColumnLengthMaxWidth { get; init; } = 120;
+
+    public virtual string ColumnMessageHeader { get; init; } = "信息";
+
+    public virtual double ColumnMessageIndex { get; init; } = 999;
+
+    public virtual DataGridLength ColumnMessageWidth { get; init; } = new DataGridLength(400);
+
+    public virtual string ColumnNameHeader { get; init; } = "文件名";
+
+    public virtual double ColumnNameIndex { get; init; } = 0.3;
+
+    public virtual DataGridLength ColumnNameWidth { get; init; } = new DataGridLength(400);
+
+    public virtual string ColumnPathHeader { get; init; } = "路径";
+
+    public virtual double ColumnPathIndex { get; init; } = 0.4;
+
+    public virtual DataGridLength ColumnPathWidth { get; init; } = new DataGridLength(400);
+
+    public virtual string ColumnStatusHeader { get; init; } = "状态";
+
+    public virtual double ColumnStatusIndex { get; init; } = 0.2;
+
+    public virtual string ColumnTimeHeader { get; init; } = "修改时间";
+
+    public virtual double ColumnTimeIndex { get; init; } = 0.6;
+
+
+    protected virtual (double Index, Func<DataGridColumn> Func)[] PresetColumns =>
+    [
+        (ColumnIsCheckedIndex, GetIsCheckedColumn),
+        (ColumnStatusIndex, GetProcessStatusColumn),
+        (ColumnNameIndex, GetNameColumn),
+        (ColumnPathIndex, GetPathColumn),
+        (ColumnLengthIndex, GetLengthColumn),
+        (ColumnTimeIndex, GetTimeColumn),
+        (ColumnMessageIndex, GetMessageColumn),
+    ];
+
+    protected virtual DataGridColumn GetIsCheckedColumn()
     {
-        try
+        var column = new DataGridTemplateColumn
         {
-            Process.Start(new ProcessStartInfo(file.Path)
+            CanUserResize = false,
+            CanUserReorder = false,
+            CanUserSort = false,
+            Header = ColumnIsCheckedHeader,
+            SortMemberPath = nameof(SimpleFileInfo.IsChecked)
+        };
+        var cellTemplate = new FuncDataTemplate<SimpleFileInfo>((value, namescope) =>
+        {
+            var rootPanel = this.GetLogicalAncestors().OfType<VerticalTwoStepPanelBase>().FirstOrDefault();
+            return new ContentControl
             {
-                UseShellExecute = true
-            });
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, "打开文件失败");
-        }
+                Content = new CheckBox()
+                {
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    [!ToggleButton.IsCheckedProperty] = new Binding(nameof(SimpleFileInfo.IsChecked)),
+                    [!IsEnabledProperty] = new Binding("DataContext.IsWorking") //执行命令时，这CheckBox不可以Enable
+                        { Source = rootPanel, Converter = InverseBoolConverter },
+                },
+                [!IsEnabledProperty] = new Binding(nameof(SimpleFileInfo.CanCheck)), //套两层控件，实现任一禁止选择则不允许选择
+                [!OpacityProperty] = new Binding(nameof(SimpleFileInfo.CanCheck)) { Converter = BoolToOpacityConverter }
+            };
+        });
+
+        column.CellTemplate = cellTemplate;
+        return column;
     }
 
-    protected override void OnInitialized()
+    protected virtual DataGridColumn GetLengthColumn()
     {
-        base.OnInitialized();
+        return new DataGridTextColumn()
+        {
+            Header = ColumnLengthHeader,
+            Binding = new Binding(".")
+                { Converter = FileDirLength2StringConverter, Mode = BindingMode.OneWay },
+            SortMemberPath = nameof(SimpleFileInfo.Length),
+            IsReadOnly = true,
+            MaxWidth = ColumnLengthMaxWidth,
+            CellStyleClasses = { "Right" }
+        };
+    }
 
+    protected virtual DataGridColumn GetMessageColumn()
+    {
+        return new DataGridTextColumn()
+        {
+            Header = ColumnMessageHeader,
+            Binding = new Binding(nameof(SimpleFileInfo.Message)),
+            IsReadOnly = true,
+            Width = ColumnMessageWidth
+        };
+    }
+
+    protected virtual DataGridColumn GetNameColumn()
+    {
+        return new DataGridTextColumn()
+        {
+            Header = ColumnNameHeader,
+            Binding = new Binding(nameof(SimpleFileInfo.Name)),
+            IsReadOnly = true,
+            Width = ColumnNameWidth,
+        };
+    }
+
+    protected virtual DataGridColumn GetPathColumn()
+    {
+        return new DataGridTextColumn()
+        {
+            Header = ColumnPathHeader,
+            Binding = new Binding(nameof(SimpleFileInfo.RelativePath)),
+            IsReadOnly = true,
+            Width = ColumnPathWidth
+        };
+    }
+
+    protected virtual DataGridColumn GetProcessStatusColumn()
+    {
+        var column = new DataGridLightColumn()
+        {
+            Header = ColumnStatusHeader,
+            MaxWidth = 200,
+            FillBinding = new Binding(nameof(SimpleFileInfo.Status)) { Converter = ProcessStatusColorConverter },
+            SortMemberPath = nameof(SimpleFileInfo.Status)
+        };
+
+        return column;
+    }
+
+    protected virtual DataGridColumn GetTimeColumn()
+    {
+        return new DataGridTextColumn()
+        {
+            Header = ColumnTimeHeader,
+            Binding = new Binding(nameof(SimpleFileInfo.Time))
+            {
+                Converter = DateTimeConverter,
+                Mode = BindingMode.OneWay
+            },
+            IsReadOnly = true,
+            CanUserResize = false
+        };
+    }
+
+    private void GenerateColumns()
+    {
         int columnCount = Columns.Count;
         //插入的，从后往前插，这样不会打乱顺序
         var ordered1 = PresetColumns
@@ -469,31 +478,12 @@ public class SimpleFileDataGrid : DataGrid
         }
     }
 
-    protected override void OnLoadingRow(DataGridRowEventArgs e)
-    {
-        base.OnLoadingRow(e);
-        e.Row.GetObservable(DataGridRow.IsSelectedProperty).Subscribe(p =>
-        {
-            if (detailPopup == null)
-            {
-                return;
-            }
-            if (p)
-            {
-                detailPopup.PlacementTarget = e.Row;
-                detailPopup.IsOpen = true;
-                Focus();
-            }
-        });
-    }
+    #endregion
 
-    protected override void OnLostFocus(RoutedEventArgs e)
+    #region 详情面板
+
+    private void TryClosePopupWhenLostFocus()
     {
-        base.OnLostFocus(e);
-        if (detailPopup == null)
-        {
-            return;
-        }
         if (TopLevel.GetTopLevel(this)?.IsFocused == true || IsFocused || detailPopup.IsFocused)
         {
             Debug.WriteLine("不关闭Popup（窗口、DataGrid或Popup被Focused）");
@@ -518,11 +508,60 @@ public class SimpleFileDataGrid : DataGrid
         detailPopup.IsOpen = false;
     }
 
+    private void TryOpenPopupWhenSelectionChanged()
+    {
+        if (IsRowDetailsPopupVisible && SelectedItems.Count == 1)
+        {
+            var row = this.GetVisualDescendants()
+                .OfType<DataGridRow>()
+                .FirstOrDefault(r => r.IsSelected);
+            Debug.Assert(row != null);
+            if (row != null)
+            {
+                detailPopup.PlacementTarget = row;
+                detailPopup.IsOpen = true;
+                Focus();
+            }
+        }
+        else
+        {
+            detailPopup.IsOpen = false;
+        }
+    }
+
+    private void UpdatePopupMaxWidth(double width)
+    {
+        detailPopup?.MaxWidth = width;
+    }
+
+    #endregion
+
+    #region 事件
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        GenerateColumns();
+    }
+
+    protected override void OnLostFocus(RoutedEventArgs e)
+    {
+        base.OnLostFocus(e);
+        TryClosePopupWhenLostFocus();
+    }
+
+    protected override void OnSelectionChanged(SelectionChangedEventArgs e)
+    {
+        base.OnSelectionChanged(e);
+        TryOpenPopupWhenSelectionChanged();
+    }
+
     protected override void OnSizeChanged(SizeChangedEventArgs e)
     {
         base.OnSizeChanged(e);
-        detailPopup?.MaxWidth = e.NewSize.Width;
+        UpdatePopupMaxWidth(e.NewSize.Width);
     }
+
     private void SetAutoScrollToSelectedItem()
     {
         this.GetObservable(SelectedItemProperty).Subscribe(item =>
@@ -541,4 +580,6 @@ public class SimpleFileDataGrid : DataGrid
             // OnFileDoubleTapped(file);
         }
     }
+
+    #endregion
 }

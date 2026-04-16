@@ -23,14 +23,15 @@ internal static class FileDataGridRowDetailConverters
                 return null;
             }
 
-            if (!f.IsDir)
+            if (f.IsDir)
+            {
+                ic.Add("文件夹");
+            }
+            else
             {
                 ic.Add(new Run((string)Converters.Converters.FileLength.Convert(f.Length,
                     typeof(string), null,
-                    CultureInfo.CurrentCulture))
-                {
-                    FontStyle = FontStyle.Italic
-                });
+                    CultureInfo.CurrentCulture)));
             }
 
             ic.Add("    ");
@@ -39,7 +40,7 @@ internal static class FileDataGridRowDetailConverters
         });
 
     public static FuncValueConverter<SimpleFileInfo, InlineCollection> FilePathToInlineConverter =
-            new FuncValueConverter<SimpleFileInfo, InlineCollection>(f =>
+        new FuncValueConverter<SimpleFileInfo, InlineCollection>(f =>
         {
             InlineCollection ic = new InlineCollection();
 

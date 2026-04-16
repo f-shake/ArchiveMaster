@@ -186,9 +186,8 @@
                     ColumnNameIndex="10.1"
                     ColumnPathIndex="10.3"
                     ColumnTimeIndex="10.4"
-                    ItemsSource="{Binding Files}"
-                    RowDetailsTemplate="{x:Null}"
-                    RowDetailsVisibilityMode="Collapsed">
+                    IsRowDetailsPopupVisible="False"
+                    ItemsSource="{Binding Files}">
                     <v:SimpleFileDataGrid.Columns>
                         <v:DataGridLightColumn
                             Fill="{DynamicResource Accent0}"

@@ -15,8 +15,7 @@
             <v:SimpleFileDataGrid
                 ColumnIsCheckedIndex="-1"
                 ColumnStatusIndex="-1"
-                ItemsSource="{Binding CreatedFiles}"
-                RowDetailsTemplate="{x:Null}" />
+                ItemsSource="{Binding CreatedFiles}" />
         </HeaderedContentControl>
         <HeaderedContentControl
             Grid.Column="2"
@@ -25,8 +24,7 @@
             <v:SimpleFileDataGrid
                 ColumnIsCheckedIndex="-1"
                 ColumnStatusIndex="-1"
-                ItemsSource="{Binding ModifiedFiles}"
-                RowDetailsTemplate="{x:Null}" />
+                ItemsSource="{Binding ModifiedFiles}" />
         </HeaderedContentControl>
         <HeaderedContentControl
             Grid.Column="4"
@@ -35,8 +33,7 @@
             <v:SimpleFileDataGrid
                 ColumnIsCheckedIndex="-1"
                 ColumnStatusIndex="-1"
-                ItemsSource="{Binding DeletedFiles}"
-                RowDetailsTemplate="{x:Null}" />
+                ItemsSource="{Binding DeletedFiles}" />
         </HeaderedContentControl>
     </Grid>
 

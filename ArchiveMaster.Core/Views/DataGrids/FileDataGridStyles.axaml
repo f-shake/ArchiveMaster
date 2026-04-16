@@ -56,21 +56,28 @@
                                     Height="16"
                                     Icon="FolderOpen" />
                             </Button>
-                            <SelectableTextBlock Inlines="{Binding ., Converter={x:Static v:FileDataGridRowDetailConverters.FilePathToInlineConverter}}" />
+                            <SelectableTextBlock
+                                Inlines="{Binding ., Converter={x:Static v:FileDataGridRowDetailConverters.FilePathToInlineConverter}}"
+                                TextTrimming="CharacterEllipsis" />
                         </Grid>
                     </ctrl:FormItem>
                     <ctrl:FormItem
                         Classes="BoldLabel"
                         Label="元数据："
                         LabelWidth="{StaticResource FileDataGridRowDetailLabelWidth}">
-                        <SelectableTextBlock Inlines="{Binding ., Converter={x:Static v:FileDataGridRowDetailConverters.FileMetadataToInlineConverter}}" />
+                        <SelectableTextBlock
+                            Inlines="{Binding ., Converter={x:Static v:FileDataGridRowDetailConverters.FileMetadataToInlineConverter}}"
+                            TextTrimming="CharacterEllipsis" />
                     </ctrl:FormItem>
                     <ctrl:FormItem
                         Classes="BoldLabel"
                         IsVisible="{Binding Message, Converter={x:Static cvt:Converters.IsNotNull}}"
                         Label="信息："
                         LabelWidth="{StaticResource FileDataGridRowDetailLabelWidth}">
-                        <SelectableTextBlock Text="{Binding Message}" />
+                        <SelectableTextBlock
+                            Text="{Binding Message}"
+                            TextWrapping="Wrap"
+                            ToolTip.Tip="{Binding Message}" />
                     </ctrl:FormItem>
                 </StackPanel>
             </DataTemplate>
@@ -256,18 +263,21 @@
                     <Popup
                         x:Name="PART_Popup"
                         Grid.RowSpan="3"
-                        Placement="BottomEdgeAlignedLeft"
-                        WindowManagerAddShadowHint="True">
-                        <Border
-                            x:Name="PART_PopupBorder"
-                            Padding="{StaticResource FileDataGridRowDetailPopupPadding}"
-                            Background="{DynamicResource Background3}"
-                            CornerRadius="8">
-                            <ContentControl
-                                Content="{TemplateBinding SelectedItem}"
-                                ContentTemplate="{TemplateBinding RowDetailsPopupTemplate}" />
+                        Placement="BottomEdgeAlignedLeft">
+                        <Border Padding="6">
+                            <Border
+                                x:Name="PART_PopupBorder"
+                                Padding="{StaticResource FileDataGridRowDetailPopupPadding}"
+                                Background="{DynamicResource Background3}"
+                                BoxShadow="0 0 6 0 #88000000"
+                                CornerRadius="8">
+                                <ContentControl
+                                    Content="{TemplateBinding SelectedItem}"
+                                    ContentTemplate="{TemplateBinding RowDetailsPopupTemplate}" />
+                            </Border>
                         </Border>
                     </Popup>
+
                 </Grid>
             </ControlTemplate>
         </Setter>
@@ -280,7 +290,6 @@
         x:Key="{x:Type v:TreeFileDataGrid}"
         BasedOn="{StaticResource {x:Type v:SimpleFileDataGrid}}"
         TargetType="v:TreeFileDataGrid">
-        <Setter Property="RowDetailsTemplate" Value="{x:Null}" />
         <Setter Property="Template">
             <ControlTemplate>
 
@@ -382,6 +391,25 @@
                             VerticalAlignment="Center"
                             Content="{TemplateBinding Footer}" />
                     </Grid>
+
+
+                    <Popup
+                        x:Name="PART_Popup"
+                        Grid.RowSpan="3"
+                        Placement="BottomEdgeAlignedLeft">
+                        <Border Padding="6">
+                            <Border
+                                x:Name="PART_PopupBorder"
+                                Padding="{StaticResource FileDataGridRowDetailPopupPadding}"
+                                Background="{DynamicResource Background3}"
+                                BoxShadow="0 0 6 0 #88000000"
+                                CornerRadius="8">
+                                <ContentControl
+                                    Content="{TemplateBinding SelectedItem}"
+                                    ContentTemplate="{TemplateBinding RowDetailsPopupTemplate}" />
+                            </Border>
+                        </Border>
+                    </Popup>
                 </Grid>
             </ControlTemplate>
         </Setter>
