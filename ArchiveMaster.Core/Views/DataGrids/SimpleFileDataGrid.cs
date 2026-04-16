@@ -126,6 +126,17 @@ public class SimpleFileDataGrid : DataGrid
             throw new Exception("FileDataGrid中找不到PART_Popup");
         }
 
+        detailPopup.Loaded += (s2, e2) =>
+        {
+            var closeButton = detailPopup.Child.GetVisualDescendants()
+                .OfType<Button>()
+                .FirstOrDefault(p => p.Name == "PART_ClosePopupButton");
+            if (closeButton != null)
+            {
+                closeButton.Click += (s3, e3) => { detailPopup.Close(); };
+            }
+        };
+
         if (ColumnIsCheckedIndex >= 0)
         {
             var btnSelectAll = e.NameScope.Find<Button>("PART_SelectAllButton");
@@ -500,12 +511,17 @@ public class SimpleFileDataGrid : DataGrid
         if (detailPopup.IsPointerOverPopup || detailPopup.IsPointerOver)
         {
             Debug.WriteLine("不关闭Popup（鼠标在Popup上）");
+            return;
         }
 
-        Debug.WriteLine($"当前Focus：{f}");
+        if (f != null)
+        {
+            Debug.WriteLine($"不关闭Popup（当前Focus：{f}）");
+            return;
+        }
 
         Debug.WriteLine("关闭Popup");
-        detailPopup.IsOpen = false;
+        detailPopup.Close();
     }
 
     private void TryOpenPopupWhenSelectionChanged()
@@ -518,14 +534,15 @@ public class SimpleFileDataGrid : DataGrid
             Debug.Assert(row != null);
             if (row != null)
             {
-                detailPopup.PlacementTarget = row;
-                detailPopup.IsOpen = true;
+                // detailPopup.PlacementTarget = row;
+                Debug.WriteLine("打开Popup");
+                detailPopup.Open();
                 Focus();
             }
         }
         else
         {
-            detailPopup.IsOpen = false;
+            detailPopup.Close();
         }
     }
 

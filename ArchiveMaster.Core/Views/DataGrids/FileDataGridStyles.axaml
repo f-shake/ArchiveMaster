@@ -263,7 +263,8 @@
                     <Popup
                         x:Name="PART_Popup"
                         Grid.RowSpan="3"
-                        Placement="BottomEdgeAlignedLeft">
+                        Placement="BottomEdgeAlignedLeft"
+                        PlacementTarget="{Binding ElementName=DataGridBorder}">
                         <Border Padding="6">
                             <Border
                                 x:Name="PART_PopupBorder"
@@ -271,9 +272,28 @@
                                 Background="{DynamicResource Background3}"
                                 BoxShadow="0 0 6 0 #88000000"
                                 CornerRadius="8">
-                                <ContentControl
-                                    Content="{TemplateBinding SelectedItem}"
-                                    ContentTemplate="{TemplateBinding RowDetailsPopupTemplate}" />
+                                <Grid ColumnDefinitions="*,8,Auto">
+                                    <ContentControl
+                                        Content="{TemplateBinding SelectedItem}"
+                                        ContentTemplate="{TemplateBinding RowDetailsPopupTemplate}" />
+                                    <Button
+                                        x:Name="PART_ClosePopupButton"
+                                        Grid.Column="2"
+                                        Width="12"
+                                        Height="12"
+                                        Padding="0"
+                                        VerticalAlignment="Top"
+                                        HorizontalContentAlignment="Center"
+                                        VerticalContentAlignment="Center"
+                                        Classes="Icon">
+                                        <Path
+                                            HorizontalAlignment="Left"
+                                            VerticalAlignment="Center"
+                                            Data="M 0 0 L 8 8 M 0 8 L 8 0"
+                                            Stroke="{DynamicResource Foreground0}"
+                                            StrokeThickness="1" />
+                                    </Button>
+                                </Grid>
                             </Border>
                         </Border>
                     </Popup>
