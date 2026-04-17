@@ -528,17 +528,17 @@ public class SimpleFileDataGrid : DataGrid
     {
         if (IsRowDetailsPopupVisible && SelectedItems.Count == 1)
         {
-            var row = this.GetVisualDescendants()
-                .OfType<DataGridRow>()
-                .FirstOrDefault(r => r.IsSelected);
-            Debug.Assert(row != null);
-            if (row != null)
-            {
-                // detailPopup.PlacementTarget = row;
-                Debug.WriteLine("打开Popup");
-                detailPopup.Open();
-                Focus();
-            }
+            // var row = this.GetVisualDescendants()
+            //     .OfType<DataGridRow>()
+            //     .FirstOrDefault(r => r.IsSelected);
+            // Debug.Assert(row != null);
+            // if (row != null)
+            // {
+            // detailPopup.PlacementTarget = row;
+            Debug.WriteLine("打开Popup");
+            detailPopup.Open();
+            Focus(); //将焦点重新回到DataGrid
+            // }
         }
         else
         {

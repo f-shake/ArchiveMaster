@@ -263,7 +263,7 @@
                     <Popup
                         x:Name="PART_Popup"
                         Grid.RowSpan="3"
-                        Placement="BottomEdgeAlignedLeft"
+                        Placement="TopEdgeAlignedLeft"
                         PlacementTarget="{Binding ElementName=DataGridBorder}">
                         <Border Padding="6">
                             <Border
