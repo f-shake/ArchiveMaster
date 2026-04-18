@@ -91,6 +91,8 @@ namespace ArchiveMaster.Services
 
         public List<TaggingPhotoFileInfo> Files { get; private set; }
 
+        public List<TaggedPhoto> UnusedExistingTaggedPhotos { get; private set; }
+
         public override async Task ExecuteAsync(CancellationToken ct = default)
         {
             systemPrompts = SYSTEM_PROMPT
@@ -263,15 +265,16 @@ namespace ArchiveMaster.Services
 
         public override async Task InitializeAsync(CancellationToken ct = default)
         {
-            NotifyMessage("正在查找文件");
             List<TaggingPhotoFileInfo> files = new List<TaggingPhotoFileInfo>();
             await Task.Run(async () =>
             {
+                NotifyMessage("正在查找文件");
                 var enumerableFiles = new DirectoryInfo(Config.Dir)
                     .EnumerateFiles("*", FileEnumerateExtension.GetEnumerationOptions())
                     .ApplyFilter(ct, Config.Filter)
                     .Select(p => new TaggingPhotoFileInfo(p, Config.Dir));
 
+                NotifyMessage("正在查找已保存的标签");
                 var existingFiles = new Dictionary<string, TaggedPhoto>();
                 if (File.Exists(Config.TagFile))
                 {
@@ -286,6 +289,7 @@ namespace ArchiveMaster.Services
                         {
                             file.Tags = f.Tags;
                             file.HasGenerated = true;
+                            existingFiles.Remove(file.RelativePath);
                         }
 
                         file.IsChecked = !file.HasGenerated;
@@ -293,6 +297,7 @@ namespace ArchiveMaster.Services
                     },
                     ct,
                     FilesLoopOptions.DoNothing());
+                UnusedExistingTaggedPhotos = existingFiles.Values.ToList();
             }, ct);
 
             Files = files;

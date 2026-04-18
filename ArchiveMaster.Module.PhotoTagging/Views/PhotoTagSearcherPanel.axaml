@@ -38,14 +38,9 @@
         <Grid
             Margin="8"
             IsEnabled="{Binding HasLoaded}"
-            RowDefinitions="Auto,8,*">
-            <Grid ColumnDefinitions="Auto,8,*,8,Auto,8,Auto">
-                <ComboBox
-                    DisplayMemberBinding="{Binding ., Converter={x:Static cvt:Converters.Description}}"
-                    ItemsSource="{Binding TagTypes}"
-                    SelectedItem="{Binding TagType}" />
+            RowDefinitions="Auto,4,Auto,8,*">
+            <Grid ColumnDefinitions="*,8,Auto,8,Auto">
                 <AutoCompleteBox
-                    Grid.Column="2"
                     ItemsSource="{Binding Tags}"
                     Text="{Binding SearchKeyword}"
                     ValueMemberBinding="{Binding Tag}"
@@ -67,19 +62,49 @@
                     </Interaction.Behaviors>
                 </AutoCompleteBox>
                 <CheckBox
-                    Grid.Column="4"
+                    Grid.Column="2"
                     Content="模糊匹配"
                     IsChecked="{Binding Partial}" />
                 <Button
-                    Grid.Column="6"
+                    Grid.Column="4"
                     Classes="Primary"
                     Command="{Binding SearchCommand}"
                     Content="搜索"
                     IsEnabled="{Binding SearchKeyword, Converter={x:Static cvt:Converters.IsNotNull}}" />
             </Grid>
-
-            <Grid
+            <ct:FormItem
                 Grid.Row="2"
+                Label="筛选类型：">
+                <StackPanel
+                    Orientation="Horizontal"
+                    Spacing="8">
+                    <CheckBox
+                        Content="对象"
+                        IsChecked="{Binding EnableObjectTags}" />
+                    <CheckBox
+                        Content="场景"
+                        IsChecked="{Binding EnableSceneTags}" />
+                    <CheckBox
+                        Content="情绪"
+                        IsChecked="{Binding EnableColorTags}" />
+                    <CheckBox
+                        Content="颜色"
+                        IsChecked="{Binding EnableMoodTags}" />
+                    <CheckBox
+                        Content="拍摄"
+                        IsChecked="{Binding EnableTechniqueTags}" />
+                    <CheckBox
+                        Content="文本"
+                        IsChecked="{Binding EnableTextTags}"
+                        IsEnabled="{Binding Partial}" />
+                    <CheckBox
+                        Content="描述"
+                        IsChecked="{Binding EnableDescriptionTags}"
+                        IsEnabled="{Binding Partial}" />
+                </StackPanel>
+            </ct:FormItem>
+            <Grid
+                Grid.Row="4"
                 RowDefinitions="*,8,Auto">
                 <ListBox ItemsSource="{Binding Files}">
                     <ListBox.Styles>

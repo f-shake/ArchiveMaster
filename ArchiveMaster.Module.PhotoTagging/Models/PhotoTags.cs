@@ -21,7 +21,7 @@ public record PhotoTags(
         allTags.UnionWith(TechniqueTags);
         return allTags;
     }
-    
+
     [JsonIgnore]
     public int Count => ObjectTags.Count
                         + SceneTags.Count
@@ -31,52 +31,39 @@ public record PhotoTags(
 
     public bool ContainsTag(string tag, TagType type)
     {
-        return type switch
-        {
-            TagType.All => ObjectTags.Contains(tag)
-                           || SceneTags.Contains(tag)
-                           || MoodTags.Contains(tag)
-                           || ColorTags.Contains(tag)
-                           || TechniqueTags.Contains(tag),
-            TagType.Object => ObjectTags.Contains(tag),
-            TagType.Scene => SceneTags.Contains(tag),
-            TagType.Mood => MoodTags.Contains(tag),
-            TagType.Color => ColorTags.Contains(tag),
-            TagType.Technique => TechniqueTags.Contains(tag),
-            TagType.Text => OcrText != null && OcrText.Contains(tag),
-            TagType.Description => Description != null && Description.Contains(tag),
-            _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
-        };
+        if (string.IsNullOrWhiteSpace(tag)) return false;
+
+        bool match = false;
+
+        if (type.HasFlag(TagType.Object)) match |= ObjectTags.Contains(tag);
+        if (type.HasFlag(TagType.Scene)) match |= SceneTags.Contains(tag);
+        if (type.HasFlag(TagType.Mood)) match |= MoodTags.Contains(tag);
+        if (type.HasFlag(TagType.Color)) match |= ColorTags.Contains(tag);
+        if (type.HasFlag(TagType.Technique)) match |= TechniqueTags.Contains(tag);
+        if (type.HasFlag(TagType.Text)) match |= OcrText != null && OcrText.Contains(tag);
+        if (type.HasFlag(TagType.Description)) match |= Description != null && Description.Contains(tag);
+
+        return match;
     }
 
     public bool Matches(string query, TagType type, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
     {
-        if (string.IsNullOrWhiteSpace(query))
-        {
-            return false;
-        }
+        if (string.IsNullOrWhiteSpace(query)) return false;
 
-        // 提取通用列表匹配逻辑
         bool ListMatch(List<string> list) => list.Any(t => t.Contains(query, comparison));
         bool TextMatch(string text) => text != null && text.Contains(query, comparison);
 
-        return type switch
-        {
-            TagType.All => ListMatch(ObjectTags)
-                           || ListMatch(SceneTags)
-                           || ListMatch(MoodTags)
-                           || ListMatch(ColorTags)
-                           || ListMatch(TechniqueTags)
-                           || TextMatch(OcrText)
-                           || TextMatch(Description),
-            TagType.Object => ListMatch(ObjectTags),
-            TagType.Scene => ListMatch(SceneTags),
-            TagType.Mood => ListMatch(MoodTags),
-            TagType.Color => ListMatch(ColorTags),
-            TagType.Technique => ListMatch(TechniqueTags),
-            TagType.Text => TextMatch(OcrText),
-            TagType.Description => TextMatch(Description),
-            _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
-        };
+        bool isMatch = false;
+
+        // 按位检查每一个标志位
+        if (type.HasFlag(TagType.Object)) isMatch |= ListMatch(ObjectTags);
+        if (type.HasFlag(TagType.Scene)) isMatch |= ListMatch(SceneTags);
+        if (type.HasFlag(TagType.Mood)) isMatch |= ListMatch(MoodTags);
+        if (type.HasFlag(TagType.Color)) isMatch |= ListMatch(ColorTags);
+        if (type.HasFlag(TagType.Technique)) isMatch |= ListMatch(TechniqueTags);
+        if (type.HasFlag(TagType.Text)) isMatch |= TextMatch(OcrText);
+        if (type.HasFlag(TagType.Description)) isMatch |= TextMatch(Description);
+
+        return isMatch;
     }
 }
