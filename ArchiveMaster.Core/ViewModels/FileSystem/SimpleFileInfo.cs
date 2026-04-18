@@ -168,6 +168,7 @@ namespace ArchiveMaster.ViewModels.FileSystem
         {
             status = ProcessStatus.Error;
             this.message = message;
+            NotifyStatusProperties();
         }
 
         public void Processing()

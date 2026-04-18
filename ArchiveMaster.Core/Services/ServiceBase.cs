@@ -227,8 +227,6 @@ namespace ArchiveMaster.Services
                     break;
             }
 
-            UpdateCurrentProcessingFile(null);
-
             options.FinallyAction?.Invoke(file);
         }
 

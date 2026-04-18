@@ -32,6 +32,8 @@ public static class Converters
 
     public static readonly FileLengthConverter FileLength = FzLib.Avalonia.Converters.Converters.FileLength;
 
+    public static readonly BitRateConverter BitRateMbps = new BitRateConverter() { Units = [null, null, " Mbps"] };
+
     public static readonly TransferSpeedConverter TransferSpeed = FzLib.Avalonia.Converters.Converters.TransferSpeed;
 
     public static readonly FilePickerFilterConverter FilePickerFilter =
@@ -54,7 +56,7 @@ public static class Converters
 
 
     public static readonly StringListConverter StringList = FzLib.Avalonia.Converters.Converters.StringList;
-    
+
     public static readonly StringJoinConverter StringJoin = new StringJoinConverter();
 
     public static readonly BoolToTextWrappingConverter TextWrapping = FzLib.Avalonia.Converters.Converters.TextWrapping;
@@ -62,7 +64,7 @@ public static class Converters
     public static readonly NumberToThicknessConverter Thickness = FzLib.Avalonia.Converters.Converters.Thickness;
 
     public static readonly TimeSpanConverter TimeSpan = FzLib.Avalonia.Converters.Converters.TimeSpan;
-    public static readonly TimeSpanConverter TimeSpanMs =new TimeSpanConverter(){Format = "hh\\:mm\\:ss\\.fff" };
+    public static readonly TimeSpanConverter TimeSpanMs = new TimeSpanConverter() { Format = "hh\\:mm\\:ss\\.fff" };
 
     public static readonly TimeSpanNumberConverter TimeSpanNumber = FzLib.Avalonia.Converters.Converters.TimeSpanNumber;
 

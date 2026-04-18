@@ -1,0 +1,48 @@
+﻿<v:VerticalTwoStepPanelBase
+    x:Class="ArchiveMaster.Views.VideoInfoPanel"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ct="using:FzLib.Avalonia.Controls"
+    xmlns:cvt="using:ArchiveMaster.Converters"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:v="using:ArchiveMaster.Views"
+    xmlns:vm="clr-namespace:ArchiveMaster.ViewModels"
+    x:Name="root"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    x:DataType="vm:TimeAssViewModel"
+    mc:Ignorable="d">
+    <v:VerticalTwoStepPanelBase.ConfigsContent>
+        <ct:FormItem Label="目录：">
+            <v:FilePickerTextBox
+                FileNames="{Binding Config.Dir}"
+                Filter="{Binding Config.Filter}"
+                IsFilterBarVisible="True"
+                Type="OpenFolder" />
+        </ct:FormItem>
+    </v:VerticalTwoStepPanelBase.ConfigsContent>
+    <v:VerticalTwoStepPanelBase.ResultsContent>
+        <v:SimpleFileDataGrid ItemsSource="{Binding Files}">
+            <v:SimpleFileDataGrid.Columns>
+                <DataGridTextColumn
+                    Binding="{Binding VideoInfo.Format.FormatLongName}"
+                    Header="格式"
+                    IsReadOnly="True" />
+                <DataGridTextColumn
+                    Binding="{Binding VideoInfo.Format.StreamCount}"
+                    Header="流数量"
+                    IsReadOnly="True" />
+                <DataGridTextColumn
+                    Binding="{Binding VideoInfo.Format.Duration}"
+                    Header="时长"
+                    IsReadOnly="True" />
+                <DataGridTextColumn
+                    Binding="{Binding VideoInfo.Format.BitRate, Converter={x:Static cvt:Converters.BitRateMbps}, Mode=OneWay}"
+                    Header="码率"
+                    IsReadOnly="True" />
+            </v:SimpleFileDataGrid.Columns>
+        </v:SimpleFileDataGrid>
+
+    </v:VerticalTwoStepPanelBase.ResultsContent>
+</v:VerticalTwoStepPanelBase>
