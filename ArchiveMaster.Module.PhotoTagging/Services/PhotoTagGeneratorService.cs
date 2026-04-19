@@ -159,10 +159,10 @@ namespace ArchiveMaster.Services
                     {
                         try
                         {
-                            int currentIndex = Interlocked.Increment(ref index);
+                            int currentIndex = Interlocked.Increment(ref index) ;
                             NotifyMessage(
-                                $"正在生成图片标签（{currentIndex}/{files.Count}，累计{generated + 1}/{Files.Count}）：{item.File.RelativePath}");
-                            NotifyProgress(currentIndex - 1, files.Count);
+                                $"正在生成图片标签（{currentIndex+ generated}/{Files.Count}，本次{currentIndex}/{files.Count}）：{item.File.RelativePath}");
+                            NotifyProgress(currentIndex - 1, Files.Count);
 
                             if (item.Bytes == null)
                             {

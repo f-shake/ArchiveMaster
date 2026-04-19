@@ -68,13 +68,8 @@
                             </Button>
                             <SelectableTextBlock
                                 Inlines="{Binding ., Converter={x:Static v:FileDataGridRowDetailConverters.FilePathToInlineConverter}}"
-                                TextTrimming="PathSegmentEllipsis">
-                                <ToolTip.Tip>
-                                    <TextBlock
-                                        Inlines="{Binding ., Converter={x:Static v:FileDataGridRowDetailConverters.FilePathToInlineConverter}}"
-                                        TextWrapping="Wrap" />
-                                </ToolTip.Tip>
-                            </SelectableTextBlock>
+                                TextTrimming="PathSegmentEllipsis"
+                                TextWrapping="Wrap" />
                         </Grid>
                     </ctrl:FormItem>
                     <ctrl:FormItem
