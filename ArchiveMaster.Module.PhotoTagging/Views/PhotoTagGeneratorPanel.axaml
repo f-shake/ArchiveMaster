@@ -121,7 +121,7 @@
                 <DataTemplate>
                     <Grid ColumnDefinitions="*,8,Auto">
                         <StackPanel Spacing="{StaticResource FileDataGridRowDetailPopupSpacing}">
-                            <v:FileDataGridRowDetailDefaultContent />
+                            <v:FileDataGridRowDetailDefaultContent Content="{Binding .}" />
                             <ct:FormItem
                                 Classes="BoldLabel"
                                 Label="标签："

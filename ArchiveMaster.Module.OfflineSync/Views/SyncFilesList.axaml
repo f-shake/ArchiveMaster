@@ -23,7 +23,7 @@
     <v:SimpleFileDataGrid.RowDetailsPopupTemplate>
         <DataTemplate>
             <StackPanel Spacing="{StaticResource FileDataGridRowDetailPopupSpacing}">
-                <v:FileDataGridRowDetailDefaultContent />
+                <v:FileDataGridRowDetailDefaultContent Content="{Binding .}" />
                 <ct:FormItem
                     Classes="BoldLabel"
                     Label="临时文件名："
