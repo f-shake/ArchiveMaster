@@ -91,6 +91,16 @@ namespace ArchiveMaster.Services
 #if DEBUG && WRITEMESSAGE
             Debug.WriteLine("{0:HH:m:s.fff}\t更新进度：{1:P2}", DateTime.Now, percent);
 #endif
+            if (percent > 1)
+            {
+                percent = 1;
+            }
+
+            if (percent < 0)
+            {
+                percent = 0;
+            }
+
             ProgressUpdate?.Invoke(this, new ProgressUpdateEventArgs(percent));
             //Debug.WriteLine($"{percent * 100:0.00}%");
         }
