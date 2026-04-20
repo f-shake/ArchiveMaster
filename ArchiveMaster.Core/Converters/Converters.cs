@@ -1,4 +1,5 @@
-﻿using FzLib.Avalonia.Converters;
+﻿using Avalonia.Data.Converters;
+using FzLib.Avalonia.Converters;
 
 namespace ArchiveMaster.Converters;
 
@@ -100,4 +101,7 @@ public static class Converters
         { PropertyType = FilePropertyConverter.FilePropertyType.Name };
 
     public static StringToBindingConverter StringToBinding = new();
+
+    public static readonly IValueConverter SecondsToTimeSpanString =
+        new FuncValueConverter<double, string>(p=>System.TimeSpan.FromSeconds(p).ToString());
 }

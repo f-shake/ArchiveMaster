@@ -23,26 +23,84 @@
         </ct:FormItem>
     </v:VerticalTwoStepPanelBase.ConfigsContent>
     <v:VerticalTwoStepPanelBase.ResultsContent>
-        <v:SimpleFileDataGrid ItemsSource="{Binding Files}">
-            <v:SimpleFileDataGrid.Columns>
-                <DataGridTextColumn
-                    Binding="{Binding VideoInfo.Format.FormatLongName}"
-                    Header="格式"
-                    IsReadOnly="True" />
-                <DataGridTextColumn
-                    Binding="{Binding VideoInfo.Format.StreamCount}"
-                    Header="流数量"
-                    IsReadOnly="True" />
-                <DataGridTextColumn
-                    Binding="{Binding VideoInfo.Format.Duration}"
-                    Header="时长"
-                    IsReadOnly="True" />
-                <DataGridTextColumn
-                    Binding="{Binding VideoInfo.Format.BitRate, Converter={x:Static cvt:Converters.BitRateMbps}, Mode=OneWay}"
-                    Header="码率"
-                    IsReadOnly="True" />
-            </v:SimpleFileDataGrid.Columns>
-        </v:SimpleFileDataGrid>
+        <UniformGrid
+            Columns="1"
+            RowSpacing="8"
+            Rows="2">
+            <v:SimpleFileDataGrid
+                ItemsSource="{Binding Files}"
+                SelectedItem="{Binding SelectedFile}">
+                <v:SimpleFileDataGrid.Columns>
+                    <DataGridTextColumn
+                        Binding="{Binding VideoInfo.Format.FormatLongName}"
+                        Header="格式"
+                        IsReadOnly="True" />
+                    <DataGridTextColumn
+                        Binding="{Binding VideoInfo.Format.StreamCount}"
+                        Header="流数量"
+                        IsReadOnly="True" />
+                    <DataGridTextColumn
+                        Binding="{Binding VideoInfo.Format.Duration, Converter={x:Static cvt:Converters.SecondsToTimeSpanString}}"
+                        Header="时长"
+                        IsReadOnly="True" />
+                    <DataGridTextColumn
+                        Binding="{Binding VideoInfo.Format.BitRate, Converter={x:Static cvt:Converters.BitRateMbps}, Mode=OneWay}"
+                        Header="码率"
+                        IsReadOnly="True" />
+                </v:SimpleFileDataGrid.Columns>
+            </v:SimpleFileDataGrid>
+            <DataGrid
+                IsReadOnly="True"
+                ItemsSource="{Binding SelectedFile.VideoInfo.Streams}">
+                <DataGrid.Columns>
+                    <DataGridTextColumn
+                        Binding="{Binding Index}"
+                        Header="序号" />
+                    <DataGridTextColumn
+                        Binding="{Binding CodecType, Converter={x:Static cvt:Converters.Description}, Mode=OneWay}"
+                        Header="类型" />
+                    <DataGridTextColumn
+                        Binding="{Binding CodecLongName}"
+                        Header="编码" />
+                    <!-- <DataGridTextColumn Header="类型"> -->
+                    <!--     <DataGridTextColumn.Binding> -->
+                    <!--         <MultiBinding StringFormat="{}{0} ({1})"> -->
+                    <!--             <Binding Path="CodecShortName" /> -->
+                    <!--             <Binding Path="CodecLongName" /> -->
+                    <!--         </MultiBinding> -->
+                    <!--     </DataGridTextColumn.Binding> -->
+                    <!-- </DataGridTextColumn> -->
 
+                    <DataGridTextColumn
+                        Binding="{Binding BitRate, Converter={x:Static cvt:Converters.BitRateMbps}, Mode=OneWay}"
+                        Header="码率" />
+                    <DataGridTextColumn
+                        Binding="{Binding Duration, Converter={x:Static cvt:Converters.SecondsToTimeSpanString}, Mode=OneWay}"
+                        Header="时长" />
+                    <DataGridTextColumn
+                        Binding="{Binding Profile}"
+                        Header="预设" />
+                    <DataGridTextColumn
+                        Binding="{Binding Size}"
+                        Header="分辨率" />
+                    <DataGridTextColumn
+                        Binding="{Binding ColorRange}"
+                        Header="色彩范围" />
+                    <DataGridTextColumn
+                        Binding="{Binding ColorSpace}"
+                        Header="色彩空间" />
+                    <DataGridTextColumn
+                        Binding="{Binding TargetFrameRate, StringFormat=F2}"
+                        Header="目标帧率" />
+                    <DataGridTextColumn
+                        Binding="{Binding ActualFrameRate, StringFormat=F2}"
+                        Header="实际帧率" />
+                    <DataGridTextColumn
+                        Binding="{Binding FrameCount}"
+                        Header="帧数量" />
+
+                </DataGrid.Columns>
+            </DataGrid>
+        </UniformGrid>
     </v:VerticalTwoStepPanelBase.ResultsContent>
 </v:VerticalTwoStepPanelBase>

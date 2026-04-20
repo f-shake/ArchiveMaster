@@ -120,7 +120,7 @@ namespace ArchiveMaster.Services
                 var jFormat = (JsonObject)json["format"];
                 var jStreams = (JsonArray)json["streams"];
                 var format = ParseVideoInfoPartJson<VideoFormat>(jFormat);
-                var streams = jStreams.Cast<JsonObject>().Select(ParseVideoInfoPartJson<VideoStreamInfo>).ToList();
+                var streams = jStreams.Cast<JsonObject>().Select(ParseVideoInfoPartJson<VideoStream>).ToList();
                 return new VideoInfo(format, streams, result);
             }
             catch (Exception ex)

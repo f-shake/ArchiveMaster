@@ -18,6 +18,9 @@ public partial class VideoInfoViewModel(ViewModelServices services)
     [ObservableProperty]
     private ObservableCollection<VideoInfoFileInfo> files;
 
+    [ObservableProperty]
+    private VideoInfoFileInfo selectedFile;
+
     protected override Task OnInitializedAsync()
     {
         Files = new ObservableCollection<VideoInfoFileInfo>(Service.Files);
