@@ -12,6 +12,7 @@
     d:DesignHeight="450"
     d:DesignWidth="800"
     x:DataType="vm:TimeAssViewModel"
+    ExecuteButtonContent="提取元数据"
     mc:Ignorable="d">
     <v:VerticalTwoStepPanelBase.ConfigsContent>
         <ct:FormItem Label="目录：">
@@ -36,11 +37,11 @@
                         Header="格式"
                         IsReadOnly="True" />
                     <DataGridTextColumn
-                        Binding="{Binding VideoInfo.Format.StreamCount}"
+                        Binding="{Binding VideoInfo.Format.StreamCount, Converter={x:Static cvt:VideoInfoValidNumberConverter.Instance}, Mode=OneWay}"
                         Header="流数量"
                         IsReadOnly="True" />
                     <DataGridTextColumn
-                        Binding="{Binding VideoInfo.Format.Duration, Converter={x:Static cvt:Converters.SecondsToTimeSpanString}}"
+                        Binding="{Binding VideoInfo.Format.Duration, Converter={x:Static cvt:Converters.SecondsToTimeSpanString}, Mode=OneWay}"
                         Header="时长"
                         IsReadOnly="True" />
                     <DataGridTextColumn
@@ -54,7 +55,7 @@
                 ItemsSource="{Binding SelectedFile.VideoInfo.Streams}">
                 <DataGrid.Columns>
                     <DataGridTextColumn
-                        Binding="{Binding Index}"
+                        Binding="{Binding Index, Converter={x:Static cvt:VideoInfoValidNumberConverter.Instance}, Mode=OneWay}"
                         Header="序号" />
                     <DataGridTextColumn
                         Binding="{Binding CodecType, Converter={x:Static cvt:Converters.Description}, Mode=OneWay}"
@@ -62,15 +63,6 @@
                     <DataGridTextColumn
                         Binding="{Binding CodecLongName}"
                         Header="编码" />
-                    <!-- <DataGridTextColumn Header="类型"> -->
-                    <!--     <DataGridTextColumn.Binding> -->
-                    <!--         <MultiBinding StringFormat="{}{0} ({1})"> -->
-                    <!--             <Binding Path="CodecShortName" /> -->
-                    <!--             <Binding Path="CodecLongName" /> -->
-                    <!--         </MultiBinding> -->
-                    <!--     </DataGridTextColumn.Binding> -->
-                    <!-- </DataGridTextColumn> -->
-
                     <DataGridTextColumn
                         Binding="{Binding BitRate, Converter={x:Static cvt:Converters.BitRateMbps}, Mode=OneWay}"
                         Header="码率" />
@@ -90,14 +82,23 @@
                         Binding="{Binding ColorSpace}"
                         Header="色彩空间" />
                     <DataGridTextColumn
-                        Binding="{Binding TargetFrameRate, StringFormat=F2}"
+                        Binding="{Binding TargetFrameRate, Converter={x:Static cvt:VideoInfoValidNumberConverter.Instance}, Mode=OneWay}"
                         Header="目标帧率" />
                     <DataGridTextColumn
-                        Binding="{Binding ActualFrameRate, StringFormat=F2}"
+                        Binding="{Binding ActualFrameRate, Converter={x:Static cvt:VideoInfoValidNumberConverter.Instance}, Mode=OneWay}"
                         Header="实际帧率" />
                     <DataGridTextColumn
-                        Binding="{Binding FrameCount}"
+                        Binding="{Binding FrameCount, Converter={x:Static cvt:VideoInfoValidNumberConverter.Instance}, Mode=OneWay}"
                         Header="帧数量" />
+                    <DataGridTextColumn
+                        Binding="{Binding Channels, Converter={x:Static cvt:VideoInfoValidNumberConverter.Instance}, Mode=OneWay}"
+                        Header="通道" />
+                    <DataGridTextColumn
+                        Binding="{Binding ChannelLayout}"
+                        Header="通道布局" />
+                    <DataGridTextColumn
+                        Binding="{Binding SampleRate, Converter={x:Static cvt:VideoInfoValidNumberConverter.Instance}, Mode=OneWay}"
+                        Header="采样率" />
 
                 </DataGrid.Columns>
             </DataGrid>

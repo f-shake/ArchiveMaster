@@ -3,7 +3,7 @@
 public record VideoFormat
 {
     [VideoInfoFFprobeSource("nb_streams")]
-    public int StreamCount { get; init; } = 0;
+    public int StreamCount { get; init; } = -1;
 
     [VideoInfoFFprobeSource("format_name")]
     public string FormatShortName { get; init; }
@@ -12,11 +12,11 @@ public record VideoFormat
     public string FormatLongName { get; init; }
 
     [VideoInfoFFprobeSource("duration")]
-    public double Duration { get; init; } = 0;
+    public double Duration { get; init; } = double.NaN;
 
     [VideoInfoFFprobeSource("size")]
-    public long Length { get; init; } = 0;
+    public long Length { get; init; } = -1;
 
     [VideoInfoFFprobeSource("bit_rate")]
-    public double BitRate { get; init; } = 0;
+    public double BitRate { get; init; } = double.NaN;
 }

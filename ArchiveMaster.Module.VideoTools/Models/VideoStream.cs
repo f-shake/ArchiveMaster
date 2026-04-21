@@ -5,7 +5,7 @@ namespace ArchiveMaster.Models;
 public record VideoStream
 {
     [VideoInfoFFprobeSource("index")]
-    public int Index { get; init; } = 0;
+    public int Index { get; init; } = -1;
 
     [VideoInfoFFprobeSource("codec_type")]
     public string CodecTypeName { get; init; }
@@ -33,18 +33,18 @@ public record VideoStream
     public string CodecLongName { get; init; }
 
     [VideoInfoFFprobeSource("duration")]
-    public double Duration { get; init; } = 0;
+    public double Duration { get; init; } = double.NaN;
 
     [VideoInfoFFprobeSource("profile")]
     public string Profile { get; init; }
 
     [VideoInfoFFprobeSource("width")]
-    public int Width { get; init; } = 0;
+    public int Width { get; init; } = -1;
 
     [VideoInfoFFprobeSource("height")]
-    public int Height { get; init; } = 0;
-    
-    public string Size=>Width==0||Height==0?"":$"{Width} × {Height}";
+    public int Height { get; init; } = -1;
+
+    public string Size => Width <= 0 || Height <= 0 ? "" : $"{Width} × {Height}";
 
     [VideoInfoFFprobeSource("pix_fmt")]
     public string Format { get; init; }
@@ -56,14 +56,23 @@ public record VideoStream
     public string ColorSpace { get; init; }
 
     [VideoInfoFFprobeSource("r_frame_rate", VideoInfoFFprobeSourceType.Fraction)]
-    public double TargetFrameRate { get; init; } = 0;
+    public double TargetFrameRate { get; init; } = double.NaN;
 
     [VideoInfoFFprobeSource("avg_frame_rate", VideoInfoFFprobeSourceType.Fraction)]
-    public double ActualFrameRate { get; init; } = 0;
+    public double ActualFrameRate { get; init; } = double.NaN;
 
     [VideoInfoFFprobeSource("nb_frames")]
-    public int FrameCount { get; init; } = 0;
+    public int FrameCount { get; init; } = -1;
 
     [VideoInfoFFprobeSource("bit_rate")]
-    public double BitRate { get; init; } = 0;
+    public double BitRate { get; init; } = double.NaN;
+
+    [VideoInfoFFprobeSource("channels")]
+    public int Channels { get; init; } = -1;
+
+    [VideoInfoFFprobeSource("channel_layout")]
+    public string ChannelLayout { get; init; }
+    
+    [VideoInfoFFprobeSource("sample_rate")]
+    public int SampleRate { get; init; }
 }
