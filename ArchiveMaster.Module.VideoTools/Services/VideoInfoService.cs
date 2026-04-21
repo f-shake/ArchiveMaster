@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Globalization;
 using System.Numerics;
 using System.Reflection;
 using System.Text;
@@ -12,6 +13,7 @@ using ArchiveMaster.Helpers;
 using ArchiveMaster.Models;
 using ArchiveMaster.ViewModels;
 using ArchiveMaster.ViewModels.FileSystem;
+using CsvHelper;
 using FzLib.IO;
 
 namespace ArchiveMaster.Services
@@ -38,7 +40,7 @@ namespace ArchiveMaster.Services
 
             throw new JsonException($"无法将{jValue.GetValueKind()}类型转为{typeof(T).Name}");
         }
-        
+
         private static T ParseVideoInfoPartJson<T>(JsonObject json)
         {
             var properties = typeof(T).GetProperties();
@@ -159,6 +161,23 @@ namespace ArchiveMaster.Services
                     .ToList();
             }, ct);
             Files = files;
+        }
+
+        public async Task ExportCsvAsync(string exportFile)
+        {
+            List<VideoStreamFileInfo> list = new List<VideoStreamFileInfo>();
+            foreach (var file in Files)
+            {
+                foreach (var stream in file.VideoInfo.Streams)
+                {
+                    list.Add(new VideoStreamFileInfo(file, file.VideoInfo.Format, stream));
+                }
+            }
+
+            await using var fs = new FileStream(exportFile, FileMode.Create);
+            await using var writer = new StreamWriter(fs, Encoding.UTF8);
+            await using var csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
+            await csv.WriteRecordsAsync(list);
         }
     }
 }

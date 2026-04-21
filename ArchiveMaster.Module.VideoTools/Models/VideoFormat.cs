@@ -1,6 +1,6 @@
 ﻿namespace ArchiveMaster.Models;
 
-public record VideoFormat
+public record VideoFormat : IVideoFormat
 {
     [VideoInfoFFprobeSource("nb_streams")]
     public int StreamCount { get; init; } = -1;
@@ -14,9 +14,6 @@ public record VideoFormat
     [VideoInfoFFprobeSource("duration")]
     public double Duration { get; init; } = double.NaN;
 
-    [VideoInfoFFprobeSource("size")]
-    public long Length { get; init; } = -1;
-
     [VideoInfoFFprobeSource("bit_rate")]
-    public double BitRate { get; init; } = double.NaN;
+    public double TotalBitRate { get; init; } = double.NaN;
 }

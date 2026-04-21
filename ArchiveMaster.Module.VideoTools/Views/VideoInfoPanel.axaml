@@ -45,10 +45,31 @@
                         Header="时长"
                         IsReadOnly="True" />
                     <DataGridTextColumn
-                        Binding="{Binding VideoInfo.Format.BitRate, Converter={x:Static cvt:Converters.BitRateMbps}, Mode=OneWay}"
+                        Binding="{Binding VideoInfo.Format.TotalBitRate, Converter={x:Static cvt:Converters.BitRateMbps}, Mode=OneWay}"
                         Header="码率"
                         IsReadOnly="True" />
                 </v:SimpleFileDataGrid.Columns>
+                <v:SimpleFileDataGrid.Footer>
+                    <Button
+                        VerticalAlignment="Top"
+                        Classes="Link"
+                        Command="{Binding ExportCsvCommand}"
+                        Content="导出为CSV表格">
+                        <Button.IsEnabled>
+                            <MultiBinding Converter="{x:Static cvt:Converters.AndLogic}">
+                                <Binding
+                                    Converter="{x:Static cvt:Converters.InverseBool}"
+                                    Path="CanInitialize" />
+                                <Binding
+                                    Converter="{x:Static cvt:Converters.InverseBool}"
+                                    Path="CanExecute" />
+                                <Binding
+                                    Converter="{x:Static cvt:Converters.InverseBool}"
+                                    Path="CanCancel" />
+                            </MultiBinding>
+                        </Button.IsEnabled>
+                    </Button>
+                </v:SimpleFileDataGrid.Footer>
             </v:SimpleFileDataGrid>
             <DataGrid
                 IsReadOnly="True"
@@ -64,7 +85,7 @@
                         Binding="{Binding CodecLongName}"
                         Header="编码" />
                     <DataGridTextColumn
-                        Binding="{Binding BitRate, Converter={x:Static cvt:Converters.BitRateMbps}, Mode=OneWay}"
+                        Binding="{Binding TotalBitRate, Converter={x:Static cvt:Converters.BitRateMbps}, Mode=OneWay}"
                         Header="码率" />
                     <DataGridTextColumn
                         Binding="{Binding Duration, Converter={x:Static cvt:Converters.SecondsToTimeSpanString}, Mode=OneWay}"
@@ -99,7 +120,6 @@
                     <DataGridTextColumn
                         Binding="{Binding SampleRate, Converter={x:Static cvt:VideoInfoValidNumberConverter.Instance}, Mode=OneWay}"
                         Header="采样率" />
-
                 </DataGrid.Columns>
             </DataGrid>
         </UniformGrid>

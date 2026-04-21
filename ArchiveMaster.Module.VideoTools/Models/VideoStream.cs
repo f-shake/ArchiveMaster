@@ -2,7 +2,7 @@
 
 namespace ArchiveMaster.Models;
 
-public record VideoStream
+public record VideoStream : IVideoStream
 {
     [VideoInfoFFprobeSource("index")]
     public int Index { get; init; } = -1;

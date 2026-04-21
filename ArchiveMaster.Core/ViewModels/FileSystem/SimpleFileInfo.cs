@@ -6,7 +6,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 namespace ArchiveMaster.ViewModels.FileSystem
 {
     [DebuggerDisplay("Name = {Name}, Path = {Path}")]
-    public partial class SimpleFileInfo : ObservableObject
+    public partial class SimpleFileInfo : ObservableObject, ISimpleFileInfo
     {
         [property: JsonIgnore]
         [ObservableProperty]
@@ -40,9 +40,11 @@ namespace ArchiveMaster.ViewModels.FileSystem
 
         [ObservableProperty]
         private DateTime time;
+
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(RelativePath))]
         private string topDirectory;
+
         public SimpleFileInfo()
         {
         }
@@ -150,6 +152,7 @@ namespace ArchiveMaster.ViewModels.FileSystem
 
 
         #region 进度
+
         [JsonIgnore]
         public ProcessStatus Status => status;
 
@@ -196,6 +199,7 @@ namespace ArchiveMaster.ViewModels.FileSystem
             status = ProcessStatus.Success;
             NotifyStatusProperties();
         }
+
         public void Warn(string msg)
         {
             status = ProcessStatus.Warn;
@@ -208,6 +212,7 @@ namespace ArchiveMaster.ViewModels.FileSystem
             OnPropertyChanged(nameof(Status));
             OnPropertyChanged(nameof(Message));
         }
+
         #endregion
     }
 }

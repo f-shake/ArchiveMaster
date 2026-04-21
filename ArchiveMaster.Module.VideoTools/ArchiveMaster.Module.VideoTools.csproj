@@ -25,4 +25,9 @@
     <ProjectReference Include="..\ArchiveMaster.Core\ArchiveMaster.Core.csproj" />
   </ItemGroup>
 
+
+  <ItemGroup>
+    <PackageReference Include="CsvHelper" />
+  </ItemGroup>
+
 </Project>

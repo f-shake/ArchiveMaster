@@ -267,7 +267,7 @@
                             Grid.Column="4"
                             Margin="0,8,0,0"
                             HorizontalAlignment="Right"
-                            VerticalAlignment="Center"
+                            VerticalAlignment="Stretch"
                             Content="{TemplateBinding Footer}" />
                     </Grid>
 

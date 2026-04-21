@@ -32,4 +32,20 @@ public partial class VideoInfoViewModel(ViewModelServices services)
         base.OnReset();
         Files = null;
     }
+
+    [RelayCommand]
+    private async Task ExportCsvAsync()
+    {
+        var file = await Services.StorageProvider.CreatePickerBuilder()
+            .AddFilter("CSV表格", "csv")
+            .SuggestedFileName("视频清单.csv")
+            .SaveFilePickerAndGetPathAsync();
+        if (file is null)
+        {
+            return;
+        }
+
+        await Services.ProgressOverlay.WithOverlayAsync(async () => { await Service.ExportCsvAsync(file); },
+            async ex => { await Services.Dialog.ShowErrorDialogAsync("导出CSV失败", ex); }, "正在导出CSV表格");
+    }
 }
