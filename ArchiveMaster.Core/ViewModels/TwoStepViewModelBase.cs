@@ -59,8 +59,8 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
             var newValue = value;
             if (!EnableInitialize)
             {
-                //如果不启用初始化，将不存在Initializing、Initialized和Finished状态。
-                if (newValue is Initializing or Initialized or Finished)
+                //如果不启用初始化，将不存在Initializing、Initialized、Executed和Canceled。理论上，也不会有Cancelling。
+                if (newValue is Initializing or Initialized or Executed or Canceled)
                 {
                     newValue = Ready;
                 }
@@ -96,7 +96,7 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
     /// <summary>
     /// 是否允许重置
     /// </summary>
-    public bool CanReset => EnableInitialize ? Status is Initialized or Finished : Status is Finished;
+    public bool CanReset => EnableInitialize && Status is Initialized or Executed or Canceled;
 
     #endregion
 
@@ -401,17 +401,22 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
 
         Status = Executing;
 
-        await TryRunServiceMethodAsync(async () =>
+        if (await TryRunServiceMethodAsync(async () =>
+            {
+                await OnExecutingAsync(ct);
+                Config.Check();
+                await Service.ExecuteAsync(ct);
+                Service.Dispose();
+                await OnExecutedAsync(ct);
+                await CheckWarningFilesOnExecutedAsync(ct);
+            }, "执行失败"))
         {
-            await OnExecutingAsync(ct);
-            Config.Check();
-            await Service.ExecuteAsync(ct);
-            Service.Dispose();
-            await OnExecutedAsync(ct);
-            await CheckWarningFilesOnExecutedAsync(ct);
-        }, "执行失败");
-
-        Status = EnableRepeatExecute ? Initialized : Finished;
+            Status = EnableRepeatExecute ? Initialized : Executed;
+        }
+        else
+        {
+            Status = Canceled;
+        }
     }
 
     /// <summary>
@@ -439,7 +444,7 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
         }
         else
         {
-            Status = Finished;
+            Status = Canceled;
         }
     }
 

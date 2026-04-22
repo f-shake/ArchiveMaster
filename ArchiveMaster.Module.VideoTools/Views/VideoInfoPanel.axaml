@@ -5,6 +5,7 @@
     xmlns:ct="using:FzLib.Avalonia.Controls"
     xmlns:cvt="using:ArchiveMaster.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:enums="using:ArchiveMaster.Enums"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:v="using:ArchiveMaster.Views"
     xmlns:vm="clr-namespace:ArchiveMaster.ViewModels"
@@ -53,21 +54,20 @@
                     <Button
                         VerticalAlignment="Top"
                         Classes="Link"
-                        Command="{Binding ExportCsvCommand}"
-                        Content="导出为CSV表格">
-                        <Button.IsEnabled>
-                            <MultiBinding Converter="{x:Static cvt:Converters.AndLogic}">
-                                <Binding
-                                    Converter="{x:Static cvt:Converters.InverseBool}"
-                                    Path="CanInitialize" />
-                                <Binding
-                                    Converter="{x:Static cvt:Converters.InverseBool}"
-                                    Path="CanExecute" />
-                                <Binding
-                                    Converter="{x:Static cvt:Converters.InverseBool}"
-                                    Path="CanCancel" />
-                            </MultiBinding>
-                        </Button.IsEnabled>
+                        Content="导出为CSV表格"
+                        IsEnabled="{Binding Status, Converter={x:Static cvt:Converters.EqualWithParameter}, ConverterParameter={x:Static enums:TwoStepViewModelStatus.Executed}}">
+                        <Button.Flyout>
+                            <MenuFlyout>
+                                <MenuItem
+                                    Command="{Binding ExportCsvCommand}"
+                                    CommandParameter="wide"
+                                    Header="导出包含所有流的宽表" />
+                                <MenuItem
+                                    Command="{Binding ExportCsvCommand}"
+                                    CommandParameter="main"
+                                    Header="导出包含主要流的表" />
+                            </MenuFlyout>
+                        </Button.Flyout>
                     </Button>
                 </v:SimpleFileDataGrid.Footer>
             </v:SimpleFileDataGrid>

@@ -21,14 +21,20 @@ public enum TwoStepViewModelStatus
     /// 正在执行
     /// </summary>
     Executing,
-
+    
     /// <summary>
-    /// 结束，可能是执行完毕、初始化出错、执行出错或已取消
+    /// 执行完成
     /// </summary>
-    Finished,
+    Executed,
+
 
     /// <summary>
     /// 正在取消
     /// </summary>
-    Cancelling
+    Cancelling,
+    
+    /// <summary>
+    /// 非正常结束，可能是初始化出错、执行出错或已取消
+    /// </summary>
+    Canceled,
 }

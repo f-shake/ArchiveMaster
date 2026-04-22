@@ -8,6 +8,7 @@ using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using ArchiveMaster.Configs;
+using ArchiveMaster.Dto;
 using ArchiveMaster.Enums;
 using ArchiveMaster.Helpers;
 using ArchiveMaster.Models;
@@ -163,14 +164,21 @@ namespace ArchiveMaster.Services
             Files = files;
         }
 
-        public async Task ExportCsvAsync(string exportFile)
+        public async Task ExportCsvAsync(string exportFile, bool allStreams)
         {
-            List<VideoStreamFileInfo> list = new List<VideoStreamFileInfo>();
-            foreach (var file in Files)
+            List<VideoStreamFileDto> list = new List<VideoStreamFileDto>();
+            foreach (var file in Files.Where(p => p.VideoInfo is { Format: not null, Streams.Count: > 0 }))
             {
-                foreach (var stream in file.VideoInfo.Streams)
+                if (allStreams)
                 {
-                    list.Add(new VideoStreamFileInfo(file, file.VideoInfo.Format, stream));
+                    foreach (var stream in file.VideoInfo.Streams)
+                    {
+                        list.Add(new VideoStreamFileDto(file, file.VideoInfo.Format, stream));
+                    }
+                }
+                else
+                {
+                    list.Add(new VideoStreamFileDto(file, file.VideoInfo.Format, file.VideoInfo.Streams[0]));
                 }
             }
 

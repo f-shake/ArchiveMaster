@@ -1,36 +1,13 @@
 ﻿using ArchiveMaster.Enums;
+using ArchiveMaster.Models;
 using ArchiveMaster.ViewModels.FileSystem;
 using CsvHelper.Configuration.Attributes;
 
-namespace ArchiveMaster.Models;
+namespace ArchiveMaster.Dto;
 
-public class VideoStreamFileInfo(SimpleFileInfo file, VideoFormat format, VideoStream stream)
-    : ISimpleFileInfo, IVideoFormat, IVideoStream
+public class VideoStreamFileDto(SimpleFileInfo file, VideoFormat format, VideoStream stream)
+    : VideoFileDto(file, format), IVideoStream
 {
-    [Name("文件名")]
-    public string Name => file.Name;
-
-    [Name("文件路径")]
-    public string Path => file.Path;
-
-    [Name("文件修改时间")]
-    public DateTime Time => file.Time;
-
-    [Name("文件大小")]
-    public long Length => file.Length;
-
-    [Name("流数量")]
-    public int StreamCount => format.StreamCount;
-
-    [Name("格式名称（短）")]
-    public string FormatShortName => format.FormatShortName;
-
-    [Name("格式名称（长）")]
-    public string FormatLongName => format.FormatLongName;
-
-    [Name("总码率")]
-    public double TotalBitRate => format.TotalBitRate;
-
     [Name("流索引")]
     public int Index => stream.Index;
 
@@ -87,13 +64,4 @@ public class VideoStreamFileInfo(SimpleFileInfo file, VideoFormat format, VideoS
 
     [Name("采样率")]
     public int SampleRate => stream.SampleRate;
-
-    [Ignore]
-    public string RelativePath => file.RelativePath;
-
-    [Ignore]
-    public string TopDirectory => file.TopDirectory;
-
-    [Ignore]
-    public bool IsDir => file.IsDir;
 }
