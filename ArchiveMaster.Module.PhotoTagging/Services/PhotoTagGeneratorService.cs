@@ -2,6 +2,7 @@
 using ArchiveMaster.Configs;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -275,11 +276,15 @@ namespace ArchiveMaster.Services
                     .Select(p => new TaggingPhotoFileInfo(p, Config.Dir));
 
                 NotifyMessage("正在查找已保存的标签");
-                var existingFiles = new Dictionary<string, TaggedPhoto>();
+                FrozenDictionary<string, TaggedPhoto> existingFiles = null;
                 if (File.Exists(Config.TagFile))
                 {
                     existingFiles = (await TagFileHelper.ReadPhotoTagCollectionAsync(Config.TagFile, ct)).Photos
-                        .ToDictionary(p => p.RelativePath);
+                        .ToDictionary(p => p.RelativePath).ToFrozenDictionary();
+                }
+                else
+                {
+                    existingFiles = FrozenDictionary<string, TaggedPhoto>.Empty;
                 }
 
                 await TryForFilesAsync(enumerableFiles, (file, s) =>
@@ -289,7 +294,6 @@ namespace ArchiveMaster.Services
                         {
                             file.Tags = f.Tags;
                             file.HasGenerated = true;
-                            existingFiles.Remove(file.RelativePath);
                         }
 
                         file.IsChecked = !file.HasGenerated;
@@ -297,7 +301,15 @@ namespace ArchiveMaster.Services
                     },
                     ct,
                     FilesLoopOptions.DoNothing());
-                UnusedExistingTaggedPhotos = existingFiles.Values.ToList();
+
+                NotifyMessage("正在查找没有使用到的旧标签");
+                var taggedFilesRelativePath = files
+                    .Where(p => p.HasGenerated)
+                    .Select(p => p.RelativePath)
+                    .ToHashSet();
+                UnusedExistingTaggedPhotos = existingFiles.Values
+                    .Where(photo => !taggedFilesRelativePath.Contains(photo.RelativePath))
+                    .ToList();
             }, ct);
 
             Files = files;

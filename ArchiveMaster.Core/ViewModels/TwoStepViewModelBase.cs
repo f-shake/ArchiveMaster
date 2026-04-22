@@ -200,6 +200,53 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
         Service = null;
     }
 
+    #endregion
+
+    #region 更新消息和进度
+
+    private async Task WithUpdatingMessageAndProgressAsync(Func<CancellationToken, Task> func, CancellationToken ct)
+    {
+        CancellationTokenSource cts = new CancellationTokenSource();
+        ct.Register(cts.Cancel);
+        _ = StartMessageAndProgressTimer(cts.Token);
+        await func(cts.Token);
+        await cts.CancelAsync();
+    }
+
+    private async Task StartMessageAndProgressTimer(CancellationToken ct)
+    {
+        PeriodicTimer timer = new PeriodicTimer(TimeSpan.FromMilliseconds(50));
+        while (await timer.WaitForNextTickAsync(ct))
+        {
+            if (ct.IsCancellationRequested)
+            {
+                timer.Dispose();
+                return;
+            }
+
+            ForceUpdateMessageAndProgress();
+        }
+    }
+
+    private void ForceUpdateMessageAndProgress()
+    {
+        if (pendingMessage != null)
+        {
+            Message = pendingMessage;
+            pendingMessage = null;
+        }
+
+        if (pendingProgress >= 0)
+        {
+            Progress = pendingProgress;
+            pendingProgress = -1;
+        }
+    }
+
+    private string pendingMessage = null;
+
+    private double pendingProgress = -1;
+
     private void Service_MessageUpdate(object sender, MessageUpdateEventArgs e)
     {
         if (!canReceiveServiceMessage)
@@ -207,12 +254,12 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
             return;
         }
 
-        Message = e.Message;
+        pendingMessage = e.Message;
     }
 
     private void Service_ProgressUpdate(object sender, ProgressUpdateEventArgs e)
     {
-        Progress = e.Progress;
+        pendingProgress = e.Progress;
     }
 
     #endregion
@@ -405,7 +452,7 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
             {
                 await OnExecutingAsync(ct);
                 Config.Check();
-                await Service.ExecuteAsync(ct);
+                await WithUpdatingMessageAndProgressAsync(Service.ExecuteAsync, ct);
                 Service.Dispose();
                 await OnExecutedAsync(ct);
                 await CheckWarningFilesOnExecutedAsync(ct);
@@ -435,7 +482,7 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
                 CreateService();
                 await OnInitializingAsync();
                 Config.Check();
-                await Service.InitializeAsync(ct);
+                await WithUpdatingMessageAndProgressAsync(Service.InitializeAsync, ct);
                 await OnInitializedAsync();
             }, "初始化失败") //初始化成功
             && !await CheckWarningFilesOnInitializedAsync(ct)) //有需要处理的文件
@@ -444,7 +491,7 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
         }
         else
         {
-            Status = Canceled;
+            Status = Ready;
         }
     }
 
