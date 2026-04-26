@@ -31,14 +31,13 @@ public static class Converters
     public static readonly EqualToBoolConverter EqualWithParameter =
         FzLib.Avalonia.Converters.Converters.EqualWithParameter;
 
-    public static readonly FileLengthConverter FileLength = FzLib.Avalonia.Converters.Converters.FileLength;
+    public static readonly DataSizeConverter FileLength = FzLib.Avalonia.Converters.Converters.ByteLength;
 
-    public static readonly BitRateConverter BitRateMbps = new BitRateConverter() { Units = [null, null, " Mbps"] };
+    public static readonly DataSizeConverter TransferSpeed = FzLib.Avalonia.Converters.Converters.ByteRate;
 
-    public static readonly TransferSpeedConverter TransferSpeed = FzLib.Avalonia.Converters.Converters.TransferSpeed;
 
-    public static readonly FilePickerFilterConverter FilePickerFilter =
-        FzLib.Avalonia.Converters.Converters.FilePickerFilter;
+    public static readonly DataSizeConverter BitRateMbps = FzLib.Avalonia.Converters.Converters.BitRateMbps;
+
 
     public static readonly InverseBoolConverter InverseBool = FzLib.Avalonia.Converters.Converters.InverseBool;
 
@@ -74,8 +73,6 @@ public static class Converters
 
     public static readonly BoolToTextDecorationConverter OverlineTextDecoration =
         FzLib.Avalonia.Converters.Converters.OverlineTextDecoration;
-
-    public static readonly BitmapAssetValueConverter BitmapAssetValue = new();
 
     public static readonly DateTimeConverter DateTime = new();
 

@@ -6,9 +6,9 @@
     <!--Avalonia版本-->
     <AvaloniaVersion>11.3.14</AvaloniaVersion>
     <!--FzLib版本-->
-    <FzLibVersion>3.3.4</FzLibVersion>
-    <!--是否使用本地最新的FzLib。非开发者本人应当设置为T。-->
-    <UseLocalFzLib>false</UseLocalFzLib>
+    <FzLibVersion>3.3.5</FzLibVersion>
+    <!--是否使用本地最新的FzLib。非开发者本人应当设置为false。-->
+    <UseLocalFzLib>true</UseLocalFzLib>
     <!--是否指定调试时的输出目录，以及指定目录位置-->
     <SpecialOutputDir>true</SpecialOutputDir>
     <OutputDir>C:\CodeTemp</OutputDir>

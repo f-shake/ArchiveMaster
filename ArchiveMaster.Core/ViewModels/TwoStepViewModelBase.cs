@@ -462,7 +462,14 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
         }
         else
         {
-            Status = Canceled;
+            if (EnableInitialize)
+            {
+                Status = Canceled;
+            }
+            else
+            {
+                ResetCommand.Execute(null);
+            }
         }
     }
 
