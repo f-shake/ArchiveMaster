@@ -8,73 +8,34 @@ public static class Converters
     public static readonly NumberToAlignmentConverter Alignment = FzLib.Avalonia.Converters.Converters.Alignment;
 
     public static readonly BoolLogicConverter AndLogic = FzLib.Avalonia.Converters.Converters.AndLogic;
-    public static readonly BoolLogicConverter OrLogic = FzLib.Avalonia.Converters.Converters.OrLogic;
-    public static readonly BoolLogicConverter NorLogic = FzLib.Avalonia.Converters.Converters.NorLogic;
-    public static readonly BoolLogicConverter XorLogic = FzLib.Avalonia.Converters.Converters.XorLogic;
-    public static readonly BoolLogicConverter NandLogic = FzLib.Avalonia.Converters.Converters.NandLogic;
-    public static readonly BoolLogicConverter XnorLogic = FzLib.Avalonia.Converters.Converters.XnorLogic;
-
+    public static readonly DataSizeConverter BitRateMbps = FzLib.Avalonia.Converters.Converters.BitRateMbps;
     public static readonly BoolToFontWeightConverter
         BoldFontWeight = FzLib.Avalonia.Converters.Converters.BoldFontWeight;
 
     public static readonly BoolToOpacityStyleConverter BoldOpacity = FzLib.Avalonia.Converters.Converters.BoldOpacity;
-
+    public static readonly BoolToIntegerConverter BoolZeroOne = FzLib.Avalonia.Converters.Converters.BoolZeroOne;
     public static readonly CountToBoolConverter CountGreaterThanZero =
         FzLib.Avalonia.Converters.Converters.CountGreaterThanZero;
 
     public static readonly CountToBoolConverter CountIsZero = FzLib.Avalonia.Converters.Converters.CountIsZero;
-
-    public static readonly BoolToIntegerConverter BoolZeroOne = FzLib.Avalonia.Converters.Converters.BoolZeroOne;
-
+    public static readonly DateTimeConverter DateTime = new();
     public static readonly DescriptionConverter Description = FzLib.Avalonia.Converters.Converters.Description;
-
     public static readonly EqualToBoolConverter EqualWithParameter =
         FzLib.Avalonia.Converters.Converters.EqualWithParameter;
 
+    public static readonly FileFilterDescriptionConverter FileFilter = new();
     public static readonly DataSizeConverter FileLength = FzLib.Avalonia.Converters.Converters.ByteLength;
-
-    public static readonly DataSizeConverter TransferSpeed = FzLib.Avalonia.Converters.Converters.ByteRate;
-
-
-    public static readonly DataSizeConverter BitRateMbps = FzLib.Avalonia.Converters.Converters.BitRateMbps;
-
+    public static readonly FilePropertyConverter FileName = new()
+    { PropertyType = FilePropertyConverter.FilePropertyType.Name };
 
     public static readonly InverseBoolConverter InverseBool = FzLib.Avalonia.Converters.Converters.InverseBool;
-
     public static readonly NullToBoolConverter IsNotNull = FzLib.Avalonia.Converters.Converters.IsNotNull;
-
     public static readonly NullToBoolConverter IsNull = FzLib.Avalonia.Converters.Converters.IsNull;
-
     public static readonly BoolToFontStyleConverter ItalicFontStyle =
         FzLib.Avalonia.Converters.Converters.ItalicFontStyle;
 
     public static readonly BoolToFontWeightConverter LightFontWeight =
         FzLib.Avalonia.Converters.Converters.LightFontWeight;
-
-    public static readonly EqualToBoolConverter NotEqualWithParameter =
-        FzLib.Avalonia.Converters.Converters.NotEqualWithParameter;
-
-
-    public static readonly StringListConverter StringList = FzLib.Avalonia.Converters.Converters.StringList;
-
-    public static readonly StringJoinConverter StringJoin = new StringJoinConverter();
-
-    public static readonly BoolToTextWrappingConverter TextWrapping = FzLib.Avalonia.Converters.Converters.TextWrapping;
-
-    public static readonly NumberToThicknessConverter Thickness = FzLib.Avalonia.Converters.Converters.Thickness;
-
-    public static readonly TimeSpanConverter TimeSpan = FzLib.Avalonia.Converters.Converters.TimeSpan;
-    public static readonly TimeSpanConverter TimeSpanMs = new TimeSpanConverter() { Format = "hh\\:mm\\:ss\\.fff" };
-
-    public static readonly TimeSpanNumberConverter TimeSpanNumber = FzLib.Avalonia.Converters.Converters.TimeSpanNumber;
-
-    public static readonly BoolToTextDecorationConverter UnderlineTextDecoration =
-        FzLib.Avalonia.Converters.Converters.UnderlineTextDecoration;
-
-    public static readonly BoolToTextDecorationConverter OverlineTextDecoration =
-        FzLib.Avalonia.Converters.Converters.OverlineTextDecoration;
-
-    public static readonly DateTimeConverter DateTime = new();
 
     public static readonly ValueMappingConverter LogMap = new()
     {
@@ -90,15 +51,29 @@ public static class Converters
         }
     };
 
-    public static readonly TupleConverter Tuple = new();
+    public static readonly BoolLogicConverter NandLogic = FzLib.Avalonia.Converters.Converters.NandLogic;
+    public static readonly BoolLogicConverter NorLogic = FzLib.Avalonia.Converters.Converters.NorLogic;
+    public static readonly EqualToBoolConverter NotEqualWithParameter =
+        FzLib.Avalonia.Converters.Converters.NotEqualWithParameter;
 
-    public static readonly FileFilterDescriptionConverter FileFilter = new();
-
-    public static readonly FilePropertyConverter FileName = new()
-        { PropertyType = FilePropertyConverter.FilePropertyType.Name };
-
-    public static StringToBindingConverter StringToBinding = new();
+    public static readonly BoolLogicConverter OrLogic = FzLib.Avalonia.Converters.Converters.OrLogic;
+    public static readonly BoolToTextDecorationConverter OverlineTextDecoration =
+        FzLib.Avalonia.Converters.Converters.OverlineTextDecoration;
 
     public static readonly IValueConverter SecondsToTimeSpanString =
-        new FuncValueConverter<double, string>(p=>System.TimeSpan.FromSeconds(p).ToString());
+        new FuncValueConverter<double, string>(p => System.TimeSpan.FromSeconds(p).ToString());
+
+    public static readonly StringListConverter StringList = FzLib.Avalonia.Converters.Converters.StringList;
+    public static readonly BoolToTextWrappingConverter TextWrapping = FzLib.Avalonia.Converters.Converters.TextWrapping;
+    public static readonly NumberToThicknessConverter Thickness = FzLib.Avalonia.Converters.Converters.Thickness;
+    public static readonly TimeSpanConverter TimeSpan = FzLib.Avalonia.Converters.Converters.TimeSpan;
+    public static readonly TimeSpanConverter TimeSpanMs = new TimeSpanConverter() { Format = "hh\\:mm\\:ss\\.fff" };
+    public static readonly TimeSpanNumberConverter TimeSpanNumber = FzLib.Avalonia.Converters.Converters.TimeSpanNumber;
+    public static readonly DataSizeConverter TransferSpeed = FzLib.Avalonia.Converters.Converters.ByteRate;
+    public static readonly TupleConverter Tuple = new();
+    public static readonly BoolToTextDecorationConverter UnderlineTextDecoration =
+        FzLib.Avalonia.Converters.Converters.UnderlineTextDecoration;
+
+    public static readonly BoolLogicConverter XnorLogic = FzLib.Avalonia.Converters.Converters.XnorLogic;
+    public static readonly BoolLogicConverter XorLogic = FzLib.Avalonia.Converters.Converters.XorLogic;
 }

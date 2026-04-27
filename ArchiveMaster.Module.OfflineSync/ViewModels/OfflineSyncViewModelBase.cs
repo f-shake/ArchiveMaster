@@ -32,31 +32,39 @@ namespace ArchiveMaster.ViewModels
             nameof(ModifiedFileLength),
             nameof(DeletedFileCount),
             nameof(MovedFileCount),
-            nameof(CheckedFileCount))]
+            nameof(CheckedFileCount),
+            nameof(DeletedFileLength))]
         private ObservableCollection<TFile> files = new ObservableCollection<TFile>();
 
-        public long AddedFileCount => Files?.Cast<FileSystem.SyncFileInfo>()
+        public long AddedFileCount => Files?.Cast<SyncFileInfo>()
             .Where(p => p.UpdateType == FileUpdateType.Add && p.IsChecked)?.Count() ?? 0;
 
-        public long AddedFileLength => Files?.Cast<FileSystem.SyncFileInfo>()
+        public long AddedFileLength => Files?.Cast<SyncFileInfo>()
             .Where(p => p.UpdateType == FileUpdateType.Add && p.IsChecked)?.Sum(p => p.Length) ?? 0;
 
         public int CheckedFileCount => Files?.Where(p => p.IsChecked)?.Count() ?? 0;
 
-        public int DeletedFileCount => Files?.Cast<FileSystem.SyncFileInfo>()
+        public int DeletedFileCount => Files?.Cast<SyncFileInfo>()
             .Where(p => p.UpdateType == FileUpdateType.Delete && p.IsChecked)?.Count() ?? 0;
+
+        public long DeletedFileLength => Files?.Cast<SyncFileInfo>()
+            .Where(p => p.UpdateType == FileUpdateType.Delete && p.IsChecked)?.Sum(p => p.Length) ?? 0;
 
         public char DirectorySeparatorChar => Path.DirectorySeparatorChar;
 
-        public long ModifiedFileCount => Files?.Cast<FileSystem.SyncFileInfo>()
+        public long ModifiedFileCount => Files?.Cast<SyncFileInfo>()
             .Where(p => p.UpdateType == FileUpdateType.Modify && p.IsChecked)?.Count() ?? 0;
 
-        public long ModifiedFileLength => Files?.Cast<FileSystem.SyncFileInfo>()
+        public long ModifiedFileLength => Files?.Cast<SyncFileInfo>()
             .Where(p => p.UpdateType == FileUpdateType.Modify && p.IsChecked)?.Sum(p => p.Length) ?? 0;
-
-        public int MovedFileCount => Files?.Cast<FileSystem.SyncFileInfo>()
+        public int MovedFileCount => Files?.Cast<SyncFileInfo>()
             .Where(p => p.UpdateType == FileUpdateType.Move && p.IsChecked)?.Count() ?? 0;
 
+
+        protected override void OnReset()
+        {
+            Files = new ObservableCollection<TFile>();
+        }
 
         private void AddFileCheckedNotify(SimpleFileInfo file)
         {
@@ -68,7 +76,7 @@ namespace ArchiveMaster.ViewModels
                 }
 
                 OnPropertyChanged(nameof(CheckedFileCount));
-                if (s is not FileSystem.SyncFileInfo syncFile)
+                if (s is not SyncFileInfo syncFile)
                 {
                     return;
                 }
@@ -87,6 +95,7 @@ namespace ArchiveMaster.ViewModels
 
                     case FileUpdateType.Delete:
                         OnPropertyChanged(nameof(DeletedFileCount));
+                        OnPropertyChanged(nameof(DeletedFileLength));
                         break;
 
                     case FileUpdateType.Move:
@@ -108,7 +117,7 @@ namespace ArchiveMaster.ViewModels
                 return;
             }
 
-            value.ForEach(p => AddFileCheckedNotify(p));
+            value.ForEach(AddFileCheckedNotify);
             value.CollectionChanged += (s, e) => throw new NotSupportedException("不允许对集合进行修改");
         }
 
@@ -123,11 +132,6 @@ namespace ArchiveMaster.ViewModels
         private void SelectNone()
         {
             Files?.ForEach(p => p.IsChecked = false);
-        }
-
-        protected override void OnReset()
-        {
-            Files = new ObservableCollection<TFile>();
         }
     }
 }

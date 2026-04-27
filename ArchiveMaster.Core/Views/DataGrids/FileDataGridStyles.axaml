@@ -29,7 +29,7 @@
                         Classes="BoldLabel"
                         Label="路径："
                         LabelWidth="{StaticResource FileDataGridRowDetailLabelWidth}">
-                        <Grid ColumnDefinitions="*,8,Auto,0,Auto,0,Auto">
+                        <Grid ColumnDefinitions="*,8,Auto,0,Auto">
                             <Grid.Styles>
                                 <Style Selector="Button">
                                     <Setter Property="Height" Value="20" />
@@ -39,28 +39,20 @@
                             <Button
                                 Grid.Column="2"
                                 Classes="Link"
-                                Command="{Binding Source={x:Static vm:GlobalCommands.Instance}, Path=CopyTextCommand}"
-                                CommandParameter="{Binding Path}"
-                                IsVisible="{Binding Path, Converter={x:Static cvt:Converters.IsNotNull}}">
-                                <ic:FluentIcon
-                                    Height="16"
-                                    Icon="Copy" />
-                            </Button>
-                            <Button
-                                Grid.Column="4"
-                                Classes="Link"
                                 Command="{Binding Source={x:Static vm:GlobalCommands.Instance}, Path=OpenFileCommand}"
                                 CommandParameter="{Binding Path}"
+                                Focusable="False"
                                 IsVisible="{Binding Path, Converter={x:Static cvt:Converters.IsNotNull}}">
                                 <ic:FluentIcon
                                     Height="16"
                                     Icon="Document" />
                             </Button>
                             <Button
-                                Grid.Column="6"
+                                Grid.Column="4"
                                 Classes="Link"
                                 Command="{Binding Source={x:Static vm:GlobalCommands.Instance}, Path=OpenParentDirCommand}"
                                 CommandParameter="{Binding Path}"
+                                Focusable="False"
                                 IsVisible="{Binding Path, Converter={x:Static cvt:Converters.IsNotNull}}">
                                 <ic:FluentIcon
                                     Height="16"

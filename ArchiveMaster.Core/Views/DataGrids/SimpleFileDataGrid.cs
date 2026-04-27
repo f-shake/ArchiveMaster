@@ -493,6 +493,8 @@ public class SimpleFileDataGrid : DataGrid
 
     #region 详情面板
 
+    private int popupVersion;
+
     private void TryClosePopupWhenLostFocus()
     {
         if (TopLevel.GetTopLevel(this)?.IsFocused == true || IsFocused || detailPopup.IsFocused)
@@ -508,20 +510,38 @@ public class SimpleFileDataGrid : DataGrid
             return;
         }
 
-        if (detailPopup.IsPointerOverPopup || detailPopup.IsPointerOver)
-        {
-            Debug.WriteLine("不关闭Popup（鼠标在Popup上）");
-            return;
-        }
+        // if (detailPopup.IsPointerOverPopup || detailPopup.IsPointerOver)
+        // {
+        //     Debug.WriteLine("不关闭Popup（鼠标在Popup上）");
+        //     return;
+        // }
 
-        if (f != null)
-        {
-            Debug.WriteLine($"不关闭Popup（当前Focus：{f}）");
-            return;
-        }
+        // if (f != null)
+        // {
+        //     Debug.WriteLine($"不关闭Popup（当前Focus：{f}）");
+        //     return;
+        // }
 
         Debug.WriteLine("关闭Popup");
-        detailPopup.Close();
+        // if (TopLevel.GetTopLevel(this)?.IsFocused == false)
+        // {
+        //     //如果窗口失去焦点，直接关闭
+        //     Debug.WriteLine("窗口失去焦点，直接关闭Popup");
+        //     detailPopup.Close();
+        // }
+        // else
+        // {
+        // Debug.WriteLine("窗口未失去焦点，延迟关闭Popup");
+        var currentVersion = popupVersion;
+        Task.Delay(100).ContinueWith(_ =>
+        {
+            //切换选择的文件时，焦点会短暂离开Popup。此时若直接关闭，会导致闪烁。
+            if (currentVersion == popupVersion) //期间没有新的Popup打开
+            {
+                detailPopup.Close();
+            }
+        }, TaskScheduler.FromCurrentSynchronizationContext());
+        // }
     }
 
     private void TryOpenPopupWhenSelectionChanged()
@@ -535,6 +555,7 @@ public class SimpleFileDataGrid : DataGrid
             // if (row != null)
             // {
             // detailPopup.PlacementTarget = row;
+            Interlocked.Increment(ref popupVersion);
             Debug.WriteLine("打开Popup");
             detailPopup.Open();
             Focus(); //将焦点重新回到DataGrid
