@@ -50,13 +50,13 @@
                 <Button
                     Classes="Icon"
                     Command="{Binding RemoveSelectedCommand}"
-                    Content="{ic:FluentIcon Icon=Delete}"
+                    Content="{ic:FluentIcon Icon=LineHorizontal1}"
                     IsEnabled="{Binding SelectedSyncDir, Converter={x:Static cvt:Converters.IsNotNull}}"
                     ToolTip.Tip="移除选中项" />
                 <Button
                     Classes="Icon"
                     Command="{Binding RemoveAllCommand}"
-                    Content="{ic:FluentIcon Icon=ArrowClockwise}"
+                    Content="{ic:FluentIcon Icon=Delete}"
                     ToolTip.Tip="移除全部" />
             </StackPanel>
         </Grid>

@@ -39,6 +39,18 @@ public static class FileHelper
                        """
     };
 
+    public static FileFilterRule VideoFileFilterRule => new FileFilterRule()
+    {
+        IncludeFiles = """
+                       *.avi
+                       *.mp4
+                       *.webp
+                       *.3gp
+                       *.mkv
+                       *.mov
+                       """
+    };
+
     private static void TryDirectlyDelete(string path)
     {
         try

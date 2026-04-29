@@ -22,31 +22,9 @@ namespace ArchiveMaster.Services
 
         public static TimeSpan? GetVideoLength(string path, string ffprobePath)
         {
-            ProcessStartInfo startInfo = new ProcessStartInfo()
-            {
-                UseShellExecute = false,
-                CreateNoWindow = true,
-                RedirectStandardError = true,
-                RedirectStandardInput = true,
-                RedirectStandardOutput = true,
-                FileName = ffprobePath,
-                Arguments =
-                    $"-v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 \"{path}\""
-            };
-
-            using Process p = new Process();
-            p.StartInfo = startInfo;
-            p.Start();
-            p.WaitForExit();
-            var output = p.StandardOutput.ReadToEnd().Trim();
-            if (double.TryParse(output, out double length))
-            {
-                return TimeSpan.FromSeconds(length);
-            }
-            else
-            {
-                return null;
-            }
+            var output = ExecutableDependencyHelper.GetProgramOutput(ffprobePath,
+                $"-v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 \"{path}\"");
+            return double.TryParse(output, out double length) ? TimeSpan.FromSeconds(length) : null;
         }
 
         private void Export(TimeAssVideoFileInfo file, string exportPath)

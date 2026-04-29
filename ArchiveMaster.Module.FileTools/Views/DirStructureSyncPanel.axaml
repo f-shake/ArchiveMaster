@@ -28,18 +28,6 @@
                     <Style Selector="SelectableTextBlock">
                         <Setter Property="TextWrapping" Value="Wrap" />
                     </Style>
-                    <Style Selector="ctrl|FormItem">
-                        <Setter Property="LabelWidth" Value="72" />
-                        <Setter Property="LabelTemplate">
-                            <Setter.Value>
-                                <DataTemplate>
-                                    <TextBlock
-                                        FontWeight="Bold"
-                                        Text="{Binding .}" />
-                                </DataTemplate>
-                            </Setter.Value>
-                        </Setter>
-                    </Style>
                 </Grid.Styles>
                 <TextBlock
                     FontWeight="Bold"
@@ -50,21 +38,25 @@
                     Text="源文件信息" />
                 <ctrl:FormItem
                     Grid.Row="2"
+                    Classes="BoldLabel"
                     Label="文件名：">
                     <SelectableTextBlock Text="{Binding Template.Name}" />
                 </ctrl:FormItem>
                 <ctrl:FormItem
                     Grid.Row="4"
+                    Classes="BoldLabel"
                     Label="相对路径：">
                     <SelectableTextBlock Text="{Binding Template.Path}" />
                 </ctrl:FormItem>
                 <ctrl:FormItem
                     Grid.Row="6"
+                    Classes="BoldLabel"
                     Label="文件大小：">
                     <SelectableTextBlock Text="{Binding Template.Length, Converter={x:Static cvt:Converters.FileLength}}" />
                 </ctrl:FormItem>
                 <ctrl:FormItem
                     Grid.Row="8"
+                    Classes="BoldLabel"
                     Label="修改时间：">
                     <SelectableTextBlock Text="{Binding Template.Time, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}" />
                 </ctrl:FormItem>
@@ -72,24 +64,28 @@
                 <ctrl:FormItem
                     Grid.Row="2"
                     Grid.Column="2"
+                    Classes="BoldLabel"
                     Label="文件名：">
                     <SelectableTextBlock Text="{Binding Name}" />
                 </ctrl:FormItem>
                 <ctrl:FormItem
                     Grid.Row="4"
                     Grid.Column="2"
+                    Classes="BoldLabel"
                     Label="相对路径：">
                     <SelectableTextBlock Text="{Binding Path}" />
                 </ctrl:FormItem>
                 <ctrl:FormItem
                     Grid.Row="6"
                     Grid.Column="2"
+                    Classes="BoldLabel"
                     Label="文件大小：">
                     <SelectableTextBlock Text="{Binding Length, Converter={x:Static cvt:Converters.FileLength}}" />
                 </ctrl:FormItem>
                 <ctrl:FormItem
                     Grid.Row="8"
                     Grid.Column="2"
+                    Classes="BoldLabel"
                     Label="修改时间：">
                     <SelectableTextBlock Text="{Binding Time, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}" />
                 </ctrl:FormItem>
@@ -156,13 +152,9 @@
                 ColumnPathIndex="1.2"
                 ColumnTimeIndex="2.4"
                 ItemsSource="{Binding Files}"
-                RowDetailsTemplate="{StaticResource DataGridDetailTemplate}"
+                RowDetailsPopupTemplate="{StaticResource DataGridDetailTemplate}"
                 ShowCount="False">
-                <DataGrid.Resources>
-                    <c:DirStructureSyncTypeDescriptionConverter x:Key="DirStructureSyncTypeDescriptionConverter" />
-                </DataGrid.Resources>
                 <DataGrid.Columns>
-
                     <DataGridTemplateColumn
                         CanUserResize="False"
                         Header="多匹配">

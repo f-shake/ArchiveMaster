@@ -288,9 +288,6 @@ public class TreeFileDataGrid : SimpleFileDataGrid
         return tbkName;
     }
 
-    protected override void OnFileDoubleTapped(SimpleFileInfo file)
-    {
-    }
 
     private void Collapse(TreeDirInfo dir)
     {

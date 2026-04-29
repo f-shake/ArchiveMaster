@@ -13,35 +13,48 @@ namespace ArchiveMaster.ViewModels;
 public partial class PhotoTagSearcherViewModel(ViewModelServices services)
     : TwoStepViewModelBase<PhotoTagSearcherService, PhotoTagSearcherConfig>(services)
 {
+    [NotifyPropertyChangedFor(nameof(Tags))]
+    [ObservableProperty]
+    private bool enableColorTags = true;
+
+    [NotifyPropertyChangedFor(nameof(Tags))]
+    [ObservableProperty]
+    private bool enableDescriptionTags = true;
+
+    [NotifyPropertyChangedFor(nameof(Tags))]
+    [ObservableProperty]
+    private bool enableMoodTags = true;
+
+    [NotifyPropertyChangedFor(nameof(Tags))]
+    [ObservableProperty]
+    private bool enableObjectTags = true;
+
+    [NotifyPropertyChangedFor(nameof(Tags))]
+    [ObservableProperty]
+    private bool enableSceneTags = true;
+
+    [NotifyPropertyChangedFor(nameof(Tags))]
+    [ObservableProperty]
+    private bool enableTechniqueTags = true;
+
+    [NotifyPropertyChangedFor(nameof(Tags))]
+    [ObservableProperty]
+    private bool enableTextTags = true;
+
     [ObservableProperty]
     private List<TaggingPhotoFileInfo> files;
 
     [ObservableProperty]
     private bool hasLoaded = false;
 
-    [NotifyPropertyChangedFor(nameof(TagTypes))]
     [ObservableProperty]
-    private bool partial = false;
+    private bool partial = true;
 
     [ObservableProperty]
     private string searchKeyword = "";
 
-    [NotifyPropertyChangedFor(nameof(Tags))]
-    [ObservableProperty]
-    private TagType tagType = TagType.All;
-
     public override bool EnableInitialize => false;
-    public TagType[] TagTypes => Partial
-        ? Enum.GetValues<TagType>()
-        :
-        [
-            TagType.All,
-            TagType.Object,
-            TagType.Scene,
-            TagType.Mood,
-            TagType.Color,
-            TagType.Technique
-        ];
+
     private List<TagAndCount> Tags
     {
         get
@@ -51,18 +64,37 @@ public partial class PhotoTagSearcherViewModel(ViewModelServices services)
                 return null;
             }
 
-            return TagType switch
+            List<List<TagAndCount>> tags = new List<List<TagAndCount>>();
+
+            if (EnableObjectTags)
             {
-                TagType.All => Service.AllTags,
-                TagType.Object => Service.ObjectTags,
-                TagType.Scene => Service.SceneTags,
-                TagType.Color => Service.ColorTags,
-                TagType.Mood => Service.MoodTags,
-                TagType.Technique => Service.TechniqueTags,
-                _ => []
-            };
+                tags.Add(Service.ObjectTags);
+            }
+
+            if (EnableSceneTags)
+            {
+                tags.Add(Service.SceneTags);
+            }
+
+            if (EnableMoodTags)
+            {
+                tags.Add(Service.MoodTags);
+            }
+
+            if (EnableColorTags)
+            {
+                tags.Add(Service.ColorTags);
+            }
+
+            if (EnableTechniqueTags)
+            {
+                tags.Add(Service.TechniqueTags);
+            }
+
+            return tags.SelectMany(p => p).ToList();
         }
     }
+
     protected override Task OnExecutedAsync(CancellationToken ct)
     {
         Files = Service.AllFiles;
@@ -78,9 +110,53 @@ public partial class PhotoTagSearcherViewModel(ViewModelServices services)
         HasLoaded = false;
     }
 
+    partial void OnPartialChanged(bool value)
+    {
+        if (!value)
+        {
+            EnableTextTags = false;
+            EnableDescriptionTags = false;
+        }
+    }
     [RelayCommand]
     private async Task SearchAsync()
     {
-        Files = await Service.SearchAsync(TagType, SearchKeyword, Partial);
+        var tagType = TagType.None;
+        if (EnableObjectTags)
+        {
+            tagType |= TagType.Object;
+        }
+
+        if (EnableSceneTags)
+        {
+            tagType |= TagType.Scene;
+        }
+
+        if (EnableMoodTags)
+        {
+            tagType |= TagType.Mood;
+        }
+
+        if (EnableColorTags)
+        {
+            tagType |= TagType.Color;
+        }
+
+        if (EnableTechniqueTags)
+        {
+            tagType |= TagType.Technique;
+        }
+
+        if (EnableTextTags)
+        {
+            tagType |= TagType.Text;
+        }
+
+        if (EnableDescriptionTags)
+        {
+            tagType |= TagType.Description;
+        }
+
+        Files = await Service.SearchAsync(tagType, SearchKeyword, Partial);
     }
 }

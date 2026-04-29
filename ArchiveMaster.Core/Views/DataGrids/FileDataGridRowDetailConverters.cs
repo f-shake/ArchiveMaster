@@ -14,36 +14,36 @@ namespace ArchiveMaster.Views;
 
 internal static class FileDataGridRowDetailConverters
 {
+    public static FuncValueConverter<SimpleFileInfo, InlineCollection> FileMetadataToInlineConverter =
+        new FuncValueConverter<SimpleFileInfo, InlineCollection>(f =>
+        {
+            InlineCollection ic = new InlineCollection();
+            if (f == null)
+            {
+                return null;
+            }
+
+            if (f.IsDir)
+            {
+                ic.Add("文件夹");
+            }
+            else
+            {
+                ic.Add(new Run((string)Converters.Converters.FileLength.Convert(f.Length,
+                    typeof(string), null,
+                    CultureInfo.CurrentCulture)));
+            }
+
+            ic.Add("    ");
+            ic.Add(new Run(f.Time.ToString("yyyy-MM-dd HH:mm:ss")));
+            return ic;
+        });
+
     public static FuncValueConverter<SimpleFileInfo, InlineCollection> FilePathToInlineConverter =
         new FuncValueConverter<SimpleFileInfo, InlineCollection>(f =>
         {
             InlineCollection ic = new InlineCollection();
 
-            void AddOpenFileButton()
-            {
-                ic.Add(new InlineUIContainer(new Button()
-                {
-                    Content = new FluentIcon { Icon = Icon.Document,Height = 16,Width = 16 },
-                    Padding = new Thickness(),
-                    Height = 16,
-                    Classes = { "Link" },
-                    VerticalAlignment = VerticalAlignment.Bottom,
-                    Margin = new Thickness(8, -2),
-                    Command = GlobalCommands.Instance.OpenFileCommand,
-                    CommandParameter = f.Path
-                }));
-                ic.Add(new InlineUIContainer(new Button()
-                {
-                    Content = new FluentIcon { Icon = Icon.FolderOpen, Width = 20 },
-                    Padding = new Thickness(),
-                    Height = 16,
-                    Classes = { "Link" },
-                    VerticalAlignment = VerticalAlignment.Bottom,
-                    Margin = new Thickness(8, -2),
-                    Command = GlobalCommands.Instance.OpenParentDirCommand,
-                    CommandParameter = f.Path
-                }));
-            }
 
             if (f == null || string.IsNullOrEmpty(f.Path))
             {
@@ -55,7 +55,6 @@ internal static class FileDataGridRowDetailConverters
             if (string.IsNullOrEmpty(f.RelativePath))
             {
                 ic.Add(new Run(f.Path));
-                AddOpenFileButton();
                 return ic;
             }
 
@@ -63,7 +62,6 @@ internal static class FileDataGridRowDetailConverters
             if (!f.Path.EndsWith(f.RelativePath))
             {
                 ic.Add(new Run($"{f.Path}（{f.RelativePath}）"));
-                AddOpenFileButton();
                 return ic;
             }
 
@@ -71,31 +69,6 @@ internal static class FileDataGridRowDetailConverters
             var relPath = f.Path[..^f.RelativePath.Length];
             ic.Add(new Run(relPath));
             ic.Add(new Run(f.RelativePath) { TextDecorations = TextDecorations.Underline });
-            AddOpenFileButton();
             return ic;
         });
-
-    public static FuncValueConverter<SimpleFileInfo, InlineCollection> FileMetadataToInlineConverter =
-        new FuncValueConverter<SimpleFileInfo, InlineCollection>(f =>
-        {
-            InlineCollection ic = new InlineCollection();
-            if (f == null)
-            {
-                return null;
-            }
-            if (!f.IsDir)
-            {
-                ic.Add(new Run((string)Converters.Converters.FileLength.Convert(f.Length,
-                    typeof(string), null,
-                    CultureInfo.CurrentCulture))
-                {
-                    FontStyle = FontStyle.Italic
-                });
-            }
-
-            ic.Add("    ");
-            ic.Add(new Run(f.Time.ToString("yyyy-MM-dd HH:mm:ss")));
-            return ic;
-        });
-
 }

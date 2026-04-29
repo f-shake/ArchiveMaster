@@ -100,19 +100,19 @@ namespace ArchiveMaster.Services
 
             NotifyProgressIndeterminate();
             NotifyMessage("正在枚举文件");
-
-            await TryForFilesAsync(new DirectoryInfo(sourceDir)
-                .EnumerateFiles("*", FileEnumerateExtension.GetEnumerationOptions())
-                .Where(p => p.Extension != EncryptedFileMetadataExtension)
-                .ApplyFilter(ct)
-                .Select(p => new EncryptorFileInfo(p, sourceDir)), (file, s) =>
+            await Task.Run(() =>
             {
-                ProcessFileNames(file);
-
-                NotifyMessage($"正在加入{s.GetFileNumberMessage()}：{file.Name}");
-                files.Add(file);
-            }, ct, FilesLoopOptions.DoNothing());
-
+                TryForFiles(new DirectoryInfo(sourceDir)
+                    .EnumerateFiles("*", FileEnumerateExtension.GetEnumerationOptions())
+                    .Where(p => p.Extension != EncryptedFileMetadataExtension)
+                    .ApplyFilter(ct)
+                    .Select(p => new EncryptorFileInfo(p, sourceDir)), (file, s) =>
+                {
+                    ProcessFileNames(file);
+                    NotifyMessage($"正在加入{s.GetFileNumberMessage()}：{file.Name}");
+                    files.Add(file);
+                }, ct, FilesLoopOptions.DoNothing());
+            }, ct);
             ProcessingFiles = files;
         }
 

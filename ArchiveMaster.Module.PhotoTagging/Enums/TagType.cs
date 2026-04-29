@@ -2,22 +2,30 @@
 
 namespace ArchiveMaster.Enums;
 
+[Flags]
 public enum TagType
 {
-    [Description("全部")]
-    All,
+    [Description("无")]
+    None = 0x01,
+
     [Description("对象")]
-    Object,
+    Object = 0x02,
+
     [Description("场景")]
-    Scene,
+    Scene = 0x04,
+
     [Description("情绪")]
-    Mood,
+    Mood = 0x08,
+
     [Description("颜色")]
-    Color,
+    Color = 0x10,
+
     [Description("拍摄")]
-    Technique,
+    Technique = 0x20,
+
     [Description("文本")]
-    Text,
+    Text = 0x40,
+
     [Description("描述")]
-    Description
+    Description = 0x80,
 }

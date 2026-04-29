@@ -2,6 +2,7 @@
 using ArchiveMaster.Configs;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -91,6 +92,8 @@ namespace ArchiveMaster.Services
 
         public List<TaggingPhotoFileInfo> Files { get; private set; }
 
+        public List<TaggedPhoto> UnusedExistingTaggedPhotos { get; private set; }
+
         public override async Task ExecuteAsync(CancellationToken ct = default)
         {
             systemPrompts = SYSTEM_PROMPT
@@ -159,8 +162,8 @@ namespace ArchiveMaster.Services
                         {
                             int currentIndex = Interlocked.Increment(ref index);
                             NotifyMessage(
-                                $"正在生成图片标签（{currentIndex}/{files.Count}，累计{generated + 1}/{Files.Count}）：{item.File.RelativePath}");
-                            NotifyProgress(currentIndex - 1, files.Count);
+                                $"正在生成图片标签（{1 + generated}/{Files.Count}，本次{currentIndex}/{files.Count}）：{item.File.RelativePath}");
+                            NotifyProgress(generated, Files.Count);
 
                             if (item.Bytes == null)
                             {
@@ -263,20 +266,25 @@ namespace ArchiveMaster.Services
 
         public override async Task InitializeAsync(CancellationToken ct = default)
         {
-            NotifyMessage("正在查找文件");
             List<TaggingPhotoFileInfo> files = new List<TaggingPhotoFileInfo>();
             await Task.Run(async () =>
             {
+                NotifyMessage("正在查找文件");
                 var enumerableFiles = new DirectoryInfo(Config.Dir)
                     .EnumerateFiles("*", FileEnumerateExtension.GetEnumerationOptions())
                     .ApplyFilter(ct, Config.Filter)
                     .Select(p => new TaggingPhotoFileInfo(p, Config.Dir));
 
-                var existingFiles = new Dictionary<string, TaggedPhoto>();
+                NotifyMessage("正在查找已保存的标签");
+                FrozenDictionary<string, TaggedPhoto> existingFiles = null;
                 if (File.Exists(Config.TagFile))
                 {
                     existingFiles = (await TagFileHelper.ReadPhotoTagCollectionAsync(Config.TagFile, ct)).Photos
-                        .ToDictionary(p => p.RelativePath);
+                        .ToDictionary(p => p.RelativePath).ToFrozenDictionary();
+                }
+                else
+                {
+                    existingFiles = FrozenDictionary<string, TaggedPhoto>.Empty;
                 }
 
                 await TryForFilesAsync(enumerableFiles, (file, s) =>
@@ -293,6 +301,15 @@ namespace ArchiveMaster.Services
                     },
                     ct,
                     FilesLoopOptions.DoNothing());
+
+                NotifyMessage("正在查找没有使用到的旧标签");
+                var taggedFilesRelativePath = files
+                    .Where(p => p.HasGenerated)
+                    .Select(p => p.RelativePath)
+                    .ToHashSet();
+                UnusedExistingTaggedPhotos = existingFiles.Values
+                    .Where(photo => !taggedFilesRelativePath.Contains(photo.RelativePath))
+                    .ToList();
             }, ct);
 
             Files = files;

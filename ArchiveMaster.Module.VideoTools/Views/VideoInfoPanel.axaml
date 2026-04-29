@@ -1,0 +1,127 @@
+﻿<v:VerticalTwoStepPanelBase
+    x:Class="ArchiveMaster.Views.VideoInfoPanel"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ct="using:FzLib.Avalonia.Controls"
+    xmlns:cvt="using:ArchiveMaster.Converters"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:enums="using:ArchiveMaster.Enums"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:v="using:ArchiveMaster.Views"
+    xmlns:vm="clr-namespace:ArchiveMaster.ViewModels"
+    x:Name="root"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    x:DataType="vm:TimeAssViewModel"
+    ExecuteButtonContent="提取元数据"
+    mc:Ignorable="d">
+    <v:VerticalTwoStepPanelBase.ConfigsContent>
+        <ct:FormItem Label="目录：">
+            <v:FilePickerTextBox
+                FileNames="{Binding Config.Dir}"
+                Filter="{Binding Config.Filter}"
+                IsFilterBarVisible="True"
+                Type="OpenFolder" />
+        </ct:FormItem>
+    </v:VerticalTwoStepPanelBase.ConfigsContent>
+    <v:VerticalTwoStepPanelBase.ResultsContent>
+        <UniformGrid
+            Columns="1"
+            RowSpacing="8"
+            Rows="2">
+            <v:SimpleFileDataGrid
+                ItemsSource="{Binding Files}"
+                SelectedItem="{Binding SelectedFile}">
+                <v:SimpleFileDataGrid.Columns>
+                    <DataGridTextColumn
+                        Binding="{Binding VideoInfo.Format.FormatLongName}"
+                        Header="格式"
+                        IsReadOnly="True" />
+                    <DataGridTextColumn
+                        Binding="{Binding VideoInfo.Format.StreamCount, Converter={x:Static cvt:VideoInfoValidNumberConverter.Instance}, Mode=OneWay}"
+                        Header="流数量"
+                        IsReadOnly="True" />
+                    <DataGridTextColumn
+                        Binding="{Binding VideoInfo.Format.Duration, Converter={x:Static cvt:Converters.SecondsToTimeSpanString}, Mode=OneWay}"
+                        Header="时长"
+                        IsReadOnly="True" />
+                    <DataGridTextColumn
+                        Binding="{Binding VideoInfo.Format.TotalBitRate, Converter={x:Static cvt:Converters.BitRateMbps}, Mode=OneWay}"
+                        Header="码率"
+                        IsReadOnly="True" />
+                </v:SimpleFileDataGrid.Columns>
+                <v:SimpleFileDataGrid.Footer>
+                    <Button
+                        VerticalAlignment="Top"
+                        Classes="Link"
+                        Content="导出为CSV表格"
+                        IsEnabled="{Binding Status, Converter={x:Static cvt:Converters.EqualWithParameter}, ConverterParameter={x:Static enums:TwoStepViewModelStatus.Executed}}">
+                        <Button.Flyout>
+                            <MenuFlyout>
+                                <MenuItem
+                                    Command="{Binding ExportCsvCommand}"
+                                    CommandParameter="wide"
+                                    Header="导出包含所有流的宽表" />
+                                <MenuItem
+                                    Command="{Binding ExportCsvCommand}"
+                                    CommandParameter="main"
+                                    Header="导出包含主要流的表" />
+                            </MenuFlyout>
+                        </Button.Flyout>
+                    </Button>
+                </v:SimpleFileDataGrid.Footer>
+            </v:SimpleFileDataGrid>
+            <DataGrid
+                IsReadOnly="True"
+                ItemsSource="{Binding SelectedFile.VideoInfo.Streams}">
+                <DataGrid.Columns>
+                    <DataGridTextColumn
+                        Binding="{Binding Index, Converter={x:Static cvt:VideoInfoValidNumberConverter.Instance}, Mode=OneWay}"
+                        Header="序号" />
+                    <DataGridTextColumn
+                        Binding="{Binding CodecType, Converter={x:Static cvt:Converters.Description}, Mode=OneWay}"
+                        Header="类型" />
+                    <DataGridTextColumn
+                        Binding="{Binding CodecLongName}"
+                        Header="编码" />
+                    <DataGridTextColumn
+                        Binding="{Binding TotalBitRate, Converter={x:Static cvt:Converters.BitRateMbps}, Mode=OneWay}"
+                        Header="码率" />
+                    <DataGridTextColumn
+                        Binding="{Binding Duration, Converter={x:Static cvt:Converters.SecondsToTimeSpanString}, Mode=OneWay}"
+                        Header="时长" />
+                    <DataGridTextColumn
+                        Binding="{Binding Profile}"
+                        Header="预设" />
+                    <DataGridTextColumn
+                        Binding="{Binding Size}"
+                        Header="分辨率" />
+                    <DataGridTextColumn
+                        Binding="{Binding ColorRange}"
+                        Header="色彩范围" />
+                    <DataGridTextColumn
+                        Binding="{Binding ColorSpace}"
+                        Header="色彩空间" />
+                    <DataGridTextColumn
+                        Binding="{Binding TargetFrameRate, Converter={x:Static cvt:VideoInfoValidNumberConverter.Instance}, Mode=OneWay}"
+                        Header="目标帧率" />
+                    <DataGridTextColumn
+                        Binding="{Binding ActualFrameRate, Converter={x:Static cvt:VideoInfoValidNumberConverter.Instance}, Mode=OneWay}"
+                        Header="实际帧率" />
+                    <DataGridTextColumn
+                        Binding="{Binding FrameCount, Converter={x:Static cvt:VideoInfoValidNumberConverter.Instance}, Mode=OneWay}"
+                        Header="帧数量" />
+                    <DataGridTextColumn
+                        Binding="{Binding Channels, Converter={x:Static cvt:VideoInfoValidNumberConverter.Instance}, Mode=OneWay}"
+                        Header="通道" />
+                    <DataGridTextColumn
+                        Binding="{Binding ChannelLayout}"
+                        Header="通道布局" />
+                    <DataGridTextColumn
+                        Binding="{Binding SampleRate, Converter={x:Static cvt:VideoInfoValidNumberConverter.Instance}, Mode=OneWay}"
+                        Header="采样率" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </UniformGrid>
+    </v:VerticalTwoStepPanelBase.ResultsContent>
+</v:VerticalTwoStepPanelBase>

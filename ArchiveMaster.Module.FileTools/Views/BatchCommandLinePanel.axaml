@@ -90,17 +90,10 @@
     <v:VerticalTwoStepPanelBase.ResultsContent>
         <Grid RowDefinitions="*,8,Auto">
             <v:SimpleFileDataGrid ItemsSource="{Binding Files}">
-                <DataGrid.RowDetailsTemplate>
+                <v:SimpleFileDataGrid.RowDetailsPopupTemplate>
                     <DataTemplate>
-                        <StackPanel
-                            Margin="{StaticResource FileDataGridRowDetailPadding}"
-                            Spacing="8">
-                            <ContentControl
-                                Content="{Binding}"
-                                ContentTemplate="{StaticResource FileDataGridRowDetailPathTemplate}" />
-                            <ContentControl
-                                Content="{Binding}"
-                                ContentTemplate="{StaticResource FileDataGridRowDetailMetadataTemplate}" />
+                        <StackPanel Spacing="{StaticResource FileDataGridRowDetailPopupSpacing}">
+                            <v:FileDataGridRowDetailDefaultContent Content="{Binding .}" />
                             <ct:FormItem
                                 Classes="BoldLabel"
                                 Label="命令行："
@@ -109,7 +102,7 @@
                             </ct:FormItem>
                             <ct:FormItem
                                 Classes="BoldLabel"
-                                Label="自动创建目录："
+                                Label="创建目录："
                                 LabelWidth="{StaticResource FileDataGridRowDetailLabelWidth}">
                                 <TextBlock Text="{Binding AutoCreateDir}" />
                             </ct:FormItem>
@@ -125,12 +118,9 @@
                                 LabelWidth="{StaticResource FileDataGridRowDetailLabelWidth}">
                                 <TextBlock Text="{Binding ProcessError}" />
                             </ct:FormItem>
-                            <ContentControl
-                                Content="{Binding}"
-                                ContentTemplate="{StaticResource FileDataGridRowDetailMessageTemplate}" />
                         </StackPanel>
                     </DataTemplate>
-                </DataGrid.RowDetailsTemplate>
+                </v:SimpleFileDataGrid.RowDetailsPopupTemplate>
             </v:SimpleFileDataGrid>
             <TextBlock
                 Grid.Row="2"

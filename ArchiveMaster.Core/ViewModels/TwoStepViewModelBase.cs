@@ -9,12 +9,14 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using ArchiveMaster.Configs;
+using ArchiveMaster.Enums;
 using Avalonia.Controls;
 using FzLib.Avalonia.Dialogs;
 using Mapster;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using ArchiveMaster.ViewModels.FileSystem;
+using static ArchiveMaster.Enums.TwoStepViewModelStatus;
 
 namespace ArchiveMaster.ViewModels;
 
@@ -46,61 +48,55 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
 
     #endregion
 
-    #region 按钮可执行性
+
+    #region 状态和按钮可执行性
+
+    public TwoStepViewModelStatus Status
+    {
+        get;
+        private set
+        {
+            var newValue = value;
+            if (!EnableInitialize)
+            {
+                //如果不启用初始化，将不存在Initializing、Initialized、Executed和Canceled。理论上，也不会有Cancelling。
+                if (newValue is Initializing or Initialized or Executed or Canceled)
+                {
+                    newValue = Ready;
+                }
+            }
+
+            SetProperty(ref field, newValue);
+            OnPropertyChanged(nameof(CanCancel));
+            OnPropertyChanged(nameof(CanInitialize));
+            OnPropertyChanged(nameof(CanReset));
+            OnPropertyChanged(nameof(CanExecute));
+            InitializeCommand.NotifyCanExecuteChanged();
+            ExecuteCommand.NotifyCanExecuteChanged();
+            CancelCommand.NotifyCanExecuteChanged();
+            ResetCommand.NotifyCanExecuteChanged();
+        }
+    }
 
     /// <summary>
     /// 能否取消
     /// </summary>
-    [ObservableProperty]
-    private bool canCancel = false;
+    public bool CanCancel => Status is Initializing or Executing;
 
     /// <summary>
     /// 是否允许执行
     /// </summary>
-    [ObservableProperty]
-    private bool canExecute = false;
+    public bool CanExecute => EnableInitialize ? Status is Initialized : Status is Ready;
 
     /// <summary>
     /// 是否允许初始化
     /// </summary>
-    [ObservableProperty]
-    private bool canInitialize = true;
+    public bool CanInitialize => EnableInitialize && Status is Ready;
 
     /// <summary>
     /// 是否允许重置
     /// </summary>
-    [ObservableProperty]
-    private bool canReset = false;
-
-    private void UpdateCommandExecutable(bool? canInitialize = null,
-        bool? canExecute = null,
-        bool? canCancel = null,
-        bool? canReset = null)
-    {
-        if (canInitialize.HasValue)
-        {
-            CanInitialize = canInitialize.Value;
-            InitializeCommand.NotifyCanExecuteChanged();
-        }
-
-        if (canExecute.HasValue)
-        {
-            CanExecute = canExecute.Value;
-            ExecuteCommand.NotifyCanExecuteChanged();
-        }
-
-        if (canCancel.HasValue)
-        {
-            CanCancel = canCancel.Value;
-            CancelCommand.NotifyCanExecuteChanged();
-        }
-
-        if (canReset.HasValue)
-        {
-            CanReset = canReset.Value;
-            ResetCommand.NotifyCanExecuteChanged();
-        }
-    }
+    public bool CanReset => EnableInitialize && Status is Initialized or Executed or Canceled;
 
     #endregion
 
@@ -115,7 +111,8 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
     /// <summary>
     /// 进度
     /// </summary>
-    [ObservableProperty] [NotifyPropertyChangedFor(nameof(ProgressIndeterminate))]
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ProgressIndeterminate))]
     private double progress;
 
     /// <summary>
@@ -155,7 +152,7 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
     /// 核心服务
     /// </summary>
     protected TService Service { get; private set; }
-    
+
     public ITwoStepService TwoStepService => Service;
 
     [ObservableProperty]
@@ -203,6 +200,53 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
         Service = null;
     }
 
+    #endregion
+
+    #region 更新消息和进度
+
+    private async Task WithUpdatingMessageAndProgressAsync(Func<CancellationToken, Task> func, CancellationToken ct)
+    {
+        CancellationTokenSource cts = new CancellationTokenSource();
+        ct.Register(cts.Cancel);
+        _ = StartMessageAndProgressTimer(cts.Token);
+        await func(cts.Token);
+        await cts.CancelAsync();
+    }
+
+    private async Task StartMessageAndProgressTimer(CancellationToken ct)
+    {
+        PeriodicTimer timer = new PeriodicTimer(TimeSpan.FromMilliseconds(50));
+        while (await timer.WaitForNextTickAsync(ct))
+        {
+            if (ct.IsCancellationRequested)
+            {
+                timer.Dispose();
+                return;
+            }
+
+            ForceUpdateMessageAndProgress();
+        }
+    }
+
+    private void ForceUpdateMessageAndProgress()
+    {
+        if (pendingMessage != null)
+        {
+            Message = pendingMessage;
+            pendingMessage = null;
+        }
+
+        if (pendingProgress >= 0)
+        {
+            Progress = pendingProgress;
+            pendingProgress = -1;
+        }
+    }
+
+    private string pendingMessage = null;
+
+    private double pendingProgress = -1;
+
     private void Service_MessageUpdate(object sender, MessageUpdateEventArgs e)
     {
         if (!canReceiveServiceMessage)
@@ -210,12 +254,12 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
             return;
         }
 
-        Message = e.Message;
+        pendingMessage = e.Message;
     }
 
     private void Service_ProgressUpdate(object sender, ProgressUpdateEventArgs e)
     {
-        Progress = e.Progress;
+        pendingProgress = e.Progress;
     }
 
     #endregion
@@ -375,18 +419,16 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
     [RelayCommand(CanExecute = nameof(CanCancel))]
     private void Cancel()
     {
-        CanCancel = false;
+        Status = Cancelling;
         CancelCommand.NotifyCanExecuteChanged();
         Services.ProgressOverlay.SetVisible(true);
         if (InitializeCommand.IsRunning)
         {
             InitializeCommand.Cancel();
-            UpdateCommandExecutable(canInitialize: false);
         }
         else if (ExecuteCommand.IsRunning)
         {
             ExecuteCommand.Cancel();
-            UpdateCommandExecutable(canExecute: false);
         }
     }
 
@@ -404,19 +446,31 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
             CreateService();
         }
 
-        UpdateCommandExecutable(false, false, true, false);
+        Status = Executing;
 
-        await TryRunServiceMethodAsync(async () =>
+        if (await TryRunServiceMethodAsync(async () =>
+            {
+                await OnExecutingAsync(ct);
+                Config.Check();
+                await WithUpdatingMessageAndProgressAsync(Service.ExecuteAsync, ct);
+                Service.Dispose();
+                await OnExecutedAsync(ct);
+                await CheckWarningFilesOnExecutedAsync(ct);
+            }, "执行失败"))
         {
-            await OnExecutingAsync(ct);
-            Config.Check();
-            await Service.ExecuteAsync(ct);
-            Service.Dispose();
-            await OnExecutedAsync(ct);
-            await CheckWarningFilesOnExecutedAsync(ct);
-        }, "执行失败");
-
-        UpdateCommandExecutable(null, EnableRepeatExecute, false, true);
+            Status = EnableRepeatExecute ? Initialized : Executed;
+        }
+        else
+        {
+            if (EnableInitialize)
+            {
+                Status = Canceled;
+            }
+            else
+            {
+                ResetCommand.Execute(null);
+            }
+        }
     }
 
     /// <summary>
@@ -427,23 +481,24 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
     private async Task InitializeAsync(CancellationToken ct)
     {
         Services.AppConfig.SaveBackground();
-        UpdateCommandExecutable(false, false, true, false);
+
+        Status = Initializing;
 
         if (await TryRunServiceMethodAsync(async () =>
             {
                 CreateService();
                 await OnInitializingAsync();
                 Config.Check();
-                await Service.InitializeAsync(ct);
+                await WithUpdatingMessageAndProgressAsync(Service.InitializeAsync, ct);
                 await OnInitializedAsync();
             }, "初始化失败") //初始化成功
             && !await CheckWarningFilesOnInitializedAsync(ct)) //有需要处理的文件
         {
-            UpdateCommandExecutable(false, true, false, true);
+            Status = Initialized;
         }
         else
         {
-            UpdateCommandExecutable(true, false, false, false);
+            Status = Ready;
         }
     }
 
@@ -453,7 +508,7 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
     [RelayCommand(CanExecute = nameof(CanReset))]
     private void Reset()
     {
-        UpdateCommandExecutable(true, !EnableInitialize, false, false);
+        Status = Ready;
 
         Message = "就绪";
         OnReset();

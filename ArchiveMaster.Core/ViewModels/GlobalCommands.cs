@@ -20,39 +20,82 @@ public partial class GlobalCommands(IClipboardService clipboardService, IDialogS
     [RelayCommand]
     private async Task OpenFileAsync(string path)
     {
-        try
+        if (string.IsNullOrEmpty(path))
         {
-            Process.Start(new ProcessStartInfo(path)
-            {
-                UseShellExecute = true
-            });
+            return;
         }
-        catch (Exception ex)
+
+        if (File.Exists(path) || Directory.Exists(path))
         {
-            await dialogService.ShowErrorDialogAsync("打开文件失败", ex);
-            Log.Error(ex, "打开文件失败");
+            try
+            {
+                Process.Start(new ProcessStartInfo(path)
+                {
+                    UseShellExecute = true
+                });
+            }
+            catch (Exception ex)
+            {
+                await dialogService.ShowErrorDialogAsync("打开文件失败", ex);
+                Log.Error(ex, "打开文件失败");
+            }
+        }
+        else
+        {
+            await dialogService.ShowErrorDialogAsync("打开文件失败", $"文件或目录{path}不存在");
         }
     }
 
     [RelayCommand]
     private async Task OpenParentDirAsync(string path)
     {
-        path = Path.GetDirectoryName(path);
         if (string.IsNullOrEmpty(path))
         {
-            await dialogService.ShowErrorDialogAsync("打开文件失败", "文件路径无效");
+            return;
         }
-        try
+
+        if (File.Exists(path) || Directory.Exists(path))
         {
-            Process.Start(new ProcessStartInfo(path)
+            if (OperatingSystem.IsWindows())
             {
-                UseShellExecute = true
-            });
+                try
+                {
+                    Process.Start(new ProcessStartInfo("explorer.exe")
+                    {
+                        Arguments = $"/select, \"{path}\""
+                    });
+                }
+                catch (Exception ex)
+                {
+                    await dialogService.ShowErrorDialogAsync("打开文件失败", ex);
+                    Log.Error(ex, "打开文件失败");
+                }
+
+                return;
+            }
+
+            path = Path.GetDirectoryName(path);
+            if (string.IsNullOrEmpty(path))
+            {
+                await dialogService.ShowErrorDialogAsync("打开文件失败", "文件路径无效");
+            }
+
+            try
+            {
+                Process.Start(new ProcessStartInfo(path)
+                {
+                    UseShellExecute = true
+                });
+            }
+            catch (Exception ex)
+            {
+                await dialogService.ShowErrorDialogAsync("打开文件失败", ex);
+                Log.Error(ex, "打开文件失败");
+            }
         }
-        catch (Exception ex)
+        else
         {
-            await dialogService.ShowErrorDialogAsync("打开文件失败", ex);
-            Log.Error(ex, "打开文件失败");
+            await dialogService.ShowErrorDialogAsync("打开文件失败", $"文件或目录{path}不存在");
         }
     }
 }

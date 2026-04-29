@@ -114,29 +114,19 @@
                 ColumnStatusIndex="1"
                 ColumnTimeIndex="-1"
                 ItemsSource="{Binding Files}">
-                <DataGrid.RowDetailsTemplate>
+                <v:SimpleFileDataGrid.RowDetailsPopupTemplate>
                     <DataTemplate>
-                        <StackPanel
-                            Margin="{StaticResource FileDataGridRowDetailPadding}"
-                            Spacing="8">
-                            <ContentControl
-                                Content="{Binding}"
-                                ContentTemplate="{StaticResource FileDataGridRowDetailPathTemplate}" />
-                            <ContentControl
-                                Content="{Binding}"
-                                ContentTemplate="{StaticResource FileDataGridRowDetailMetadataTemplate}" />
+                        <StackPanel Spacing="{StaticResource FileDataGridRowDetailPopupSpacing}">
+                            <v:FileDataGridRowDetailDefaultContent Content="{Binding .}" />
                             <ct:FormItem
                                 Classes="BoldLabel"
                                 Label="新文件名："
                                 LabelWidth="{StaticResource FileDataGridRowDetailLabelWidth}">
                                 <TextBlock Text="{Binding NewName}" />
                             </ct:FormItem>
-                            <ContentControl
-                                Content="{Binding}"
-                                ContentTemplate="{StaticResource FileDataGridRowDetailMessageTemplate}" />
                         </StackPanel>
                     </DataTemplate>
-                </DataGrid.RowDetailsTemplate>
+                </v:SimpleFileDataGrid.RowDetailsPopupTemplate>
                 <DataGrid.Columns>
                     <DataGridTemplateColumn CanUserResize="False">
                         <DataGridTemplateColumn.CellTemplate>

@@ -14,11 +14,20 @@
       <DependentUpon>FileCopyTestPanel.axaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Views\VideoInfoPanel.axaml.cs">
+      <DependentUpon>VideoInfoPanel.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
 
 
   <ItemGroup>
     <ProjectReference Include="..\ArchiveMaster.Core\ArchiveMaster.Core.csproj" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <PackageReference Include="CsvHelper" />
   </ItemGroup>
 
 </Project>

@@ -5,6 +5,7 @@
     xmlns:cfg="clr-namespace:ArchiveMaster.Configs"
     xmlns:cvt="clr-namespace:ArchiveMaster.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:enums="using:ArchiveMaster.Enums"
     xmlns:ic="using:FluentIcons.Avalonia.Markup"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:sys="clr-namespace:System;assembly=System.Runtime"
@@ -156,7 +157,8 @@
                     Grid.Column="10"
                     Classes="Middle"
                     Command="{Binding ResetCommand}"
-                    Content="{Binding ResetButtonContent, RelativeSource={RelativeSource AncestorType=v:PanelBase}}" />
+                    Content="{Binding ResetButtonContent, RelativeSource={RelativeSource AncestorType=v:PanelBase}}"
+                    IsVisible="{Binding EnableInitialize}" />
             </Grid>
 
             <!--  双行  -->
@@ -253,7 +255,7 @@
                             Margin="8,8,0,8"
                             Padding="0,0,20,0"
                             HorizontalScrollBarVisibility="Disabled"
-                            IsEnabled="{Binding CanInitialize}"
+                            IsEnabled="{Binding Status, Converter={x:Static cvt:Converters.EqualWithParameter}, ConverterParameter={x:Static enums:TwoStepViewModelStatus.Ready}}"
                             IsVisible="{Binding ConfigsContent, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static cvt:Converters.IsNotNull}}"
                             VerticalScrollBarVisibility="Auto">
                             <ContentPresenter Content="{TemplateBinding ConfigsContent}" />
