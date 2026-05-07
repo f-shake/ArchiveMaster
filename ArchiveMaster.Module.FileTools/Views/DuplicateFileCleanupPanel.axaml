@@ -9,7 +9,7 @@
     xmlns:vm="using:ArchiveMaster.ViewModels"
     d:DesignHeight="600"
     d:DesignWidth="800"
-    x:DataType="vm:EncryptorViewModel"
+    x:DataType="vm:DuplicateFileCleanupViewModel"
     mc:Ignorable="d">
     <v:VerticalTwoStepPanelBase.ConfigsContent>
         <ct:StackFormItemGroup>

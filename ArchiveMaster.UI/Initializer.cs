@@ -51,14 +51,14 @@ public static class Initializer
 
 #else
 #endif
-        //new FileToolsModuleInfo(),
-        //new PhotoToolsModuleInfo(),
-        //new PhotoTaggingModuleInfo(),
-        //new VideoToolsModuleInfo(),
-        //new TextToolsModuleInfo(),
-        //new OfflineSyncModuleInfo(),
-        //new WriteOnceArchiveModuleInfo(),
-        //new FileBackupperModuleInfo(),
+        new FileToolsModuleInfo(),
+        new PhotoToolsModuleInfo(),
+        new PhotoTaggingModuleInfo(),
+        new VideoToolsModuleInfo(),
+        new TextToolsModuleInfo(),
+        new OfflineSyncModuleInfo(),
+        new WriteOnceArchiveModuleInfo(),
+        new FileBackupperModuleInfo(),
     ];
 #endif
 

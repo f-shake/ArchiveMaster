@@ -14,7 +14,7 @@
     xmlns:vm="using:ArchiveMaster.ViewModels"
     d:DesignHeight="600"
     d:DesignWidth="800"
-    x:DataType="vm:EncryptorViewModel"
+    x:DataType="vm:RenameViewModel"
     mc:Ignorable="d">
     <v:VerticalTwoStepPanelBase.ConfigsContent>
         <ct:StackFormItemGroup
@@ -37,8 +37,8 @@
                     MinLines="5"
                     Text="{Binding Config.ManualMaps}"
                     TextWrapping="Wrap"
-                    UseFloatingWatermark="True"
-                    Watermark="每行一个文件，格式为：原文件路径[制表符]新文件名。例如：C:\file.txt&#x0009;newFile.txt" />
+                    UseFloatingPlaceholder="True"
+                    PlaceholderText="每行一个文件，格式为：原文件路径[制表符]新文件名。例如：C:\file.txt&#x0009;newFile.txt" />
             </ct:FormItem>
             <ct:FormItem
                 IsVisible="{Binding !Config.Manual}"

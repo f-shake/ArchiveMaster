@@ -12,6 +12,7 @@
     <!--是否指定调试时的输出目录，以及指定目录位置-->
     <SpecialOutputDir>true</SpecialOutputDir>
     <OutputDir>C:\CodeTemp</OutputDir>
+    <AvaloniaUseCompiledBindingsByDefault>false</AvaloniaUseCompiledBindingsByDefault>
   </PropertyGroup>
 
   <!--指定bin目录和obj目录位置-->
