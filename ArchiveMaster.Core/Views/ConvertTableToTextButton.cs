@@ -5,6 +5,7 @@ using ArchiveMaster.Models;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
+using Avalonia.Input.Platform;
 using FzLib.Avalonia.Converters;
 
 namespace ArchiveMaster.Views;

@@ -59,7 +59,7 @@ public partial class MainWindow : ExtendedWindow
         Content = grid;
 
         ExtendClientAreaToDecorationsHint = true;
-        ExtendClientAreaChromeHints = ExtendClientAreaChromeHints.NoChrome;
+        //ExtendClientAreaChromeHints = ExtendClientAreaChromeHints.NoChrome;
     }
 
     private void LightDarkButton_OnClick(object sender, RoutedEventArgs e)

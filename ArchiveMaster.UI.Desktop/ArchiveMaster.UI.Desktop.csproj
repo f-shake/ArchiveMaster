@@ -26,6 +26,7 @@
   <ItemGroup>
     <PackageReference Include="Avalonia.Desktop" />
     <PackageReference Include="HotAvalonia" />
+    <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="AvaloniaUI.DiagnosticsSupport"/>
   </ItemGroup>
 
   <ItemGroup>

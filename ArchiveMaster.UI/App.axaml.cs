@@ -22,6 +22,7 @@ using Avalonia.Markup.Xaml.Styling;
 using Avalonia.Threading;
 using FzLib.Programming;
 using Serilog;
+using FzLib.Avalonia.Controls;
 
 namespace ArchiveMaster;
 
@@ -111,7 +112,7 @@ public class App : Application
 
         // Line below is needed to remove Avalonia data validation.
         // Without this line you will get duplicate validations from both Avalonia and CT
-        BindingPlugins.DataValidators.RemoveAt(0);
+        //BindingPlugins.DataValidators.RemoveAt(0);
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             desktop.ShutdownMode = ShutdownMode.OnExplicitShutdown;
