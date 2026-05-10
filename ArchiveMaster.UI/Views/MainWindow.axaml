@@ -14,7 +14,7 @@
     Height="800"
     MinWidth="600"
     MinHeight="400"
-    TitleBarBackground="{DynamicResource Background1}"
+    Background="{DynamicResource Background1}"
     WindowStartupLocation="CenterScreen"
     mc:Ignorable="d">
     <v:ExtendedWindow.TitleBarFooter>

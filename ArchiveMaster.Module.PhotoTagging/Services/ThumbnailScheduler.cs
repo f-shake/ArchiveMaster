@@ -1,4 +1,4 @@
-﻿//#define WRITE_DEBUG_MESSAGE
+﻿#define WRITE_DEBUG_MESSAGE
 
 using System.Collections.Concurrent;
 using System.Diagnostics;
@@ -8,10 +8,12 @@ namespace ArchiveMaster.Services;
 
 public static class ThumbnailScheduler
 {
+    public static readonly int MaxThreading = 4;
+
     private record LoadRequest(ImageFileInfo Item, Action Action);
 
     private static readonly ConcurrentStack<LoadRequest> taskStack = new();
-    private static readonly SemaphoreSlim concurrencyLimiter = new(Math.Max(2, Environment.ProcessorCount / 2));
+    private static readonly SemaphoreSlim concurrencyLimiter = new(MaxThreading);
 
     // 状态标记：0 为静止，1 为正在处理
     private static int isProcessing = 0;
@@ -68,6 +70,7 @@ public static class ThumbnailScheduler
                 // 2. 预检：如果图片已经加载（比如重复入栈的情况），直接跳过
                 if (current.Item.ThumbnailImage != null)
                 {
+                    await Task.Yield();
                     continue;
                 }
 
