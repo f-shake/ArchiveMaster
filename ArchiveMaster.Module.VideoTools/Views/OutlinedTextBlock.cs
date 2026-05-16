@@ -9,14 +9,14 @@ namespace ArchiveMaster.Views
 {
     public class OutlinedTextBlock : Control
     {
-        public static readonly StyledProperty<string?> TextProperty =
-            AvaloniaProperty.Register<OutlinedTextBlock, string?>(nameof(Text), string.Empty);
+        public static readonly StyledProperty<string> TextProperty =
+            AvaloniaProperty.Register<OutlinedTextBlock, string>(nameof(Text), string.Empty);
 
-        public static readonly StyledProperty<IBrush?> FillProperty =
-            AvaloniaProperty.Register<OutlinedTextBlock, IBrush?>(nameof(Fill), Brushes.Black);
+        public static readonly StyledProperty<IBrush> FillProperty =
+            AvaloniaProperty.Register<OutlinedTextBlock, IBrush>(nameof(Fill), Brushes.Black);
 
-        public static readonly StyledProperty<IBrush?> StrokeProperty =
-            AvaloniaProperty.Register<OutlinedTextBlock, IBrush?>(nameof(Stroke), Brushes.Black);
+        public static readonly StyledProperty<IBrush> StrokeProperty =
+            AvaloniaProperty.Register<OutlinedTextBlock, IBrush>(nameof(Stroke), Brushes.Black);
 
         public static readonly StyledProperty<double> StrokeThicknessProperty =
             AvaloniaProperty.Register<OutlinedTextBlock, double>(nameof(StrokeThickness), 1.0);
@@ -44,15 +44,15 @@ namespace ArchiveMaster.Views
         public static readonly StyledProperty<bool> StrikethroughProperty =
             AvaloniaProperty.Register<OutlinedTextBlock, bool>(nameof(Strikethrough), false);
 
-        private FormattedText? _formattedText;
-        private Geometry? _textGeometry;
-        private IPen? _pen;
+        private FormattedText _formattedText;
+        private Geometry _textGeometry;
+        private IPen _pen;
 
         #region CLR Properties
         [Content]
-        public string? Text { get => GetValue(TextProperty); set => SetValue(TextProperty, value); }
-        public IBrush? Fill { get => GetValue(FillProperty); set => SetValue(FillProperty, value); }
-        public IBrush? Stroke { get => GetValue(StrokeProperty); set => SetValue(StrokeProperty, value); }
+        public string Text { get => GetValue(TextProperty); set => SetValue(TextProperty, value); }
+        public IBrush Fill { get => GetValue(FillProperty); set => SetValue(FillProperty, value); }
+        public IBrush Stroke { get => GetValue(StrokeProperty); set => SetValue(StrokeProperty, value); }
         public double StrokeThickness { get => GetValue(StrokeThicknessProperty); set => SetValue(StrokeThicknessProperty, value); }
         public FontFamily FontFamily { get => GetValue(FontFamilyProperty); set => SetValue(FontFamilyProperty, value); }
         public double FontSize { get => GetValue(FontSizeProperty); set => SetValue(FontSizeProperty, value); }
@@ -155,7 +155,7 @@ namespace ArchiveMaster.Views
             var textGeo = _formattedText.BuildGeometry(new Point(0, 0));
             
             // 手动构建装饰线几何图形
-            Geometry? decorations = null;
+            Geometry decorations = null;
             double thickness = Math.Max(1, FontSize / 15); // 根据字号自动计算线条粗细
 
             // 处理下划线

@@ -75,8 +75,8 @@ public partial class FilePickerTextBox : UserControl
         AvaloniaProperty.RegisterDirect<FilePickerTextBox, FilePickerType>(
             nameof(Type), o => o.Type, (o, v) => o.Type = v);
 
-    public static readonly StyledProperty<string> WatermarkProperty =
-            TextBox.WatermarkProperty.AddOwner<FilePickerTextBox>();
+    public static readonly StyledProperty<string> PlaceholderTextProperty =
+            TextBox.PlaceholderTextProperty.AddOwner<FilePickerTextBox>();
 
     private string saveFileDefaultExtension = default;
 
@@ -186,10 +186,10 @@ public partial class FilePickerTextBox : UserControl
         set => SetAndRaise(typeProperty, ref type, value);
     }
 
-    public string Watermark
+    public string PlaceholderText
     {
-        get => GetValue(WatermarkProperty);
-        set => SetValue(WatermarkProperty, value);
+        get => GetValue(PlaceholderTextProperty);
+        set => SetValue(PlaceholderTextProperty, value);
     }
 
     public void DragEnter(object sender, DragEventArgs e)
@@ -307,6 +307,7 @@ public partial class FilePickerTextBox : UserControl
         }
         catch (Exception ex)
         {
+            Debug.WriteLine(ex);
             Debug.Assert(false);
         }
     }

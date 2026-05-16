@@ -55,7 +55,7 @@
                         <TextBox
                             Width="240"
                             Text="{Binding Config.ExtraAiPrompt}"
-                            Watermark="默认对搜索结果进行归纳总结" />
+                            PlaceholderText="默认对搜索结果进行归纳总结" />
                     </ct:FormItem>
                     <ct:FormItem Header="期望回答长度（字数）">
                         <NumericUpDown

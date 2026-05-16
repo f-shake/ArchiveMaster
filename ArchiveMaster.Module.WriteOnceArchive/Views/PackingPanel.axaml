@@ -107,7 +107,7 @@
                         <v:PasswordBox
                             Width="200"
                             Password="{Binding Config.Password}"
-                            Watermark="若为空，则不进行加密" />
+                            PlaceholderText="若为空，则不进行加密" />
                     </ctrl:FormItem>
 
                 </ctrl:WrapFormItemGroup>

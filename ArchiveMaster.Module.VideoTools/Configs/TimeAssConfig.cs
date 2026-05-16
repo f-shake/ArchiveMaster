@@ -32,7 +32,7 @@ namespace ArchiveMaster.Configs
                 ExportFile = Path.Combine(Path.GetDirectoryName(firstFile),
                     Path.GetFileNameWithoutExtension(firstFile) + ".ass");
             }
-            catch (Exception ex)
+            catch
             {
                 
             }

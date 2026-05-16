@@ -62,8 +62,13 @@ public class SecurePasswordStoreService
 
     private static byte[] DeriveKey(string masterPassword, byte[] salt)
     {
-        using var pbkdf2 = new Rfc2898DeriveBytes(masterPassword, salt, 200_000, HashAlgorithmName.SHA256);
-        return pbkdf2.GetBytes(32); // 256-bit AES key
+        return Rfc2898DeriveBytes.Pbkdf2(
+            masterPassword,
+            salt,
+            200_000,
+            HashAlgorithmName.SHA256,
+            32 // 256-bit AES key
+        );
     }
 
     public static bool VerifyMasterPassword(string masterPassword, string hexString)

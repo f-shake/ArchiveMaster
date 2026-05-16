@@ -25,7 +25,7 @@ public class OpenAIChatClient(IOpenAIAiProvider config) : BaseChatClient<IOpenAI
 
     public override IAsyncEnumerable<string> GetStreamingResponseAsync(
         IEnumerable<AiChatMessage> messages, ChatOptions options = null,
-        [EnumeratorCancellation] CancellationToken ct = default)
+        CancellationToken ct = default)
     {
         return GetStreamingResponseAsync(messages, options, "chat/completions",
             line =>

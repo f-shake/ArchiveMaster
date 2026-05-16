@@ -89,7 +89,7 @@
             MinLines="2"
             Text="{Binding $parent[UserControl].Source.Text}"
             TextWrapping="Wrap"
-            Watermark="将需要处理的文本输入或粘贴至此">
+            PlaceholderText="要处理的文本输入或粘贴至此">
             <Interaction.Behaviors>
                 <DataTriggerBehavior
                     Binding="{Binding #tbtnMore.IsChecked}"

@@ -28,7 +28,7 @@
                         <v:PasswordBox
                             Width="240"
                             Password="{Binding Config.Password}"
-                            Watermark="若备份时未设置密码，此处可留空" />
+                            PlaceholderText="若备份时未设置密码，此处可留空" />
                     </ctrl:FormItem>
                 </ctrl:WrapFormItemGroup>
             </ctrl:FormItem>

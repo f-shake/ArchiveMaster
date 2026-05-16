@@ -37,14 +37,14 @@
                         IsFilterBarVisible="True"
                         IsVisible="{Binding !Config.InputStructureFile}"
                         Type="OpenFolder"
-                        Watermark="选择一个作为模板的目录" />
+                        PlaceholderText="一个作为模板的目录" />
                     <v:FilePickerTextBox
                         Grid.Column="2"
                         FileNames="{Binding Config.SourceDirOrFile}"
                         IsVisible="{Binding Config.InputStructureFile}"
                         StringFileTypeFilter="JSON文件;*.json;application/json;"
                         Type="OpenFile"
-                        Watermark="选择由本工具导出的结构文件" />
+                        PlaceholderText="选择由本工具导出的结构文件" />
                 </Grid>
             </ctrl:FormItem>
 

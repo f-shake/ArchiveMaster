@@ -17,7 +17,7 @@
                 <v:FilePickerTextBox
                     FileNames="{Binding Config.CleaningDir}"
                     Type="OpenFolder"
-                    Watermark="要清理重复文件的目录（这里的文件可能会被删除）" />
+                    PlaceholderText="要清理重复文件的目录（这里的文件可能会被删除）" />
             </ct:FormItem>
             <ct:FormItem
                 Description="若待清理目录下的某文件，在参考目录下也找到了相同的文件，则将删除待清理目录下的该文件。"
@@ -25,7 +25,7 @@
                 <v:FilePickerTextBox
                     FileNames="{Binding Config.ReferenceDir}"
                     Type="OpenFolder"
-                    Watermark="用于判断是否重复的参考目录（不会删除文件）" />
+                    PlaceholderText="用于判断是否重复的参考目录（不会删除文件）" />
             </ct:FormItem>
 
             <ct:FormItem Label="匹配条件：">
