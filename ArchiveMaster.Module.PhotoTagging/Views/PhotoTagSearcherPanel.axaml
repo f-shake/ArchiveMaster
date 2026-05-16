@@ -147,13 +147,6 @@
             </Image>
 
         </DataTemplate>
-
-        <ItemsPanelTemplate x:Key="WrapPanelItemsPanelTemplate">
-            <v:SVirtualizingWrapPanel />
-        </ItemsPanelTemplate>
-        <ItemsPanelTemplate x:Key="StackPanelItemsPanelTemplate">
-            <VirtualizingStackPanel />
-        </ItemsPanelTemplate>
     </v:VerticalTwoStepPanelBase.Resources>
     <v:VerticalTwoStepPanelBase.ConfigsContent>
         <ct:StackFormItemGroup>
@@ -244,48 +237,66 @@
                         IsEnabled="{Binding Partial}" />
                 </StackPanel>
             </ct:FormItem>
-
-            <ListBox
-                Grid.Row="4"
-                ItemsSource="{Binding Files}">
-                <ListBox.Styles>
-                    <Style Selector="ListBoxItem">
-                        <Setter Property="BorderBrush" Value="{DynamicResource Background3}" />
-                        <Setter Property="BorderThickness" Value="0,0,0,1" />
-                        <Style Selector="^:selected /template/ ContentPresenter">
-                            <Setter Property="Background" Value="Transparent" />
-                        </Style>
-                        <Style Selector="^:pointerover /template/ ContentPresenter">
-                            <Setter Property="Background" Value="Transparent" />
-                        </Style>
-                        <Style Selector="^:pressed /template/ ContentPresenter">
-                            <Setter Property="Background" Value="Transparent" />
-                        </Style>
-                    </Style>
-                </ListBox.Styles>
+            <ContentControl Grid.Row="4">
                 <Interaction.Behaviors>
                     <DataTriggerBehavior
                         Binding="{Binding Config.UseWrapPanel}"
                         Value="False">
-                        <ChangePropertyAction
-                            PropertyName="ItemTemplate"
-                            Value="{StaticResource ListItemTemplate}" />
-                        <ChangePropertyAction
-                            PropertyName="ItemsPanel"
-                            Value="{StaticResource StackPanelItemsPanelTemplate}" />
+                        <ChangePropertyAction PropertyName="Content">
+                            <ChangePropertyAction.Value>
+                                <ListBox
+                                    Grid.Row="4"
+                                    ItemTemplate="{StaticResource ListItemTemplate}"
+                                    ItemsSource="{Binding Files}">
+                                    <ListBox.Styles>
+                                        <Style Selector="ListBoxItem">
+                                            <Setter Property="BorderBrush" Value="{DynamicResource Background3}" />
+                                            <Setter Property="BorderThickness" Value="0,0,0,1" />
+                                            <Style Selector="^:selected /template/ ContentPresenter">
+                                                <Setter Property="Background" Value="Transparent" />
+                                            </Style>
+                                            <Style Selector="^:pointerover /template/ ContentPresenter">
+                                                <Setter Property="Background" Value="Transparent" />
+                                            </Style>
+                                            <Style Selector="^:pressed /template/ ContentPresenter">
+                                                <Setter Property="Background" Value="Transparent" />
+                                            </Style>
+                                        </Style>
+                                    </ListBox.Styles>
+
+                                </ListBox>
+                            </ChangePropertyAction.Value>
+                        </ChangePropertyAction>
                     </DataTriggerBehavior>
                     <DataTriggerBehavior
                         Binding="{Binding Config.UseWrapPanel}"
                         Value="True">
-                        <ChangePropertyAction
-                            PropertyName="ItemTemplate"
-                            Value="{StaticResource ThumbnailItemTemplate}" />
-                        <ChangePropertyAction
-                            PropertyName="ItemsPanel"
-                            Value="{StaticResource WrapPanelItemsPanelTemplate}" />
+                        <ChangePropertyAction PropertyName="Content">
+                            <ChangePropertyAction.Value>
+                                <ScrollViewer
+                                    Grid.Row="4"
+                                    Padding="8"
+                                    Background="{DynamicResource Background2}"
+                                    HorizontalScrollBarVisibility="Disabled"
+                                    VerticalScrollBarVisibility="Auto">
+                                    <ItemsRepeater
+                                        ItemTemplate="{StaticResource ThumbnailItemTemplate}"
+                                        ItemsSource="{Binding Files}">
+                                        <ItemsRepeater.Layout>
+                                            <UniformGridLayout
+                                                MinColumnSpacing="10"
+                                                MinRowSpacing="10"
+                                                Orientation="Horizontal" />
+                                        </ItemsRepeater.Layout>
+                                    </ItemsRepeater>
+                                </ScrollViewer>
+                            </ChangePropertyAction.Value>
+                        </ChangePropertyAction>
                     </DataTriggerBehavior>
                 </Interaction.Behaviors>
-            </ListBox>
+            </ContentControl>
+
+
             <TextBlock
                 Grid.Row="6"
                 Text="{Binding Files.Count, StringFormat='{}共{0}项'}" />

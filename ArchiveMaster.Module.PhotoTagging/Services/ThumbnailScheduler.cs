@@ -78,26 +78,24 @@ public static class ThumbnailScheduler
                 await concurrencyLimiter.WaitAsync();
 
                 // 4. 执行任务
-                _ = Task.Run(() =>
+
+                try
                 {
-                    try
-                    {
 #if WRITE_DEBUG_MESSAGE
-                        Debug.WriteLine($"[Worker] 开始执行。剩余排队: {taskStack.Count}");
+                    Debug.WriteLine($"[Worker] 开始执行。剩余排队: {taskStack.Count}");
 #endif
-                        current.Action();
-                    }
-                    catch (Exception ex)
-                    {
+                    current.Action();
+                }
+                catch (Exception ex)
+                {
 #if WRITE_DEBUG_MESSAGE
-                        Debug.WriteLine($"[Worker] 任务执行出错: {ex.Message}");
+                    Debug.WriteLine($"[Worker] 任务执行出错: {ex.Message}");
 #endif
-                    }
-                    finally
-                    {
-                        concurrencyLimiter.Release();
-                    }
-                });
+                }
+                finally
+                {
+                    concurrencyLimiter.Release();
+                }
             }
         }
         catch (Exception ex)

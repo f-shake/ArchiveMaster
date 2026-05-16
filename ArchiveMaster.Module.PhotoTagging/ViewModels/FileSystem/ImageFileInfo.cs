@@ -7,7 +7,7 @@ namespace ArchiveMaster.ViewModels.FileSystem;
 
 public class ImageFileInfo : SimpleFileInfo, IDisposable
 {
-    public static int MaxPixels = 500_000;
+    public static int MaxPixels = 50_000;
 
     private bool imageLoaded;
 
