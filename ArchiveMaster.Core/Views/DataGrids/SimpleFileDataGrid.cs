@@ -582,7 +582,8 @@ public class SimpleFileDataGrid : DataGrid
         GenerateColumns();
     }
 
-    protected override void OnLostFocus(RoutedEventArgs e)
+
+    protected override void OnLostFocus(FocusChangedEventArgs e)
     {
         base.OnLostFocus(e);
         TryClosePopupWhenLostFocus();

@@ -41,8 +41,7 @@ namespace ArchiveMaster.UI.Android;
                            | ConfigChanges.KeyboardHidden
                            | ConfigChanges.Navigation
 )]
-public class MainActivity : AvaloniaMainActivity<App>, IPermissionService, IBackCommandService,
-    IViewPadding
+public class MainActivity : AvaloniaMainActivity, IPermissionService, IBackCommandService, IViewPadding
 {
     private const int REQUEST_MANAGE_EXTERNAL_STORAGE = 1024;
     private const int REQUEST_READ_AND_WRITE_EXTERNAL_STORAGE = 1025;

@@ -23,8 +23,8 @@ public class VideoStreamFileDto(SimpleFileInfo file, VideoFormat format, VideoSt
     [Name("编解码器长名称")]
     public string CodecLongName => stream.CodecLongName;
 
-    [Name("时长")]
-    public double Duration => stream.Duration;
+    [Name("流时长")]
+    public double StreamDuration => stream.Duration;
 
     [Name("编码配置")]
     public string Profile => stream.Profile;

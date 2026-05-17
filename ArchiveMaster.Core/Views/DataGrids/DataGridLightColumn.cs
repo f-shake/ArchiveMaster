@@ -30,9 +30,9 @@ namespace ArchiveMaster.Views
             set => SetValue(FillProperty, value);
         }
 
-        public IBinding VisibleBinding { get; set; }
+        public BindingBase VisibleBinding { get; set; }
 
-        public IBinding FillBinding { get; set; }
+        public BindingBase FillBinding { get; set; }
 
         public override bool IsReadOnly
         {
@@ -42,7 +42,7 @@ namespace ArchiveMaster.Views
 
 
         protected override Control GenerateEditingElement(DataGridCell cell, object dataItem,
-            out ICellEditBinding binding)
+            out BindingExpressionBase binding)
         {
             binding = null;
             return null;

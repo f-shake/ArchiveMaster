@@ -13,6 +13,9 @@ namespace ArchiveMaster.Configs
         [ObservableProperty]
         private string rootDir;
 
+        [ObservableProperty]
+        private bool useWrapPanel;
+
         public override void Check()
         {
             CheckFile(TagFile, "标签文件");

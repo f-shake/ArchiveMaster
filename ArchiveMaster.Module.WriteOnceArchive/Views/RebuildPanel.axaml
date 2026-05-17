@@ -30,7 +30,7 @@
                     FileNames="{Binding Config.PackageInfoFile}"
                     StringFileTypeFilter="文件包信息;*.wpk;;"
                     Type="OpenFile"
-                    Watermark="*.wpk文件；若置空，默认选取文件包中最新的package_info.wpk" />
+                    PlaceholderText="*.wpk文件；若置空，默认选取文件包中最新的package_info.wpk" />
             </ctrl:FormItem>
             <ctrl:FormItem Label="选项：">
                 <ctrl:WrapFormItemGroup>
@@ -38,7 +38,7 @@
                         <v:PasswordBox
                             Width="240"
                             Password="{Binding Config.Password}"
-                            Watermark="若备份时未设置密码，此处可留空" />
+                            PlaceholderText="若备份时未设置密码，此处可留空" />
                     </ctrl:FormItem>
 
                     <CheckBox

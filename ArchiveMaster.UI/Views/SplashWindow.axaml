@@ -14,7 +14,7 @@
     Background="{x:Null}"
     CanResize="False"
     ShowInTaskbar="False"
-    SystemDecorations="None"
+    WindowDecorations="None"
     Topmost="True"
     WindowStartupLocation="CenterScreen"
     mc:Ignorable="d">

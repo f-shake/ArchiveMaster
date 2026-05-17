@@ -36,7 +36,7 @@
             <TextBox
                 Grid.Column="12"
                 Text="{Binding LogSearchText}"
-                Watermark="关键词搜索" />
+                PlaceholderText="关键词搜索" />
             <Button
                 Grid.Column="14"
                 Classes="Icon"

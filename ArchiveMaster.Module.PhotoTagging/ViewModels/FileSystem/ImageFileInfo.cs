@@ -2,12 +2,13 @@
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 using ImageMagick;
+using System.Diagnostics;
 
 namespace ArchiveMaster.ViewModels.FileSystem;
 
 public class ImageFileInfo : SimpleFileInfo, IDisposable
 {
-    public static int MaxPixels = 500_000;
+    public static int MaxPixels = 50_000;
 
     private bool imageLoaded;
 
@@ -82,6 +83,7 @@ public class ImageFileInfo : SimpleFileInfo, IDisposable
             }
             catch (Exception ex)
             {
+                Debug.WriteLine($"加载图片失败（{Path}）：{ex.Message}");
                 return;
             }
         }

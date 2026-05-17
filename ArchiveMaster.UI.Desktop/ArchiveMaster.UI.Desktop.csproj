@@ -10,7 +10,6 @@
     <AssemblyVersion>$(AppVersion)</AssemblyVersion>
     <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
     <ApplicationManifest>app.manifest</ApplicationManifest>
-    <c>true</c>
 
     <ApplicationIcon>../ArchiveMaster.UI/Assets/icon_light.ico</ApplicationIcon>
     

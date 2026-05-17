@@ -118,6 +118,7 @@ public partial class PhotoTagSearcherViewModel(ViewModelServices services)
             EnableDescriptionTags = false;
         }
     }
+    
     [RelayCommand]
     private async Task SearchAsync()
     {
@@ -159,4 +160,5 @@ public partial class PhotoTagSearcherViewModel(ViewModelServices services)
 
         Files = await Service.SearchAsync(tagType, SearchKeyword, Partial);
     }
+
 }

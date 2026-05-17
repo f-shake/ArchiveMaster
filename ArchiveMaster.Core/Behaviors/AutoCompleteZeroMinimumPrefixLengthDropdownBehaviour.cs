@@ -1,18 +1,9 @@
-﻿using System.Collections;
-using Avalonia.Controls;
+﻿using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Xaml.Interactivity;
 using FluentIcons.Avalonia;
 using FluentIcons.Common;
-using System.Diagnostics;
-using ArchiveMaster.Helpers;
-using Avalonia.Controls;
-using ArchiveMaster.ViewModels;
 using Avalonia;
-using Avalonia.Input.Platform;
-using Avalonia.Interactivity;
-using Avalonia.Platform.Storage;
-using Serilog;
 
 
 namespace ArchiveMaster.Behaviors;
@@ -62,7 +53,7 @@ public class AutoCompleteZeroMinimumPrefixLengthDropdownBehaviour : Behavior<Aut
         {
             var prop = AssociatedObject.GetType().GetProperty("TextBox",
                 System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
-            var tb = (TextBox?)prop?.GetValue(AssociatedObject);
+            var tb = (TextBox)prop?.GetValue(AssociatedObject);
             if (tb is not null && tb.InnerRightContent is not Button)
             {
                 dropDownButton = new Button()
@@ -82,11 +73,11 @@ public class AutoCompleteZeroMinimumPrefixLengthDropdownBehaviour : Behavior<Aut
         }
     }
 
-    private void DropDownOpening(object? sender, System.ComponentModel.CancelEventArgs e)
+    private void DropDownOpening(object sender, System.ComponentModel.CancelEventArgs e)
     {
         var prop = AssociatedObject?.GetType().GetProperty("TextBox",
             System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
-        var tb = (TextBox?)prop?.GetValue(AssociatedObject);
+        var tb = (TextBox)prop?.GetValue(AssociatedObject);
         if (tb is not null && tb.IsReadOnly)
         {
             e.Cancel = true;
@@ -94,7 +85,7 @@ public class AutoCompleteZeroMinimumPrefixLengthDropdownBehaviour : Behavior<Aut
         }
     }
 
-    private void OnGotFocus(object? sender, RoutedEventArgs e)
+    private void OnGotFocus(object sender, RoutedEventArgs e)
     {
         if (AssociatedObject != null)
         {
@@ -103,7 +94,7 @@ public class AutoCompleteZeroMinimumPrefixLengthDropdownBehaviour : Behavior<Aut
     }
 
     //have to use KeyUp as AutoCompleteBox eats some of the KeyDown events
-    private void OnKeyUp(object? sender, Avalonia.Input.KeyEventArgs e)
+    private void OnKeyUp(object sender, Avalonia.Input.KeyEventArgs e)
     {
         if ((e.Key == Avalonia.Input.Key.Down || e.Key == Avalonia.Input.Key.F4))
         {
@@ -114,7 +105,7 @@ public class AutoCompleteZeroMinimumPrefixLengthDropdownBehaviour : Behavior<Aut
         }
     }
 
-    private void PointerReleased(object? sender, Avalonia.Input.PointerReleasedEventArgs e)
+    private void PointerReleased(object sender, Avalonia.Input.PointerReleasedEventArgs e)
     {
         if (string.IsNullOrEmpty(AssociatedObject?.Text))
         {

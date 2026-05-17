@@ -44,28 +44,28 @@ public class LlmCallerService
         return await GetResponseAsync(messages, options, ct);
     }
 
-    private async Task<string> GetResponseAsync(IEnumerable<AiChatMessage> messages, ChatOptions options = null,
+    public async IAsyncEnumerable<string> CallStreamAsync(string systemPrompt, string userPrompt,
+        ChatOptions options = null,
+        [EnumeratorCancellation]
         CancellationToken ct = default)
     {
-        var chatClient = GetChatClient();
-        string response;
-        try
+        // LogPrompt(systemPrompt, userPrompt, true);
+        var sys = AiChatMessage.CreateSystemMessage(systemPrompt, false, 0);
+        var user = AiChatMessage.CreateUserMessage(userPrompt, false, 0);
+        await foreach (var p in GetStreamResponseAsync([sys, user], options, ct))
         {
-            response = await chatClient.GetResponseAsync(messages, options, ct);
+            yield return p;
         }
-        catch (OperationCanceledException)
-        {
-            throw;
-        }
-        catch (Exception ex)
-        {
-            throw new Exception($"AI模型调用失败（{ex.Message}）", ex);
-        }
+    }
 
-        Debug.WriteLine($"AI回答：{response}");
-        Log.Logger.Information("AI回答：{ResponseText}", response);
-        Debug.WriteLine("AI调用完成");
-        return response;
+    public async IAsyncEnumerable<string> CallStreamAsync(IEnumerable<AiChatMessage> messages,
+        ChatOptions options = null,
+        [EnumeratorCancellation] CancellationToken ct = default)
+    {
+        await foreach (var p in GetStreamResponseAsync(messages, options, ct))
+        {
+            yield return p;
+        }
     }
 
     public async Task<string> CallWithStreamAsync(string systemPrompt, string userPrompt,
@@ -109,33 +109,46 @@ public class LlmCallerService
         return string.Concat(result);
     }
 
-    public async IAsyncEnumerable<string> CallStreamAsync(string systemPrompt, string userPrompt,
-        ChatOptions options = null,
-        [EnumeratorCancellation]
-        CancellationToken ct = default)
+    private IChatClient GetChatClient()
     {
-        // LogPrompt(systemPrompt, userPrompt, true);
-        var sys = AiChatMessage.CreateSystemMessage(systemPrompt, false, 0);
-        var user = AiChatMessage.CreateUserMessage(userPrompt, false, 0);
-        await foreach (var p in GetStreamResponseAsync([sys, user], options, ct))
+        IChatClient chatClient = Config.Type switch
         {
-            yield return p;
-        }
+            AiProviderType.OpenAI => new OpenAIChatClient(Config),
+            AiProviderType.Ollama => new OllamaChatClient(Config),
+            // AiProviderType.OpenAICompatible => new OpenAICompatibleChatClient(Config),
+            _ => throw new ArgumentOutOfRangeException()
+        };
+
+        return chatClient;
     }
 
-
-    public async IAsyncEnumerable<string> CallStreamAsync(IEnumerable<AiChatMessage> messages,
-        ChatOptions options = null,
-        CancellationToken ct = default)
+    private async Task<string> GetResponseAsync(IEnumerable<AiChatMessage> messages, ChatOptions options = null,
+                            CancellationToken ct = default)
     {
-        await foreach (var p in GetStreamResponseAsync(messages, options, ct))
+        var chatClient = GetChatClient();
+        string response;
+        try
         {
-            yield return p;
+            response = await chatClient.GetResponseAsync(messages, options, ct);
         }
-    }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"AI模型调用失败（{ex.Message}）", ex);
+        }
 
-    private async IAsyncEnumerable<string> GetStreamResponseAsync(IEnumerable<AiChatMessage> messages,
-        ChatOptions options = null, CancellationToken ct = default)
+        Debug.WriteLine($"AI回答：{response}");
+        Log.Logger.Information("AI回答：{ResponseText}", response);
+        Debug.WriteLine("AI调用完成");
+        return response;
+    }
+    private async IAsyncEnumerable<string> GetStreamResponseAsync(
+        IEnumerable<AiChatMessage> messages,
+        ChatOptions options = null,
+        [EnumeratorCancellation] CancellationToken ct = default)
     {
         var chatClient = GetChatClient();
 
@@ -162,18 +175,5 @@ public class LlmCallerService
 
         Log.Logger.Information(str.ToString());
         Debug.WriteLine("AI流式调用完成");
-    }
-
-    private IChatClient GetChatClient()
-    {
-        IChatClient chatClient = Config.Type switch
-        {
-            AiProviderType.OpenAI => new OpenAIChatClient(Config),
-            AiProviderType.Ollama => new OllamaChatClient(Config),
-            // AiProviderType.OpenAICompatible => new OpenAICompatibleChatClient(Config),
-            _ => throw new ArgumentOutOfRangeException()
-        };
-
-        return chatClient;
     }
 }

@@ -57,6 +57,5 @@
     <ProjectReference Include="..\ArchiveMaster.Module.OfflineSync\ArchiveMaster.Module.OfflineSync.csproj"/>
     <ProjectReference Include="..\ArchiveMaster.Module.WriteOnceArchive\ArchiveMaster.Module.WriteOnceArchive.csproj"/>
     <ProjectReference Include="..\ArchiveMaster.Module.TextTools\ArchiveMaster.Module.TextTools.csproj" />
-    <!--        <ProjectReference Include="..\ArchiveMaster.Module.Test\ArchiveMaster.Module.Test.csproj" Condition="'$(Configuration)' == 'Debug'" />-->
   </ItemGroup>
 </Project>

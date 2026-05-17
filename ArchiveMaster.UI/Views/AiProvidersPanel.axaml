@@ -155,7 +155,7 @@
                                 MinLines="3"
                                 Text="{Binding SelectedProvider.ExtraParamsJson}"
                                 TextWrapping="Wrap"
-                                Watermark="{}{&#10;    &quot;think&quot;: false&#10;}" />
+                                PlaceholderText="{}{&#10;    &quot;think&quot;: false&#10;}" />
                         </ct:FormItem>
                     </ct:StackFormItemGroup>
                 </HeaderedContentControl>

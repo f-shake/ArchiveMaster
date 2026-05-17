@@ -24,13 +24,11 @@ public class OllamaChatClient(IOllamaAiProvider config) : BaseChatClient<IOllama
     public override IAsyncEnumerable<string> GetStreamingResponseAsync(
         IEnumerable<AiChatMessage> messages,
         ChatOptions options = null,
-        [EnumeratorCancellation]
         CancellationToken ct = default)
     {
         return GetStreamingResponseAsync(messages, options, "api/chat",
             line =>
             {
-                string result = null;
                 try
                 {
                     var chunk = JsonSerializer.Deserialize<OllamaStreamChunk>(line);

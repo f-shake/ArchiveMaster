@@ -21,7 +21,7 @@
                 MaxLines="3"
                 Text="{Binding #root.FileNames}"
                 TextChanged="OnTextChanged"
-                Watermark="{Binding #root.Watermark}" />
+                PlaceholderText="{Binding #root.Watermark}" />
             <Button
                 Grid.Column="1"
                 Margin="8,0,0,0"

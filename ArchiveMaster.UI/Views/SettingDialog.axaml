@@ -131,7 +131,7 @@
                     <v:FilePickerTextBox
                         FileNames="{Binding Configs.FFmpegDir}"
                         Type="OpenFolder"
-                        Watermark="若为空，表示使用环境变量" />
+                        PlaceholderText="若为空，表示使用环境变量" />
                 </ct:FormItem>
             </ct:StackFormItemGroup>
         </TabItem>

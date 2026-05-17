@@ -10,14 +10,16 @@ namespace ArchiveMaster.Views;
 
 public partial class PasswordBox : UserControl
 {
+    public static readonly StyledProperty<SecurePassword> PasswordProperty =
+        AvaloniaProperty.Register<PasswordBox, SecurePassword>(
+            nameof(Password));
+
+    public static readonly StyledProperty<string> PlaceholderTextProperty = TextBox.PlaceholderTextProperty.AddOwner<PasswordBox>();
+
     public PasswordBox()
     {
         InitializeComponent();
     }
-
-    public static readonly StyledProperty<SecurePassword> PasswordProperty =
-        AvaloniaProperty.Register<PasswordBox, SecurePassword>(
-            nameof(Password));
 
     public SecurePassword Password
     {
@@ -25,11 +27,9 @@ public partial class PasswordBox : UserControl
         set => SetValue(PasswordProperty, value);
     }
 
-    public static readonly StyledProperty<string> WatermarkProperty = TextBox.WatermarkProperty.AddOwner<PasswordBox>();
-
-    public string Watermark
+    public string PlaceholderText
     {
-        get => GetValue(WatermarkProperty);
-        set => SetValue(WatermarkProperty, value);
+        get => GetValue(PlaceholderTextProperty);
+        set => SetValue(PlaceholderTextProperty, value);
     }
 }

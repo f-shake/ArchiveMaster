@@ -10,6 +10,7 @@
     xmlns:vm="clr-namespace:ArchiveMaster.ViewModels"
     d:DesignHeight="450"
     d:DesignWidth="800"
+    x:DataType="vm:PhotoGeoSorterViewModel"
     mc:Ignorable="d">
     <v:VerticalTwoStepPanelBase.ConfigsContent>
         <ct:StackFormItemGroup>

@@ -27,7 +27,11 @@ class Program
                 UseDBusFilePicker = false,
             })
             .UsePlatformDetect()
-            .LogToTrace();
+            .LogToTrace()
+#if DEBUG
+            .WithDeveloperTools()
+#endif
+            ;
     }
 
     // Initialization code. Don't use any Avalonia, third-party APIs or any
