@@ -16,11 +16,6 @@ public static class AiServiceExtensions
                 assistantMessage?.Append(e.Value);
             }, ct: ct);
 
-            // if (service.NeedRemoveThink)
-            // {
-            //     result = LlmCallerService.RemoveThink(result);
-            // }
-
             return result;
         }
 

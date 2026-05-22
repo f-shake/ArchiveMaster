@@ -12,6 +12,7 @@ namespace ArchiveMaster.ViewModels;
 public partial class AiConversation : ObservableObject
 {
     public int MAX_FOLDED_LENGTH = 50;
+
     [ObservableProperty]
     private bool canUserInput;
 
@@ -19,6 +20,7 @@ public partial class AiConversation : ObservableObject
     private string inputText;
 
     private bool isRegenerating;
+
     public AiConversation(ViewModelServices services)
     {
         Services = services;
@@ -33,6 +35,7 @@ public partial class AiConversation : ObservableObject
     public AvaloniaList<AiChatMessage> Messages { get; } = new AvaloniaList<AiChatMessage>();
     public IAiService Service { get; private set; }
     public ViewModelServices Services { get; }
+
     public AiAssistantChatMessage AddAssistantMessage()
     {
         var message = AiChatMessage.CreateAssistantMessage();
@@ -76,6 +79,7 @@ public partial class AiConversation : ObservableObject
         CanUserInput = false;
         InputText = "（自动生成）";
     }
+
 
     private void AddMessage(AiChatMessage message)
     {
@@ -142,27 +146,6 @@ public partial class AiConversation : ObservableObject
             var messages = Messages.ToList();
             var assistantMessage = AddAssistantMessage();
 
-            // LastAssistantMessage.Append("<think>\n");
-            // for (int i = 1; i < 20; i++)
-            // {
-            //     if (i % 3 == 0)
-            //     {
-            //         LastAssistantMessage.Append("\n");
-            //     }
-            //     else
-            //     {
-            //         LastAssistantMessage.Append("# 哈哈哈哈222");
-            //     }
-            //
-            //     if (i == 12)
-            //     {
-            //         LastAssistantMessage.Append("</think>\n");
-            //     }
-            //
-            //     await Task.Delay(100);
-            // }
-            //
-            // return;
             await Service.CallAiWithStreamAsync(messages, assistantMessage, ct);
         }
         catch (Exception ex)
@@ -173,7 +156,7 @@ public partial class AiConversation : ObservableObject
         {
             if (LastAssistantMessage?.IsFrozen == false)
             {
-                LastAssistantMessage.FreezeAssistantMessage();
+                LastAssistantMessage.FreezeAssistantMessage(Service.ProcessAssistantResponse);
             }
 
             OnEndResponse();

@@ -1,7 +1,10 @@
 ﻿using System.Collections.Concurrent;
 using System.Text;
 using ArchiveMaster.Enums;
+using ArchiveMaster.Models;
 using ArchiveMaster.Services;
+using Avalonia.Controls.Documents;
+using Avalonia.Media;
 
 namespace ArchiveMaster.ViewModels;
 
@@ -29,6 +32,7 @@ public class AiAssistantChatMessage : AiChatMessage
     {
         _ = InitializeTimerAsync();
     }
+
     public string PlainText
     {
         get
@@ -72,17 +76,35 @@ public class AiAssistantChatMessage : AiChatMessage
         queueMessage.Enqueue(message);
     }
 
-    protected override void Freeze(bool fold = false, int maxLength = 50)
+    protected override void Freeze(bool fold = false, int maxLength = 50, Func<string, string> processText = null)
     {
         timerCts.Cancel();
         timer.Dispose();
         OnTimerTick();
 
         EndLine();
+        
+        
+        isFrozen = true;
         frozenPlainText = plainTextBuilder.ToString();
+        if (processText != null)
+        {
+            frozenPlainText = processText(frozenPlainText);
+        }
+
         frozenThinkText = thinkTextBuilder.ToString();
 
-        base.Freeze(fold, maxLength);
+        frozenFullText = fullTextBuilder.ToString();
+        if (processText != null)
+        {
+            frozenFullText = processText(frozenFullText);
+            Inlines.Clear();
+            Inlines.AddRange(SimpleMarkdownParser.ParseSimpleMarkdown(frozenFullText));
+        }
+
+    
+        OnPropertyChanged(nameof(IsFrozen));
+        OnPropertyChanged(nameof(FullText));
     }
 
     private void AppendImmediately(string message)
@@ -179,6 +201,7 @@ public class AiAssistantChatMessage : AiChatMessage
             }
         }
     }
+
     private void OnTimerTick()
     {
         var items = new List<string>(queueMessage.Count + 2);

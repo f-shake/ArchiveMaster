@@ -1,6 +1,7 @@
 ﻿using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json.Nodes;
+using System.Text.RegularExpressions;
 using ArchiveMaster.AiAgents;
 using ArchiveMaster.Attributes;
 using ArchiveMaster.Configs;
@@ -15,7 +16,6 @@ public class TextRewriterService(AppConfig appConfig)
     public const int MaxRefLength = 10_000;
 
     public AiAgentBase AiAgent { get; set; }
-
 
     public override async Task<(string SystemPrompt, string UserPrompt)> GetFirstPromptAsync(CancellationToken ct)
     {
@@ -37,14 +37,35 @@ public class TextRewriterService(AppConfig appConfig)
         return (prompt, text);
     }
 
+    public override string ProcessAssistantResponse(string text)
+    {
+        text = base.ProcessAssistantResponse(text);
+
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            return text;
+        }
+
+        // 处理中英数之间的多余空格
+        // 匹配：汉字 + 一个或多个空格 + 英文字母/数字
+        text = Regex.Replace(text, @"([\u4e00-\u9fa5]+)\s+([a-zA-Z0-9]+)", "$1$2");
+        // 匹配：英文字母/数字 + 一个或多个空格 + 汉字
+        text = Regex.Replace(text, @"([a-zA-Z0-9]+)\s+([\u4e00-\u9fa5]+)", "$1$2");
+
+        // 清理可能因为大模型抽风产生的首尾空行
+        text = text.Trim('\r', '\n');//.Replace("\r\n\r\n", "\r\n").Replace("\n\n", "\n");
+
+        return text;
+    }
     public override void Reset()
     {
     }
 
+
     private async Task<string> GetSystemPromptAsync(CancellationToken ct)
     {
         var prompt = new StringBuilder();
-        prompt.AppendLine("你是一个文本处理机器人。");
+        prompt.AppendLine("你是一个文本处理机器人。以下是具体要求：");
         prompt.AppendLine(await AiAgent.BuildSystemPromptAsync(ct));
 
 

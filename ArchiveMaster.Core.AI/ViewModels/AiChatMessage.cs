@@ -14,9 +14,9 @@ namespace ArchiveMaster.ViewModels;
 
 public abstract partial class AiChatMessage : INotifyPropertyChanged
 {
-    private string frozenFullText;
-    private readonly StringBuilder fullTextBuilder = new StringBuilder();
-    private bool isFrozen;
+    protected readonly StringBuilder fullTextBuilder = new StringBuilder();
+    protected string frozenFullText;
+    protected bool isFrozen;
 
     protected AiChatMessage()
     {
@@ -59,7 +59,8 @@ public abstract partial class AiChatMessage : INotifyPropertyChanged
         return message;
     }
 
-    public static AiUserChatMessage CreateUserMessage(string userPrompt,IEnumerable<byte[]> images, bool fold = false, int maxLength = 0)
+    public static AiUserChatMessage CreateUserMessage(string userPrompt, IEnumerable<byte[]> images, bool fold = false,
+        int maxLength = 0)
     {
         var message = new AiUserChatMessage();
         message.AddInline(userPrompt);
@@ -71,6 +72,7 @@ public abstract partial class AiChatMessage : INotifyPropertyChanged
                 message.AddImage(image);
             }
         }
+
         message.Freeze(fold, maxLength);
         return message;
     }
@@ -80,14 +82,14 @@ public abstract partial class AiChatMessage : INotifyPropertyChanged
         return ThinkPartRegex().Replace(text, string.Empty);
     }
 
-    public void FreezeAssistantMessage()
+    public void FreezeAssistantMessage(Func<string, string> processText)
     {
         if (Sender != AiChatMessageSender.Assistant)
         {
             throw new InvalidOperationException("当前消息不是Assistant，无法冻结");
         }
 
-        Freeze(false, 0);
+        Freeze(false, 0, processText);
     }
 
     protected void AddInline(InlineItem inline)
@@ -101,11 +103,14 @@ public abstract partial class AiChatMessage : INotifyPropertyChanged
         MessageAppended?.Invoke(this, EventArgs.Empty);
     }
 
-    protected virtual void Freeze(bool fold = false, int maxLength = 50)
+    protected virtual void Freeze(bool fold = false, int maxLength = 50, Func<string, string> processText = null)
     {
         isFrozen = true;
         frozenFullText = fullTextBuilder.ToString();
-
+        if (processText != null)
+        {
+            frozenFullText = processText(frozenFullText);
+        }
 
         if (fold)
         {
