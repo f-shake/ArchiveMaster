@@ -17,99 +17,78 @@ using Table = DocumentFormat.OpenXml.Wordprocessing.Table;
 
 namespace ArchiveMaster.Services;
 
-public static class TextSourceExtensions
+public static class DocFileExtensions
 {
-    extension(TextSource source)
+    extension(IEnumerable<DocFile> docFiles)
     {
         public async Task<string> GetCombinedPlainTextAsync(CancellationToken ct = default)
         {
-            return (await source.GetPlainTextAsync(TextSourceReadUnit.Combined, ct).FirstOrDefaultAsync()).Text;
+            return (await docFiles.GetPlainTextAsync(TextSourceReadUnit.Combined, ct).FirstOrDefaultAsync()).Text;
         }
 
-        public async IAsyncEnumerable<DocFilePart> GetPlainTextAsync(TextSourceReadUnit readUnit = TextSourceReadUnit.PerFile,
+        public async IAsyncEnumerable<DocFilePart> GetPlainTextAsync(
+            TextSourceReadUnit readUnit = TextSourceReadUnit.PerFile,
             [EnumeratorCancellation]
             CancellationToken ct = default)
         {
-            ArgumentNullException.ThrowIfNull(source);
+            ArgumentNullException.ThrowIfNull(docFiles);
 
             StringBuilder combined = new StringBuilder();
-            if (source.FromFile)
+            foreach (var file in docFiles)
             {
-                foreach (var file in source.Files)
+                ct.ThrowIfCancellationRequested();
+
+                if (file.File == null || !File.Exists(file.File))
                 {
-                    ct.ThrowIfCancellationRequested();
-
-                    if (file.File == null || !File.Exists(file.File))
-                    {
-                        throw new FileNotFoundException(file.File);
-                    }
-
-                    switch (new FileInfo(file.File).Length)
-                    {
-                        case <= 0:
-                            throw new InvalidOperationException($"文件{file.File}的大小为0");
-                        case > 1024 * 1024 * 1024:
-                            throw new InvalidOperationException($"文件{file.File}的大小超过1GB");
-                    }
-
-                    bool perParagraph = readUnit == TextSourceReadUnit.PerParagraph;
-                    var lines = Path.GetExtension(file.File) switch
-                    {
-                        ".docx" => file.ReadDocxAsync(perParagraph, ct),
-                        ".xlsx" => file.ReadXlsxAsync(perParagraph, ct),
-                        // ".doc" => file.ReadDocAsync(ct: ct),
-                        ".md" => file.ReadMarkdownAsync(perParagraph, ct),
-                        ".pdf" => file.ReadPdfAsync(perParagraph, ct),
-                        _ => file.ReadTxtAsync(perParagraph, ct)
-                    };
-
-                    switch (readUnit)
-                    {
-                        case TextSourceReadUnit.PerFile:
-                        case TextSourceReadUnit.PerParagraph:
-                        {
-                            await foreach (var line in lines.WithCancellation(ct))
-                            {
-                                yield return new DocFilePart(file.File, line);
-                            }
-
-                            break;
-                        }
-                        case TextSourceReadUnit.Combined:
-                        {
-                            combined.AppendLine(await lines.FirstAsync());
-
-                            break;
-                        }
-
-                        default:
-                            throw new ArgumentOutOfRangeException(nameof(readUnit), readUnit, null);
-                    }
+                    throw new FileNotFoundException(file.File);
                 }
 
-                if (readUnit == TextSourceReadUnit.Combined)
+                switch (new FileInfo(file.File).Length)
                 {
-                    yield return new DocFilePart(null, combined.ToString());
+                    case <= 0:
+                        throw new InvalidOperationException($"文件{file.File}的大小为0");
+                    case > 1024 * 1024 * 1024:
+                        throw new InvalidOperationException($"文件{file.File}的大小超过1GB");
                 }
-            }
-            else
-            {
+
+                bool perParagraph = readUnit == TextSourceReadUnit.PerParagraph;
+                var lines = Path.GetExtension(file.File) switch
+                {
+                    ".docx" => file.ReadDocxAsync(perParagraph, ct),
+                    ".xlsx" => file.ReadXlsxAsync(perParagraph, ct),
+                    // ".doc" => file.ReadDocAsync(ct: ct),
+                    ".md" => file.ReadMarkdownAsync(perParagraph, ct),
+                    ".pdf" => file.ReadPdfAsync(perParagraph, ct),
+                    _ => file.ReadTxtAsync(perParagraph, ct)
+                };
+
                 switch (readUnit)
                 {
                     case TextSourceReadUnit.PerFile:
-                    case TextSourceReadUnit.Combined:
-                        yield return new DocFilePart(null, source.Text);
-                        break;
                     case TextSourceReadUnit.PerParagraph:
-                        foreach (var line in source.Text.SplitLines())
+                    {
+                        await foreach (var line in lines.WithCancellation(ct))
                         {
-                            yield return new DocFilePart(null, line);
+                            yield return new DocFilePart(file.File, line);
                         }
 
                         break;
+                    }
+                    case TextSourceReadUnit.Combined:
+                    {
+                        combined.AppendLine(await lines.FirstAsync());
+
+                        break;
+                    }
+
                     default:
                         throw new ArgumentOutOfRangeException(nameof(readUnit), readUnit, null);
                 }
+            }
+
+            if (readUnit == TextSourceReadUnit.Combined)
+            {
+                yield return new DocFilePart(null, combined.ToString());
             }
         }
     }

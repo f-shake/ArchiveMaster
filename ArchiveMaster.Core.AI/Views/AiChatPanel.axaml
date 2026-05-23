@@ -13,6 +13,12 @@
     d:DesignWidth="800"
     mc:Ignorable="d">
     <UserControl.Styles>
+        <Style Selector="Button.ChatButton">
+            <Setter Property="Width" Value="36" />
+            <Setter Property="Height" Value="36" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="CornerRadius" Value="18" />
+        </Style>
         <Style Selector="Border.ChatBox">
             <Setter Property="CornerRadius" Value="8" />
             <Setter Property="Padding" Value="16,8" />
@@ -156,35 +162,112 @@
         <Grid
             Grid.Row="2"
             Margin="8"
-            ColumnDefinitions="Auto,8,*,8,Auto">
-            <Grid.Styles>
-                <Style Selector="Button">
-                    <Setter Property="Width" Value="36" />
-                    <Setter Property="Height" Value="36" />
-                    <Setter Property="Padding" Value="0" />
-                    <Setter Property="CornerRadius" Value="18" />
-                </Style>
-            </Grid.Styles>
+            ColumnDefinitions="Auto,Auto,*,8,Auto">
             <Button
+                Margin="0,0,8,0"
+                VerticalAlignment="Bottom"
+                Classes="ChatButton"
                 Command="{Binding $parent[UserControl].Conversation.ResetCommand}"
                 Content="{ic:FluentIcon Icon=ArrowReset}"
-                Foreground="White"
                 IsEnabled="{Binding !$parent[UserControl].Conversation.SendCommand.IsRunning}"
                 ToolTip.Tip="重置" />
-
-            <TextBox
+            <Button
+                Grid.Column="1"
+                Margin="0,0,8,0"
+                VerticalAlignment="Bottom"
+                Classes="ChatButton"
+                Click="AddAttachmentButton_Click"
+                Content="{ic:FluentIcon Icon=Add}"
+                IsEnabled="{Binding !$parent[UserControl].Conversation.SendCommand.IsRunning}"
+                IsVisible="{Binding $parent[UserControl].AllowAttachments}"
+                ToolTip.Tip="增加附件" />
+            <Grid
                 Grid.Column="2"
-                AcceptsReturn="True"
-                AcceptsTab="True"
-                IsEnabled="{Binding $parent[UserControl].Conversation.CanUserInput}"
-                KeyDown="InputTextBox_KeyDown"
-                MaxLines="6"
-                Text="{Binding $parent[UserControl].Conversation.InputText}"
-                TextWrapping="Wrap" />
+                RowDefinitions="Auto,Auto">
+                <Grid
+                    Margin="0,0,0,8"
+                    IsVisible="{Binding $parent[UserControl].AllowAttachments}">
+                    <TextBlock
+                        Margin="0,8"
+                        IsVisible="{Binding $parent[UserControl].Attachments.Count, Converter={x:Static cvt:Converters.CountIsZero}}"
+                        Opacity="0.7"
+                        Text="当前没有选择任何文件" />
+                    <ScrollViewer
+                        HorizontalScrollBarVisibility="Disabled"
+                        IsVisible="{Binding $parent[UserControl].Attachments.Count, Converter={x:Static cvt:Converters.CountGreaterThanZero}}"
+                        VerticalScrollBarVisibility="Auto">
+                        <ItemsControl
+                            Background="Transparent"
+                            ItemsSource="{Binding $parent[UserControl].Attachments}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel
+                                        ItemSpacing="8"
+                                        LineSpacing="8"
+                                        Orientation="Horizontal" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Button
+                                        Padding="8,4"
+                                        CornerRadius="16">
+                                        <TextBlock Text="{Binding File, Converter={x:Static cvt:Converters.FileName}}" />
+                                        <Button.Flyout>
+                                            <Flyout>
+                                                <StackPanel
+                                                    Width="320"
+                                                    Orientation="Vertical"
+                                                    Spacing="16">
+                                                    <TextBlock
+                                                        FontWeight="Bold"
+                                                        Text="{Binding File}"
+                                                        TextWrapping="Wrap" />
+                                                    <StackPanel
+                                                        HorizontalAlignment="Right"
+                                                        Orientation="Horizontal">
+                                                        <Button
+                                                            Classes="Link"
+                                                            Command="{Binding OpenFileCommand, Source={x:Static vm:GlobalCommands.Instance}}"
+                                                            CommandParameter="{Binding File}"
+                                                            Content="打开"
+                                                            ToolTip.Tip="使用关联的程序打开文件" />
+                                                        <Button
+                                                            Classes="Link"
+                                                            Click="OpenFileButton_Click"
+                                                            Content="测试"
+                                                            ToolTip.Tip="尝试读取文件" />
+                                                        <Button
+                                                            Classes="Link"
+                                                            Click="RemoveFileButton_Click"
+                                                            Content="移除"
+                                                            ToolTip.Tip="从文件列表中移除" />
+                                                    </StackPanel>
+                                                </StackPanel>
+                                            </Flyout>
+                                        </Button.Flyout>
+                                    </Button>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </Grid>
+                <TextBox
+                    Grid.Row="1"
+                    AcceptsReturn="True"
+                    AcceptsTab="True"
+                    IsEnabled="{Binding $parent[UserControl].Conversation.CanUserInput}"
+                    KeyDown="InputTextBox_KeyDown"
+                    MaxLines="6"
+                    Text="{Binding $parent[UserControl].Conversation.InputText}"
+                    TextWrapping="Wrap" />
+            </Grid>
 
-            <Panel Grid.Column="4">
+            <Panel
+                Grid.Column="4"
+                VerticalAlignment="Bottom">
                 <Button
-                    Classes="Primary"
+                    Classes="Primary ChatButton"
                     Command="{Binding $parent[UserControl].Conversation.SendCommand}"
                     Content="{ic:FluentIcon Icon=Send}"
                     Foreground="White"
@@ -194,6 +277,7 @@
                     ToolTip.Tip="发送" />
                 <Button
                     Background="Red"
+                    Classes="ChatButton"
                     Command="{Binding $parent[UserControl].Conversation.SendCancelCommand}"
                     Content="{ic:FluentIcon Icon=Stop}"
                     Foreground="White"

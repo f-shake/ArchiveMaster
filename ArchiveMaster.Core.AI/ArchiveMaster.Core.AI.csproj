@@ -14,6 +14,11 @@
 
     <ItemGroup>
         <PackageReference Include="Magick.NET-Q16-AnyCPU"/>
+        <PackageReference Include="Markdig" />
+        <PackageReference Include="MetadataExtractor" />
+        <PackageReference Include="PdfPig" />
+        <PackageReference Include="UTF.Unknown" />
+        <PackageReference Include="DocumentFormat.OpenXml" />
     </ItemGroup>
 
     <ItemGroup>

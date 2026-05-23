@@ -1,16 +1,24 @@
 using System.Diagnostics;
+using ArchiveMaster.Enums;
 using ArchiveMaster.Helpers;
+using ArchiveMaster.Services;
 using Avalonia.Controls;
 using ArchiveMaster.ViewModels;
 using Avalonia;
+using Avalonia.Collections;
 using Avalonia.Input;
 using Avalonia.Input.Platform;
 using Avalonia.Interactivity;
 using Avalonia.Media;
 using Avalonia.Platform.Storage;
 using Avalonia.Threading;
+using DocumentFormat.OpenXml.Bibliography;
 using FluentIcons.Avalonia;
 using FluentIcons.Common;
+using FzLib.Avalonia.Controls;
+using FzLib.Avalonia.Dialogs;
+using FzLib.Avalonia.Services;
+using FzLib.Collections;
 using Serilog;
 
 namespace ArchiveMaster.Views
@@ -39,6 +47,87 @@ namespace ArchiveMaster.Views
             get => GetValue(ConversationProperty);
             set => SetValue(ConversationProperty, value);
         }
+
+        private bool allowAttachments;
+
+        public static readonly DirectProperty<AiChatPanel, bool> AllowAttachmentsProperty = AvaloniaProperty.RegisterDirect<AiChatPanel, bool>(
+            nameof(AllowAttachments), o => o.AllowAttachments, (o, v) => o.AllowAttachments = v);
+
+        public bool AllowAttachments
+        {
+            get => allowAttachments;
+            set => SetAndRaise(AllowAttachmentsProperty, ref allowAttachments, value);
+        }
+
+        private AvaloniaList<DocFile> attachments=new AvaloniaList<DocFile>();
+        
+        public static readonly DirectProperty<AiChatPanel, AvaloniaList<DocFile>> AttachmentsProperty =
+            AvaloniaProperty.RegisterDirect<AiChatPanel, AvaloniaList<DocFile>>(
+                nameof(Attachments), o => o.Attachments, (o, v) => o.Attachments = v);
+        
+        public AvaloniaList<DocFile> Attachments
+        {
+            get => attachments;
+            set => SetAndRaise(AttachmentsProperty, ref attachments, value);
+        }
+
+        private async void OpenFileButton_Click(object sender, RoutedEventArgs e)
+        {
+            var button = sender as Button;
+            if (button?.DataContext is DocFile file)
+            {
+                await TestFileAsync(file);
+            }
+        }
+
+        private void RemoveFileButton_Click(object sender, RoutedEventArgs e)
+        {
+            var button = sender as Button;
+            if (button?.DataContext is DocFile file)
+            {
+                Attachments.Remove(file);
+            }
+        }
+
+        public static async Task TestFileAsync(DocFile file)
+        {
+            DocFile[] sources = [file];
+            string result = null;
+            bool canceled = false;
+            await HostServices.GetRequiredService<IProgressOverlayService>()
+                .WithOverlayAsync(
+                    ct => Task.Run(async () =>
+                        result = (await sources.GetPlainTextAsync(TextSourceReadUnit.Combined, ct)
+                            .FirstOrDefaultAsync()).Text, ct),
+                    () =>
+                    {
+                        canceled = true;
+                        return Task.CompletedTask;
+                    },
+                    async ex =>
+                    {
+                        await HostServices.GetRequiredService<IDialogService>()
+                            .ShowErrorDialogAsync("打开文件失败", $"无法打开文件：{file.File}", ex.ToString());
+                        canceled = true;
+                    },
+                    "正在打开文件");
+            if (canceled)
+            {
+                return;
+            }
+
+            if (string.IsNullOrEmpty(result))
+            {
+                await HostServices.GetRequiredService<IDialogService>()
+                    .ShowWarningDialogAsync("文件为空", $"成功打开文件：{file.File}，但文件为空");
+            }
+            else
+            {
+                await HostServices.GetRequiredService<IDialogService>()
+                    .ShowOkDialogAsync("打开文件成功", $"成功打开文件：{file.File}", result);
+            }
+        }
+
 
         private async void CopyButton_Click(object sender, RoutedEventArgs e)
         {
@@ -130,6 +219,28 @@ namespace ArchiveMaster.Views
             {
                 tbk.MaxLines = 3;
                 btn.Content = new FluentIcon { Icon = Icon.ChevronDown };
+            }
+        }
+
+        private async void AddAttachmentButton_Click(object sender, RoutedEventArgs e)
+        {
+            var storage = HostServices.GetRequiredService<IStorageProviderService>();
+            var files = await storage.CreatePickerBuilder()
+                .AddFilter("支持的格式", "txt", /* "doc",*/ "docx", "xlsx", "md", "pdf", "txt")
+                .AddFilter("Word文档", /*"doc",*/ "docx")
+                .AddFilter("Excel表格", "xlsx")
+                .AddFilter("PDF文档", /*"doc",*/ "pdf")
+                .AddFilter("Markdown文档", "md")
+                .AddFilter("纯文本", "txt")
+                .AddFilter("所有文件（作为纯文本读取）", "*")
+                .AllowMultiple()
+                .OpenFilePickerAsync();
+            if (files is { Count: > 0 })
+            {
+                foreach (var file in files)
+                {
+                    Attachments.Add(new DocFile(file.GetPath()));
+                }
             }
         }
     }

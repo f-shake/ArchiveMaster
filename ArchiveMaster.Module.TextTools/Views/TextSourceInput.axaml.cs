@@ -86,41 +86,42 @@ namespace ArchiveMaster.Views
             var button = sender as Button;
             if (button?.DataContext is DocFile file)
             {
-                var sources = new TextSource() { Files = { file } };
-                string result = null;
-                bool canceled = false;
-                await HostServices.GetRequiredService<IProgressOverlayService>()
-                    .WithOverlayAsync(
-                        ct => Task.Run(async () =>
-                            result = (await sources.GetPlainTextAsync(TextSourceReadUnit.Combined, ct)
-                                .FirstOrDefaultAsync()).Text, ct),
-                        () =>
-                        {
-                            canceled = true;
-                            return Task.CompletedTask;
-                        },
-                        async ex =>
-                        {
-                            await HostServices.GetRequiredService<IDialogService>()
-                                .ShowErrorDialogAsync("打开文件失败", $"无法打开文件：{file.File}", ex.ToString());
-                            canceled = true;
-                        },
-                        "正在打开文件");
-                if (canceled)
-                {
-                    return;
-                }
-
-                if (string.IsNullOrEmpty(result))
-                {
-                    await HostServices.GetRequiredService<IDialogService>()
-                        .ShowWarningDialogAsync("文件为空", $"成功打开文件：{file.File}，但文件为空");
-                }
-                else
-                {
-                    await HostServices.GetRequiredService<IDialogService>()
-                        .ShowOkDialogAsync("打开文件成功", $"成功打开文件：{file.File}", result);
-                }
+                await AiChatPanel.TestFileAsync(file);
+                // var sources = new TextSource() { Files = { file } };
+                // string result = null;
+                // bool canceled = false;
+                // await HostServices.GetRequiredService<IProgressOverlayService>()
+                //     .WithOverlayAsync(
+                //         ct => Task.Run(async () =>
+                //             result = (await sources.GetPlainTextAsync(TextSourceReadUnit.Combined, ct)
+                //                 .FirstOrDefaultAsync()).Text, ct),
+                //         () =>
+                //         {
+                //             canceled = true;
+                //             return Task.CompletedTask;
+                //         },
+                //         async ex =>
+                //         {
+                //             await HostServices.GetRequiredService<IDialogService>()
+                //                 .ShowErrorDialogAsync("打开文件失败", $"无法打开文件：{file.File}", ex.ToString());
+                //             canceled = true;
+                //         },
+                //         "正在打开文件");
+                // if (canceled)
+                // {
+                //     return;
+                // }
+                //
+                // if (string.IsNullOrEmpty(result))
+                // {
+                //     await HostServices.GetRequiredService<IDialogService>()
+                //         .ShowWarningDialogAsync("文件为空", $"成功打开文件：{file.File}，但文件为空");
+                // }
+                // else
+                // {
+                //     await HostServices.GetRequiredService<IDialogService>()
+                //         .ShowOkDialogAsync("打开文件成功", $"成功打开文件：{file.File}", result);
+                // }
             }
         }
 

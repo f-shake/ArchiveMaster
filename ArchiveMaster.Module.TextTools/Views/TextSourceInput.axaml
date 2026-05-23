@@ -87,9 +87,9 @@
             IsVisible="{Binding !$parent[UserControl].Source.FromFile}"
             MaxLines="3"
             MinLines="2"
+            PlaceholderText="要处理的文本输入或粘贴至此"
             Text="{Binding $parent[UserControl].Source.Text}"
-            TextWrapping="Wrap"
-            PlaceholderText="要处理的文本输入或粘贴至此">
+            TextWrapping="Wrap">
             <Interaction.Behaviors>
                 <DataTriggerBehavior
                     Binding="{Binding #tbtnMore.IsChecked}"
