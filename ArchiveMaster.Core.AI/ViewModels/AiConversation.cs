@@ -9,7 +9,7 @@ using FzLib.Avalonia.Dialogs;
 
 namespace ArchiveMaster.ViewModels;
 
-public partial class AiConversation : ObservableObject
+public partial class AiConversation(ViewModelServices services) : ObservableObject
 {
     [ObservableProperty]
     private bool canUserInput;
@@ -19,12 +19,6 @@ public partial class AiConversation : ObservableObject
 
     private bool isRegenerating;
 
-    public AiConversation(ViewModelServices services)
-    {
-        Services = services;
-        Reset();
-    }
-
     public event EventHandler MessageAppended;
 
     public AiAssistantChatMessage LastAssistantMessage => Messages.OfType<AiAssistantChatMessage>().LastOrDefault();
@@ -32,7 +26,7 @@ public partial class AiConversation : ObservableObject
     public AiUserChatMessage LastUserMessage => Messages.OfType<AiUserChatMessage>().LastOrDefault();
     public AvaloniaList<AiChatMessage> Messages { get; } = new AvaloniaList<AiChatMessage>();
     public IAiService Service { get; private set; }
-    public ViewModelServices Services { get; }
+    public ViewModelServices Services { get; } = services;
 
     public AiAssistantChatMessage AddAssistantMessage()
     {
@@ -74,8 +68,16 @@ public partial class AiConversation : ObservableObject
         }
 
         Messages.Clear();
-        CanUserInput = false;
-        InputText = "（自动生成）";
+        if (Service?.ProvideFirstUserPrompt ?? true)
+        {
+            CanUserInput = false;
+            InputText = "（自动生成）";
+        }
+        else
+        {
+            CanUserInput = true;
+            InputText = "";
+        }
     }
 
 
@@ -128,9 +130,10 @@ public partial class AiConversation : ObservableObject
         {
             if (isFirst)
             {
-                var (systemPrompt, userPrompt) = await Service.GetFirstPromptAsync(ct);
-
+                var systemPrompt = await Service.GetSystemPromptAsync(ct);
                 AddSystemMessage(systemPrompt);
+
+                var userPrompt = Service.ProvideFirstUserPrompt ? await Service.GetFirstUserPromptAsync(ct) : prompt;
                 AddUserMessage(userPrompt);
             }
             else

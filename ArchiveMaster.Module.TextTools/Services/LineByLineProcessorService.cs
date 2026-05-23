@@ -26,6 +26,8 @@ public partial class LineByLineProcessorService(AppConfig appConfig)
 
     public ObservableCollection<LineByLineItem> Items { get; } = new ObservableCollection<LineByLineItem>();
 
+    public override bool ProvideFirstUserPrompt { get; } = false;
+
     public override async Task ExecuteAsync(CancellationToken ct = default)
     {
         LlmCallerService llm = new LlmCallerService(AI);
@@ -82,33 +84,19 @@ public partial class LineByLineProcessorService(AppConfig appConfig)
         }, ct);
     }
 
-    private async Task ProcessSingleVoteAsync(LlmCallerService llm, LineByLineItem[] chunk, int processed,
-        int voteIndex,
-        CancellationToken ct)
+    public override ValueTask<string> GetFirstUserPromptAsync(CancellationToken ct)
     {
-        int retryCount = Config.EnableRetry ? Config.MaxRetryCount : 1;
-        while (retryCount > 0)
-        {
-            try
-            {
-                await ProcessSingleChunkAsync(llm, chunk, processed, voteIndex, ct);
-                break;
-            }
-            catch (AiUnexpectedFormatException ex)
-            {
-                Log.Logger.Error(ex, "AI返回的格式不符合预期");
-                retryCount--;
-                if (retryCount <= 0)
-                {
-                    throw;
-                }
-            }
-        }
+        throw new NotImplementedException();
     }
 
     public override IEnumerable<SimpleFileInfo> GetInitializedFiles()
     {
         return null;
+    }
+
+    public override ValueTask<string> GetSystemPromptAsync(CancellationToken ct)
+    {
+        throw new NotImplementedException();
     }
 
     public override async Task InitializeAsync(CancellationToken ct = default)
@@ -236,62 +224,31 @@ public partial class LineByLineProcessorService(AppConfig appConfig)
                 chunk[i].Output = line;
             }
         }
-        //并行调用时，流式调用有问题，改为一次性调用。
-        // await foreach (var r in llm.CallStreamAsync(GetSystemPrompt(chunk.Length), userPrompt, ct: ct))
-        // {
-        //     foreach (var c in r)
-        //     {
-        //         if (c == '\n') //AI使用\n作为换行符
-        //         {
-        //             CompleteLine();
-        //             index++;
-        //         }
-        //         else
-        //         {
-        //             str.Append(c);
-        //         }
-        //     }
-        // }
-
-        // CompleteLine();
-        //
-        // if (index != chunk.Length - 1)
-        // {
-        //     throw new AiUnexpectedFormatException(
-        //         $"向AI发送了{chunk.Length}行输入，但收到了{index}行输出。请检查AI模型是否正常运行");
-        // }
-
-        // void CompleteLine()
-        // {
-        //     if (processed + index >= Items.Count)
-        //     {
-        //         throw new AiUnexpectedFormatException($"AI返回的总行数（{processed + index}）超过了输入的行数。");
-        //     }
-        //
-        //     var result = indexPrefix.Replace(str.ToString(), string.Empty);
-        //     var item = Items[processed + index];
-        //
-        //
-        //     //如果启用投票，写入EachVote中
-        //     if (voteIndex >= 0)
-        //     {
-        //         item.EachVote[voteIndex] = result;
-        //     }
-        //     else
-        //     {
-        //         item.Output = result;
-        //     }
-        //
-        //     str.Clear();
-        //
-        //     if (voteIndex == -1)
-        //     {
-        //         //启动投票机制时，并行访问AI，进度无意义
-        //         NotifyCurrentProgress(processed, voteIndex, index, chunk.Length);
-        //     }
-        // }
     }
 
+    private async Task ProcessSingleVoteAsync(LlmCallerService llm, LineByLineItem[] chunk, int processed,
+                                            int voteIndex,
+        CancellationToken ct)
+    {
+        int retryCount = Config.EnableRetry ? Config.MaxRetryCount : 1;
+        while (retryCount > 0)
+        {
+            try
+            {
+                await ProcessSingleChunkAsync(llm, chunk, processed, voteIndex, ct);
+                break;
+            }
+            catch (AiUnexpectedFormatException ex)
+            {
+                Log.Logger.Error(ex, "AI返回的格式不符合预期");
+                retryCount--;
+                if (retryCount <= 0)
+                {
+                    throw;
+                }
+            }
+        }
+    }
     private void ProcessVoteResult(LineByLineItem item)
     {
         //按结果进行分组，按票数排序

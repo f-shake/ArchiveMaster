@@ -25,9 +25,21 @@ namespace ArchiveMaster.Views
 {
     public partial class AiChatPanel : UserControl
     {
+        public static readonly DirectProperty<AiChatPanel, bool> AllowAttachmentsProperty =
+            AvaloniaProperty.RegisterDirect<AiChatPanel, bool>(
+                nameof(AllowAttachments), o => o.AllowAttachments, (o, v) => o.AllowAttachments = v);
+
+        public static readonly DirectProperty<AiChatPanel, AvaloniaList<DocFile>> AttachmentsProperty =
+            AvaloniaProperty.RegisterDirect<AiChatPanel, AvaloniaList<DocFile>>(
+                nameof(Attachments), o => o.Attachments, (o, v) => o.Attachments = v);
+
         public static readonly StyledProperty<AiConversation> ConversationProperty =
-            AvaloniaProperty.Register<AiChatPanel, AiConversation>(
+                            AvaloniaProperty.Register<AiChatPanel, AiConversation>(
                 nameof(Conversation));
+
+        private bool allowAttachments = true;
+
+        private AvaloniaList<DocFile> attachments = new AvaloniaList<DocFile>();
 
         public AiChatPanel()
         {
@@ -42,53 +54,23 @@ namespace ArchiveMaster.Views
             });
         }
 
-        public AiConversation Conversation
-        {
-            get => GetValue(ConversationProperty);
-            set => SetValue(ConversationProperty, value);
-        }
-
-        private bool allowAttachments;
-
-        public static readonly DirectProperty<AiChatPanel, bool> AllowAttachmentsProperty = AvaloniaProperty.RegisterDirect<AiChatPanel, bool>(
-            nameof(AllowAttachments), o => o.AllowAttachments, (o, v) => o.AllowAttachments = v);
-
         public bool AllowAttachments
         {
             get => allowAttachments;
             set => SetAndRaise(AllowAttachmentsProperty, ref allowAttachments, value);
         }
 
-        private AvaloniaList<DocFile> attachments=new AvaloniaList<DocFile>();
-        
-        public static readonly DirectProperty<AiChatPanel, AvaloniaList<DocFile>> AttachmentsProperty =
-            AvaloniaProperty.RegisterDirect<AiChatPanel, AvaloniaList<DocFile>>(
-                nameof(Attachments), o => o.Attachments, (o, v) => o.Attachments = v);
-        
         public AvaloniaList<DocFile> Attachments
         {
             get => attachments;
             set => SetAndRaise(AttachmentsProperty, ref attachments, value);
         }
 
-        private async void OpenFileButton_Click(object sender, RoutedEventArgs e)
+        public AiConversation Conversation
         {
-            var button = sender as Button;
-            if (button?.DataContext is DocFile file)
-            {
-                await TestFileAsync(file);
-            }
+            get => GetValue(ConversationProperty);
+            set => SetValue(ConversationProperty, value);
         }
-
-        private void RemoveFileButton_Click(object sender, RoutedEventArgs e)
-        {
-            var button = sender as Button;
-            if (button?.DataContext is DocFile file)
-            {
-                Attachments.Remove(file);
-            }
-        }
-
         public static async Task TestFileAsync(DocFile file)
         {
             DocFile[] sources = [file];
@@ -128,6 +110,27 @@ namespace ArchiveMaster.Views
             }
         }
 
+        private async void AddAttachmentButton_Click(object sender, RoutedEventArgs e)
+        {
+            var storage = HostServices.GetRequiredService<IStorageProviderService>();
+            var files = await storage.CreatePickerBuilder()
+                .AddFilter("支持的格式", "txt", /* "doc",*/ "docx", "xlsx", "md", "pdf", "txt")
+                .AddFilter("Word文档", /*"doc",*/ "docx")
+                .AddFilter("Excel表格", "xlsx")
+                .AddFilter("PDF文档", /*"doc",*/ "pdf")
+                .AddFilter("Markdown文档", "md")
+                .AddFilter("纯文本", "txt")
+                .AddFilter("所有文件（作为纯文本读取）", "*")
+                .AllowMultiple()
+                .OpenFilePickerAsync();
+            if (files is { Count: > 0 })
+            {
+                foreach (var file in files)
+                {
+                    Attachments.Add(new DocFile(file.GetPath()));
+                }
+            }
+        }
 
         private async void CopyButton_Click(object sender, RoutedEventArgs e)
         {
@@ -156,6 +159,35 @@ namespace ArchiveMaster.Views
             catch (Exception ex)
             {
                 Log.Logger.Error(ex, "复制AI消息失败");
+            }
+        }
+
+        private void ExpandCollapseButton_Click(object sender, RoutedEventArgs e)
+        {
+            var btn = sender as Button;
+            if (btn == null)
+            {
+                Debug.Assert(false);
+                return;
+            }
+
+            SelectableTextBlock tbk = (btn.Parent as DockPanel)?.Children?.OfType<SelectableTextBlock>()
+                ?.FirstOrDefault();
+            if (tbk == null)
+            {
+                Debug.Assert(false);
+                return;
+            }
+
+            if (tbk.MaxLines == 3) //当前已折叠，需要展开
+            {
+                tbk.MaxLines = int.MaxValue;
+                btn.Content = new FluentIcon { Icon = Icon.ChevronUp };
+            }
+            else
+            {
+                tbk.MaxLines = 3;
+                btn.Content = new FluentIcon { Icon = Icon.ChevronDown };
             }
         }
 
@@ -193,54 +225,21 @@ namespace ArchiveMaster.Views
             }
         }
 
-        private void ExpandCollapseButton_Click(object sender, RoutedEventArgs e)
+        private async void OpenFileButton_Click(object sender, RoutedEventArgs e)
         {
-            var btn = sender as Button;
-            if (btn == null)
+            var button = sender as Button;
+            if (button?.DataContext is DocFile file)
             {
-                Debug.Assert(false);
-                return;
-            }
-
-            SelectableTextBlock tbk = (btn.Parent as DockPanel)?.Children?.OfType<SelectableTextBlock>()
-                ?.FirstOrDefault();
-            if (tbk == null)
-            {
-                Debug.Assert(false);
-                return;
-            }
-
-            if (tbk.MaxLines == 3) //当前已折叠，需要展开
-            {
-                tbk.MaxLines = int.MaxValue;
-                btn.Content = new FluentIcon { Icon = Icon.ChevronUp };
-            }
-            else
-            {
-                tbk.MaxLines = 3;
-                btn.Content = new FluentIcon { Icon = Icon.ChevronDown };
+                await TestFileAsync(file);
             }
         }
 
-        private async void AddAttachmentButton_Click(object sender, RoutedEventArgs e)
+        private void RemoveFileButton_Click(object sender, RoutedEventArgs e)
         {
-            var storage = HostServices.GetRequiredService<IStorageProviderService>();
-            var files = await storage.CreatePickerBuilder()
-                .AddFilter("支持的格式", "txt", /* "doc",*/ "docx", "xlsx", "md", "pdf", "txt")
-                .AddFilter("Word文档", /*"doc",*/ "docx")
-                .AddFilter("Excel表格", "xlsx")
-                .AddFilter("PDF文档", /*"doc",*/ "pdf")
-                .AddFilter("Markdown文档", "md")
-                .AddFilter("纯文本", "txt")
-                .AddFilter("所有文件（作为纯文本读取）", "*")
-                .AllowMultiple()
-                .OpenFilePickerAsync();
-            if (files is { Count: > 0 })
+            var button = sender as Button;
+            if (button?.DataContext is DocFile file)
             {
-                foreach (var file in files)
-                {
-                    Attachments.Add(new DocFile(file.GetPath()));
-                }
+                Attachments.Remove(file);
             }
         }
     }

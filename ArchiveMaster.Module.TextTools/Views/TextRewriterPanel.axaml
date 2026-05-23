@@ -17,9 +17,9 @@
         <ct:StackFormItemGroup
             x:Name="stkForm"
             IsEnabled="{Binding !AiConversation.SendCommand.IsRunning}">
-            <ct:FormItem Label="文本源：">
-                <v:TextSourceInput Source="{Binding Config.Source}" />
-            </ct:FormItem>
+            <!-- <ct:FormItem Label="文本源："> -->
+            <!--     <v:TextSourceInput Source="{Binding Config.Source}" /> -->
+            <!-- </ct:FormItem> -->
 
             <ct:FormItem Label="分类：">
                 <ct:RadioButtonGroup

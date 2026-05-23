@@ -10,10 +10,11 @@ public interface IAiService
     public AiProviderConfig AI { get; }
     public ChatOptions ChatOptions { get; }
 
-    public bool NeedRemoveThink { get; }
+    public bool ProvideFirstUserPrompt { get; }
 
-    public Task<(string SystemPrompt, string UserPrompt)> GetFirstPromptAsync(CancellationToken ct);
+    public ValueTask<string> GetFirstUserPromptAsync(CancellationToken ct);
 
+    public ValueTask<string> GetSystemPromptAsync(CancellationToken ct);
     string PostProcessLine(string text);
 
     internal void OnAiTextGenerate(LlmOutputItem e);

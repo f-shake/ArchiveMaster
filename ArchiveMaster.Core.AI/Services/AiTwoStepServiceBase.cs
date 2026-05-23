@@ -18,22 +18,17 @@ public abstract class AiTwoStepServiceBase<TConfig>(AppConfig appConfig)
 
     public ChatOptions ChatOptions { get; }
 
-
-    public bool NeedRemoveThink { get; }
+    public abstract bool ProvideFirstUserPrompt { get; }
 
     protected AppConfig AppConfig { get; } = appConfig;
 
+    public abstract ValueTask<string> GetFirstUserPromptAsync(CancellationToken ct);
 
-    public Task<(string SystemPrompt, string UserPrompt)> GetFirstPromptAsync(CancellationToken ct)
-    {
-        throw new NotImplementedException();
-    }
-
+    public abstract ValueTask<string> GetSystemPromptAsync(CancellationToken ct);
     public void OnAiTextGenerate(LlmOutputItem e)
     {
         AiTextGenerate?.Invoke(this, new GenericEventArgs<LlmOutputItem>(e));
     }
-
     public string PostProcessLine(string text)
     {
         return text;

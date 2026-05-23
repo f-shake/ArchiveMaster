@@ -20,6 +20,7 @@ namespace ArchiveMaster.Services
 {
     public class SmartDocSearchService(AppConfig appConfig) : AiServiceBase<SmartDocSearchConfig>(appConfig)
     {
+        public override bool ProvideFirstUserPrompt { get; } = true;
         public List<TextSearchResult> SearchResults { get; private set; }
 
         public static List<T> RandomSelect<T>(List<T> source, int m)
@@ -35,20 +36,14 @@ namespace ArchiveMaster.Services
             return selected.Select(i => source[i]).ToList();
         }
 
-        public override Task<(string SystemPrompt, string UserPrompt)> GetFirstPromptAsync(CancellationToken ct)
+
+        public override ValueTask<string> GetFirstUserPromptAsync(CancellationToken ct)
         {
             if (SearchResults == null)
             {
                 throw new InvalidOperationException("请先执行搜索");
             }
 
-            string sys = $"""
-                          你是一个归纳总结机器人。当前，用户以“{string.Join(" ", Config.Keywords.Trimmed)}”为关键词，对一些文段进行了搜索，得到了一系列的结果，这些结果将在下面给出。
-                          你需要根据这些结果，进行归纳总结。期望输出长度（字数）：{Config.ExpectedAiConcludeLength}，请严格遵守输出字数要求。
-                          回复的时候，你只需要回复结果，不要参杂其他内容。
-                          若有必要输出MarkDown，样式应当简单，不要输出表格。
-                          {(string.IsNullOrWhiteSpace(Config.ExtraAiPrompt) ? "" : "用户的额外要求，你需要尽可能满足，除非与上文冲突：" + Config.ExtraAiPrompt)}
-                          """;
             var prompt = new StringBuilder();
             foreach (var (item, index) in RandomSelect(SearchResults, Config.AiConcludeMaxCount)
                          .Select((item, index) => (item, index)))
@@ -70,7 +65,23 @@ namespace ArchiveMaster.Services
                 prompt.AppendLine(item.Context);
             }
 
-            return Task.FromResult((sys, prompt.ToString()));
+            return ValueTask.FromResult(prompt.ToString());
+        }
+
+        public override ValueTask<string> GetSystemPromptAsync(CancellationToken ct)
+        {
+            return ValueTask.FromResult($"""
+                                         你是一个归纳总结机器人。当前，用户以“{string.Join(" ", Config.Keywords.Trimmed)}”为关键词，对一些文段进行了搜索，得到了一系列的结果，这些结果将在下面给出。
+                                         你需要根据这些结果，进行归纳总结。期望输出长度（字数）：{Config.ExpectedAiConcludeLength}，请严格遵守输出字数要求。
+                                         回复的时候，你只需要回复结果，不要参杂其他内容。
+                                         若有必要输出MarkDown，样式应当简单，不要输出表格。
+                                         {(string.IsNullOrWhiteSpace(Config.ExtraAiPrompt) ? "" : "用户的额外要求，你需要尽可能满足，除非与上文冲突：" + Config.ExtraAiPrompt)}
+                                         """);
+        }
+
+        public override void Reset()
+        {
+            SearchResults = null;
         }
 
         public async Task SearchAsync(CancellationToken ct)
@@ -146,12 +157,6 @@ namespace ArchiveMaster.Services
             }, ct);
             SearchResults = results;
         }
-
-        public override void Reset()
-        {
-            SearchResults = null;
-        }
-
         private static List<int> FindAllIndexes(string source, string keyword, StringComparison comparison)
         {
             var indexes = new List<int>();

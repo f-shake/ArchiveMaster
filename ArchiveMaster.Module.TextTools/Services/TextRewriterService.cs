@@ -17,24 +17,32 @@ public class TextRewriterService(AppConfig appConfig)
 
     public AiAgentBase AiAgent { get; set; }
 
-    public override async Task<(string SystemPrompt, string UserPrompt)> GetFirstPromptAsync(CancellationToken ct)
+
+    public override bool ProvideFirstUserPrompt { get; } = false;
+
+    public override ValueTask<string> GetFirstUserPromptAsync(CancellationToken ct)
     {
-        if (AiAgent == null)
+        throw new NotImplementedException();
+    }
+
+    public override async ValueTask<string> GetSystemPromptAsync(CancellationToken ct)
+    {
+        var prompt = new StringBuilder();
+        prompt.AppendLine("你是一个文本处理机器人。以下是具体要求：");
+        prompt.AppendLine(await AiAgent.BuildSystemPromptAsync(ct));
+
+
+        //处理额外提示
+        if (AiAgent.CanUserSetExtraPrompt && !string.IsNullOrWhiteSpace(AiAgent.ExtraPrompt))
         {
-            throw new InvalidOperationException("请设置AI智能体");
+            prompt.AppendLine($"额外要求：{AiAgent.ExtraPrompt}");
         }
 
-        StringBuilder str = new StringBuilder();
-
-        NotifyMessage("正在读取文本源");
-        string text = (await Config.Source.GetPlainTextAsync(TextSourceReadUnit.Combined, ct)
-            .FirstOrDefaultAsync()).Text;
-        this.CheckTextSource(text, MaxLength, "文本源");
-
-        NotifyMessage("正在调用AI进行处理");
-
-        var prompt = await GetSystemPromptAsync(ct);
-        return (prompt, text);
+        //增加其他要求
+        prompt.AppendLine("要求输出的时候，仅输出结果，不要输出其他内容。");
+        prompt.AppendLine("输出格式上，要完全符合用户输入的语段，不要添加额外的内容。" +
+                          "若有必要输出MarkDown，样式应当简单，不要输出表格。");
+        return prompt.ToString();
     }
 
     public override string PostProcessLine(string text)
@@ -53,32 +61,12 @@ public class TextRewriterService(AppConfig appConfig)
         text = Regex.Replace(text, @"([a-zA-Z0-9]+)\s+([\u4e00-\u9fa5]+)", "$1$2");
 
         // 清理可能因为大模型抽风产生的首尾空行
-        text = text.Trim('\r', '\n');//.Replace("\r\n\r\n", "\r\n").Replace("\n\n", "\n");
+        text = text.Trim('\r', '\n'); //.Replace("\r\n\r\n", "\r\n").Replace("\n\n", "\n");
 
         return text;
     }
+
     public override void Reset()
     {
-    }
-
-
-    private async Task<string> GetSystemPromptAsync(CancellationToken ct)
-    {
-        var prompt = new StringBuilder();
-        prompt.AppendLine("你是一个文本处理机器人。以下是具体要求：");
-        prompt.AppendLine(await AiAgent.BuildSystemPromptAsync(ct));
-
-
-        //处理额外提示
-        if (AiAgent.CanUserSetExtraPrompt && !string.IsNullOrWhiteSpace(AiAgent.ExtraPrompt))
-        {
-            prompt.AppendLine($"额外要求：{AiAgent.ExtraPrompt}");
-        }
-
-        //增加其他要求
-        prompt.AppendLine("要求输出的时候，仅输出结果，不要输出其他内容。");
-        prompt.AppendLine("输出格式上，要完全符合用户输入的语段，不要添加额外的内容。" +
-                          "若有必要输出MarkDown，样式应当简单，不要输出表格。");
-        return prompt.ToString();
     }
 }

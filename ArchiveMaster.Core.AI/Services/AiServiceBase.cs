@@ -14,15 +14,17 @@ public abstract class AiServiceBase<TConfig>(AppConfig appConfig)
 
     public AiProviderConfig AI => GlobalConfigs.Instance.AiProviders.CurrentProvider;
     public ChatOptions ChatOptions { get; } = null;
-    public bool NeedRemoveThink { get; } = true;
-    protected AppConfig AppConfig { get; } = appConfig;
-    public abstract Task<(string SystemPrompt, string UserPrompt)> GetFirstPromptAsync(CancellationToken ct);
+    public abstract bool ProvideFirstUserPrompt { get; }
 
+    protected AppConfig AppConfig { get; } = appConfig;
+
+    public abstract ValueTask<string> GetFirstUserPromptAsync(CancellationToken ct);
+
+    public abstract ValueTask<string> GetSystemPromptAsync(CancellationToken ct);
     public void OnAiTextGenerate(LlmOutputItem e)
     {
         AiTextGenerate?.Invoke(this, new GenericEventArgs<LlmOutputItem>(e));
     }
-
     public virtual string PostProcessLine(string text)
     {
         return text;

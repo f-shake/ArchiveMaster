@@ -79,6 +79,8 @@ public class TypoCheckerService(AppConfig appConfig)
 
     public event GenericEventHandler<TypoItem> TypoItemGenerated;
 
+    public override bool ProvideFirstUserPrompt { get; } = false;
+
     public static List<TypoSegment> SegmentTypos(string rawText, IList<TypoItem> typos)
     {
         //AI的回复中，正确修正后语段，如果一句话中存在多个错误，只会在最后一个修正时全部修正正确。
@@ -289,9 +291,19 @@ public class TypoCheckerService(AppConfig appConfig)
         }, ct);
     }
 
+    public override ValueTask<string> GetFirstUserPromptAsync(CancellationToken ct)
+    {
+        throw new NotImplementedException();
+    }
+
     public override IEnumerable<SimpleFileInfo> GetInitializedFiles()
     {
         return null;
+    }
+
+    public override ValueTask<string> GetSystemPromptAsync(CancellationToken ct)
+    {
+        return ValueTask.FromResult(SYSTEM_PROMPT);
     }
 
     public override Task InitializeAsync(CancellationToken ct = default)

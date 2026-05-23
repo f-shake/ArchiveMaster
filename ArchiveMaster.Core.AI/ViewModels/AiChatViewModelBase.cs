@@ -12,6 +12,7 @@ public abstract class AiChatViewModelBase<TService, TConfig> : MultiPresetViewMo
         AiConversation = HostServices.GetRequiredService<AiConversation>();
         Service = HostServices.GetRequiredService<TService>();
         AiConversation.BindService(Service);
+        AiConversation.Reset();
 
         GlobalConfigs.Instance.AiProviders.PropertyChanged += (s, e) =>
         {

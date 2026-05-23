@@ -10,8 +10,8 @@ namespace ArchiveMaster.Configs;
 
 public partial class TextRewriterConfig : ConfigBase
 {
-    [ObservableProperty]
-    private TextSource source = new TextSource();
+    // [ObservableProperty]
+    // private TextSource source = new TextSource();
 
     [ObservableProperty]
     private List<AiAgentBase> aiAgents = new List<AiAgentBase>();
@@ -22,9 +22,9 @@ public partial class TextRewriterConfig : ConfigBase
 
     public override void Check()
     {
-        if (Source.IsEmpty())
-        {
-            throw new ArgumentException("文本源为空");
-        }
+        // if (Source.IsEmpty())
+        // {
+        //     throw new ArgumentException("文本源为空");
+        // }
     }
 }
