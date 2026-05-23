@@ -23,7 +23,7 @@ public abstract class AiServiceBase<TConfig>(AppConfig appConfig)
         AiTextGenerate?.Invoke(this, new GenericEventArgs<LlmOutputItem>(e));
     }
 
-    public virtual string ProcessAssistantResponse(string text)
+    public virtual string PostProcessLine(string text)
     {
         return text;
     }

@@ -6,8 +6,11 @@ using Avalonia;
 using Avalonia.Input;
 using Avalonia.Input.Platform;
 using Avalonia.Interactivity;
+using Avalonia.Media;
 using Avalonia.Platform.Storage;
 using Avalonia.Threading;
+using FluentIcons.Avalonia;
+using FluentIcons.Common;
 using Serilog;
 
 namespace ArchiveMaster.Views
@@ -26,13 +29,7 @@ namespace ArchiveMaster.Views
             {
                 if (c != null)
                 {
-                    c.MessageAppended += (s, e) =>
-                    {
-                        Dispatcher.UIThread.Invoke(() =>
-                        {
-                            scr.ScrollToEnd();
-                        });
-                    };
+                    c.MessageAppended += (s, e) => { Dispatcher.UIThread.Invoke(() => { scr.ScrollToEnd(); }); };
                 }
             });
         }
@@ -104,6 +101,35 @@ namespace ArchiveMaster.Views
                 textBox.CaretIndex = cursorPosition + Environment.NewLine.Length;
 
                 e.Handled = true;
+            }
+        }
+
+        private void ExpandCollapseButton_Click(object sender, RoutedEventArgs e)
+        {
+            var btn = sender as Button;
+            if (btn == null)
+            {
+                Debug.Assert(false);
+                return;
+            }
+
+            SelectableTextBlock tbk = (btn.Parent as DockPanel)?.Children?.OfType<SelectableTextBlock>()
+                ?.FirstOrDefault();
+            if (tbk == null)
+            {
+                Debug.Assert(false);
+                return;
+            }
+
+            if (tbk.MaxLines == 3) //当前已折叠，需要展开
+            {
+                tbk.MaxLines = int.MaxValue;
+                btn.Content = new FluentIcon { Icon = Icon.ChevronUp };
+            }
+            else
+            {
+                tbk.MaxLines = 3;
+                btn.Content = new FluentIcon { Icon = Icon.ChevronDown };
             }
         }
     }

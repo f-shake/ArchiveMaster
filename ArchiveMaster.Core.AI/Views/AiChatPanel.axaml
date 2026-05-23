@@ -34,8 +34,14 @@
             </Style>
         </Style>
         <Style Selector="SelectableTextBlock.AiChatMessage">
-            <Setter Property="TextWrapping" Value="Wrap" />
             <Setter Property="LineSpacing" Value="2" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+        <Style Selector="Button.AiChatMessageExpand">
+            <Setter Property="Padding" Value="2" />
+            <Setter Property="Margin" Value="4,0,0,0" />
+            <Setter Property="VerticalAlignment" Value="Top" />
+            <Setter Property="DockPanel.Dock" Value="Right" />
         </Style>
     </UserControl.Styles>
     <Grid RowDefinitions="*,8,Auto">
@@ -45,6 +51,29 @@
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <Panel>
+                            <!--  系统  -->
+                            <DockPanel
+                                Classes="ChatContainer"
+                                IsVisible="{Binding Sender, Converter={x:Static cvt:Converters.EqualWithParameter}, ConverterParameter=System}">
+                                <Border
+                                    HorizontalAlignment="Right"
+                                    Background="{DynamicResource Background2}"
+                                    Classes="ChatBox">
+                                    <DockPanel>
+                                        <Button
+                                            Classes="Transparent AiChatMessageExpand"
+                                            Click="ExpandCollapseButton_Click"
+                                            Content="{ic:FluentIcon Icon=ChevronDown}" />
+                                        <SelectableTextBlock
+                                            b:TextBlockInlinesBehavior.ItemsSource="{Binding Inlines}"
+                                            Classes="AiChatMessage"
+                                            MaxLines="3"
+                                            Opacity="0.75"
+                                            TextTrimming="CharacterEllipsis" />
+                                    </DockPanel>
+                                </Border>
+                            </DockPanel>
+
                             <!--  用户  -->
                             <DockPanel
                                 Classes="ChatContainer"
@@ -59,29 +88,21 @@
                                 <Border
                                     Background="{DynamicResource AccentB2}"
                                     Classes="ChatBox">
-                                    <SelectableTextBlock
-                                        b:TextBlockInlinesBehavior.ItemsSource="{Binding Inlines}"
-                                        Classes="AiChatMessage" />
+                                    <DockPanel>
+                                        <Button
+                                            Classes="Transparent AiChatMessageExpand"
+                                            Click="ExpandCollapseButton_Click"
+                                            Content="{ic:FluentIcon Icon=ChevronDown}" />
+                                        <SelectableTextBlock
+                                            b:TextBlockInlinesBehavior.ItemsSource="{Binding Inlines}"
+                                            Classes="AiChatMessage"
+                                            MaxLines="3"
+                                            TextTrimming="CharacterEllipsis" />
+                                    </DockPanel>
                                 </Border>
                             </DockPanel>
 
-
-                            <!--  系统  -->
-                            <DockPanel
-                                Classes="ChatContainer"
-                                IsVisible="{Binding Sender, Converter={x:Static cvt:Converters.EqualWithParameter}, ConverterParameter=System}">
-                                <Border
-                                    HorizontalAlignment="Right"
-                                    Background="{DynamicResource Background2}"
-                                    Classes="ChatBox">
-                                    <SelectableTextBlock
-                                        b:TextBlockInlinesBehavior.ItemsSource="{Binding Inlines}"
-                                        Classes="AiChatMessage"
-                                        Opacity="0.75" />
-                                </Border>
-                            </DockPanel>
-
-                            <!--  AI  -->
+                            <!--  AI助手  -->
                             <StackPanel
                                 IsVisible="{Binding Sender, Converter={x:Static cvt:Converters.EqualWithParameter}, ConverterParameter=Assistant}"
                                 Orientation="Vertical"

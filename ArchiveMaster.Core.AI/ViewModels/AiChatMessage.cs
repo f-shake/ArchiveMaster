@@ -41,26 +41,25 @@ public abstract partial class AiChatMessage : INotifyPropertyChanged
         return message;
     }
 
-    public static AiSystemChatMessage CreateSystemMessage(string systemPrompt, bool fold = false, int maxLength = 0)
+    public static AiSystemChatMessage CreateSystemMessage(string systemPrompt)
     {
         var message = new AiSystemChatMessage();
         message.AddInline(systemPrompt);
         message.fullTextBuilder.Append(systemPrompt);
-        message.Freeze(fold, maxLength);
+        message.Freeze();
         return message;
     }
 
-    public static AiUserChatMessage CreateUserMessage(string userPrompt, bool fold = false, int maxLength = 0)
+    public static AiUserChatMessage CreateUserMessage(string userPrompt)
     {
         var message = new AiUserChatMessage();
         message.AddInline(userPrompt);
         message.fullTextBuilder.Append(userPrompt);
-        message.Freeze(fold, maxLength);
+        message.Freeze();
         return message;
     }
 
-    public static AiUserChatMessage CreateUserMessage(string userPrompt, IEnumerable<byte[]> images, bool fold = false,
-        int maxLength = 0)
+    public static AiUserChatMessage CreateUserMessage(string userPrompt, IEnumerable<byte[]> images)
     {
         var message = new AiUserChatMessage();
         message.AddInline(userPrompt);
@@ -73,7 +72,7 @@ public abstract partial class AiChatMessage : INotifyPropertyChanged
             }
         }
 
-        message.Freeze(fold, maxLength);
+        message.Freeze();
         return message;
     }
 
@@ -82,15 +81,15 @@ public abstract partial class AiChatMessage : INotifyPropertyChanged
         return ThinkPartRegex().Replace(text, string.Empty);
     }
 
-    public void FreezeAssistantMessage(Func<string, string> processText)
-    {
-        if (Sender != AiChatMessageSender.Assistant)
-        {
-            throw new InvalidOperationException("当前消息不是Assistant，无法冻结");
-        }
-
-        Freeze(false, 0, processText);
-    }
+    // public void FreezeAssistantMessage(Func<string, string> processText)
+    // {
+    //     if (Sender != AiChatMessageSender.Assistant)
+    //     {
+    //         throw new InvalidOperationException("当前消息不是Assistant，无法冻结");
+    //     }
+    //
+    //     Freeze(false, 0, processText);
+    // }
 
     protected void AddInline(InlineItem inline)
     {
@@ -103,27 +102,10 @@ public abstract partial class AiChatMessage : INotifyPropertyChanged
         MessageAppended?.Invoke(this, EventArgs.Empty);
     }
 
-    protected virtual void Freeze(bool fold = false, int maxLength = 50, Func<string, string> processText = null)
+    protected virtual void Freeze()
     {
         isFrozen = true;
         frozenFullText = fullTextBuilder.ToString();
-        if (processText != null)
-        {
-            frozenFullText = processText(frozenFullText);
-        }
-
-        if (fold)
-        {
-            if (FullText.Length > maxLength)
-            {
-                Inlines.Clear();
-                var text = FullText.Replace("\r", "").Replace("\n", "");
-                Inlines.Add(new InlineItem(text[..(maxLength / 2)]));
-                Inlines.Add(new InlineItem("  ...  ", false, Brushes.Gray));
-                Inlines.Add(new InlineItem(text[^(maxLength / 2)..]));
-                Inlines.Add(new InlineItem($"（共{FullText.Length}字）"));
-            }
-        }
 
         OnPropertyChanged(nameof(IsFrozen));
         OnPropertyChanged(nameof(FullText));

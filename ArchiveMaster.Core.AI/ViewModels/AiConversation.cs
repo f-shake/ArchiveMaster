@@ -11,8 +11,6 @@ namespace ArchiveMaster.ViewModels;
 
 public partial class AiConversation : ObservableObject
 {
-    public int MAX_FOLDED_LENGTH = 50;
-
     [ObservableProperty]
     private bool canUserInput;
 
@@ -43,16 +41,16 @@ public partial class AiConversation : ObservableObject
         return message;
     }
 
-    public AiSystemChatMessage AddSystemMessage(string systemPrompt, bool fold, int maxLength)
+    public AiSystemChatMessage AddSystemMessage(string systemPrompt)
     {
-        var message = AiChatMessage.CreateSystemMessage(systemPrompt, fold, maxLength);
+        var message = AiChatMessage.CreateSystemMessage(systemPrompt);
         AddMessage(message);
         return message;
     }
 
-    public AiUserChatMessage AddUserMessage(string userPrompt, bool fold, int maxLength)
+    public AiUserChatMessage AddUserMessage(string userPrompt)
     {
-        var message = AiChatMessage.CreateUserMessage(userPrompt, fold, maxLength);
+        var message = AiChatMessage.CreateUserMessage(userPrompt);
         AddMessage(message);
         return message;
     }
@@ -132,19 +130,25 @@ public partial class AiConversation : ObservableObject
             {
                 var (systemPrompt, userPrompt) = await Service.GetFirstPromptAsync(ct);
 
-                AddSystemMessage(systemPrompt, true, MAX_FOLDED_LENGTH);
-                AddUserMessage(userPrompt, true, MAX_FOLDED_LENGTH);
+                AddSystemMessage(systemPrompt);
+                AddUserMessage(userPrompt);
             }
             else
             {
                 if (!isRegenerating)
                 {
-                    AddUserMessage(prompt, false, MAX_FOLDED_LENGTH);
+                    AddUserMessage(prompt);
                 }
             }
 
             var messages = Messages.ToList();
             var assistantMessage = AddAssistantMessage();
+
+            assistantMessage.AiAssistantEndLine += (s, e) =>
+            {
+                var newLine = Service.PostProcessLine(e.LineText);
+                e.ReplaceLine(newLine);
+            };
 
             await Service.CallAiWithStreamAsync(messages, assistantMessage, ct);
         }
@@ -154,11 +158,6 @@ public partial class AiConversation : ObservableObject
         }
         finally
         {
-            if (LastAssistantMessage?.IsFrozen == false)
-            {
-                LastAssistantMessage.FreezeAssistantMessage(Service.ProcessAssistantResponse);
-            }
-
             OnEndResponse();
         }
     }

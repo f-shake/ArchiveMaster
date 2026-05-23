@@ -34,7 +34,7 @@ public abstract class AiTwoStepServiceBase<TConfig>(AppConfig appConfig)
         AiTextGenerate?.Invoke(this, new GenericEventArgs<LlmOutputItem>(e));
     }
 
-    public string ProcessAssistantResponse(string text)
+    public string PostProcessLine(string text)
     {
         return text;
     }

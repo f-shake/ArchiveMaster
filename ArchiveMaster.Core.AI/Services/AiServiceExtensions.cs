@@ -15,6 +15,7 @@ public static class AiServiceExtensions
                 service.OnAiTextGenerate(e.Value);
                 assistantMessage?.Append(e.Value);
             }, ct: ct);
+            assistantMessage?.Complete();
 
             return result;
         }

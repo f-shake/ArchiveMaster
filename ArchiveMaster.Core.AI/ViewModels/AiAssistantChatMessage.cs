@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Text;
 using ArchiveMaster.Enums;
+using ArchiveMaster.Events;
 using ArchiveMaster.Models;
 using ArchiveMaster.Services;
 using Avalonia.Controls.Documents;
@@ -75,8 +76,13 @@ public class AiAssistantChatMessage : AiChatMessage
     {
         queueMessage.Enqueue(message);
     }
+    
+    public void Complete()
+    {
+        Freeze();
+    }
 
-    protected override void Freeze(bool fold = false, int maxLength = 50, Func<string, string> processText = null)
+    protected override void Freeze()
     {
         timerCts.Cancel();
         timer.Dispose();
@@ -87,21 +93,10 @@ public class AiAssistantChatMessage : AiChatMessage
         
         isFrozen = true;
         frozenPlainText = plainTextBuilder.ToString();
-        if (processText != null)
-        {
-            frozenPlainText = processText(frozenPlainText);
-        }
 
         frozenThinkText = thinkTextBuilder.ToString();
 
         frozenFullText = fullTextBuilder.ToString();
-        if (processText != null)
-        {
-            frozenFullText = processText(frozenFullText);
-            Inlines.Clear();
-            Inlines.AddRange(SimpleMarkdownParser.ParseSimpleMarkdown(frozenFullText));
-        }
-
     
         OnPropertyChanged(nameof(IsFrozen));
         OnPropertyChanged(nameof(FullText));
@@ -137,6 +132,8 @@ public class AiAssistantChatMessage : AiChatMessage
         AddInline(lines[^1]);
     }
 
+    public event EventHandler<AiAssistantEndLineEventArgs> AiAssistantEndLine;
+
     private void EndLine(string lineText = null)
     {
         if (lineText == null)
@@ -145,6 +142,10 @@ public class AiAssistantChatMessage : AiChatMessage
             lineText = string.Concat(inlines.Select(i => i.Text));
             Inlines.RemoveRange(lineBeginIndex, Inlines.Count - lineBeginIndex);
         }
+        
+        var e=new  AiAssistantEndLineEventArgs(lineText);
+        AiAssistantEndLine?.Invoke(this, e);
+        lineText = e.LineText;
 
         if (lineText.Trim().Equals("<think>", StringComparison.OrdinalIgnoreCase))
         {

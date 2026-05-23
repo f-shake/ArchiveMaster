@@ -37,9 +37,9 @@ public class TextRewriterService(AppConfig appConfig)
         return (prompt, text);
     }
 
-    public override string ProcessAssistantResponse(string text)
+    public override string PostProcessLine(string text)
     {
-        text = base.ProcessAssistantResponse(text);
+        text = base.PostProcessLine(text);
 
         if (string.IsNullOrWhiteSpace(text))
         {

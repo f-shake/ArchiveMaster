@@ -14,7 +14,7 @@ public interface IAiService
 
     public Task<(string SystemPrompt, string UserPrompt)> GetFirstPromptAsync(CancellationToken ct);
 
-    string ProcessAssistantResponse(string text);
+    string PostProcessLine(string text);
 
     internal void OnAiTextGenerate(LlmOutputItem e);
 }
