@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.Text;
 using ArchiveMaster.Enums;
 using ArchiveMaster.Events;
 using ArchiveMaster.Services;
@@ -18,9 +19,9 @@ public partial class AiConversation(ViewModelServices services) : ObservableObje
     private string inputText;
 
     private bool isRegenerating;
-
     public event EventHandler MessageAppended;
 
+    public AvaloniaList<DocFile> Attachments { get; } = new AvaloniaList<DocFile>();
     public AiAssistantChatMessage LastAssistantMessage => Messages.OfType<AiAssistantChatMessage>().LastOrDefault();
     public AiSystemChatMessage LastSystemMessage => Messages.OfType<AiSystemChatMessage>().LastOrDefault();
     public AiUserChatMessage LastUserMessage => Messages.OfType<AiUserChatMessage>().LastOrDefault();
@@ -90,8 +91,12 @@ public partial class AiConversation(ViewModelServices services) : ObservableObje
 
     private void OnBeginResponse()
     {
-        InputText = "";
         CanUserInput = false;
+        if (!isRegenerating)
+        {
+            InputText = "";
+            Attachments.Clear();
+        }
     }
 
     [RelayCommand]
@@ -123,7 +128,25 @@ public partial class AiConversation(ViewModelServices services) : ObservableObje
             throw new Exception("正在生成中");
         }
 
-        var prompt = isRegenerating ? LastUserMessage.FullText : InputText;
+        var prompt = new StringBuilder();
+
+        if (!isRegenerating) //重新生成时，不需要获取当前提示词
+        {
+            prompt.AppendLine(isRegenerating ? LastUserMessage.FullText : InputText);
+
+            if (Attachments is { Count: > 0 })
+            {
+                int index = 0;
+                await foreach (var part in Attachments.GetPlainTextAsync(TextSourceReadUnit.PerFile, ct))
+                {
+                    index++;
+                    prompt.AppendLine($"==========以下是第{index}个附件（{part.Source}）==========");
+                    prompt.AppendLine(part.Text);
+                    prompt.AppendLine($"==========第{index}个附件内容结束==========");
+                }
+            }
+        }
+
         bool isFirst = LastSystemMessage == null;
         OnBeginResponse();
         try
@@ -133,14 +156,16 @@ public partial class AiConversation(ViewModelServices services) : ObservableObje
                 var systemPrompt = await Service.GetSystemPromptAsync(ct);
                 AddSystemMessage(systemPrompt);
 
-                var userPrompt = Service.ProvideFirstUserPrompt ? await Service.GetFirstUserPromptAsync(ct) : prompt;
+                var userPrompt = Service.ProvideFirstUserPrompt
+                    ? await Service.GetFirstUserPromptAsync(ct)
+                    : prompt.ToString();
                 AddUserMessage(userPrompt);
             }
             else
             {
                 if (!isRegenerating)
                 {
-                    AddUserMessage(prompt);
+                    AddUserMessage(prompt.ToString());
                 }
             }
 

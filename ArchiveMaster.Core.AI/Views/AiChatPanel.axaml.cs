@@ -29,29 +29,23 @@ namespace ArchiveMaster.Views
             AvaloniaProperty.RegisterDirect<AiChatPanel, bool>(
                 nameof(AllowAttachments), o => o.AllowAttachments, (o, v) => o.AllowAttachments = v);
 
-        public static readonly DirectProperty<AiChatPanel, AvaloniaList<DocFile>> AttachmentsProperty =
-            AvaloniaProperty.RegisterDirect<AiChatPanel, AvaloniaList<DocFile>>(
-                nameof(Attachments), o => o.Attachments, (o, v) => o.Attachments = v);
+        public static readonly DirectProperty<AiChatPanel, bool> CanSendProperty =
+            AvaloniaProperty.RegisterDirect<AiChatPanel, bool>(
+                nameof(CanSend), o => o.CanSend, (o, v) => o.CanSend = v);
 
         public static readonly StyledProperty<AiConversation> ConversationProperty =
-                            AvaloniaProperty.Register<AiChatPanel, AiConversation>(
+                    AvaloniaProperty.Register<AiChatPanel, AiConversation>(
                 nameof(Conversation));
 
         private bool allowAttachments = true;
 
-        private AvaloniaList<DocFile> attachments = new AvaloniaList<DocFile>();
+        private bool canSend;
 
         public AiChatPanel()
         {
             InitializeComponent();
-            //自动滚动到最底部
-            this.GetObservable(ConversationProperty).Subscribe(c =>
-            {
-                if (c != null)
-                {
-                    c.MessageAppended += (s, e) => { Dispatcher.UIThread.Invoke(() => { scr.ScrollToEnd(); }); };
-                }
-            });
+
+            this.GetObservable(ConversationProperty).Subscribe(OnConversationChanged);
         }
 
         public bool AllowAttachments
@@ -60,10 +54,10 @@ namespace ArchiveMaster.Views
             set => SetAndRaise(AllowAttachmentsProperty, ref allowAttachments, value);
         }
 
-        public AvaloniaList<DocFile> Attachments
+        public bool CanSend
         {
-            get => attachments;
-            set => SetAndRaise(AttachmentsProperty, ref attachments, value);
+            get => canSend;
+            private set => SetAndRaise(CanSendProperty, ref canSend, value);
         }
 
         public AiConversation Conversation
@@ -71,6 +65,7 @@ namespace ArchiveMaster.Views
             get => GetValue(ConversationProperty);
             set => SetValue(ConversationProperty, value);
         }
+
         public static async Task TestFileAsync(DocFile file)
         {
             DocFile[] sources = [file];
@@ -127,7 +122,7 @@ namespace ArchiveMaster.Views
             {
                 foreach (var file in files)
                 {
-                    Attachments.Add(new DocFile(file.GetPath()));
+                    Conversation.Attachments.Add(new DocFile(file.GetPath()));
                 }
             }
         }
@@ -225,6 +220,24 @@ namespace ArchiveMaster.Views
             }
         }
 
+        private void OnConversationChanged(AiConversation c)
+        {
+            if (c == null)
+            {
+                return;
+            }
+
+            c.MessageAppended += (s, e) => { Dispatcher.UIThread.Invoke(() => { scr.ScrollToEnd(); }); };
+            c.PropertyChanged += (s, e) =>
+            {
+                if (e.PropertyName == nameof(AiConversation.InputText))
+                {
+                    UpdateCanSend();
+                }
+            };
+            c.Attachments.CollectionChanged += (s, e) => { UpdateCanSend(); };
+        }
+
         private async void OpenFileButton_Click(object sender, RoutedEventArgs e)
         {
             var button = sender as Button;
@@ -239,8 +252,18 @@ namespace ArchiveMaster.Views
             var button = sender as Button;
             if (button?.DataContext is DocFile file)
             {
-                Attachments.Remove(file);
+                Conversation.Attachments.Remove(file);
             }
+        }
+
+        private void UpdateCanSend()
+        {
+            if (Conversation == null)
+            {
+                return;
+            }
+
+            CanSend = Conversation.InputText is { Length: > 0 } || Conversation.Attachments.Count > 0;
         }
     }
 }

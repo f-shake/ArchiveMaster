@@ -18,6 +18,9 @@
             <Setter Property="Height" Value="36" />
             <Setter Property="Padding" Value="0" />
             <Setter Property="CornerRadius" Value="18" />
+            <Style Selector="^:disabled">
+                <Setter Property="Opacity" Value="0.7" />
+            </Style>
         </Style>
         <Style Selector="Border.ChatBox">
             <Setter Property="CornerRadius" Value="8" />
@@ -189,16 +192,16 @@
                     IsVisible="{Binding $parent[UserControl].AllowAttachments}">
                     <TextBlock
                         Margin="0,8"
-                        IsVisible="{Binding $parent[UserControl].Attachments.Count, Converter={x:Static cvt:Converters.CountIsZero}}"
+                        IsVisible="{Binding $parent[UserControl].Conversation.Attachments.Count, Converter={x:Static cvt:Converters.CountIsZero}}"
                         Opacity="0.7"
                         Text="当前没有选择任何文件" />
                     <ScrollViewer
                         HorizontalScrollBarVisibility="Disabled"
-                        IsVisible="{Binding $parent[UserControl].Attachments.Count, Converter={x:Static cvt:Converters.CountGreaterThanZero}}"
+                        IsVisible="{Binding $parent[UserControl].Conversation.Attachments.Count, Converter={x:Static cvt:Converters.CountGreaterThanZero}}"
                         VerticalScrollBarVisibility="Auto">
                         <ItemsControl
                             Background="Transparent"
-                            ItemsSource="{Binding $parent[UserControl].Attachments}">
+                            ItemsSource="{Binding $parent[UserControl].Conversation.Attachments}">
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
                                     <WrapPanel
@@ -272,9 +275,20 @@
                     Content="{ic:FluentIcon Icon=Send}"
                     Foreground="White"
                     IsDefault="True"
-                    IsEnabled="{Binding $parent[UserControl].Conversation.InputText, Converter={x:Static cvt:Converters.IsNotNull}}"
+                    IsEnabled="{Binding $parent[UserControl].CanSend}"
                     IsVisible="{Binding !$parent[UserControl].Conversation.SendCommand.IsRunning}"
-                    ToolTip.Tip="发送" />
+                    ToolTip.Tip="发送">
+                    <!-- <Button.IsEnabled> -->
+                    <!--     <MultiBinding Converter="{x:Static cvt:Converters.OrLogic}"> -->
+                    <!--  <Binding  -->
+                    <!--  Converter="{x:Static cvt:Converters.IsNotNull}"  -->
+                    <!--  Path="$parent[UserControl].Conversation.InputText" />  -->
+                    <!--  <Binding  -->
+                    <!--  Converter="{x:Static cvt:Converters.CountGreaterThanZero}"  -->
+                    <!--  Path="$parent[UserControl].Conversation.Attachments" />  -->
+                    <!--     </MultiBinding> -->
+                    <!-- </Button.IsEnabled> -->
+                </Button>
                 <Button
                     Background="Red"
                     Classes="ChatButton"
