@@ -147,6 +147,7 @@ public partial class AiConversation(ViewModelServices services) : ObservableObje
             }
         }
 
+
         bool isFirst = LastSystemMessage == null;
         OnBeginResponse();
         try
@@ -158,14 +159,14 @@ public partial class AiConversation(ViewModelServices services) : ObservableObje
 
                 var userPrompt = Service.ProvideFirstUserPrompt
                     ? await Service.GetFirstUserPromptAsync(ct)
-                    : prompt.ToString();
+                    : prompt.ToString().Trim();
                 AddUserMessage(userPrompt);
             }
             else
             {
                 if (!isRegenerating)
                 {
-                    AddUserMessage(prompt.ToString());
+                    AddUserMessage(prompt.ToString().Trim());
                 }
             }
 

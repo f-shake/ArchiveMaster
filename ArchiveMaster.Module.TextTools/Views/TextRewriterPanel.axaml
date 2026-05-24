@@ -3,6 +3,7 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:ct="using:FzLib.Avalonia.Controls"
+    xmlns:cvt="clr-namespace:ArchiveMaster.Converters;assembly=ArchiveMaster.Core"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:v="using:ArchiveMaster.Views"
@@ -21,7 +22,7 @@
             <!--     <v:TextSourceInput Source="{Binding Config.Source}" /> -->
             <!-- </ct:FormItem> -->
 
-            <ct:FormItem Label="分类：">
+            <ct:FormItem Label="智能体：">
                 <ct:RadioButtonGroup
                     DisplayMemberBinding="{Binding Name}"
                     ItemsSource="{Binding AiAgentGroups}"
@@ -30,7 +31,8 @@
 
             <ct:FormItem
                 Description="{Binding SelectedAiAgent.Description}"
-                Label="智能体：">
+                IsVisible="{Binding SelectedAiAgentGroup.Agents, Converter={x:Static cvt:Converters.CountGreaterThanOne}}"
+                Label=" ">
                 <ct:RadioButtonGroup
                     DisplayMemberBinding="{Binding Name}"
                     ItemsSource="{Binding SelectedAiAgentGroup.Agents}"

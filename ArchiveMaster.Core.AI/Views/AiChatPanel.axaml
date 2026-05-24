@@ -257,7 +257,6 @@
                 </Grid>
                 <TextBox
                     Grid.Row="1"
-                    AcceptsReturn="True"
                     AcceptsTab="True"
                     IsEnabled="{Binding $parent[UserControl].Conversation.CanUserInput}"
                     KeyDown="InputTextBox_KeyDown"

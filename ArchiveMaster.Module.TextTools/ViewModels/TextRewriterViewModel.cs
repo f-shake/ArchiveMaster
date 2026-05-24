@@ -30,6 +30,7 @@ public partial class TextRewriterViewModel : AiChatViewModelBase<TextRewriterSer
             [nameof(AiAgents.TextCorrection)] = ("文本纠错", 5),
             [nameof(AiAgents.TextEvaluation)] = ("文本评价", 4),
             [nameof(AiAgents.Custom)] = ("自定义", 6),
+            [nameof(AiAgents.Chat)] = ("聊天", 0),
         };
 
     [ObservableProperty]
