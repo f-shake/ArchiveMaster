@@ -172,7 +172,7 @@
                 Classes="ChatButton"
                 Command="{Binding $parent[UserControl].Conversation.ResetCommand}"
                 Content="{ic:FluentIcon Icon=ArrowReset}"
-                IsEnabled="{Binding !$parent[UserControl].Conversation.SendCommand.IsRunning}"
+                IsEnabled="{Binding $parent[UserControl].CanReset}"
                 ToolTip.Tip="重置" />
             <Button
                 Grid.Column="1"

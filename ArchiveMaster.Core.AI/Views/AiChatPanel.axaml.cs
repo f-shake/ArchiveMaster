@@ -29,15 +29,21 @@ namespace ArchiveMaster.Views
             AvaloniaProperty.RegisterDirect<AiChatPanel, bool>(
                 nameof(AllowAttachments), o => o.AllowAttachments, (o, v) => o.AllowAttachments = v);
 
-        public static readonly DirectProperty<AiChatPanel, bool> CanSendProperty =
+        public static readonly DirectProperty<AiChatPanel, bool> CanResetProperty =
             AvaloniaProperty.RegisterDirect<AiChatPanel, bool>(
+                nameof(CanReset), o => o.CanReset, (o, v) => o.CanReset = v);
+
+        public static readonly DirectProperty<AiChatPanel, bool> CanSendProperty =
+                    AvaloniaProperty.RegisterDirect<AiChatPanel, bool>(
                 nameof(CanSend), o => o.CanSend, (o, v) => o.CanSend = v);
 
         public static readonly StyledProperty<AiConversation> ConversationProperty =
-                    AvaloniaProperty.Register<AiChatPanel, AiConversation>(
+            AvaloniaProperty.Register<AiChatPanel, AiConversation>(
                 nameof(Conversation));
 
         private bool allowAttachments = true;
+
+        private bool canReset;
 
         private bool canSend;
 
@@ -54,12 +60,17 @@ namespace ArchiveMaster.Views
             set => SetAndRaise(AllowAttachmentsProperty, ref allowAttachments, value);
         }
 
+        public bool CanReset
+        {
+            get => canReset;
+            private set => SetAndRaise(CanResetProperty, ref canReset, value);
+        }
+
         public bool CanSend
         {
             get => canSend;
             private set => SetAndRaise(CanSendProperty, ref canSend, value);
         }
-
         public AiConversation Conversation
         {
             get => GetValue(ConversationProperty);
@@ -236,6 +247,17 @@ namespace ArchiveMaster.Views
                 }
             };
             c.Attachments.CollectionChanged += (s, e) => { UpdateCanSend(); };
+            c.SendCommand.PropertyChanged += (s, e) =>
+            {
+                if (e.PropertyName == nameof(c.SendCommand.IsRunning))
+                {
+                    UpdateCanReset();
+                }
+            };
+            c.Messages.CollectionChanged += (s, e) => { UpdateCanReset(); };
+            
+            UpdateCanReset();
+            UpdateCanSend();
         }
 
         private async void OpenFileButton_Click(object sender, RoutedEventArgs e)
@@ -256,6 +278,15 @@ namespace ArchiveMaster.Views
             }
         }
 
+        private void UpdateCanReset()
+        {
+            if (Conversation == null)
+            {
+                return;
+            }
+
+            CanReset = !Conversation.SendCommand.IsRunning && Conversation.Messages.Count > 0;
+        }
         private void UpdateCanSend()
         {
             if (Conversation == null)

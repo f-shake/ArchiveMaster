@@ -54,8 +54,8 @@
                     <ct:FormItem Header="额外提示词">
                         <TextBox
                             Width="240"
-                            Text="{Binding Config.ExtraAiPrompt}"
-                            PlaceholderText="默认对搜索结果进行归纳总结" />
+                            PlaceholderText="默认对搜索结果进行归纳总结"
+                            Text="{Binding Config.ExtraAiPrompt}" />
                     </ct:FormItem>
                     <ct:FormItem Header="期望回答长度（字数）">
                         <NumericUpDown
@@ -184,7 +184,9 @@
                 Classes="GroupBox"
                 Header="AI分析"
                 IsVisible="{Binding !!SearchResults}">
-                <v:AiChatPanel Conversation="{Binding AiConversation}" />
+                <v:AiChatPanel
+                    AllowAttachments="False"
+                    Conversation="{Binding AiConversation}" />
 
             </HeaderedContentControl>
 
