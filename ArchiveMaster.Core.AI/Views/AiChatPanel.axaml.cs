@@ -34,7 +34,7 @@ namespace ArchiveMaster.Views
                 nameof(CanReset), o => o.CanReset, (o, v) => o.CanReset = v);
 
         public static readonly DirectProperty<AiChatPanel, bool> CanSendProperty =
-                    AvaloniaProperty.RegisterDirect<AiChatPanel, bool>(
+            AvaloniaProperty.RegisterDirect<AiChatPanel, bool>(
                 nameof(CanSend), o => o.CanSend, (o, v) => o.CanSend = v);
 
         public static readonly StyledProperty<AiConversation> ConversationProperty =
@@ -52,6 +52,9 @@ namespace ArchiveMaster.Views
             InitializeComponent();
 
             this.GetObservable(ConversationProperty).Subscribe(OnConversationChanged);
+
+            //需要使用Tunnel策略，否则会被父控件的KeyDown事件拦截
+            txtInput.AddHandler(KeyDownEvent, InputTextBox_KeyDown, RoutingStrategies.Tunnel);
         }
 
         public bool AllowAttachments
@@ -71,6 +74,7 @@ namespace ArchiveMaster.Views
             get => canSend;
             private set => SetAndRaise(CanSendProperty, ref canSend, value);
         }
+
         public AiConversation Conversation
         {
             get => GetValue(ConversationProperty);
@@ -199,38 +203,44 @@ namespace ArchiveMaster.Views
 
         private void InputTextBox_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.KeyModifiers == KeyModifiers.Shift && e.Key == Key.Enter)
+            if (e.Key == Key.Enter)
             {
-                var textBox = sender as TextBox;
-                if (textBox == null)
+                if (e.KeyModifiers == KeyModifiers.Shift) //换行
                 {
-                    return;
+                    e.Handled = true;
+                    var textBox = sender as TextBox;
+                    if (textBox == null)
+                    {
+                        return;
+                    }
+
+                    // 获取光标位置
+                    int cursorPosition = textBox.CaretIndex;
+                    string currentText = textBox.Text ?? "";
+
+                    // 如果有选中的文本，先删除选中的文本
+                    if (textBox.SelectedText.Length > 0)
+                    {
+                        currentText = currentText.Remove(textBox.SelectionStart, textBox.SelectedText.Length);
+                    }
+
+                    // 在光标前插入换行符，光标后也插入换行符
+                    string beforeCursor = currentText.Substring(0, cursorPosition);
+                    string afterCursor = currentText.Substring(cursorPosition);
+
+                    // 将光标前后的文本拼接在一起，并在光标位置前后加上换行符
+                    textBox.Text = beforeCursor + Environment.NewLine + afterCursor;
+
+                    // 移动光标到换行符后面
+                    textBox.CaretIndex = cursorPosition + Environment.NewLine.Length;
                 }
-
-                // 获取光标位置
-                int cursorPosition = textBox.CaretIndex;
-                string currentText = textBox.Text ?? "";
-
-                // 如果有选中的文本，先删除选中的文本
-                if (textBox.SelectedText.Length > 0)
+                else if (e.KeyModifiers == KeyModifiers.None) //发送
                 {
-                    currentText = currentText.Remove(textBox.SelectionStart, textBox.SelectedText.Length);
+                    e.Handled = true;
+                    btnSend.Command?.Execute(null);
                 }
-
-                // 在光标前插入换行符，光标后也插入换行符
-                string beforeCursor = currentText.Substring(0, cursorPosition);
-                string afterCursor = currentText.Substring(cursorPosition);
-
-                // 将光标前后的文本拼接在一起，并在光标位置前后加上换行符
-                textBox.Text = beforeCursor + Environment.NewLine + afterCursor;
-
-                // 移动光标到换行符后面
-                textBox.CaretIndex = cursorPosition + Environment.NewLine.Length;
-
-                e.Handled = true;
             }
         }
-
         private void OnConversationChanged(AiConversation c)
         {
             if (c == null)
@@ -255,7 +265,7 @@ namespace ArchiveMaster.Views
                 }
             };
             c.Messages.CollectionChanged += (s, e) => { UpdateCanReset(); };
-            
+
             UpdateCanReset();
             UpdateCanSend();
         }
@@ -287,6 +297,7 @@ namespace ArchiveMaster.Views
 
             CanReset = !Conversation.SendCommand.IsRunning && Conversation.Messages.Count > 0;
         }
+
         private void UpdateCanSend()
         {
             if (Conversation == null)

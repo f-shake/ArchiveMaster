@@ -256,10 +256,11 @@
                     </ScrollViewer>
                 </Grid>
                 <TextBox
+                    x:Name="txtInput"
                     Grid.Row="1"
+                    AcceptsReturn="True"
                     AcceptsTab="True"
                     IsEnabled="{Binding $parent[UserControl].Conversation.CanUserInput}"
-                    KeyDown="InputTextBox_KeyDown"
                     MaxLines="6"
                     Text="{Binding $parent[UserControl].Conversation.InputText}"
                     TextWrapping="Wrap" />
@@ -269,11 +270,11 @@
                 Grid.Column="4"
                 VerticalAlignment="Bottom">
                 <Button
+                    x:Name="btnSend"
                     Classes="Primary ChatButton"
                     Command="{Binding $parent[UserControl].Conversation.SendCommand}"
                     Content="{ic:FluentIcon Icon=Send}"
                     Foreground="White"
-                    IsDefault="True"
                     IsEnabled="{Binding $parent[UserControl].CanSend}"
                     IsVisible="{Binding !$parent[UserControl].Conversation.SendCommand.IsRunning}"
                     ToolTip.Tip="发送">

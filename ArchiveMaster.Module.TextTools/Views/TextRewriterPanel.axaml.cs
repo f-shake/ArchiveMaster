@@ -35,7 +35,7 @@ namespace ArchiveMaster.Views
             }
 
             var aiAgent = ((TextRewriterViewModel)sender).SelectedAiAgent;
-            while (stkForm.Children.Count > 2)
+            while (stkForm.Children.Count > 1)
             {
                 stkForm.Children.RemoveAt(stkForm.Children.Count - 1);
             }

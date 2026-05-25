@@ -22,23 +22,21 @@
             <!--     <v:TextSourceInput Source="{Binding Config.Source}" /> -->
             <!-- </ct:FormItem> -->
 
-            <ct:FormItem Label="智能体：">
-                <ct:RadioButtonGroup
-                    DisplayMemberBinding="{Binding Name}"
-                    ItemsSource="{Binding AiAgentGroups}"
-                    SelectedItem="{Binding SelectedAiAgentGroup}" />
-            </ct:FormItem>
-
             <ct:FormItem
                 Description="{Binding SelectedAiAgent.Description}"
-                IsVisible="{Binding SelectedAiAgentGroup.Agents, Converter={x:Static cvt:Converters.CountGreaterThanOne}}"
-                Label=" ">
-                <ct:RadioButtonGroup
-                    DisplayMemberBinding="{Binding Name}"
-                    ItemsSource="{Binding SelectedAiAgentGroup.Agents}"
-                    SelectedItem="{Binding SelectedAiAgent}" />
+                Label="智能体：">
+                <ct:WrapFormItemGroup>
+                    <ct:RadioButtonGroup
+                        DisplayMemberBinding="{Binding Name}"
+                        ItemsSource="{Binding AiAgentGroups}"
+                        SelectedItem="{Binding SelectedAiAgentGroup}" />
+                    <ct:RadioButtonGroup
+                        DisplayMemberBinding="{Binding Name}"
+                        IsVisible="{Binding SelectedAiAgentGroup.Agents, Converter={x:Static cvt:Converters.CountGreaterThanOne}}"
+                        ItemsSource="{Binding SelectedAiAgentGroup.Agents}"
+                        SelectedItem="{Binding SelectedAiAgent}" />
+                </ct:WrapFormItemGroup>
             </ct:FormItem>
-
         </ct:StackFormItemGroup>
     </v:VerticalTwoStepPanelBase.ConfigsContent>
 
