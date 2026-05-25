@@ -124,7 +124,11 @@ namespace ArchiveMaster.Services
                 }
 
                 image.Quality = (uint)Config.Quality;
-                image.Write(file.DistFile.Path, Config.CompressImageFormat);
+                // image.Write(file.DistFile.Path, Config.CompressImageFormat);
+                using (var stream = new FileStream(file.DistFile.Path, FileMode.Create))
+                {
+                    image.Write(stream, Config.CompressImageFormat);
+                }
             }
 
             File.SetLastWriteTime(file.DistFile.Path, file.Time);
