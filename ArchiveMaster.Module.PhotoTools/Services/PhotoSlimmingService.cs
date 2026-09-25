@@ -27,6 +27,20 @@ namespace ArchiveMaster.Services
         {
             return Task.Run(() =>
             {
+                // 三个待处理列表都从勾选集合里筛，分母取三者长度之和（旧代码列表未筛勾选，取消勾选后分母会偏小）。
+                var checkedFiles = Files.CheckedOnly().ToList();
+                var deletingFiles = checkedFiles.Where(p => p.SlimmingTaskType == SlimmingTaskType.Delete).ToList();
+                var copyingFiles = checkedFiles.Where(p => p.SlimmingTaskType == SlimmingTaskType.Copy).ToList();
+                var compressingFiles = checkedFiles.Where(p => p.SlimmingTaskType == SlimmingTaskType.Compress).ToList();
+                var count = deletingFiles.Count + copyingFiles.Count + compressingFiles.Count;
+
+                // 无事可做（含"可处理项全部被取消勾选"）时直接返回，且必须在清理目标目录之前，否则会清掉上一轮输出却不再生成。
+                if (count == 0)
+                {
+                    NotifyMessage("没有需要处理的文件");
+                    return;
+                }
+
                 if (Config.ClearAllBeforeRunning)
                 {
                     if (Directory.Exists(Config.DistDir))
@@ -37,11 +51,6 @@ namespace ArchiveMaster.Services
 
                 Directory.CreateDirectory(Config.DistDir);
 
-                var totalFiles = Files.CheckedOnly();
-                var deletingFiles = Files.Where(p => p.SlimmingTaskType == SlimmingTaskType.Delete).ToList();
-                var copyingFiles = Files.Where(p => p.SlimmingTaskType == SlimmingTaskType.Copy).ToList();
-                var compressingFiles = Files.Where(p => p.SlimmingTaskType == SlimmingTaskType.Compress).ToList();
-                var count = totalFiles.Count();
                 //第一步：删除
                 TryForFiles(deletingFiles, (file, s) =>
                 {
@@ -77,7 +86,8 @@ namespace ArchiveMaster.Services
 
         public override IEnumerable<SimpleFileInfo> GetInitializedFiles()
         {
-            return Files;
+            // 交给框架的是非 Skip 的行（不筛勾选）：全部是跳过项时框架会照旧提示"结果为空"并禁止开始。
+            return Files.Where(p => p.SlimmingTaskType != SlimmingTaskType.Skip);
         }
 
         public override async Task InitializeAsync(CancellationToken ct)
@@ -88,9 +98,9 @@ namespace ArchiveMaster.Services
             {
                 SearchCopyingAndCompressingFiles(ct);
                 SearchDeletingFiles(ct);
-                Files = Files.Where(p => p.SlimmingTaskType != SlimmingTaskType.Skip).ToList();
             }, ct);
 
+            // 保留 Skip 项仅供界面展示（灰色"跳过"、底部统计）：它不进三个待处理列表，也不交给框架。
             Files = Files.OrderBy(p => p.SlimmingTaskType).ToList();
         }
 

@@ -19,7 +19,7 @@ namespace ArchiveMaster.ViewModels.FileSystem
             DistFile = distFile;
             if (slimmingTaskType == SlimmingTaskType.Skip)
             {
-                IsChecked = false;
+                SetSkipped();
             }
         }
 
@@ -30,8 +30,18 @@ namespace ArchiveMaster.ViewModels.FileSystem
             DistFile = distFile;
             if (slimmingTaskType == SlimmingTaskType.Skip)
             {
-                IsChecked = false;
+                SetSkipped();
             }
+        }
+
+        /// <summary>
+        /// 跳过项：置为未勾选且不可勾选（「筛选」按钮例外，仍可能勾上，但不影响处理），状态置为 Skip（状态列显示颜色而非透明）。
+        /// </summary>
+        private void SetSkipped()
+        {
+            IsChecked = false;
+            CanCheck = false;
+            Skip();
         }
     }
 }
