@@ -98,7 +98,7 @@ namespace ArchiveMaster.Configs
         private int maxShortSize = 5000;
 
         /// <summary>
-        /// 质量（1-100）
+        /// 质量（0-100；界面可调范围为 10-100）
         /// </summary>
         [ObservableProperty]
         private int quality = 50;

@@ -142,7 +142,7 @@
 | 工具名           | 用途                                                         | 期望解决的问题                                               | 原项目                                                       |
 | ---------------- | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
 | 修复照片修改时间<br />`RepairModifiedTime` | 寻找EXIF信息中的拍摄时间与照片修改时间不同的文件，将修改时间更新闻EXIF时间 | 对照片进行处理后，文件修改时间会更新，不利于部分软件的照片排序，需要从EXIF中读取实际拍摄时间，对文件修改时间进行更新。 | [照片归档工具](https://github.com/autodotua/PhotoArchivingTools)<br />控制台小程序集 |
-| 照片瘦身<br />`PhotoSlimming` | 复制或压缩照片，用于生成更小的照片集副本                     | 需要将硬盘中整理后的部分照片复制到手机中以便随时查看，但可能存在文件过大放不进手机、只需要部分目录中的文件、只需要部分类型文件等需求。 | [照片归档工具](https://github.com/autodotua/PhotoArchivingTools)<br />[照片瘦身工具](https://github.com/autodotua/PhotoSlimming) |
+| 照片瘦身<br />`PhotoSlimming` | 复制或压缩照片，用于生成更小的照片集副本（可输出 JPEG/WebP/AVIF/HEIC 等格式） | 需要将硬盘中整理后的部分照片复制到手机中以便随时查看，但可能存在文件过大放不进手机、只需要部分目录中的文件、只需要部分类型文件等需求。 | [照片归档工具](https://github.com/autodotua/PhotoArchivingTools)<br />[照片瘦身工具](https://github.com/autodotua/PhotoSlimming) |
 | 照片地理信息写入<br />`PhotoGeoTagging` | 将GPX轨迹中的GPS位置信息，根据拍摄时间自动匹配并写入照片Exif | 相机拍摄的照片，不包含地理信息，无法根据位置查找照片。使用该工具，可以将拍摄时在相关工具记录的GPX轨迹中找到拍摄时间所在的位置，并写入照片元数据中。 |                                                              |
 | 照片位置分类<br />`PhotoGeoSorter` | 根据照片EXIF信息中的地理位置，以及用于提供分类标准的矢量数据，将照片移动到不同的目录 | 有大量的照片，这些照片由手机或其他能够定位的设备拍摄，并写入了位置信息。希望将这些数据 |                                                              |
 
@@ -274,4 +274,17 @@
 3. 创建一个视图模型类，继承并实现`ViewModelBase`，用于页面的模型。大多数工具可以分为初始化和执行两步，这类工具可以继承并实现`TwoStepViewModelBase`。
 4. 创建一个视图类，继承`PanelBase`，用于页面的模型。大多数工具可以分为初始化和执行两步，这类工具可以继承`TwoStepViewModelBase`。
 5. 在实现`IModuleInfo`的类中更新工具相关信息
+
+
+# 许可
+
+本项目以 **GNU General Public License v3.0** 发布，许可正文见 [LICENSE.txt](./LICENSE.txt)。
+
+采用 GPLv3 的原因：照片瘦身工具需要编码 HEIC，为此随包附带自行构建的 libheif + x265，
+其中 x265 采用 GPL-2.0 或更高版本许可（GPL-2.0-or-later），因此整个程序以 GPLv3 分发。
+
+- 第三方组件清单与相应源码的获取方式：[THIRD-PARTY-NOTICES.txt](./THIRD-PARTY-NOTICES.txt)
+- 照片瘦身所需原生库的构建脚本：[build_scripts/native](./build_scripts/native)
+
+> 2.9.0 及以前的版本以 Apache License 2.0 发布。已发布的旧版本仍适用其当时的许可，该许可不可撤回。
 

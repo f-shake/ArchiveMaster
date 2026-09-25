@@ -2,13 +2,15 @@
   <PropertyGroup>
     <Nullable>disable</Nullable>
     <!--App版本-->
-    <AppVersion>2.9.0</AppVersion>
+    <AppVersion>2.9.1</AppVersion>
+    <!--许可：自引入 x265（GPL-2.0-or-later）起由 Apache-2.0 改为 GPLv3，详见 LICENSE.txt 与 THIRD-PARTY-NOTICES.txt-->
+    <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
     <!--Avalonia版本-->
     <AvaloniaVersion>12.0.2</AvaloniaVersion>
     <!--FzLib版本-->
     <FzLibVersion>3.4.0-rc.2</FzLibVersion>
     <!--是否使用本地最新的FzLib。非开发者本人应当设置为false。-->
-    <UseLocalFzLib>true</UseLocalFzLib>
+    <UseLocalFzLib>false</UseLocalFzLib>
     <!--是否指定调试时的输出目录，以及指定目录位置-->
     <SpecialOutputDir>true</SpecialOutputDir>
     <OutputDir>C:\CodeTemp</OutputDir>

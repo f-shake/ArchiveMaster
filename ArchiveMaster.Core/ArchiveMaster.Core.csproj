@@ -44,10 +44,20 @@
 
   <ItemGroup>
     <PackageReference Include="FluentIcons.Avalonia" />
-    <PackageReference Include="Magick.NET-Q16-AnyCPU" />
+    <!-- GeneratePathProperty：把包内自带的 Notice.txt（约 400 KB，含全部第三方组件许可）随包分发。
+         Apache-2.0 §4(d) 要求传递其归属声明，而 Magick.NET 的 targets 只复制原生库、不复制该文件。 -->
+    <PackageReference Include="Magick.NET-Q16-AnyCPU" GeneratePathProperty="true" />
     <PackageReference Include="Mapster" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" />
     <PackageReference Include="System.Reactive" />
+  </ItemGroup>
+
+  <ItemGroup Condition="Exists('$(PkgMagick_NET-Q16-AnyCPU)\Notice.txt')">
+    <!-- NuGet 生成的路径属性名只把包名里的 . 换成 _，连字符保留 -->
+    <Content Include="$(PkgMagick_NET-Q16-AnyCPU)\Notice.txt">
+      <Link>NOTICE-Magick.NET.txt</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>

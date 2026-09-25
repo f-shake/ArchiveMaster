@@ -61,7 +61,7 @@ namespace ArchiveMaster.Services
                 {
                     int index = s.FileIndex + deletingFiles.Count + copyingFiles.Count;
                     NotifyMessageAndProgress(index, count, "压缩", file);
-                    Compress(file);
+                    Compress(file, ct);
                 }, ct, FilesLoopOptions.Builder()
                     .AutoApplyStatus()
                     .WithMultiThreads(Config.Thread)
@@ -95,7 +95,7 @@ namespace ArchiveMaster.Services
         }
 
 
-        private void Compress(SlimmingFilesInfo file)
+        private void Compress(SlimmingFilesInfo file, CancellationToken ct)
         {
             if (file.DistFile.ExistsFile)
             {
@@ -124,14 +124,68 @@ namespace ArchiveMaster.Services
                 }
 
                 image.Quality = (uint)Config.Quality;
-                // image.Write(file.DistFile.Path, Config.CompressImageFormat);
-                using (var stream = new FileStream(file.DistFile.Path, FileMode.Create))
+
+                if (IsHeifFormat(Config.CompressImageFormat))
                 {
-                    image.Write(stream, Config.CompressImageFormat);
+                    WriteHeif(image, file.DistFile.Path, ct);
+                }
+                else
+                {
+                    // image.Write(file.DistFile.Path, Config.CompressImageFormat);
+                    using (var stream = new FileStream(file.DistFile.Path, FileMode.Create))
+                    {
+                        image.Write(stream, Config.CompressImageFormat);
+                    }
                 }
             }
 
             File.SetLastWriteTime(file.DistFile.Path, file.Time);
+        }
+
+        /// <summary>
+        /// HEIC/HEIF 走随包的 libheif 写出（Magick.NET 的 native 包里 libheif 未编入 HEVC 编码器，无法编码 HEIC），
+        /// 其余格式仍由 Magick.NET 写出。
+        /// </summary>
+        private void WriteHeif(MagickImage image, string distPath, CancellationToken ct)
+        {
+            if (!HeifEncoder.IsAvailable)
+            {
+                throw new InvalidOperationException(
+                    $"输出格式 {Config.CompressImageFormat} 需要随包的 libheif，但当前不可用：{HeifEncoder.UnavailableReason}");
+            }
+
+            // 非 HEIC 分支交给 ImageMagick 写出，它会自行完成色彩空间转换与 alpha 处理；
+            // 而这里是自己按 RGB 通道取字节，所以要先统一：
+            //  · 非 sRGB（如 CMYK 源图）先转 sRGB，否则取到的是 C/M/Y/K 通道，颜色会错
+            //  · 有 alpha 时关闭该通道（保留像素原值），与 JPEG 分支丢弃 alpha 的行为保持一致；
+            //    注意不要用 AlphaOption.Remove——那会把透明区域合成到白底，与 JPEG 分支观感不同
+            bool convertedToSrgb = false;
+            if (image.ColorSpace != ColorSpace.sRGB)
+            {
+                image.ColorSpace = ColorSpace.sRGB;
+                convertedToSrgb = true;
+            }
+
+            if (image.HasAlpha)
+            {
+                image.Alpha(AlphaOption.Off);
+            }
+
+            // 元数据取自源图、原样传递。
+            // 特别注意：EXIF 必须保留 "Exif\0\0" 六字节前缀，否则小米等手机相册不显示 EXIF
+            //（桌面工具 Pillow/Magick.NET 仍能读出，所以此点无法在本地验证）——详见 HeifEncoder 的注释。
+            byte[] rgb = image.GetPixels().ToByteArray(PixelMapping.RGB);
+            byte[] exif = image.GetProfile("exif")?.ToByteArray();
+            // 转换过色彩空间后原 ICC 已不再描述当前像素，故不再传递
+            byte[] icc = convertedToSrgb ? null : image.GetColorProfile()?.ToByteArray();
+            byte[] xmp = image.GetProfile("xmp")?.ToByteArray();
+
+            HeifEncoder.Encode(rgb, (int)image.Width, (int)image.Height, Config.Quality, exif, icc, xmp, distPath, ct);
+        }
+
+        private static bool IsHeifFormat(MagickFormat format)
+        {
+            return format is MagickFormat.Heic or MagickFormat.Heif;
         }
 
 

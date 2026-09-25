@@ -32,6 +32,48 @@
     </ItemGroup>
 
     <ItemGroup>
+        <!-- 许可文本与第三方声明随程序分发（GPLv3 要求随分发物提供许可副本），
+             安装程序的许可页则直接嵌入仓库根的 LICENSE.txt（不依赖发布目录名） -->
+        <Content Include="..\LICENSE.txt">
+            <Link>LICENSE.txt</Link>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+        <Content Include="..\THIRD-PARTY-NOTICES.txt">
+            <Link>THIRD-PARTY-NOTICES.txt</Link>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+    </ItemGroup>
+
+    <ItemGroup>
+        <!-- 照片瘦身输出 HEIC 所需的原生库（构建方式见 build_scripts/native/build-heif.ps1）。
+             放在桌面壳工程而非 PhotoTools 模块：模块会被 Android 工程引用，放那里会把 Windows 的 DLL 卷进 APK。
+             用 Link 平铺到输出目录，与 Magick.Native-*.dll 一致，运行时按程序集所在目录即可加载。
+             注意：必须按目标 RuntimeIdentifier 选取，不能用 IsOSPlatform（那判断的是构建主机——
+             build.ps1 -l 在 Windows 上发布 linux-x64 时会把 Windows 的 DLL 打进 Linux 包）。
+             未指定 RID（本地 dotnet build/run）时带上 win-x64，便于开发调试。 -->
+        <Content Include="native\win-x64\*.dll" Condition="'$(RuntimeIdentifier)' == '' or '$(RuntimeIdentifier)' == 'win-x64'">
+            <Link>%(Filename)%(Extension)</Link>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+        <Content Include="native\linux-x64\*.so*" Condition="'$(RuntimeIdentifier)' == 'linux-x64'">
+            <Link>%(Filename)%(Extension)</Link>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+        <Content Include="native\linux-arm64\*.so*" Condition="'$(RuntimeIdentifier)' == 'linux-arm64'">
+            <Link>%(Filename)%(Extension)</Link>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+        <Content Include="native\osx-x64\*.dylib" Condition="'$(RuntimeIdentifier)' == 'osx-x64'">
+            <Link>%(Filename)%(Extension)</Link>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+        <Content Include="native\osx-arm64\*.dylib" Condition="'$(RuntimeIdentifier)' == 'osx-arm64'">
+            <Link>%(Filename)%(Extension)</Link>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+    </ItemGroup>
+
+    <ItemGroup>
         <ProjectReference Include="..\ArchiveMaster.Core\ArchiveMaster.Core.csproj"/>
         <ProjectReference Include="..\ArchiveMaster.UI\ArchiveMaster.UI.csproj"/>
     </ItemGroup>

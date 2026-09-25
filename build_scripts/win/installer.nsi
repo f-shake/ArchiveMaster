@@ -28,7 +28,7 @@ SetCompressor zlib ; lzma
 ; 欢迎页面
 !insertmacro MUI_PAGE_WELCOME
 ; 许可协议页面
-; !insertmacro MUI_PAGE_LICENSE "许可协议.txt"
+!insertmacro MUI_PAGE_LICENSE "..\..\LICENSE.txt" ; 直接用仓库根的 LICENSE.txt，不依赖是否已执行 build.ps1 及其输出目录名（-s 时为 win-x64_sc）
 ; 安装目录选择页面
 !insertmacro MUI_PAGE_DIRECTORY
 ; 安装过程页面

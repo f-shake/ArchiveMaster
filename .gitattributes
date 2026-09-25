@@ -4,6 +4,14 @@
 * text=auto
 
 ###############################################################################
+# 二进制文件（如 ArchiveMaster.UI.Desktop/native 下的原生库）按原样存储，
+# 避免 text=auto 对其做行尾转换
+###############################################################################
+*.dll binary
+*.so binary
+*.dylib binary
+
+###############################################################################
 # Set default behavior for command prompt diff.
 #
 # This is need for earlier builds of msysgit that does not have it on by

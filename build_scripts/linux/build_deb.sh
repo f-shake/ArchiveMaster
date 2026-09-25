@@ -40,6 +40,19 @@ cp desktop ./temp/usr/share/applications/ArchiveMaster.desktop
 mkdir ./temp/usr/share/pixmaps
 cp icon.png ./temp/usr/share/pixmaps/ArchiveMaster.png
 
+# 许可与第三方声明（Debian 政策要求 /usr/share/doc/<包名>/copyright；
+# 这三个文件由各 csproj 的 Content 项复制进发布目录而随包分发
+# （LICENSE.txt、THIRD-PARTY-NOTICES.txt 来自 ArchiveMaster.UI.Desktop，
+#   NOTICE-Magick.NET.txt 来自 ArchiveMaster.Core 并经项目引用传递到发布目录）。
+# 目录名须与 control 里的 Package 字段一致；注意该字段目前是大写 ArchiveMaster，
+# 而 Debian 政策要求包名全小写——将来把 control 改成小写时，只改 DOC_DIR 这一处即可。）
+DOC_DIR=./temp/usr/share/doc/ArchiveMaster
+mkdir -p "$DOC_DIR"
+# 三个文件缺一不可，故不加 || true，让缺失直接暴露出来
+cp -f ./linux-x64/LICENSE.txt "$DOC_DIR/copyright"
+cp -f ./linux-x64/THIRD-PARTY-NOTICES.txt "$DOC_DIR/"
+cp -f ./linux-x64/NOTICE-Magick.NET.txt "$DOC_DIR/"
+
 # Hicolor icons
 # mkdir ./temp/usr/share/icons
 # mkdir ./temp/usr/share/icons/hicolor

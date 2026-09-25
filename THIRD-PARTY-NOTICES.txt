@@ -1,0 +1,96 @@
+ArchiveMaster 第三方组件声明
+============================
+
+本程序（ArchiveMaster）以 GNU General Public License v3.0 发布，许可正文见随包的
+LICENSE.txt。本文件列出随程序分发的第三方组件及其许可，以及获取相应源码的方式。
+
+说明：本项目在版本 2.9.0 及以前以 Apache License 2.0 发布；自引入 x265（GPL-2.0-or-later）
+起改为 GPLv3。已发布的旧版本仍适用其当时的 Apache-2.0 许可，该许可不可撤回。
+
+
+一、照片瘦身功能输出 HEIC 所需的原生库（自行构建，未修改源码）
+--------------------------------------------------------------
+
+以下三个库由本项目自行编译（构建脚本：build_scripts/native/build-heif.ps1 与 build-heif.sh），
+随程序放在程序目录下。源码均未修改；如需相应源码，可从下列地址获取对应版本，
+或用上述构建脚本自行构建出完全相同的产物。
+
+1) libheif 1.23.5
+   用途：HEIF/HEIC 容器读写
+   许可：GNU Lesser General Public License v3.0
+   源码：https://github.com/strukturag/libheif
+         所用提交：5c7b41f3cc097447dd3c700cc9ec7d94fbb59eec
+
+2) libde265 1.1.3
+   用途：HEVC 解码
+   许可：GNU Lesser General Public License v3.0
+   源码：https://github.com/strukturag/libde265
+         所用提交：78bd19905b90a95c2ddbe109b2554ea01f65acd7
+
+3) x265 4.1
+   用途：HEVC 编码（HEIC 编码所需）
+   许可：GNU General Public License v2.0 或更高版本（GPL-2.0-or-later）
+         —— 这是本程序整体以 GPLv3 发布的原因
+   源码：https://bitbucket.org/multicoreware/x265_git
+         所用提交：1d117bed4747758b51bd2c124d738527e30392cb（tag 4.1）
+
+
+二、ImageMagick 及其自带的第三方组件（经 NuGet 包 Magick.NET）
+--------------------------------------------------------------
+
+本程序通过 NuGet 包 Magick.NET-Q16-AnyCPU 使用 ImageMagick。
+该包内的原生库（Magick.Native-Q16-*.dll）静态包含了数十个第三方库，其中包含多个
+GNU Lesser General Public License 组件（例如 libheif、libde265、libraw、glib、
+pango、librsvg、liblqr、liblzma、fribidi、gdk-pixbuf 等）。
+
+完整清单与各组件许可文本见随包分发的 NOTICE-Magick.NET.txt
+（即 Magick.NET 包自带的 Notice.txt，未作任何修改）。
+Magick.NET 源码：https://github.com/dlemstra/Magick.NET
+ImageMagick 源码：https://github.com/ImageMagick/ImageMagick
+
+
+三、托管 NuGet 包（.NET 依赖）
+------------------------------
+
+本程序直接引用的 NuGet 包如下。这些包均未被修改，其完整许可文本随各自包分发
+（本地缓存在 ~/.nuget/packages/<包名>/<版本>/ 下），也可从下列项目地址获取。
+
+MIT 许可：
+  Avalonia、Avalonia.Desktop、Avalonia.Controls.DataGrid、Avalonia.Controls.ItemsRepeater、
+  Avalonia.Themes.Fluent、Avalonia.Controls.ColorPicker、CommunityToolkit.Mvvm、Mapster、
+  FluentIcons.Avalonia、Xaml.Behaviors.Avalonia、DiscUtils.Iso9660、DocumentFormat.OpenXml、
+  SkiaSharp（含 NativeAssets.Win32/Linux/macOS）、Svg.Controls.Skia.Avalonia、System.Reactive、
+  ExifLibNet.Updated、HotAvalonia、Microsoft.Extensions.DependencyInjection、
+  Microsoft.Extensions.Hosting（含 Abstractions、WindowsServices）、
+  Microsoft.EntityFrameworkCore.Sqlite、Microsoft.CodeAnalysis.CSharp.Scripting
+  （Avalonia：https://github.com/AvaloniaUI/Avalonia ；SkiaSharp：https://github.com/mono/SkiaSharp ；
+    其余各包可在 https://www.nuget.org/packages/<包名> 查到项目地址）
+
+Apache-2.0 许可：
+  Serilog、Serilog.Sinks.File（https://github.com/serilog/serilog）
+  PdfPig（https://github.com/UglyToad/PdfPig）
+  MetadataExtractor（https://github.com/drewnoakes/metadata-extractor-dotnet）
+
+BSD 许可：
+  Markdig（BSD-2-Clause，https://github.com/xoofx/markdig）
+  NetTopologySuite、NetTopologySuite.IO.Esri.Shapefile、NetTopologySuite.IO.GeoJSON4STJ
+  （BSD-3-Clause，https://github.com/NetTopologySuite/NetTopologySuite）
+
+其他：
+  CsvHelper —— MS-PL 或 Apache-2.0 双许可（可选 Apache-2.0，https://github.com/JoshClose/CsvHelper）
+  UTF.Unknown —— MPL-1.1（https://github.com/CharsetDetector/UTF-unknown）
+
+以上包的传递依赖（例如 XmpCore 等）由各自包的许可文件覆盖，未在此逐一列出。
+如需由工具生成的完整清单（含传递依赖与完整许可文本），可用
+`dotnet-project-licenses`、`nuget-license` 等工具对本仓库执行一次生成。
+
+
+四、如何获取相应源码
+--------------------
+
+- 本项目自身的源码：https://github.com/autodotua/ArchiveMaster
+- 第一节的原生库：按上述提交号从上游仓库获取，或用 build_scripts/native 下的脚本重新构建
+- 第二节的组件：见 NOTICE-Magick.NET.txt 中各组件条目所附的来源说明
+- 第三节的托管包：从 NuGet 或各项目地址获取对应版本源码
+
+本程序分发的原生库均为上游源码的未修改构建产物。

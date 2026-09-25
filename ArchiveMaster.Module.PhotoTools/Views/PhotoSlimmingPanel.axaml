@@ -104,6 +104,12 @@
                                                 <MenuFlyout>
                                                     <MenuItem
                                                         Command="{Binding #root.DataContext.SelectCompressFormatCommand}"
+                                                        CommandParameter="{x:Static im:MagickFormat.Heic}"
+                                                        Cursor="Arrow"
+                                                        Header="{x:Static im:MagickFormat.Heic}"
+                                                        IsVisible="{Binding #root.DataContext.IsHeifEncoderAvailable}" />
+                                                    <MenuItem
+                                                        Command="{Binding #root.DataContext.SelectCompressFormatCommand}"
                                                         CommandParameter="{x:Static im:MagickFormat.Jpg}"
                                                         Cursor="Arrow"
                                                         Header="{x:Static im:MagickFormat.Jpg}" />
