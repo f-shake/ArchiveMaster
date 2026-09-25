@@ -184,7 +184,14 @@ namespace ArchiveMaster.Services
             // 元数据取自源图、原样传递。
             // 特别注意：EXIF 必须保留 "Exif\0\0" 六字节前缀，否则小米等手机相册不显示 EXIF
             //（桌面工具 Pillow/Magick.NET 仍能读出，所以此点无法在本地验证）——详见 HeifEncoder 的注释。
-            byte[] rgb = image.GetPixels().ToByteArray(PixelMapping.RGB);
+            // 必须释放像素集合：它在 MagickImage 之外独立持有像素缓存，不释放则缓存落盘产生的
+            // %TEMP%\magick-* 临时文件不会被删除（实测 8 张 50MP 图残留 1.49 GB），且每张泄漏一个
+            byte[] rgb;
+            using (IPixelCollection<ushort> pixels = image.GetPixels())
+            {
+                rgb = pixels.ToByteArray(PixelMapping.RGB);
+            }
+
             byte[] exif = image.GetProfile("exif")?.ToByteArray();
             // 转换过色彩空间后原 ICC 已不再描述当前像素，故不再传递
             byte[] icc = convertedToSrgb ? null : image.GetColorProfile()?.ToByteArray();
