@@ -275,6 +275,42 @@
 4. 创建一个视图类，继承`PanelBase`，用于页面的模型。大多数工具可以分为初始化和执行两步，这类工具可以继承`TwoStepViewModelBase`。
 5. 在实现`IModuleInfo`的类中更新工具相关信息
 
+## Vibe Coding
+
+本项目部分代码由 AI 编写。以下列出涉及的文件及编写程度，供使用者自行判断。
+
+范围为提交 `ed621fc`（含）以来。
+
+### 完全由 AI 编写
+
+- `ArchiveMaster.Module.PhotoTools/Helpers/HeifEncoder.cs` —— 通过 P/Invoke 调用随包的 libheif 编码 HEIC（含网格编码）
+- `ArchiveMaster.Module.PhotoTools/Helpers/ImageMetadataHelper.cs` —— XMP 中 GPano 尺寸与 `dc:format` 的同步
+- `build_scripts/native/build-heif.ps1`
+- `build_scripts/native/build-heif.sh`
+- `THIRD-PARTY-NOTICES.txt`
+- `tools/heic-verify/` —— HEIC 输出验证工具，共 9 个文件（含其 README）
+
+### 部分由 AI 编写
+
+- `.gitattributes`
+- `ArchiveMaster.Core/ArchiveMaster.Core.csproj`
+- `ArchiveMaster.Module.PhotoTools/Configs/PhotoSlimmingConfig.cs`
+- `ArchiveMaster.Module.PhotoTools/Services/PhotoSlimmingService.cs`
+- `ArchiveMaster.Module.PhotoTools/ViewModels/PhotoSlimmingViewModel.cs`
+- `ArchiveMaster.Module.PhotoTools/ViewModels/FileSystem/SlimmingFilesInfo.cs`
+- `ArchiveMaster.Module.PhotoTools/Views/PhotoSlimmingPanel.axaml`
+- `ArchiveMaster.UI.Desktop/ArchiveMaster.UI.Desktop.csproj`
+- `Directory.Build.props`
+- `LICENSE.txt` —— 仅换成了 GPLv3 正文；正文本身是许可证标准文本，非 AI 撰写
+- `README.md`
+- `build_scripts/linux/build_deb.sh`
+- `build_scripts/win/installer.nsi`
+- `helps/photos.md`
+
+### 由AI编写的脚本编译生成
+
+- `ArchiveMaster.UI.Desktop/native/win-x64/` 下的 `libheif.dll`、`libx265.dll`、`libde265.dll`
+  是构建产物，由上面列出的构建脚本从上游源码（libheif、x265、libde265）编译得到；这些源码非 AI 编写。
 
 # 许可
 

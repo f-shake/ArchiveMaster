@@ -194,6 +194,193 @@ public static class HeifEncoder
         }
     }
 
+    /// <summary>
+    /// 把图像编码成 HEIF 网格（多块 HEVC 小图拼成一张大图）。
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// 手机的硬件 HEVC 解码器对<b>单张</b> HEVC 图有尺寸上限：真机实测小米相册能开 4096x4104（1681 万像素）的单张图，
+    /// 但 6000x3000（1800 万像素）就打不开。手机相机自己拍的 5000 万像素照片之所以能显示，
+    /// 是因为它存成了 192 块 512x512 的网格（见相机原片的 item 结构：grid x1 + hvc1 x192），
+    /// 解码器每次只需要解 512x512。
+    /// </para>
+    /// <para>
+    /// <b>约束（改动本方法前务必先读）：</b>
+    /// <list type="number">
+    /// <item>
+    /// libheif 要求瓦片<b>完整均匀地铺满整图</b>，不接受末行/末列更小——写出时不会报错，
+    /// 但解码时会报 <c>Invalid grid data: Grid tiles do not cover whole image</c>。
+    /// 所以 width/height 必须是 <paramref name="tileSize"/> 的整数倍（调用方负责保证）。
+    /// </item>
+    /// <item>
+    /// 瓦片边长必须是 16 的倍数：libheif 在图像宽度不是 16 的倍数时输出的色度是坏的（画面发灰、撕裂）。
+    /// 512 既满足这条，又与手机相机自己用的瓦片尺寸一致。
+    /// </item>
+    /// <item>
+    /// 色彩配置只取自<b>第 0 块瓦片</b>（libheif 仅在 tile_x==0 且 tile_y==0 时收集 colr 属性），
+    /// 所以 ICC 只挂在第一块上，不是每块都挂。
+    /// </item>
+    /// <item>
+    /// ffmpeg 不支持 HEIF 网格拼接，对这种文件只会解出单块瓦片且不报错，验证必须用 libheif。
+    /// </item>
+    /// </list>
+    /// </para>
+    /// </remarks>
+    /// <param name="tileSize">瓦片边长，须为 16 的倍数，且能整除 width 和 height。</param>
+    public static void EncodeTiled(byte[] rgb24, int width, int height, int quality, int tileSize,
+        byte[] exifWithPrefix, byte[] iccProfile, byte[] xmp, string outputPath,
+        CancellationToken ct = default)
+    {
+        ArgumentNullException.ThrowIfNull(rgb24);
+        ArgumentException.ThrowIfNullOrWhiteSpace(outputPath);
+        if (width <= 0 || height <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(width), "图像尺寸必须为正数");
+        }
+
+        if (quality is < 0 or > 100)
+        {
+            throw new ArgumentOutOfRangeException(nameof(quality), quality, "质量必须在 0-100 之间");
+        }
+
+        if (tileSize <= 0 || tileSize % 16 != 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(tileSize), tileSize, "瓦片边长必须是 16 的正倍数");
+        }
+
+        if (width % tileSize != 0 || height % tileSize != 0)
+        {
+            throw new ArgumentException(
+                $"图像尺寸 {width}x{height} 必须能被瓦片边长 {tileSize} 整除，否则 libheif 会写出无法解码的网格");
+        }
+
+        if (rgb24.Length < (long)width * height * RgbBytesPerPixel)
+        {
+            throw new ArgumentException(
+                $"RGB 数据长度不足：需要 {(long)width * height * RgbBytesPerPixel} 字节，实际 {rgb24.Length} 字节",
+                nameof(rgb24));
+        }
+
+        ProbeResult probe = Availability.Value;
+        if (!probe.Available)
+        {
+            throw new InvalidOperationException($"HEIC 编码不可用：{probe.Reason}");
+        }
+
+        EncodeSemaphore.Wait(ct);
+        try
+        {
+            EncodeTiledCore(rgb24, width, height, quality, tileSize,
+                exifWithPrefix, iccProfile, xmp, outputPath);
+        }
+        finally
+        {
+            EncodeSemaphore.Release();
+        }
+    }
+
+    private static void EncodeTiledCore(byte[] rgb24, int width, int height, int quality, int tileSize,
+        byte[] exifWithPrefix, byte[] iccProfile, byte[] xmp, string outputPath)
+    {
+        int columns = width / tileSize;
+        int rows = height / tileSize;
+
+        nint context = 0, encoder = 0, options = 0, gridHandle = 0;
+        try
+        {
+            context = heif_context_alloc();
+            if (context == 0)
+            {
+                throw new InvalidOperationException("heif_context_alloc 返回空指针");
+            }
+
+            ThrowIfFailed(heif_context_get_encoder_for_format(context, HeifCompressionHevc, out encoder),
+                "获取 HEVC 编码器");
+            ThrowIfFailed(heif_encoder_set_lossy_quality(encoder, quality), "设置质量");
+
+            options = heif_encoding_options_alloc();
+            // 参数是「列数、行数」，不是瓦片宽高；瓦片尺寸由解码端从第 0 块反推
+            ThrowIfFailed(heif_context_add_grid_image(context, (uint)width, (uint)height,
+                (uint)columns, (uint)rows, options, out gridHandle), "创建网格");
+
+            int sourceRowBytes = width * RgbBytesPerPixel;
+            for (int row = 0; row < rows; row++)
+            {
+                for (int column = 0; column < columns; column++)
+                {
+                    nint tile = 0;
+                    try
+                    {
+                        ThrowIfFailed(heif_image_create(tileSize, tileSize, HeifColorspaceRgb, HeifChromaInterleavedRgb, out tile),
+                            "创建瓦片");
+                        ThrowIfFailed(heif_image_add_plane(tile, HeifChannelInterleaved, tileSize, tileSize, 8),
+                            "分配瓦片平面");
+
+                        nint plane = heif_image_get_plane(tile, HeifChannelInterleaved, out int stride);
+                        if (plane == 0)
+                        {
+                            throw new InvalidOperationException("heif_image_get_plane 返回空指针");
+                        }
+
+                        int tileRowBytes = tileSize * RgbBytesPerPixel;
+                        if (stride < tileRowBytes)
+                        {
+                            throw new InvalidOperationException($"瓦片行距（{stride}）小于一行的字节数（{tileRowBytes}）");
+                        }
+
+                        for (int y = 0; y < tileSize; y++)
+                        {
+                            long sourceOffset = ((long)(row * tileSize + y) * sourceRowBytes) + (long)column * tileRowBytes;
+                            Marshal.Copy(rgb24, (int)sourceOffset, nint.Add(plane, y * stride), tileRowBytes);
+                        }
+
+                        // ICC 只挂第一块：libheif 仅在 tile_x==0 且 tile_y==0 时把 colr 属性收集到网格 item 上
+                        if (column == 0 && row == 0 && iccProfile is { Length: > 0 })
+                        {
+                            ThrowIfFailed(heif_image_set_raw_color_profile(tile, "prof", iccProfile, (nuint)iccProfile.Length),
+                                "写入 ICC 色彩配置");
+                        }
+
+                        ThrowIfFailed(heif_context_add_image_tile(context, gridHandle, (uint)column, (uint)row, tile, encoder),
+                            $"加入瓦片 {column},{row}");
+                    }
+                    finally
+                    {
+                        // 用完立刻释放：add_image_tile 内部是同步完成编码的
+                        //（libheif 的 ImageItem_Grid::add_image_tile 里直接调用 encode_image），不需要留到写盘。
+                        // 若把整张网格的瓦片都保活，1.1 亿像素会切成 400 多块、多占 300 MB 以上。
+                        // 注意必须放在 finally 里——创建成功但后续任一步抛异常时，这块瓦片同样要释放。
+                        if (tile != 0)
+                        {
+                            heif_image_release(tile);
+                        }
+                    }
+                }
+            }
+
+            // 元数据同样要挂在网格的 handle 上
+            if (exifWithPrefix is { Length: > 0 })
+            {
+                ThrowIfFailed(heif_context_add_exif_metadata(context, gridHandle, exifWithPrefix, exifWithPrefix.Length),
+                    "写入 EXIF");
+            }
+
+            if (xmp is { Length: > 0 })
+            {
+                ThrowIfFailed(heif_context_add_XMP_metadata(context, gridHandle, xmp, xmp.Length), "写入 XMP");
+            }
+
+            ThrowIfFailed(heif_context_write_to_file(context, outputPath), "写出文件");
+        }
+        finally
+        {
+            if (gridHandle != 0) heif_image_handle_release(gridHandle);
+            if (options != 0) heif_encoding_options_free(options);
+            if (encoder != 0) heif_encoder_release(encoder);
+            if (context != 0) heif_context_free(context);
+        }
+    }
+
     private static ProbeResult Probe()
     {
         try
@@ -354,6 +541,18 @@ public static class HeifEncoder
     [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     private static extern HeifError heif_context_write_to_file(nint context,
         [MarshalAs(UnmanagedType.LPUTF8Str)] string filename);
+
+    // --- 网格(grid)编码，签名取自 libheif 的 heif_tiling.h（1.23.5）---
+    // 注意 add_grid_image 收的是「列数、行数」而不是瓦片宽高；add_image_tile 收的是「瓦片序号」而不是像素坐标
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    private static extern HeifError heif_context_add_grid_image(nint context,
+        uint imageWidth, uint imageHeight, uint tileColumns, uint tileRows,
+        nint encodingOptions, out nint outGridImageHandle);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    private static extern HeifError heif_context_add_image_tile(nint context, nint tiledImage,
+        uint tileX, uint tileY, nint image, nint encoder);
 
     #endregion
 }
