@@ -2,9 +2,12 @@
 // 手机上能打开 = 每张 HEVC 小图都在硬件解码器的能力范围内（实测单张上限约 1681 万像素）。
 // 用法: dotnet run heicgrid.cs <rgb24文件> <宽> <高> <quality> <瓦片边长> <exif|-> <xmp|-> <输出.heic>
 //
-// 说明：libheif 的 add_grid_image 收的是整图尺寸 + 行列数，瓦片尺寸由解码端从第 0 块瓦片反推，
-// 因此最后一行/一列可以更小（解码时按整图尺寸裁掉）。瓦片边长取 16 的倍数，
-// 既避开 libheif 宽度非 16 倍数时输出色度损坏的问题，也和手机相机自己用的 512 一致。
+// 说明：libheif 的 add_grid_image 收的是整图尺寸 + 行列数，瓦片尺寸由解码端从第 0 块瓦片反推。
+// 规范（ISO/IEC 23008-12 §6.6.2.3.1）只要求瓦片**盖满**画布（tile*columns ≥ 整图宽，是 ≥ 不是等号），
+// 多出来的部分解码端按整图尺寸裁掉；但要求**所有瓦片同尺寸**——把最后一行/列做成小瓦片会报
+// "Grid tiles have different sizes"。所以这里行列数向上取整、每块瓦片都是整块 tileSize，
+// 越出图外的像素用边缘像素复制补满（与生产的 HeifEncoder 一致）。
+// 瓦片边长取 16 的倍数：既避开 libheif 宽度非 16 倍数时输出色度损坏的问题，也和手机相机自己用的 512 一致。
 
 using System.Diagnostics;
 using System.Runtime.InteropServices;
@@ -29,9 +32,9 @@ int columns = (W + tileSize - 1) / tileSize;
 int rows = (H + tileSize - 1) / tileSize;
 
 Console.WriteLine($"libheif {Marshal.PtrToStringUTF8(Native.heif_get_version())}");
-Console.WriteLine($"整图 {W}x{H}  瓦片边长 {tileSize}  网格 {columns}x{rows} = {columns * rows} 块");
-if (W % tileSize != 0) Console.WriteLine($"  最后一列宽 {W - (columns - 1) * tileSize}");
-if (H % tileSize != 0) Console.WriteLine($"  最后一行高 {H - (rows - 1) * tileSize}");
+Console.WriteLine($"整图 {W}x{H}  瓦片边长 {tileSize}  网格 {columns}x{rows} = {columns * rows} 块（瓦片一律整块，越界补边）");
+if (W % tileSize != 0) Console.WriteLine($"  最后一列真实内容 {W - (columns - 1) * tileSize} px");
+if (H % tileSize != 0) Console.WriteLine($"  最后一行真实内容 {H - (rows - 1) * tileSize} px");
 
 byte[] rgb = File.ReadAllBytes(rgbFile);
 long need = (long)W * H * 3;
@@ -55,27 +58,45 @@ try
         options, out gridHandle), "创建网格");
 
     int srcRowBytes = W * 3;
+    int tileRowBytes = tileSize * 3;
+    byte[] tileRow = new byte[tileRowBytes];
     for (int r = 0; r < rows; r++)
     {
         int y0 = r * tileSize;
-        int th = Math.Min(tileSize, H - y0);
+        int realRows = Math.Min(tileSize, H - y0);
         for (int c = 0; c < columns; c++)
         {
             int x0 = c * tileSize;
-            int tw = Math.Min(tileSize, W - x0);
+            int realWidth = Math.Min(tileSize, W - x0);
+            int realWidthBytes = realWidth * 3;
+            int lastPixel = (realWidth - 1) * 3;
 
             nint tile = 0;
             try
             {
-                Native.Check(Native.heif_image_create(tw, th, 1, 10, out tile), "创建瓦片");
-                Native.Check(Native.heif_image_add_plane(tile, 10, tw, th, 8), "分配瓦片平面");
+                Native.Check(Native.heif_image_create(tileSize, tileSize, 1, 10, out tile), "创建瓦片");
+                Native.Check(Native.heif_image_add_plane(tile, 10, tileSize, tileSize, 8), "分配瓦片平面");
                 nint plane = Native.heif_image_get_plane(tile, 10, out int stride);
                 if (plane == 0) throw new InvalidOperationException("瓦片平面为空");
+                if (stride < tileRowBytes) throw new InvalidOperationException($"瓦片行距（{stride}）小于一行字节数（{tileRowBytes}）");
 
-                for (int y = 0; y < th; y++)
+                for (int y = 0; y < tileSize; y++)
                 {
-                    long srcOff = ((long)(y0 + y) * srcRowBytes) + (long)x0 * 3;
-                    Marshal.Copy(rgb, (int)srcOff, nint.Add(plane, y * stride), tw * 3);
+                    if (y < realRows)
+                    {
+                        long srcOff = ((long)(y0 + y) * srcRowBytes) + (long)x0 * 3;
+                        Buffer.BlockCopy(rgb, (int)srcOff, tileRow, 0, realWidthBytes);
+                        // 横向越界：把该行最后一个真实像素复制到行尾
+                        for (int x = realWidth; x < tileSize; x++)
+                        {
+                            int t = x * 3;
+                            tileRow[t] = tileRow[lastPixel];
+                            tileRow[t + 1] = tileRow[lastPixel + 1];
+                            tileRow[t + 2] = tileRow[lastPixel + 2];
+                        }
+                    }
+                    // 纵向越界：沿用上一行（缓冲里留着的就是最后一行真实像素）
+                    Marshal.Copy(tileRow, 0, nint.Add(plane, y * stride), tileRowBytes);
                 }
 
                 // ICC 只挂第一块：libheif 仅在 tile (0,0) 时收集 colr 属性

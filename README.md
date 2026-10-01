@@ -283,7 +283,8 @@
 
 ### 完全由 AI 编写
 
-- `ArchiveMaster.Module.PhotoTools/Helpers/HeifEncoder.cs` —— 通过 P/Invoke 调用随包的 libheif 编码 HEIC（含网格编码）
+- `ArchiveMaster.Module.PhotoTools/Helpers/HeifEncoder.cs` —— HEIC 的编码策略与流程（尺寸规则、单张 / 网格编码、瓦片布局）
+- `ArchiveMaster.Module.PhotoTools/Helpers/LibHeifNative.cs` —— 随包 libheif 的 P/Invoke 声明、原生库解析与可用性探测
 - `ArchiveMaster.Module.PhotoTools/Helpers/ImageMetadataHelper.cs` —— XMP 中 GPano 尺寸与 `dc:format` 的同步
 - `build_scripts/native/build-heif.ps1`
 - `build_scripts/native/build-heif.sh`

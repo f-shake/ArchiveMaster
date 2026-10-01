@@ -105,7 +105,6 @@ namespace ArchiveMaster.Services
             Files = Files.OrderBy(p => p.SlimmingTaskType).ToList();
         }
 
-
         private void Compress(SlimmingFilesInfo file, CancellationToken ct)
         {
             if (file.DistFile.ExistsFile)
@@ -131,45 +130,20 @@ namespace ArchiveMaster.Services
                     height = (uint)(image.Height * ratio);
                 }
 
-                bool useHeifGrid = false;
+                // HEIC/HEIF 的尺寸要求（单张要宽度对齐 16；超过单张像素上限则不改尺寸、改走网格）全部由
+                // HeifEncoder 决定，这里只问一句，不持有任何 HEIC 专有规则——依据见 HeifEncoder.GetTargetSize
                 if (IsHeifFormat(Config.CompressImageFormat))
                 {
-                    // 超过单张 HEVC 图的上限就改走网格编码（见 HeifEncoder.EncodeTiled 的注释）
-                    useHeifGrid = (long)width * height > HeifSingleImageMaxPixels;
-                    if (useHeifGrid)
-                    {
-                        if (TryFitToHeifGrid(width, height, out uint gridWidth, out uint gridHeight))
-                        {
-                            width = gridWidth;
-                            height = gridHeight;
-                        }
-                        else
-                        {
-                            // 原尺寸不足一块瓦片，铺不满整图，只能用单张编码
-                            useHeifGrid = false;
-                        }
-                    }
-
-                    if (!useHeifGrid)
-                    {
-                        // 宽度对齐到 16 的倍数：libheif 在这个宽度是 16 的倍数时正常，否则编出来的图色度损坏
-                        // （画面发灰、撕裂）。实测 200/520/1000/2100/4184/4200/4216/15000 宽全部损坏，
-                        // 192/208/512/1008/4000/4096/4176/4192/4208/4224 宽全部正常；
-                        // 与像素总数、质量、ICC、图像内容都无关（拿原图自己的像素重编一样坏）。
-                        // 高度不需要对齐（4096x4104、4000x4200、6000x3000 都是好的），所以只改宽度。
-                        // 其它格式不受此影响，故只在 HEIC/HEIF 分支里取整。
-                        uint alignedWidth = width / HeifWidthAlignment * HeifWidthAlignment;
-                        if (alignedWidth > 0)
-                        {
-                            width = alignedWidth;
-                        }
-                    }
+                    (width, height) = HeifEncoder.GetTargetSize(width, height);
                 }
 
-                // 尺寸真的变了才重采样，否则白白重编一遍像素
+                // 尺寸真的变了才重采样，否则白白重编一遍像素。
+                // 必须带上 IgnoreAspectRatio：Magick.NET 的 Resize/AdaptiveResize/Scale(w,h) 都是"等比内接到方框"
+                // 而不是精确尺寸（实测 9151x2698 调 AdaptiveResize(8704,2560) 得到 8683x2560）。上面的 width/height
+                // 是算好的目标像素尺寸，一旦被内接改掉就会与编码器期望的尺寸不一致——之前网格成批转不出来正是这个原因。
                 if (width > 0 && height > 0 && (width != image.Width || height != image.Height))
                 {
-                    image.AdaptiveResize(width, height);
+                    image.AdaptiveResize(new MagickGeometry(width, height) { IgnoreAspectRatio = true });
                 }
 
                 image.Quality = (uint)Config.Quality;
@@ -180,7 +154,7 @@ namespace ArchiveMaster.Services
 
                 if (IsHeifFormat(Config.CompressImageFormat))
                 {
-                    WriteHeif(image, file.DistFile.Path, ct, useHeifGrid);
+                    WriteHeif(image, file.DistFile.Path, ct);
                 }
                 else
                 {
@@ -199,7 +173,7 @@ namespace ArchiveMaster.Services
         /// HEIC/HEIF 走随包的 libheif 写出（Magick.NET 的 native 包里 libheif 未编入 HEVC 编码器，无法编码 HEIC），
         /// 其余格式仍由 Magick.NET 写出。
         /// </summary>
-        private void WriteHeif(MagickImage image, string distPath, CancellationToken ct, bool useGrid)
+        private void WriteHeif(MagickImage image, string distPath, CancellationToken ct)
         {
             if (!HeifEncoder.IsAvailable)
             {
@@ -241,81 +215,13 @@ namespace ArchiveMaster.Services
             byte[] icc = convertedToSrgb ? null : image.GetColorProfile()?.ToByteArray();
             byte[] xmp = image.GetProfile("xmp")?.ToByteArray();
 
-            if (useGrid)
-            {
-                HeifEncoder.EncodeTiled(rgb, (int)image.Width, (int)image.Height, Config.Quality,
-                    (int)HeifTileSize, exif, icc, xmp, distPath, ct);
-            }
-            else
-            {
-                HeifEncoder.Encode(rgb, (int)image.Width, (int)image.Height, Config.Quality, exif, icc, xmp, distPath, ct);
-            }
+            // 单张还是网格由 HeifEncoder 按真实像素数决定（超过单张上限就切瓦片），这里不再判断
+            HeifEncoder.Encode(rgb, (int)image.Width, (int)image.Height, Config.Quality, exif, icc, xmp, distPath, ct);
         }
 
         private static bool IsHeifFormat(MagickFormat format)
         {
             return format is MagickFormat.Heic or MagickFormat.Heif;
-        }
-
-        /// <summary>
-        /// libheif 编码时宽度必须是 16 的倍数，否则输出的图色度损坏（详见 <see cref="Compress"/> 里的注释）。
-        /// </summary>
-        private const uint HeifWidthAlignment = 16;
-
-        /// <summary>
-        /// 网格编码的瓦片边长。必须是 16 的倍数（避开上面的色度损坏问题），
-        /// 并与手机相机自己使用的瓦片尺寸一致（实测相机原片为 512x512）。
-        /// </summary>
-        /// <remarks>
-        /// 缩小它可以降低量化带来的尺寸损失（每个方向的损失最多是瓦片边长减一个像素），代价是瓦片数按平方增长。
-        /// 当前取 512 是因为这个尺寸已在真机上验证过；改动后需要重新做真机验证。
-        /// </remarks>
-        private const uint HeifTileSize = 512;
-
-        /// <summary>
-        /// 单张 HEVC 图的像素数上限，超过就改走网格编码。
-        /// </summary>
-        /// <remarks>
-        /// 真机实测（小米相册）：单张 4096x4104（1681 万像素）能打开，6000x3000（1800 万像素）打不开，
-        /// 故取 1600 万留余量。限制来自<b>像素总数</b>而不是单边长度——另一个对照是单张 8192x1024
-        /// （839 万像素、长边 8192）能正常打开，所以长边不是瓶颈。
-        /// 另注意这只是"单张图"的上限，不是照片分辨率上限：切成网格后一亿像素也能正常显示
-        /// （手机相机自己拍的 5000 万像素照片就是 192 块 512x512 的网格）。
-        /// </remarks>
-        private const long HeifSingleImageMaxPixels = 16_000_000;
-
-        /// <summary>
-        /// 把目标尺寸收缩到瓦片边长的整数倍（libheif 的网格要求瓦片<b>完整均匀地铺满整图</b>，
-        /// 不接受末行/末列更小），并按原始长宽比定行列数，尽量少变形。
-        /// </summary>
-        /// <remarks>
-        /// 量化必然带来尺寸损失（每个方向最多损失"瓦片边长减一"个像素），这是网格机制的硬约束：
-        /// 尺寸不能被瓦片边长整除时会写出解码端报 "Grid tiles do not cover whole image" 的文件。
-        /// 之所以优先保住长宽比：2:1 的等距柱状全景必须精确 2:1，否则 360 播放器会拉伸渲染；
-        /// 普通照片的长宽比变化在百分之几以内，肉眼不可见。
-        /// </remarks>
-        /// <returns>尺寸足够切成网格时返回 true；不足一块瓦片（会被放大）时返回 false，由调用方回退到单张编码。</returns>
-        private static bool TryFitToHeifGrid(uint maxWidth, uint maxHeight, out uint width, out uint height)
-        {
-            width = 0;
-            height = 0;
-            if (maxWidth < HeifTileSize || maxHeight < HeifTileSize)
-            {
-                return false;
-            }
-
-            uint maxColumns = maxWidth / HeifTileSize;
-            uint maxRows = maxHeight / HeifTileSize;
-
-            // 以"行数排满"为起点、按长宽比定列数；列数被上限截断时必须**同步收缩行数**，
-            // 否则行数不减会让长宽比失真（4000x8000 不收缩行数会得到 0.4667 而不是 0.5）
-            uint rows = maxRows;
-            uint columns = (uint)Math.Clamp(Math.Round((double)rows * maxWidth / maxHeight), 1, maxColumns);
-            rows = (uint)Math.Clamp(Math.Round((double)columns * maxHeight / maxWidth), 1, maxRows);
-
-            width = columns * HeifTileSize;
-            height = rows * HeifTileSize;
-            return true;
         }
 
         /// <summary>
@@ -425,7 +331,6 @@ namespace ArchiveMaster.Services
             };
         }
 
-
         private void Copy(SlimmingFilesInfo file)
         {
             if (file.DistFile.ExistsFile)
@@ -437,7 +342,6 @@ namespace ArchiveMaster.Services
 
             File.Copy(file.Path, file.DistFile.Path);
         }
-
 
         private string GetDistPath(string sourceFileName, string newExtension)
         {
@@ -482,7 +386,6 @@ namespace ArchiveMaster.Services
 
             return Path.Combine(Config.DistDir, subDir, fileNameWithoutExtension + extension);
         }
-
 
         private void SearchCopyingAndCompressingFiles(CancellationToken ct)
         {
