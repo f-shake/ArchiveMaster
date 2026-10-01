@@ -169,6 +169,13 @@ internal static class LibHeifNative
     [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern HeifError heif_encoder_set_lossy_quality(nint encoder, int quality);
 
+    // 用于设置 x265 的 preset。libheif 只暴露了少数几个字符串参数（x265 插件里是 preset / tune / chroma），
+    // 线程数不在其中——所以并发只能由调用方控制，见 HeifEncoder.Encode 的 remarks
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    internal static extern HeifError heif_encoder_set_parameter_string(nint encoder,
+        [MarshalAs(UnmanagedType.LPUTF8Str)] string parameterName,
+        [MarshalAs(UnmanagedType.LPUTF8Str)] string value);
+
     [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     internal static extern HeifError heif_image_create(int width, int height, int colorspace, int chroma, out nint image);
 

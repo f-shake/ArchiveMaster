@@ -163,6 +163,24 @@
                                 TickFrequency="1"
                                 Value="{Binding Config.Thread}" />
                         </ct:FormItem>
+                        <ct:FormItem
+                            Description="平衡速度与质量"
+                            Header="HEIC 编码档位"
+                            IsVisible="{Binding IsHeifFormatSelected}">
+                            <ComboBox
+                                Width="120"
+                                ItemsSource="{Binding HeifPresets}"
+                                SelectedItem="{Binding Config.HeifPreset}" />
+                        </ct:FormItem>
+                        <ct:FormItem
+                            Description=">1600万像素时启用"
+                            Header="HEIC 网格瓦片"
+                            IsVisible="{Binding IsHeifFormatSelected}">
+                            <ComboBox
+                                Width="120"
+                                ItemsSource="{Binding HeifTileSizes}"
+                                SelectedItem="{Binding Config.HeifTileSize}" />
+                        </ct:FormItem>
                     </ct:WrapFormItemGroup>
                 </ct:FormItem>
 

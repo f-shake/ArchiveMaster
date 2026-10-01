@@ -9,6 +9,7 @@ using ArchiveMaster.Views;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
 using ArchiveMaster.Enums;
@@ -54,6 +55,18 @@ public partial class PhotoSlimmingViewModel(ViewModelServices services)
     /// </summary>
     public bool IsHeifEncoderAvailable => HeifEncoder.IsAvailable;
 
+    /// <summary>
+    /// 当前输出格式是否为 HEIC/HEIF。HEIC 专有的设置（编码档位、网格瓦片边长）只在此时显示，
+    /// 因为对其它格式它们没有任何作用。
+    /// </summary>
+    public bool IsHeifFormatSelected => Config != null && HeifEncoder.IsHeifFormat(Config.CompressImageFormat);
+
+    /// <summary>界面可选的 x265 编码档位。</summary>
+    public IReadOnlyList<string> HeifPresets { get; } = HeifEncoder.Presets;
+
+    /// <summary>界面可选的网格瓦片边长。</summary>
+    public IReadOnlyList<int> HeifTileSizes { get; } = HeifEncoder.TileSizes;
+
     private static List<MagickFormat> BuildSupportedImageFormats()
     {
         var formats = MagickNET.SupportedFormats
@@ -86,6 +99,35 @@ public partial class PhotoSlimmingViewModel(ViewModelServices services)
     protected override void OnReset()
     {
         Files = null;
+    }
+
+    /// <summary>
+    /// 输出格式由下拉框直接写进 <see cref="PhotoSlimmingConfig"/>，不经过命令，所以只能靠订阅
+    /// <c>PropertyChanged</c> 来更新 <see cref="IsHeifFormatSelected"/>（决定 HEIC 专有项是否显示）。
+    /// </summary>
+    protected override void OnCurrentConfigChanged(PhotoSlimmingConfig oldConfig, PhotoSlimmingConfig newConfig)
+    {
+        if (oldConfig != null)
+        {
+            oldConfig.PropertyChanged -= OnConfigPropertyChanged;
+        }
+
+        if (newConfig != null)
+        {
+            newConfig.PropertyChanged += OnConfigPropertyChanged;
+        }
+
+        // 切换配置版本时整个 Config 对象被换掉，新对象此刻不会发 CompressImageFormat 变更通知，
+        // 所以这里必须主动刷一次；否则从一个 JPEG 配置切到 HEIC 配置时，HEIC 专有项会保持隐藏
+        OnPropertyChanged(nameof(IsHeifFormatSelected));
+
+        void OnConfigPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(PhotoSlimmingConfig.CompressImageFormat))
+            {
+                OnPropertyChanged(nameof(IsHeifFormatSelected));
+            }
+        }
     }
 
     [RelayCommand]

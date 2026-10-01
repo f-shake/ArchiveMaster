@@ -132,7 +132,7 @@ namespace ArchiveMaster.Services
 
                 // HEIC/HEIF 的尺寸要求（单张要宽度对齐 16；超过单张像素上限则不改尺寸、改走网格）全部由
                 // HeifEncoder 决定，这里只问一句，不持有任何 HEIC 专有规则——依据见 HeifEncoder.GetTargetSize
-                if (IsHeifFormat(Config.CompressImageFormat))
+                if (HeifEncoder.IsHeifFormat(Config.CompressImageFormat))
                 {
                     (width, height) = HeifEncoder.GetTargetSize(width, height);
                 }
@@ -152,7 +152,7 @@ namespace ArchiveMaster.Services
                 // 不同步就会出现"元数据写 17304x8652、像素实际 15000x7500"这类错位，详见 ImageMetadataHelper
                 SyncDimensionMetadata(image, Config.CompressImageFormat, GetOutputMimeType(Config.CompressImageFormat));
 
-                if (IsHeifFormat(Config.CompressImageFormat))
+                if (HeifEncoder.IsHeifFormat(Config.CompressImageFormat))
                 {
                     WriteHeif(image, file.DistFile.Path, ct);
                 }
@@ -216,12 +216,8 @@ namespace ArchiveMaster.Services
             byte[] xmp = image.GetProfile("xmp")?.ToByteArray();
 
             // 单张还是网格由 HeifEncoder 按真实像素数决定（超过单张上限就切瓦片），这里不再判断
-            HeifEncoder.Encode(rgb, (int)image.Width, (int)image.Height, Config.Quality, exif, icc, xmp, distPath, ct);
-        }
-
-        private static bool IsHeifFormat(MagickFormat format)
-        {
-            return format is MagickFormat.Heic or MagickFormat.Heif;
+            HeifEncoder.Encode(rgb, (int)image.Width, (int)image.Height, Config.Quality, exif, icc, xmp, distPath,
+                Config.HeifTileSize, Config.HeifPreset, ct);
         }
 
         /// <summary>
@@ -236,7 +232,7 @@ namespace ArchiveMaster.Services
 
             // 用字符串匹配而不是枚举分支：MagickFormat 里同一格式有多个别名
             //（Jpg=114 与 Jpeg=113 是两个不同成员，而配置默认值正是 Jpg），写成枚举分支会漏。
-            // GetOutputMimeType 与 IsHeifFormat 也是有鉴于此才那么写的。
+            // GetOutputMimeType 也是有鉴于此才那么写的。
             string formatName = format.ToString().ToLowerInvariant();
             bool exifWorthSyncing = formatName is "jpg" or "jpeg" or "pjpeg" or "heic" or "heif";
 
