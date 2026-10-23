@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>ArchiveMaster.Tests</RootNamespace>
+    <AssemblyName>ArchiveMaster.Tests</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit.v3" />
+    <PackageReference Include="xunit.runner.visualstudio">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ArchiveMaster.Core\ArchiveMaster.Core.csproj" />
+    <ProjectReference Include="..\ArchiveMaster.Module.FileTools\ArchiveMaster.Module.FileTools.csproj" />
+    <ProjectReference Include="..\ArchiveMaster.Module.PhotoTools\ArchiveMaster.Module.PhotoTools.csproj" />
+    <ProjectReference Include="..\ArchiveMaster.Module.PhotoTagging\ArchiveMaster.Module.PhotoTagging.csproj" />
+    <ProjectReference Include="..\ArchiveMaster.Module.VideoTools\ArchiveMaster.Module.VideoTools.csproj" />
+    <ProjectReference Include="..\ArchiveMaster.Module.TextTools\ArchiveMaster.Module.TextTools.csproj" />
+    <ProjectReference Include="..\ArchiveMaster.Module.OfflineSync\ArchiveMaster.Module.OfflineSync.csproj" />
+    <ProjectReference Include="..\ArchiveMaster.Module.WriteOnceArchive\ArchiveMaster.Module.WriteOnceArchive.csproj" />
+  </ItemGroup>
+
+</Project>

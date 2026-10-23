@@ -219,6 +219,7 @@
 | `ArchiveMaster.UI`       | 依赖编译 | 界面管理程序                                                 | `ArchiveMaster.Core` |
 | `ArchiveMaster.Modules`  | 依赖编译 | 内置模块清单 `BuiltInModules.All`，GUI 与 CLI 共用           | 各 `ArchiveMaster.Module.*` |
 | `ArchiveMaster.Cli`      | 独立编译 | 命令行入口 `am`，无界面调用同一批工具                        | `ArchiveMaster.Modules` |
+| `ArchiveMaster.Tests`    | 测试     | xUnit v3 单元测试，覆盖 Core 与 7 个非备份模块的非 UI 逻辑   | `ArchiveMaster.Core`、各模块 |
 | `ArchiveMaster.UI.*`     | 启动模块 | 具体平台的启动器                                             | `ArchiveMaster.UI`   |
 | `ArchiveMaster.Module.*` | 独立编译 | 每个模块在界面上显示为一个组别，同一类的工具放在同一个模块中 | `ArchiveMaster.Core` |
 
@@ -256,6 +257,19 @@
    | `-c`            | 单文件压缩（仅自包含）       |
    | `-noSingleFile` | 禁用单文件发布           |
 
+
+## 测试
+
+```powershell
+dotnet test ArchiveMaster.Tests
+dotnet test ArchiveMaster.Tests --filter FullyQualifiedName~Core
+dotnet test ArchiveMaster.Tests --filter FullyQualifiedName~FileTools
+```
+
+- 测试工程为 `ArchiveMaster.Tests`（xUnit v3），覆盖 Core 与 FileTools、PhotoTools、PhotoTagging、VideoTools、TextTools、OfflineSync、WriteOnceArchive 的非 UI 逻辑。
+- 不覆盖 `FileBackupper`、真实 LLM 调用、HEIC 原生编码、`ffprobe` 等外部进程、View/ViewModel。
+- 每个用例只读写 `%TEMP%\ArchiveMaster.Tests` 下的独立目录；需要保留现场时设置环境变量 `ARCHIVEMASTER_TESTS_KEEP_TEMP=1`。
+- 2A 交付为 159 条用例（150 通过、9 失败）；失败对应 8 个已确认缺陷，明细见 [unit-tests-bugs.md](docs/plans/unit-tests-bugs.md)，2B 修复后应恢复全绿。
 
 ## 命令行（`am`）
 
@@ -318,6 +332,11 @@ am run  fileTools.timeClassify --config cfg.json --yes --json  # 执行
 - `skill/` —— 技能正文与由 `am docs` 生成的工具目录（`assets/`）
 - `docs/plans/cli-and-skill.md` —— 本次开发计划
 - `AGENTS.md` —— 项目约定文件
+
+### 单元测试（2026-10）
+
+- `ArchiveMaster.Tests/` —— xUnit v3 测试工程与测试基础设施
+- `docs/plans/unit-tests.md` —— 本次测试计划
 
 ### 部分由 AI 编写
 

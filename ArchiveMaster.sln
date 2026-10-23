@@ -51,6 +51,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArchiveMaster.Modules", "Ar
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArchiveMaster.Cli", "ArchiveMaster.Cli\ArchiveMaster.Cli.csproj", "{85038163-29F4-4008-B1BD-665EF0C02997}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArchiveMaster.Tests", "ArchiveMaster.Tests\ArchiveMaster.Tests.csproj", "{58662C5D-E67C-4A8B-A4B0-6ADDFE66127E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -255,6 +257,18 @@ Global
 		{85038163-29F4-4008-B1BD-665EF0C02997}.Release|x64.Build.0 = Release|Any CPU
 		{85038163-29F4-4008-B1BD-665EF0C02997}.Release|x86.ActiveCfg = Release|Any CPU
 		{85038163-29F4-4008-B1BD-665EF0C02997}.Release|x86.Build.0 = Release|Any CPU
+		{58662C5D-E67C-4A8B-A4B0-6ADDFE66127E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{58662C5D-E67C-4A8B-A4B0-6ADDFE66127E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{58662C5D-E67C-4A8B-A4B0-6ADDFE66127E}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{58662C5D-E67C-4A8B-A4B0-6ADDFE66127E}.Debug|x64.Build.0 = Debug|Any CPU
+		{58662C5D-E67C-4A8B-A4B0-6ADDFE66127E}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{58662C5D-E67C-4A8B-A4B0-6ADDFE66127E}.Debug|x86.Build.0 = Debug|Any CPU
+		{58662C5D-E67C-4A8B-A4B0-6ADDFE66127E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{58662C5D-E67C-4A8B-A4B0-6ADDFE66127E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{58662C5D-E67C-4A8B-A4B0-6ADDFE66127E}.Release|x64.ActiveCfg = Release|Any CPU
+		{58662C5D-E67C-4A8B-A4B0-6ADDFE66127E}.Release|x64.Build.0 = Release|Any CPU
+		{58662C5D-E67C-4A8B-A4B0-6ADDFE66127E}.Release|x86.ActiveCfg = Release|Any CPU
+		{58662C5D-E67C-4A8B-A4B0-6ADDFE66127E}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

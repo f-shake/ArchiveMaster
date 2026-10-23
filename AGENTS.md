@@ -18,11 +18,12 @@
 | --- | --- |
 | 构建（含全部模块） | `dotnet build ArchiveMaster.UI.Desktop` |
 | 运行桌面版 | `dotnet run --project ArchiveMaster.UI.Desktop` |
+| 运行单元测试 | `dotnet test ArchiveMaster.Tests` |
 | 发布（单文件，Windows） | `pwsh ./build.ps1 -w`；`-s` 自包含、`-c` 压缩（仅自包含）、`-noSingleFile` 关闭单文件 |
 | 发布其他平台 | `./build.ps1 -l` / `-m` / `-all`，产物在 `./Publish/<rid>[_sc]/` |
 | 打包 Android APK | `pwsh ./build_android.ps1`（Release、android-arm64，签名配置在 `ArchiveMaster.UI.Android.csproj` 内） |
 
-构建现状：`dotnet build ArchiveMaster.UI.Desktop` 通过，0 警告 0 错误。仓库没有 CI，也没有单元测试工程（见「验证」）。
+构建现状：`dotnet build ArchiveMaster.UI.Desktop` 通过，0 警告 0 错误。仓库有单元测试工程 `ArchiveMaster.Tests`，没有 CI（见「验证」）。
 
 ### 构建 / 运行时的三个坑
 
@@ -42,13 +43,14 @@
 | `ArchiveMaster.UI` | 主界面、DI 装配、模块加载与初始化（`Initializer.cs`） |
 | `ArchiveMaster.Modules` | 内置模块清单 `BuiltInModules.All`，UI 与 CLI 共用 |
 | `ArchiveMaster.Cli` | 命令行入口 `am`，无界面运行工具（见「命令行（am）与 Agent Skill」） |
+| `ArchiveMaster.Tests` | xUnit v3 单元测试；覆盖 Core 与 7 个非备份模块的非 UI 逻辑（见「验证」） |
 | `ArchiveMaster.UI.Desktop` | 桌面启动器；HEIC 原生库也放在这里（见「原生库」） |
 | `ArchiveMaster.UI.Android` | Android 启动器；实现 `IPermissionService` 等平台接口 |
 
 两个「不在运行路径」的工程，别被误导：
 
 - `ArchiveMaster.Module.DiscArchive`：未加入 `.sln`、未被 `UI` 引用，已被 `WriteOnceArchive` 取代（`helps/disc.md` 是遗留文档）。
-- `ArchiveMaster.Module.Test`：在 `.sln` 里但没有在 `Initializer.ModuleInitializers` 注册，是手写试验面板，**不是测试工程**。
+- `ArchiveMaster.Module.Test`：在 `.sln` 里但没有在 `Initializer.ModuleInitializers` 注册，是手写试验面板，**不是测试工程**；真正的测试工程是 `ArchiveMaster.Tests`。
 
 GUI 与模块工程都设 `RootNamespace=ArchiveMaster`，所以命名空间与项目名无关，模块的类同样落在 `ArchiveMaster.Services` / `ArchiveMaster.ViewModels` 等命名空间里；`ArchiveMaster.Cli` 是例外，使用 `ArchiveMaster.Cli` 命名空间。新增类型注意避免与其他模块重名。
 
@@ -145,12 +147,15 @@ GUI 与模块工程都设 `RootNamespace=ArchiveMaster`，所以命名空间与�
 
 ## 验证
 
-仓库目前**没有自动化测试**，也没有 CI。`ArchiveMaster.Module.Test` 是试验模块，不能当作回归保障。改动后的最低验证：
+仓库有单元测试工程 `ArchiveMaster.Tests`（xUnit v3），没有 CI。`ArchiveMaster.Module.Test` 仍是手写试验面板，不能当作回归保障。改动后的最低验证：
 
 1. `dotnet build ArchiveMaster.UI.Desktop` 通过且不新增警告；
-2. 运行 `dotnet run --project ArchiveMaster.UI.Desktop`，实际操作受影响的工具（至少走一遍「初始化 → 执行」，包括取消与报错路径）；
-3. 涉及配置结构时，用旧 `configs.json` 启动一次，确认能加载、预设不丢；
-4. 涉及文件操作时，在临时目录验证，注意工具会真实移动 / 删除文件（默认删除到回收站，`GlobalConfigs.DeleteMode` 可改）。
+2. `dotnet test ArchiveMaster.Tests`：2A 当前 159 条中 150 条通过，9 条已知缺陷用例待 2B 修复后转绿；
+3. 运行 `dotnet run --project ArchiveMaster.UI.Desktop`，实际操作受影响的工具（至少走一遍「初始化 → 执行」，包括取消与报错路径）；
+4. 涉及配置结构时，用旧 `configs.json` 启动一次，确认能加载、预设不丢；
+5. 涉及文件操作时，在临时目录验证，注意工具会真实移动 / 删除文件（默认删除到回收站，`GlobalConfigs.DeleteMode` 可改）。
+
+测试边界：跳过 `FileBackupper`、真实 LLM 调用、HEIC 原生编码、`ffprobe` 等外部进程、UI/ViewModel；测试只使用 `%TEMP%\ArchiveMaster.Tests` 下的临时目录，不读写仓库或用户配置。需要保留现场时设置环境变量 `ARCHIVEMASTER_TESTS_KEEP_TEMP=1`。
 
 ## 文档与披露
 
