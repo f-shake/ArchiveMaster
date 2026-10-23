@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -135,6 +135,54 @@ namespace ArchiveMaster.Configs
             return GetOrCreateConfig<T>(typeof(T).Name, preset);
         }
 
+        /// <summary>
+        /// 按配置类型取配置，供 CLI 等无法在编译期写出泛型参数的场景使用。
+        /// </summary>
+        public object GetOrCreateConfig(Type configType, string preset = DefaultPresetName)
+        {
+            ArgumentNullException.ThrowIfNull(configType);
+            string key = configMetadata.Values.FirstOrDefault(p => p.Type == configType)?.Key;
+            if (key == null)
+            {
+                throw new Exception($"没有注册类型为{configType.Name}的配置");
+            }
+
+            ConfigItem configItem = configs.FirstOrDefault(p => p.Key == key && p.Preset == preset);
+            if (configItem == null)
+            {
+                configItem = new ConfigItem(key, Activator.CreateInstance(configType), preset);
+                configs.Add(configItem);
+            }
+            else if (!configType.IsInstanceOfType(configItem.Config))
+            {
+                throw new InvalidCastException(
+                    $"配置列表中的配置项{key}（预设：{preset ?? "（无）"}）的配置项对象类型（{configItem.Type?.Name}）与请求的类型（{configType.Name}）不一致");
+            }
+
+            return configItem.Config;
+        }
+
+        /// <summary>
+        /// 判断某个配置类型是否存在指定名称的预设。CLI 用它避免把写错的预设名静默当成默认配置。
+        /// </summary>
+        public bool HasPreset(Type configType, string preset)
+        {
+            ArgumentNullException.ThrowIfNull(configType);
+            ConfigMetadata metadata = configMetadata.Values.FirstOrDefault(p => p.Type == configType);
+            if (metadata == null)
+            {
+                return false;
+            }
+
+            // 共享预设组（如 OfflineSync 的多个步骤）里，只要组内任一配置有该预设，
+            // 就允许当前步骤使用；缺失的步骤会像 GUI 一样按默认值创建。
+            HashSet<string> groupKeys = configMetadata.Values
+                .Where(p => p.Group == metadata.Group)
+                .Select(p => p.Key)
+                .ToHashSet();
+            return configs.Any(p => groupKeys.Contains(p.Key) && p.Preset == preset);
+        }
+
         public IReadOnlyList<string> GetPresets(string groupName)
         {
             ArgumentException.ThrowIfNullOrEmpty(groupName);
@@ -165,11 +213,35 @@ namespace ArchiveMaster.Configs
             JsonOptions.Converters.Add(converter);
         }
 
-        public void Initialize()
+        /// <summary>
+        /// 创建一份包含当前已注册转换器的序列化选项，供 CLI 等无 GUI 场景复用同一套配置格式。
+        /// </summary>
+        public static JsonSerializerOptions CreateJsonOptions()
+        {
+            var options = new JsonSerializerOptions()
+            {
+                Encoder = JavaScriptEncoder.Create(UnicodeRanges.All),
+                WriteIndented = true,
+            };
+            foreach (JsonConverter converter in JsonOptions.Converters)
+            {
+                options.Converters.Add(converter);
+            }
+
+            return options;
+        }
+
+        /// <summary>
+        /// 加载配置。
+        /// </summary>
+        /// <param name="applyPendingLoad">
+        /// 是否处理 <c>configs.json.load</c>（会覆盖 configs.json）。CLI 传入 false，保证只读。
+        /// </param>
+        public void Initialize(bool applyPendingLoad = true)
         {
             try
             {
-                if (File.Exists(ConfigPath + NextStartLoadConfigExtension))
+                if (applyPendingLoad && File.Exists(ConfigPath + NextStartLoadConfigExtension))
                 {
                     File.Replace(ConfigPath + NextStartLoadConfigExtension, ConfigPath,
                         ConfigPath + ConfigBackupExtension);

@@ -217,6 +217,8 @@
 | ------------------------ | -------- | ------------------------------------------------------------ | -------------------- |
 | `ArchiveMaster.Core`     | 依赖编译 | 同时被`.UI`和`.Module.*`调用，包含一些基础的接口、基类、配置约定等 | `FzLib`              |
 | `ArchiveMaster.UI`       | 依赖编译 | 界面管理程序                                                 | `ArchiveMaster.Core` |
+| `ArchiveMaster.Modules`  | 依赖编译 | 内置模块清单 `BuiltInModules.All`，GUI 与 CLI 共用           | 各 `ArchiveMaster.Module.*` |
+| `ArchiveMaster.Cli`      | 独立编译 | 命令行入口 `am`，无界面调用同一批工具                        | `ArchiveMaster.Modules` |
 | `ArchiveMaster.UI.*`     | 启动模块 | 具体平台的启动器                                             | `ArchiveMaster.UI`   |
 | `ArchiveMaster.Module.*` | 独立编译 | 每个模块在界面上显示为一个组别，同一类的工具放在同一个模块中 | `ArchiveMaster.Core` |
 
@@ -255,6 +257,23 @@
    | `-noSingleFile` | 禁用单文件发布           |
 
 
+## 命令行（`am`）
+
+除 GUI 外，解决方案还提供命令行入口 `ArchiveMaster.Cli`（产物名为 `am`）与配套的 Agent Skill，供脚本或 AI 调用同一批工具。CLI 复用 GUI 的 Service 层，不改变任何工具的行为。
+
+```bash
+am list --json                                   # 列出可用工具
+am describe fileTools.timeClassify --json        # 输出配置模板
+am plan fileTools.timeClassify --config cfg.json # 准备阶段：列出待处理项
+am run  fileTools.timeClassify --config cfg.json --yes --json  # 执行
+```
+
+- `plan` 执行工具的准备阶段，`run` 在同一进程内继续执行第二阶段；`run` 必须带 `--yes`。
+- 结构化结果写入 `--report`（默认临时目录的 JSONL），JSON 输出见 `--json`。
+- 技能位于 `skill`，工具目录由 `am docs --out skill` 生成；`am docs --install` 可安装到 `~/.agents/skills/archive-master`。
+- 构建 CLI：`dotnet build ArchiveMaster.Cli\ArchiveMaster.Cli.csproj`；实际使用请发布 Release：`dotnet publish ArchiveMaster.Cli\ArchiveMaster.Cli.csproj -c Release`（HEIC 原生库按 RID 随包复制）。Debug 构建下 `fileTools.batchCommandLine` 只处理前 10 个文件（工具自身的调试限制）。
+
+
 ## 模块
 
 ### 新增模块
@@ -291,10 +310,23 @@
 - `THIRD-PARTY-NOTICES.txt`
 - `tools/heic-verify/` —— HEIC 输出验证工具，共 9 个文件（含其 README）
 
+### 命令行与 Agent Skill（2026-10）
+
+- `ArchiveMaster.Cli/` —— 控制台入口、参数解析、命令与输出，共 13 个文件
+- `ArchiveMaster.Core/Cli/` —— 工具目录、两阶段执行器与结果契约，共 5 个文件
+- `ArchiveMaster.Modules/` —— 统一模块清单，共 2 个文件
+- `skill/` —— 技能正文与由 `am docs` 生成的工具目录（`assets/`）
+- `docs/plans/cli-and-skill.md` —— 本次开发计划
+- `AGENTS.md` —— 项目约定文件
+
 ### 部分由 AI 编写
 
 - `.gitattributes`
 - `ArchiveMaster.Core/ArchiveMaster.Core.csproj`
+- `ArchiveMaster.Core/Configs/AppConfig.cs`
+- `ArchiveMaster.Core/Configs/GlobalConfigs.cs`
+- `ArchiveMaster.UI/Initializer.cs`
+- `ArchiveMaster.UI/ArchiveMaster.UI.csproj`
 - `ArchiveMaster.Module.PhotoTools/Configs/PhotoSlimmingConfig.cs`
 - `ArchiveMaster.Module.PhotoTools/Services/PhotoSlimmingService.cs`
 - `ArchiveMaster.Module.PhotoTools/ViewModels/PhotoSlimmingViewModel.cs`

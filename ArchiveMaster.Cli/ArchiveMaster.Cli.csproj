@@ -1,0 +1,42 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <RootNamespace>ArchiveMaster.Cli</RootNamespace>
+    <AssemblyName>am</AssemblyName>
+    <Version>$(AppVersion)</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ArchiveMaster.Core\ArchiveMaster.Core.csproj" />
+    <ProjectReference Include="..\ArchiveMaster.Modules\ArchiveMaster.Modules.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- 照片瘦身输出 HEIC 需要随程序分发原生库；按 RID 选择，未指定 RID 时带上 Windows 版便于本地调试 -->
+    <Content Include="..\ArchiveMaster.UI.Desktop\native\win-x64\*.dll" Condition="'$(RuntimeIdentifier)' == '' or '$(RuntimeIdentifier)' == 'win-x64'">
+      <Link>%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\ArchiveMaster.UI.Desktop\native\linux-x64\*.so*" Condition="'$(RuntimeIdentifier)' == 'linux-x64'">
+      <Link>%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\ArchiveMaster.UI.Desktop\native\linux-arm64\*.so*" Condition="'$(RuntimeIdentifier)' == 'linux-arm64'">
+      <Link>%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\ArchiveMaster.UI.Desktop\native\osx-x64\*.dylib" Condition="'$(RuntimeIdentifier)' == 'osx-x64'">
+      <Link>%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\ArchiveMaster.UI.Desktop\native\osx-arm64\*.dylib" Condition="'$(RuntimeIdentifier)' == 'osx-arm64'">
+      <Link>%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+</Project>

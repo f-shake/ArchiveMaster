@@ -1,0 +1,707 @@
+{
+  "schemaVersion": 1,
+  "tools": [
+    {
+      "id": "fileTools.encryptor",
+      "module": "fileTools",
+      "moduleName": "文件目录工具",
+      "title": "文件加密解密",
+      "description": "使用AES加密方法，对文件进行加密或解密",
+      "hasPrepareStage": true,
+      "prepareUnsafe": false,
+      "hasItemResults": true,
+      "config": {
+        "CipherMode": 1,
+        "DeleteSourceFiles": false,
+        "EncryptDirectoryStructure": false,
+        "EncryptedDir": null,
+        "FilenameDuplicationPolicy": 0,
+        "KeySize": 256,
+        "PaddingMode": 2,
+        "Password": "",
+        "RawDir": null,
+        "Type": 0
+      }
+    },
+    {
+      "id": "fileTools.dirStructureSync",
+      "module": "fileTools",
+      "moduleName": "文件目录工具",
+      "title": "目录结构同步",
+      "description": "以一个目录为模板，将另一个目录中的文件同步到与模板内相同文件一直的位置",
+      "hasPrepareStage": true,
+      "prepareUnsafe": false,
+      "hasItemResults": true,
+      "config": {
+        "TemplateDir": null,
+        "SourceDir": null,
+        "TargetDir": null,
+        "CompareTime": false,
+        "CompareLength": false,
+        "CompareName": false,
+        "Filter": {
+          "IsEnabled": true,
+          "ExcludeFiles": "Thumbs.db\nThumb.db\ndesktop.ini",
+          "ExcludeFolders": "$*",
+          "ExcludePaths": "",
+          "IncludeFiles": "*",
+          "IncludeFolders": "*",
+          "IncludePaths": "*",
+          "UseRegex": false
+        },
+        "MaxTimeToleranceSecond": 0,
+        "Copy": false
+      }
+    },
+    {
+      "id": "fileTools.dirStructureClone",
+      "module": "fileTools",
+      "moduleName": "文件目录工具",
+      "title": "目录结构克隆",
+      "description": "以一个目录为模板，导出一个新的稀疏文件目录，或包含文件结构的JSON文件",
+      "hasPrepareStage": true,
+      "prepareUnsafe": false,
+      "hasItemResults": true,
+      "config": {
+        "SourceDirOrFile": null,
+        "InputStructureFile": false,
+        "Filter": {
+          "IsEnabled": true,
+          "ExcludeFiles": "Thumbs.db\nThumb.db\ndesktop.ini",
+          "ExcludeFolders": "$*",
+          "ExcludePaths": "",
+          "IncludeFiles": "*",
+          "IncludeFolders": "*",
+          "IncludePaths": "*",
+          "UseRegex": false
+        },
+        "TargetDirOrFile": null,
+        "ExportStructureFile": false
+      }
+    },
+    {
+      "id": "fileTools.rename",
+      "module": "fileTools",
+      "moduleName": "文件目录工具",
+      "title": "批量重命名",
+      "description": "批量对一个目录中的文件或文件夹按规则进行重命名操作",
+      "hasPrepareStage": true,
+      "prepareUnsafe": false,
+      "hasItemResults": true,
+      "config": {
+        "Manual": false,
+        "ManualMaps": "",
+        "Dir": null,
+        "SearchPattern": null,
+        "ReplacePattern": null,
+        "RenameTarget": 0,
+        "SearchMode": 0,
+        "RenameMode": 0,
+        "SearchPath": false,
+        "IgnoreCase": true,
+        "IncludeSubDirs": true
+      }
+    },
+    {
+      "id": "fileTools.duplicateFileCleanup",
+      "module": "fileTools",
+      "moduleName": "文件目录工具",
+      "title": "重复文件清理",
+      "description": "清理一个目录内的重复文件，或已包含在另一个目录中的相同文件",
+      "hasPrepareStage": true,
+      "prepareUnsafe": false,
+      "hasItemResults": true,
+      "config": {
+        "CleaningDir": null,
+        "CompareLength": true,
+        "CompareName": true,
+        "CompareTime": true,
+        "ReferenceDir": null,
+        "TimeToleranceSecond": 0
+      }
+    },
+    {
+      "id": "fileTools.timeClassify",
+      "module": "fileTools",
+      "moduleName": "文件目录工具",
+      "title": "按时间段分类",
+      "description": "识别目录中相同时间段的文件，将它们移动到相同的新目录中",
+      "hasPrepareStage": true,
+      "prepareUnsafe": false,
+      "hasItemResults": true,
+      "config": {
+        "Dir": null,
+        "MinTimeInterval": "01:00:00"
+      }
+    },
+    {
+      "id": "fileTools.twinFileCleaner",
+      "module": "fileTools",
+      "moduleName": "文件目录工具",
+      "title": "附属文件清理",
+      "description": "当目录中存在某后缀文件（如.dng）时，自动删除同名不同后缀的关联文件（如.jpg）",
+      "hasPrepareStage": true,
+      "prepareUnsafe": false,
+      "hasItemResults": true,
+      "config": {
+        "DeletingPatterns": [
+          "{Name}.JPG",
+          "{Name}(*).JPG"
+        ],
+        "Dir": null,
+        "MasterExtensions": [
+          "DNG",
+          "ARW",
+          "RW2"
+        ]
+      }
+    },
+    {
+      "id": "fileTools.batchCommandLine",
+      "module": "fileTools",
+      "moduleName": "文件目录工具",
+      "title": "批量命令行执行",
+      "description": "以文件或目录为元素，批量执行命令行",
+      "hasPrepareStage": true,
+      "prepareUnsafe": false,
+      "hasItemResults": true,
+      "config": {
+        "Arguments": null,
+        "AutoCreateDir": null,
+        "Dir": null,
+        "Level": 1,
+        "Filter": {
+          "IsEnabled": true,
+          "ExcludeFiles": "Thumbs.db\nThumb.db\ndesktop.ini",
+          "ExcludeFolders": "$*",
+          "ExcludePaths": "",
+          "IncludeFiles": "*",
+          "IncludeFolders": "*",
+          "IncludePaths": "*",
+          "UseRegex": false
+        },
+        "Program": null,
+        "Target": 0
+      }
+    },
+    {
+      "id": "fileTools.linkDeduplication",
+      "module": "fileTools",
+      "moduleName": "文件目录工具",
+      "title": "硬链接去重",
+      "description": "通过硬链接替换重复文件，节省磁盘空间",
+      "hasPrepareStage": true,
+      "prepareUnsafe": false,
+      "hasItemResults": true,
+      "config": {
+        "Dir": null,
+        "Filter": {
+          "IsEnabled": true,
+          "ExcludeFiles": "Thumbs.db\nThumb.db\ndesktop.ini",
+          "ExcludeFolders": "$*",
+          "ExcludePaths": "",
+          "IncludeFiles": "*",
+          "IncludeFolders": "*",
+          "IncludePaths": "*",
+          "UseRegex": false
+        },
+        "AllowDifferentTime": true,
+        "HashType": 2
+      }
+    },
+    {
+      "id": "fileTools.fileFilterOperation",
+      "module": "fileTools",
+      "moduleName": "文件目录工具",
+      "title": "文件筛选操作",
+      "description": "对筛选后的文件进行复制、移动、删除操作",
+      "hasPrepareStage": true,
+      "prepareUnsafe": false,
+      "hasItemResults": true,
+      "config": {
+        "SourceDirs": null,
+        "TargetDir": null,
+        "Type": 0,
+        "PathFilter": {
+          "IsEnabled": true,
+          "ExcludeFiles": "Thumbs.db\nThumb.db\ndesktop.ini",
+          "ExcludeFolders": "$*",
+          "ExcludePaths": "",
+          "IncludeFiles": "*",
+          "IncludeFolders": "*",
+          "IncludePaths": "*",
+          "UseRegex": false
+        },
+        "EarliestTime": null,
+        "LatestTime": null,
+        "MinLength": null,
+        "MaxLength": null,
+        "TargetFileNameMode": 0,
+        "HashType": 2
+      }
+    },
+    {
+      "id": "fileTools.fileReadabilityScanner",
+      "module": "fileTools",
+      "moduleName": "文件目录工具",
+      "title": "文件可读性检测",
+      "description": "检查文件是否可以完整读取，并提供二进制比特的分布",
+      "hasPrepareStage": true,
+      "prepareUnsafe": false,
+      "hasItemResults": true,
+      "config": {
+        "Dir": null,
+        "Filter": {
+          "IsEnabled": true,
+          "ExcludeFiles": "Thumbs.db\nThumb.db\ndesktop.ini",
+          "ExcludeFolders": "$*",
+          "ExcludePaths": "",
+          "IncludeFiles": "*",
+          "IncludeFolders": "*",
+          "IncludePaths": "*",
+          "UseRegex": false
+        }
+      }
+    },
+    {
+      "id": "photoTools.repairModifiedTime",
+      "module": "photoTools",
+      "moduleName": "照片工具",
+      "title": "修复照片修改时间",
+      "description": "寻找EXIF信息中的拍摄时间与照片修改时间不同的文件，将修改时间更新闻EXIF时间",
+      "hasPrepareStage": true,
+      "prepareUnsafe": false,
+      "hasItemResults": true,
+      "config": {
+        "Dir": null,
+        "ThreadCount": 2,
+        "MaxDurationTolerance": "00:00:01",
+        "Filter": {
+          "IsEnabled": true,
+          "ExcludeFiles": "Thumbs.db\nThumb.db\ndesktop.ini",
+          "ExcludeFolders": "$*",
+          "ExcludePaths": "",
+          "IncludeFiles": "*.heic\n*.heif\n*.jpg\n*.jpeg\n*.png\n*.tif\n*.dng\n*.arw",
+          "IncludeFolders": "*",
+          "IncludePaths": "*",
+          "UseRegex": false
+        }
+      }
+    },
+    {
+      "id": "photoTools.photoSlimming",
+      "module": "photoTools",
+      "moduleName": "照片工具",
+      "title": "照片瘦身",
+      "description": "复制或压缩照片，用于生成更小的照片集副本",
+      "hasPrepareStage": true,
+      "prepareUnsafe": false,
+      "hasItemResults": true,
+      "config": {
+        "ClearAllBeforeRunning": false,
+        "CompressFilter": {
+          "IsEnabled": true,
+          "ExcludeFiles": "Thumbs.db\nThumb.db\ndesktop.ini",
+          "ExcludeFolders": "$*",
+          "ExcludePaths": "",
+          "IncludeFiles": "*.jpg\n*.jpeg\n*.heic\n*.heif\n*.bmp\n*.png\n*.gif\n*.tiff\n*.tif",
+          "IncludeFolders": "*",
+          "IncludePaths": "*",
+          "UseRegex": false
+        },
+        "CompressImageFormat": 114,
+        "CopyDirectlyFilter": {
+          "IsEnabled": true,
+          "ExcludeFiles": "Thumbs.db\nThumb.db\ndesktop.ini",
+          "ExcludeFolders": "$*",
+          "ExcludePaths": "",
+          "IncludeFiles": "*.gpx\n*.doc\n*.docx\n*.ppt\n*.pptx\n*.xls\n*.xlsx\n*.pdf",
+          "IncludeFolders": "*",
+          "IncludePaths": "*",
+          "UseRegex": false
+        },
+        "DeepestLevel": 10000,
+        "DistDir": "C:\\目标\\目录",
+        "FileNameTemplate": "{FileName}",
+        "FolderNameTemplate": "{FolderName}",
+        "MaxDurationTolerance": 60,
+        "MaxLongSize": 10000,
+        "MaxShortSize": 5000,
+        "Quality": 50,
+        "HeifPreset": "fast",
+        "HeifTileSize": 512,
+        "SkipIfExist": true,
+        "SourceDir": "C:\\源\\目录",
+        "Thread": 4
+      }
+    },
+    {
+      "id": "photoTools.photoGeoTagging",
+      "module": "photoTools",
+      "moduleName": "照片工具",
+      "title": "照片地理信息写入",
+      "description": "将GPX轨迹中的GPS位置信息，根据拍摄时间自动匹配并写入照片Exif",
+      "hasPrepareStage": true,
+      "prepareUnsafe": false,
+      "hasItemResults": true,
+      "config": {
+        "Dir": null,
+        "Filter": {
+          "IsEnabled": true,
+          "ExcludeFiles": "Thumbs.db\nThumb.db\ndesktop.ini",
+          "ExcludeFolders": "$*",
+          "ExcludePaths": "",
+          "IncludeFiles": "*.heic\n*.heif\n*.jpg\n*.jpeg\n*.png\n*.tif",
+          "IncludeFolders": "*",
+          "IncludePaths": "*",
+          "UseRegex": false
+        },
+        "GpxFile": null,
+        "MaxTolerance": "00:01:00",
+        "TimeOffset": "00:00:00",
+        "InverseTimeOffset": false
+      }
+    },
+    {
+      "id": "photoTools.photoGeoSorter",
+      "module": "photoTools",
+      "moduleName": "照片工具",
+      "title": "照片位置分类",
+      "description": "根据照片的GPS位置信息，将照片分为不同地理区域的多个目录",
+      "hasPrepareStage": true,
+      "prepareUnsafe": false,
+      "hasItemResults": true,
+      "config": {
+        "Dir": null,
+        "VectorFile": null,
+        "Filter": {
+          "IsEnabled": true,
+          "ExcludeFiles": "Thumbs.db\nThumb.db\ndesktop.ini",
+          "ExcludeFolders": "$*",
+          "ExcludePaths": "",
+          "IncludeFiles": "*.heic\n*.heif\n*.jpg\n*.jpeg\n*.png\n*.tif\n*.dng\n*.arw",
+          "IncludeFolders": "*",
+          "IncludePaths": "*",
+          "UseRegex": false
+        },
+        "FieldName": null
+      }
+    },
+    {
+      "id": "photoTagging.photoTagGenerator",
+      "module": "photoTagging",
+      "moduleName": "照片标签工具",
+      "title": "照片标签生成",
+      "description": "通过AI，自动生成照片的关键词标签",
+      "hasPrepareStage": true,
+      "prepareUnsafe": false,
+      "hasItemResults": true,
+      "config": {
+        "DescriptionLength": 30,
+        "Dir": null,
+        "Filter": {
+          "IsEnabled": true,
+          "ExcludeFiles": "Thumbs.db\nThumb.db\ndesktop.ini",
+          "ExcludeFolders": "$*",
+          "ExcludePaths": "",
+          "IncludeFiles": "*.heic\n*.heif\n*.jpg\n*.jpeg\n*.png\n*.tif",
+          "IncludeFolders": "*",
+          "IncludePaths": "*",
+          "UseRegex": false
+        },
+        "ResizingTargetResolutionIn10k": 800,
+        "TagFile": null,
+        "TargetTagCount": 20,
+        "MaxDegreeOfParallelism": 1,
+        "AutoSaveInterval": 10,
+        "RetryCount": 3
+      }
+    },
+    {
+      "id": "photoTagging.photoTagManager",
+      "module": "photoTagging",
+      "moduleName": "照片标签工具",
+      "title": "图像标签管理",
+      "description": "管理各图像的标签，进行新增、修改或和删除",
+      "hasPrepareStage": false,
+      "prepareUnsafe": false,
+      "hasItemResults": false,
+      "config": {
+        "TagFile": null,
+        "RootDir": null,
+        "Filter": {
+          "IsEnabled": true,
+          "ExcludeFiles": "Thumbs.db\nThumb.db\ndesktop.ini",
+          "ExcludeFolders": "$*",
+          "ExcludePaths": "",
+          "IncludeFiles": "*.heic\n*.heif\n*.jpg\n*.jpeg\n*.png\n*.tif",
+          "IncludeFolders": "*",
+          "IncludePaths": "*",
+          "UseRegex": false
+        }
+      }
+    },
+    {
+      "id": "photoTagging.photoTagSearcher",
+      "module": "photoTagging",
+      "moduleName": "照片标签工具",
+      "title": "照片标签搜索",
+      "description": "根据关键词，查找指定标签的图像",
+      "hasPrepareStage": false,
+      "prepareUnsafe": false,
+      "hasItemResults": false,
+      "config": {
+        "TagFile": null,
+        "RootDir": null,
+        "UseWrapPanel": false
+      }
+    },
+    {
+      "id": "videoTools.timeAss",
+      "module": "videoTools",
+      "moduleName": "视频工具",
+      "title": "视频时间戳字幕",
+      "description": "为视频添加录制时间的字幕",
+      "hasPrepareStage": true,
+      "prepareUnsafe": false,
+      "hasItemResults": true,
+      "config": {
+        "Format": {
+          "HorizontalAlignment": 2,
+          "VerticalAlignment": 0,
+          "Bold": false,
+          "BorderColor": "#000000",
+          "BorderWidth": 3,
+          "Font": "Microsoft YaHei UI",
+          "TextColor": "#FFFFFF",
+          "TimeFormat": "HH:mm:ss",
+          "Interval": 1000,
+          "Italic": false,
+          "VerticalMargin": 20,
+          "HorizontalMargin": 20,
+          "Size": 32,
+          "Underline": false
+        },
+        "Files": null,
+        "ExportFile": null,
+        "CombineIntoSingleFile": true
+      }
+    },
+    {
+      "id": "videoTools.videoInfo",
+      "module": "videoTools",
+      "moduleName": "视频工具",
+      "title": "视频信息提取",
+      "description": "为一系列视频批量提取结构化的信息",
+      "hasPrepareStage": true,
+      "prepareUnsafe": false,
+      "hasItemResults": true,
+      "config": {
+        "Dir": null,
+        "Filter": {
+          "IsEnabled": true,
+          "ExcludeFiles": "Thumbs.db\nThumb.db\ndesktop.ini",
+          "ExcludeFolders": "$*",
+          "ExcludePaths": "",
+          "IncludeFiles": "*.avi\n*.mp4\n*.webp\n*.3gp\n*.mkv\n*.mov",
+          "IncludeFolders": "*",
+          "IncludePaths": "*",
+          "UseRegex": false
+        }
+      }
+    },
+    {
+      "id": "textTools.encodingConverter",
+      "module": "textTools",
+      "moduleName": "文本工具",
+      "title": "编码识别与转换",
+      "description": "识别文本文件的编码，并可以转换为指定编码",
+      "hasPrepareStage": true,
+      "prepareUnsafe": false,
+      "hasItemResults": true,
+      "config": {
+        "Dir": null,
+        "Filter": {
+          "IsEnabled": true,
+          "ExcludeFiles": "Thumbs.db\nThumb.db\ndesktop.ini",
+          "ExcludeFolders": "$*",
+          "ExcludePaths": "",
+          "IncludeFiles": "*",
+          "IncludeFolders": "*",
+          "IncludePaths": "*",
+          "UseRegex": false
+        },
+        "TargetEncoding": "UTF-8",
+        "WithBom": null,
+        "SaveToAnotherDir": false,
+        "AnotherDir": null
+      }
+    },
+    {
+      "id": "textTools.typoChecker",
+      "module": "textTools",
+      "moduleName": "文本工具",
+      "title": "错别字检查",
+      "description": "使用AI检查文本是否存在错别字",
+      "hasPrepareStage": false,
+      "prepareUnsafe": false,
+      "hasItemResults": false,
+      "config": {
+        "Source": {
+          "FromFile": true,
+          "Text": null,
+          "Files": [],
+          "IgnoreLineBreak": false
+        },
+        "MinSegmentLength": 200,
+        "ExtraAiPrompt": null
+      }
+    },
+    {
+      "id": "textTools.lineByLineProcessor",
+      "module": "textTools",
+      "moduleName": "文本工具",
+      "title": "逐行智能转换",
+      "description": "针对每行文本调用AI进行独立转换，可用于分类、判断或文本改写等任务",
+      "hasPrepareStage": true,
+      "prepareUnsafe": false,
+      "hasItemResults": false,
+      "config": {
+        "Examples": [],
+        "MaxLineEachCall": 200,
+        "Prompt": null,
+        "SkipEmptyLine": true,
+        "Source": {
+          "FromFile": true,
+          "Text": null,
+          "Files": [],
+          "IgnoreLineBreak": false
+        },
+        "EnableRetry": true,
+        "MaxRetryCount": 3,
+        "EnableMajorityVote": false,
+        "VoteCount": 3
+      }
+    },
+    {
+      "id": "offlineSync.step1",
+      "module": "offlineSync",
+      "moduleName": "异地备份",
+      "title": "制作异地快照",
+      "description": "在异地计算机创建所需要的目录快照",
+      "hasPrepareStage": false,
+      "prepareUnsafe": false,
+      "hasItemResults": false,
+      "config": {
+        "OutputFile": null,
+        "SyncDirs": null
+      }
+    },
+    {
+      "id": "offlineSync.step2",
+      "module": "offlineSync",
+      "moduleName": "异地备份",
+      "title": "本地生成补丁",
+      "description": "在本地计算机生成与异地的差异文件的补丁包",
+      "hasPrepareStage": true,
+      "prepareUnsafe": false,
+      "hasItemResults": true,
+      "config": {
+        "CheckMoveIgnoreFileName": true,
+        "EnableEncryption": false,
+        "EncryptionPassword": "",
+        "ExportMode": 0,
+        "Filter": {
+          "IsEnabled": true,
+          "ExcludeFiles": "Thumbs.db\nThumb.db\ndesktop.ini",
+          "ExcludeFolders": "$*",
+          "ExcludePaths": "",
+          "IncludeFiles": "*",
+          "IncludeFolders": "*",
+          "IncludePaths": "*",
+          "UseRegex": false
+        },
+        "LocalDir": null,
+        "MaxTimeToleranceSecond": 3,
+        "OffsiteSnapshot": null,
+        "PatchDir": null
+      }
+    },
+    {
+      "id": "offlineSync.step3",
+      "module": "offlineSync",
+      "moduleName": "异地备份",
+      "title": "异地同步",
+      "description": "在异地应用补丁包，实现数据同步",
+      "hasPrepareStage": true,
+      "prepareUnsafe": false,
+      "hasItemResults": true,
+      "config": {
+        "PatchDir": null,
+        "Password": ""
+      }
+    },
+    {
+      "id": "writeOnceArchive.packing",
+      "module": "writeOnceArchive",
+      "moduleName": "动态固存备份",
+      "title": "打包和备份",
+      "description": "扫描文件特征，制作文件归档包",
+      "hasPrepareStage": true,
+      "prepareUnsafe": true,
+      "hasItemResults": false,
+      "config": {
+        "SourceDir": null,
+        "TargetDir": null,
+        "Filter": {
+          "IsEnabled": true,
+          "ExcludeFiles": "Thumbs.db\nThumb.db\ndesktop.ini",
+          "ExcludeFolders": "$*",
+          "ExcludePaths": "",
+          "IncludeFiles": "*",
+          "IncludeFolders": "*",
+          "IncludePaths": "*",
+          "UseRegex": false
+        },
+        "PackingType": 0,
+        "PackageSizeMB": 23500,
+        "PreviousPackageInfoFiles": null,
+        "Password": "",
+        "HashCacheFile": null
+      }
+    },
+    {
+      "id": "writeOnceArchive.rebuild",
+      "module": "writeOnceArchive",
+      "moduleName": "动态固存备份",
+      "title": "重建和恢复",
+      "description": "从文件归档包重建目录结构，或验证文件完整性",
+      "hasPrepareStage": true,
+      "prepareUnsafe": false,
+      "hasItemResults": true,
+      "config": {
+        "SourceDirs": null,
+        "TargetDir": null,
+        "PackageInfoFile": null,
+        "SkipIfExisted": true,
+        "MaxTimeToleranceSecond": 2,
+        "CheckOnly": false,
+        "Password": ""
+      }
+    },
+    {
+      "id": "writeOnceArchive.verify",
+      "module": "writeOnceArchive",
+      "moduleName": "动态固存备份",
+      "title": "包信息和验证",
+      "description": "查看备份介质中文件包的信息，验证文件完整性",
+      "hasPrepareStage": true,
+      "prepareUnsafe": false,
+      "hasItemResults": true,
+      "config": {
+        "PackageDir": null,
+        "Password": ""
+      }
+    }
+  ]
+}

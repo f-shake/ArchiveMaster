@@ -25,6 +25,11 @@ public class GlobalConfigs
 
     public bool IsSmoothScrollingEnabled { get; set; } = true;
 
+    /// <summary>
+    /// CLI 输出中最多显示的条目数，完整结果始终写入 JSONL 报告。
+    /// </summary>
+    public int CliMaxItems { get; set; } = 50;
+
     public string MasterPassword { get; set; } = SecurePasswordStoreService.EncryptMasterPassword(DefaultPassword);
 
     public string FFmpegDir { get; set; } = "";

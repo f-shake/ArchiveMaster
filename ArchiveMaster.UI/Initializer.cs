@@ -1,4 +1,4 @@
-//#define DYNAMIC_DLL
+﻿//#define DYNAMIC_DLL
 
 using System;
 using System.Collections.Generic;
@@ -45,21 +45,10 @@ public static class Initializer
     public static bool IsInitialized { get; private set; }
 
 #if !DYNAMIC_DLL
-    public static IModuleInfo[] ModuleInitializers { get; } =
-    [
-#if DEBUG
-
-#else
-#endif
-        new FileToolsModuleInfo(),
-        new PhotoToolsModuleInfo(),
-        new PhotoTaggingModuleInfo(),
-        new VideoToolsModuleInfo(),
-        new TextToolsModuleInfo(),
-        new OfflineSyncModuleInfo(),
-        new WriteOnceArchiveModuleInfo(),
-        new FileBackupperModuleInfo(),
-    ];
+    /// <summary>
+    /// 内置模块清单，与 CLI 共用 <see cref="BuiltInModules.All"/>。
+    /// </summary>
+    public static IReadOnlyList<IModuleInfo> ModuleInitializers { get; } = BuiltInModules.All;
 #endif
 
     public static IReadOnlyList<ToolPanelGroupInfo> Views => groups.AsReadOnly();
