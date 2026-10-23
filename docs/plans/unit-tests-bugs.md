@@ -1,10 +1,10 @@
-# 单元测试 2A · BUG 清单（含手工复现）
+# 单元测试 2A/2B · BUG 清单（含手工复现）
 
-这是阶段二 2A 的产物：测试按正确行为写好，失败用例保留在 `ArchiveMaster.Tests` 中；**本阶段没有修改任何产品代码**。
+这是阶段二 2A 的产物，2B 已修复全部 8 个缺陷。下列“实际”保留修复前的复现记录，便于对照。
 
 - 测试总数：159
-- 通过：150
-- 失败：9 条用例，对应 8 个缺陷
+- 2A：150 通过、9 失败（对应 8 个缺陷）
+- 2B：159 通过、0 失败
 - 运行命令：`dotnet test ArchiveMaster.Tests`
 - CLI 复现数据：`%TEMP%\am-bug-cli-*`（本次为 `am-bug-cli-248367bb1d854c29a7ba762a51cbed3b`）
 - CLI 复现脚本：[unit-tests-cli-repro.ps1](unit-tests-cli-repro.ps1)（可用 `-AmPath` 指向其他构建）
@@ -246,43 +246,54 @@ dotnet test ArchiveMaster.Tests --filter FullyQualifiedName~TableTextConverter_C
 
 ---
 
-## BUG-04 共享预设重命名只更新当前界面，配置里仍是旧名称
+## BUG-04 共享预设重命名后旧预设仍在，并新建一份重复的新预设
 
 ### 结论
 
-`AppConfig.RenamePreset` 按 `ConfigItem.Group` 过滤，但 `GetOrCreateConfig` 创建 `ConfigItem` 时没有写入 `Group`。结果是重命名只影响当前 ViewModel 的 `PresetNames`，配置项本身没改名；切换步骤或重启后旧名仍在。
+`AppConfig.RenamePreset` 按 `ConfigItem.Group` 过滤，但 `GetOrCreateConfig` 创建 `ConfigItem` 时没有写入 `Group`。结果是重命名只影响当前 ViewModel 的 `PresetNames`，配置项本身没改名。随后 UI 把 `PresetName` 设为新名称，`GetOrCreateConfig` 找不到新预设，便新建了一份默认配置；旧配置仍保留，最终同一共享组里 A、B 并存。
 
 ### 测试数据
 
 - 两个共享同一组的配置：OfflineSync 的 step1、step2、step3（组名 `OfflineSync`）
-- 当前预设：`默认`
+- 组内已有预设 `A`，并在 step1、step2 都使用过，确保两边都有 `A` 的配置项
+- 在 step1 的配置里填入可识别的数据，例如把某个路径改成 `A的数据`
 
 ### 复现步骤（GUI）
 
 1. 启动桌面版，打开“异地备份 → 制作异地快照”。
-2. 在顶部预设栏确认当前为“默认”。
-3. 点击“修改配置名称”，输入 `测试预设`，确认。
-4. 切换到同组的“本地生成补丁”步骤，或重启程序后回到“制作异地快照”。
-5. 查看预设列表。
+2. 在顶部预设栏确认当前为 `A`，并确认 step2“本地生成补丁”也能看到 `A`。
+3. 回到 step1，点击“修改配置名称”，输入 `B`，确认。
+4. 切换到同组的 step2，查看预设列表。
+5. 再切回 step1，查看预设列表。
+6. 重启程序，再次查看两边的预设列表。
 
 ### 期望
 
-同组三个步骤都显示 `测试预设`，旧名“默认”不再作为该组的当前预设。
+- 两边都只显示 `B`，`A` 不再出现。
+- `B` 就是原来的 `A`，step1 中填过的数据仍在。
+- 重启后仍然只有 `B`。
 
 ### 实际
 
-当前界面可能短暂显示 `测试预设`，但切换步骤或重启后配置里仍是“默认”；`RenamePreset` 没有匹配到任何 `ConfigItem`。
+- step2 的预设列表变成 `A`、`B`；切回 step1 后也变成 `A`、`B`。
+- `A` 保留了原数据，`B` 是新建的默认配置，数据没有跟着改名走。
+- 重启后 `A`、`B` 仍然并存，不是临时显示问题。
 
 ### 定位
 
 - `ArchiveMaster.Core/Configs/AppConfig.cs:107-131`：`new ConfigItem(key, new T(), preset)` 没有带 `ConfigMetadata.Group`。
 - `ArchiveMaster.Core/Configs/AppConfig.cs:360-369`：`configs.Where(p => p.Group == group ...)` 因 `Group` 为空而匹配不到。
 
+### 修复
+
+`ConfigItem` 构造函数增加组名参数，`GetOrCreateConfig` 两个重载和 `ParseModules` 加载时写入 `configMetadata[key].Group`；`RenamePreset` 与 `RemovePreset` 继续按 `ConfigItem.Group` 查询。同一回归用例同时覆盖改名和共享组删除。
+
 ### 验收
 
-- 共享组内所有配置项都改名。
-- 重启后 `GetPresets(group)` 返回新名称。
-- 保留 `RenameAndRemovePreset_WorkOnAllConfigsInGroup` 回归用例。
+- 共享组内所有配置项都改名，且保留原配置对象和数据。
+- 改名后 `GetPresets(group)` 只返回新名称，不能多出旧名称或重复的新名称。
+- 重启后仍然只有新名称。
+- 保留 `RenameAndRemovePreset_WorkOnAllConfigsInGroup` 回归用例；该用例已补充“改名后取回原对象、数据仍在、组内只剩新名称”的断言。
 
 ### 单测入口
 
@@ -544,4 +555,4 @@ dotnet test ArchiveMaster.Tests --filter FullyQualifiedName~Execute_EmptyFile_Is
 - BUG-04：`AppConfig.RenamePreset` 没有 CLI 命令；`am` 只按 `--preset` 读取。
 - BUG-07：`SimpleFileInfo` 是内部模型，CLI 不直接暴露该构造重载。
 
-以上 CLI 数据与脚本都在 `%TEMP%`，未加入仓库。
+以上 CLI 数据在 `%TEMP%`；复现脚本 [unit-tests-cli-repro.ps1](unit-tests-cli-repro.ps1) 已加入仓库。

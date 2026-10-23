@@ -1,3 +1,4 @@
+using ArchiveMaster.Helpers;
 using ArchiveMaster.Tests.Infrastructure;
 using ArchiveMaster.ViewModels.FileSystem;
 
@@ -93,6 +94,12 @@ public class TreeDirInfoTests : IDisposable
 
         second.IsTreeItemChecked = false;
         Assert.False(dir.IsTreeItemChecked);
+
+        first.SetChecked(true);
+        second.SetChecked(false);
+        Assert.Null(dir.IsTreeItemChecked);
+        Assert.Single(new[] { first }.CheckedOnly());
+        Assert.Empty(new[] { second }.CheckedOnly());
     }
 
     [Fact]

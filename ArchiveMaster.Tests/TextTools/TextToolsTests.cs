@@ -97,6 +97,16 @@ public class TextToolsTests : IDisposable
         Assert.StartsWith("##", encrypted);
         Assert.EndsWith("##", encrypted);
         Assert.Equal("hello", decrypted);
+
+        service.Config.Prefix = "";
+        service.Config.Suffix = "";
+        string withoutMarkers = await service.EncryptAsync("hello", TestContext.Current.CancellationToken);
+        Assert.Equal("hello",
+            await service.DecryptAsync(withoutMarkers, TestContext.Current.CancellationToken));
+
+        service.Config.Suffix = "##";
+        var exception = Assert.Throws<Exception>(() => service.Config.Check());
+        Assert.Contains("前缀", exception.Message);
     }
 
     [Fact]

@@ -57,5 +57,11 @@ public class LinkDeduplicationServiceTests : IDisposable
 
         Assert.False(strict.TreeRoot.SubDirs[0].IsChecked);
         Assert.Contains("修改日期不同", strict.TreeRoot.SubDirs[0].Message);
+
+        // 分组未勾选时，执行阶段不能创建硬链接；否则 b 的修改时间会被 a 覆盖。
+        await strict.ExecuteAsync(CancellationToken.None);
+
+        Assert.Equal(new DateTime(2020, 1, 1), File.GetLastWriteTime(a));
+        Assert.Equal(new DateTime(2021, 1, 1), File.GetLastWriteTime(b));
     }
 }

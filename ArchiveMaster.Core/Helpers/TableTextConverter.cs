@@ -106,14 +106,16 @@ public class TableTextConverter
         switch (formatType)
         {
             case TableTextType.Csv:
-                // 对 CSV 特殊字符进行转义（逗号、制表符、换行符等）
+                // 含引号的字段也要加外层引号，且必须在替换内部引号之前判断
+                bool needsCsvQuotes = str.Contains('"') || str.Contains(',') || str.Contains('\n')
+                    || str.Contains('\r') || str.Contains('\t') || str.Contains(' ');
                 if (str.Contains('"'))
                 {
                     str = str.Replace("\"", "\"\"");
                 }
-                if (str.Contains(',') || str.Contains('\n') || str.Contains('\t') || str.Contains(' '))
+                if (needsCsvQuotes)
                 {
-                    str = $"\"{str}\""; // 如果有逗号或换行符等，就加上双引号
+                    str = $"\"{str}\"";
                 }
                 break;
 
@@ -160,29 +162,21 @@ public class TableTextConverter
         StringBuilder sb = new StringBuilder();
 
         // 生成表头
-        foreach (var prop in properties)
-        {
-            sb.Append(prop.FieldName ?? prop.PropertyName);
-            sb.Append(',');
-        }
+        sb.Append(string.Join(',', properties.Select(p => p.FieldName ?? p.PropertyName)));
 
-        sb.Length--;
-        sb.AppendLine();
-
-        // 生成数据行
+        // 生成数据行：字段之间补逗号，行与行之间补换行，避免行尾残留逗号
         foreach (var item in items)
         {
-            foreach (var prop in properties)
-            {
-                sb.Append(GetValue(item, prop, TableTextType.Csv));
-                sb.Append(',');
-            }
-
             sb.AppendLine();
+            for (int i = 0; i < properties.Count; i++)
+            {
+                if (i > 0)
+                {
+                    sb.Append(',');
+                }
+                sb.Append(GetValue(item, properties[i], TableTextType.Csv));
+            }
         }
-
-        // 移除最后一个多余的逗号
-        sb.Length--;
 
         return sb.ToString();
     }

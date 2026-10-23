@@ -150,7 +150,7 @@ GUI 与模块工程都设 `RootNamespace=ArchiveMaster`，所以命名空间与�
 仓库有单元测试工程 `ArchiveMaster.Tests`（xUnit v3），没有 CI。`ArchiveMaster.Module.Test` 仍是手写试验面板，不能当作回归保障。改动后的最低验证：
 
 1. `dotnet build ArchiveMaster.UI.Desktop` 通过且不新增警告；
-2. `dotnet test ArchiveMaster.Tests`：2A 当前 159 条中 150 条通过，9 条已知缺陷用例待 2B 修复后转绿；
+2. `dotnet test ArchiveMaster.Tests`：当前 159 条全部通过；2A 发现的 8 个缺陷已在 2B 修复；
 3. 运行 `dotnet run --project ArchiveMaster.UI.Desktop`，实际操作受影响的工具（至少走一遍「初始化 → 执行」，包括取消与报错路径）；
 4. 涉及配置结构时，用旧 `configs.json` 启动一次，确认能加载、预设不丢；
 5. 涉及文件操作时，在临时目录验证，注意工具会真实移动 / 删除文件（默认删除到回收站，`GlobalConfigs.DeleteMode` 可改）。

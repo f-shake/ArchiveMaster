@@ -269,7 +269,7 @@ dotnet test ArchiveMaster.Tests --filter FullyQualifiedName~FileTools
 - 测试工程为 `ArchiveMaster.Tests`（xUnit v3），覆盖 Core 与 FileTools、PhotoTools、PhotoTagging、VideoTools、TextTools、OfflineSync、WriteOnceArchive 的非 UI 逻辑。
 - 不覆盖 `FileBackupper`、真实 LLM 调用、HEIC 原生编码、`ffprobe` 等外部进程、View/ViewModel。
 - 每个用例只读写 `%TEMP%\ArchiveMaster.Tests` 下的独立目录；需要保留现场时设置环境变量 `ARCHIVEMASTER_TESTS_KEEP_TEMP=1`。
-- 2A 交付为 159 条用例（150 通过、9 失败）；失败对应 8 个已确认缺陷，明细见 [unit-tests-bugs.md](docs/plans/unit-tests-bugs.md)，2B 修复后应恢复全绿。
+- 当前 159 条用例全部通过；2A 发现的 8 个缺陷已在 2B 修复，明细见 [unit-tests-bugs.md](docs/plans/unit-tests-bugs.md)。
 
 ## 命令行（`am`）
 

@@ -173,7 +173,7 @@ public class SimpleFileDataGrid : DataGrid
                 {
                     foreach (var file in GetItems().Where(p => p.CanCheck))
                     {
-                        file.IsChecked = true;
+                        file.SetChecked(true);
                     }
                 };
             }
@@ -185,7 +185,7 @@ public class SimpleFileDataGrid : DataGrid
                 {
                     foreach (var file in GetItems().Where(p => p.CanCheck))
                     {
-                        file.IsChecked = false;
+                        file.SetChecked(false);
                     }
                 };
             }
@@ -197,7 +197,7 @@ public class SimpleFileDataGrid : DataGrid
                 {
                     foreach (var file in GetItems().Where(p => p.CanCheck))
                     {
-                        file.IsChecked = !file.IsChecked;
+                        file.SetChecked(!file.GetChecked());
                     }
                 };
             }
@@ -272,12 +272,12 @@ public class SimpleFileDataGrid : DataGrid
                     {
                         if (helper.IsMatched(file))
                         {
-                            file.IsChecked = true;
+                            file.SetChecked(true);
                             count++;
                         }
                         else
                         {
-                            file.IsChecked = false;
+                            file.SetChecked(false);
                         }
                     }
 

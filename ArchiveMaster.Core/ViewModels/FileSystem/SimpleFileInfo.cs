@@ -90,6 +90,8 @@ namespace ArchiveMaster.ViewModels.FileSystem
             ArgumentException.ThrowIfNullOrWhiteSpace(topDir);
             Name = System.IO.Path.GetFileName(relativePath);
             Path = System.IO.Path.Combine(topDir, relativePath);
+            TopDirectory = topDir;
+            SetRelativePath(relativePath);
         }
 
         public static IEqualityComparer<SimpleFileInfo> EqualityComparer { get; }

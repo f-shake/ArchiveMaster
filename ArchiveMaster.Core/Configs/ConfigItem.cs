@@ -6,11 +6,12 @@ public class ConfigItem : ConfigMetadata
     {
     }
 
-    public ConfigItem(string key, object config, string version)
+    public ConfigItem(string key, object config, string version, string group = null)
     {
         Key = key;
         Config = config;
         Preset = version;
+        Group = group;
     }
 
     /// <summary>

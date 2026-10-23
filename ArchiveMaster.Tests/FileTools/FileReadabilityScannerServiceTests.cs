@@ -34,6 +34,7 @@ public class FileReadabilityScannerServiceTests : IDisposable
 
         Assert.Equal(ProcessStatus.Warn, service.Files[0].Status);
         Assert.Contains("文件为空", service.Files[0].Message);
+        Assert.True(service.Files[0].IsReadable);
     }
 
     [Fact]

@@ -117,14 +117,23 @@ public class AppConfigTests : IDisposable
         var appConfig = TestAppConfig.Create(ws);
         appConfig.RegisterConfig(new ConfigMetadata(typeof(SampleConfig), "共享组"));
         appConfig.RegisterConfig(new ConfigMetadata(typeof(OtherConfig), "共享组"));
-        appConfig.GetOrCreateConfig<SampleConfig>("SampleConfig", "旧预设");
-        appConfig.GetOrCreateConfig<OtherConfig>("OtherConfig", "旧预设");
+        var sample = appConfig.GetOrCreateConfig<SampleConfig>("SampleConfig", "旧预设");
+        sample.Value = "用户数据";
+        var other = appConfig.GetOrCreateConfig<OtherConfig>("OtherConfig", "旧预设");
 
         appConfig.RenamePreset("共享组", "旧预设", "新预设");
 
         Assert.True(appConfig.HasPreset(typeof(SampleConfig), "新预设"));
         Assert.True(appConfig.HasPreset(typeof(OtherConfig), "新预设"));
         Assert.False(appConfig.HasPreset(typeof(SampleConfig), "旧预设"));
+
+        // 模拟 UI 改名后重新取配置：应取回原对象，不能新建重复预设
+        var renamedSample = appConfig.GetOrCreateConfig<SampleConfig>("SampleConfig", "新预设");
+        var renamedOther = appConfig.GetOrCreateConfig<OtherConfig>("OtherConfig", "新预设");
+        Assert.Same(sample, renamedSample);
+        Assert.Same(other, renamedOther);
+        Assert.Equal("用户数据", renamedSample.Value);
+        Assert.Equal(["新预设"], appConfig.GetPresets("共享组"));
 
         Assert.True(appConfig.RemovePreset<SampleConfig>("SampleConfig", "新预设"));
         Assert.False(appConfig.HasPreset(typeof(SampleConfig), "新预设"));

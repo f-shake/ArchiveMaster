@@ -18,11 +18,28 @@ public static class FileEnumerateExtension
         };
     }
 
+    public static bool GetChecked(this SimpleFileInfo file)
+    {
+        return file is TreeFileDirInfo treeFile ? treeFile.IsChecked : file.IsChecked;
+    }
+
+    public static void SetChecked(this SimpleFileInfo file, bool value)
+    {
+        if (file is TreeFileDirInfo treeFile)
+        {
+            treeFile.IsChecked = value;
+        }
+        else
+        {
+            file.IsChecked = value;
+        }
+    }
+
     public static IEnumerable<T> CheckedOnly<T>(this IEnumerable<T> files) where T : SimpleFileInfo
     {
         foreach (var file in files)
         {
-            if (file.IsChecked)
+            if (file.GetChecked())
             {
                 yield return file;
             }

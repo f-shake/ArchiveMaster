@@ -340,7 +340,7 @@ namespace ArchiveMaster.Services
                         if (offsitePath2File.TryGetValue(relativePath, out var offsiteFile)) //路径相同，说明是没有变化或者文件被修改
                         {
                             // ====== 2.1. 文件未发生变化 ======
-                            if ((offsiteFile.Time - file.LastWriteTime).Duration().TotalSeconds <
+                            if ((offsiteFile.Time - file.LastWriteTime).Duration().TotalSeconds <=
                                 Config.MaxTimeToleranceSecond
                                 && offsiteFile.Length == file.Length) //文件没有发生改动
                             {

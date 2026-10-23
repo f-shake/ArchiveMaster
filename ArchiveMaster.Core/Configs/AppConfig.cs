@@ -115,7 +115,7 @@ namespace ArchiveMaster.Configs
 
             if (configItem == null)
             {
-                configItem = new ConfigItem(key, new T(), preset);
+                configItem = new ConfigItem(key, new T(), preset, metadata.Group);
                 configs.Add(configItem);
             }
             else
@@ -150,7 +150,7 @@ namespace ArchiveMaster.Configs
             ConfigItem configItem = configs.FirstOrDefault(p => p.Key == key && p.Preset == preset);
             if (configItem == null)
             {
-                configItem = new ConfigItem(key, Activator.CreateInstance(configType), preset);
+                configItem = new ConfigItem(key, Activator.CreateInstance(configType), preset, configMetadata[key].Group);
                 configs.Add(configItem);
             }
             else if (!configType.IsInstanceOfType(configItem.Config))
@@ -342,7 +342,14 @@ namespace ArchiveMaster.Configs
         {
             ArgumentException.ThrowIfNullOrEmpty(key);
             ArgumentException.ThrowIfNullOrEmpty(preset);
-            var configItems = configs.Where(p => p.Key == key && p.Preset == preset).ToList();
+            if (!configMetadata.TryGetValue(key, out ConfigMetadata metadata))
+            {
+                return false;
+            }
+
+            var configItems = configs
+                .Where(p => p.Group == metadata.Group && p.Preset == preset)
+                .ToList();
             if (configItems.Count == 0)
             {
                 return false;
@@ -362,6 +369,7 @@ namespace ArchiveMaster.Configs
             ArgumentException.ThrowIfNullOrEmpty(group);
             ArgumentException.ThrowIfNullOrEmpty(oldName);
             ArgumentException.ThrowIfNullOrEmpty(newName);
+
             foreach (var config in configs.Where(p => p.Group == group && p.Preset == oldName))
             {
                 config.Preset = newName;
@@ -522,7 +530,7 @@ namespace ArchiveMaster.Configs
                 {
                     var preset = j[nameof(ConfigItem.Preset)]?.GetValue<string>();
                     var instance = j[nameof(ConfigItem.Config)]?.Deserialize(configMetadata[key].Type, JsonOptions);
-                    configs.Add(new ConfigItem(key, instance, preset));
+                    configs.Add(new ConfigItem(key, instance, preset, configMetadata[key].Group));
                 }
             }
         }

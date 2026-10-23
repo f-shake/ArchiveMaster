@@ -1,6 +1,7 @@
 using ArchiveMaster.Configs;
 using ArchiveMaster.Services;
 using ArchiveMaster.Tests.Infrastructure;
+using ArchiveMaster.ViewModels.FileSystem;
 
 namespace ArchiveMaster.Tests.FileTools;
 
@@ -46,6 +47,11 @@ public class DuplicateFileCleanupServiceTests : IDisposable
 
         await service.InitializeAsync(CancellationToken.None);
 
-        Assert.NotEmpty(service.GetInitializedFiles());
+        var duplicate = Assert.IsType<TreeFileInfo>(Assert.Single(service.GetInitializedFiles()));
+        duplicate.IsChecked = false;
+
+        await service.ExecuteAsync(CancellationToken.None);
+
+        Assert.True(File.Exists(cleaningFile));
     }
 }

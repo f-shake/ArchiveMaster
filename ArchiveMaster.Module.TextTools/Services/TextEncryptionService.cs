@@ -14,15 +14,28 @@ public class TextEncryptionService(TextEncryptionConfig config, AppConfig appCon
 
     public async Task<string> DecryptAsync(string ciphertext, CancellationToken ct = default)
     {
+        if (string.IsNullOrEmpty(ciphertext))
+        {
+            return string.Empty;
+        }
+
         StringBuilder str = new StringBuilder();
 
         TextEncryptor encryptor = new TextEncryptor(Config.Password.Password);
+
+        // 前后缀都为空时没有可识别标记，整段按密文处理
+        if (string.IsNullOrEmpty(Config.Prefix) && string.IsNullOrEmpty(Config.Suffix))
+        {
+            await Task.Run(() => str.Append(encryptor.Decrypt(ciphertext)), ct);
+            CheckStringLength(str);
+            return str.ToString();
+        }
 
         await Task.Run(() =>
         {
             foreach (var (part, isEncrypted) in SplitIntoEncryptedAndUnencryptedText(ciphertext))
             {
-                str.Append(isEncrypted == false ? part : encryptor.Decrypt(part));
+                str.Append(isEncrypted == true ? encryptor.Decrypt(part) : part);
                 CheckStringLength(str);
             }
         }, ct);

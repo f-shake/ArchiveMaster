@@ -32,7 +32,9 @@ namespace ArchiveMaster.Services
 
                 if (file.Length == 0)
                 {
+                    file.IsReadable = true;
                     file.Warn("文件为空");
+                    return;
                 }
 
                 int bufferSize = FileHelper.GetOptimalBufferSize(file.Length);

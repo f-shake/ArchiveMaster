@@ -14,7 +14,8 @@ public class LinkDeduplicationService(AppConfig appConfig)
     {
         await Task.Run(() =>
         {
-            var groups = TreeRoot.SubDirs.CheckedOnly().ToList();
+            // CheckedOnly<T> 会读基类 IsChecked，这里按 TreeDirInfo 的隐藏属性筛选
+            var groups = TreeRoot.SubDirs.Where(p => p.IsChecked).ToList();
             TryForFiles(groups, (group, s) =>
             {
                 var sourceFile = group.SubFiles[0];
@@ -73,10 +74,11 @@ public class LinkDeduplicationService(AppConfig appConfig)
                 var sameHashFileList = sameHashFiles.ToList();
                 var group = tree.AddSubDir($"{sameHashFileList.Count}个相同文件");
                 group.SetRelativePath(sameHashFiles.Key);
+                bool hasDifferentTime = sameHashFiles.DistinctBy(p => p.Time).Count() > 1;
                 if (sameHashFiles.DistinctBy(p => p.Length).Count() == 1)
                 {
                     group.Length = sameHashFileList[0].Length;
-                    if (sameHashFiles.DistinctBy(p => p.Time).Count() == 1)
+                    if (!hasDifferentTime)
                     {
                         group.Time = sameHashFileList[0].Time;
                         group.IsChecked = true;
@@ -98,6 +100,12 @@ public class LinkDeduplicationService(AppConfig appConfig)
                 foreach (var file in sameHashFileList)
                 {
                     group.AddSubFile(file);
+                }
+
+                // 子项默认勾选会向上覆盖，需在加完后显式取消
+                if (hasDifferentTime && !Config.AllowDifferentTime)
+                {
+                    group.IsChecked = false;
                 }
             }
 

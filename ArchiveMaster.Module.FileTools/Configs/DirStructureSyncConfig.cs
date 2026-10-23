@@ -35,8 +35,8 @@ public partial class DirStructureSyncConfig : ConfigBase
     public override void Check()
     {
         CheckDir(SourceDir, "源目录");
-        CheckDir(SourceDir, "模板目录");
-        CheckEmpty(SourceDir, "目标目录");
+        CheckDir(TemplateDir, "模板目录");
+        CheckEmpty(TargetDir, "目标目录");
         if (!(CompareName || CompareLength || CompareTime))
         {
             throw new ArgumentException("至少选择一个比较类型");

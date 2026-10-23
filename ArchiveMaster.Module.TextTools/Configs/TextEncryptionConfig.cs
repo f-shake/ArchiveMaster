@@ -20,5 +20,9 @@ public partial class TextEncryptionConfig : ConfigBase
     {
         CheckEmpty(Password, "密码");
         CheckEmpty(Password.Password, "密码");
+        if (string.IsNullOrEmpty(Prefix) != string.IsNullOrEmpty(Suffix))
+        {
+            throw new Exception("密文前缀和后缀必须同时为空或同时非空");
+        }
     }
 }
