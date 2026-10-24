@@ -240,6 +240,8 @@
    | `-c`            | 单文件压缩（仅自包含）       |
    | `-noSingleFile` | 禁用单文件发布           |
 
+   发布的产物目录里同时包含桌面程序与命令行程序 `am`（CLI，见下文「命令行（`am`）」一节）。CLI 不写入 `PATH`，需用完整路径调用或自行添加；任一项目发布失败时脚本会以非 0 退出，不再打印成功。
+
 
 ## 测试
 
@@ -270,7 +272,7 @@ am run  fileTools.timeClassify --config cfg.json --yes --json  # 执行
 - `--set <字段>=<值>` 可重复，覆盖 `--config`、`--preset` 或默认配置中的字段；嵌套字段用点号（如 `PathFilter.IncludeFiles=*.jpg`），复杂类型用 JSON。只有 `plan` / `run` 支持 `--set`，密码等敏感值会进入命令历史，优先用 `--config` / `--preset` 提供。
 - 结构化结果写入 `--report`（默认临时目录的 JSONL），JSON 输出见 `--json`。
 - 技能位于 `skill`，工具目录由 `am docs --out skill` 生成；`am docs --install` 可安装到 `~/.agents/skills/archive-master`。
-- 构建 CLI：`dotnet build ArchiveMaster.Cli\ArchiveMaster.Cli.csproj`；实际使用请发布 Release：`dotnet publish ArchiveMaster.Cli\ArchiveMaster.Cli.csproj -c Release`（HEIC 原生库按 RID 随包复制）。Debug 构建下 `fileTools.batchCommandLine` 只处理前 10 个文件（工具自身的调试限制）。
+- 构建 CLI：`dotnet build ArchiveMaster.Cli\ArchiveMaster.Cli.csproj`；发布时执行 `build.ps1` 即可，它会把 GUI 与 CLI 一起放进 `Publish/<rid>[_sc]/`（HEIC 原生库按 RID 随包复制）。Debug 构建下 `fileTools.batchCommandLine` 只处理前 10 个文件（工具自身的调试限制）。
 
 
 ## 模块

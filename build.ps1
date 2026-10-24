@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-Build script for ArchiveMaster.UI.Desktop with flexible options.
+Build script for ArchiveMaster desktop and CLI with flexible options.
 
 .PARAMETER w
 Build for Windows (win-x64)
@@ -68,18 +68,42 @@ if (-not $s -and $c) {
 # Print current configuration
 Write-Host "========== Build Configuration =========="
 Write-Host "Targets: $($targets -join ', ')"
+Write-Host "Outputs: GUI + CLI"
 Write-Host "Self-contained: $($s.IsPresent)"
 Write-Host "Single-file: $(! $noSingleFile.IsPresent)"
 Write-Host "Compression: $($c.IsPresent -and $s.IsPresent)"
 Write-Host "========================================`n"
 
+# 任一发布步骤失败都要立即中止：否则脚本仍会打印成功并以 0 退出，
+# 调用方（CI、打包脚本）会把上一次留在输出目录里的旧产物当成新产物。
+function Invoke-Publish {
+    param (
+        [string]$Title,
+        [string]$Project,
+        [string]$Target,
+        [string]$OutDir
+    )
+
+    Write-Host "Publishing $Title to $OutDir ..."
+    dotnet publish $Project -c Release $selfContained -r $Target $publishFile $compression -o $OutDir
+    # dotnet 不存在时上面的命令根本没有执行，$LASTEXITCODE 仍是 $null；按失败处理，
+    # 否则 `exit $null` 会得到退出码 0，调用方会把失败当成功。
+    $exitCode = if ($null -eq $LASTEXITCODE) { 1 } else { $LASTEXITCODE }
+    if ($exitCode -ne 0) {
+        Write-Host "Publishing $Title to $OutDir failed (exit code $exitCode)." -ForegroundColor Red
+        exit $exitCode
+    }
+}
+
 foreach ($target in $targets) {
     # Append _sc suffix if self-contained
     $dirSuffix = if ($s) { "_sc" } else { "" }
     $outputDir = "./Publish/$($target)$dirSuffix"
-    Write-Host "Publishing to $outputDir ..."
 
-    dotnet publish ArchiveMaster.UI.Desktop -c Release $selfContained -r $target $publishFile $compression -o $outputDir
+    # GUI 与 CLI 发布到同一个目录：am（am.exe）与桌面程序放在一起，
+    # 各自需要的依赖与原生库由各自的项目复制进该目录。
+    Invoke-Publish -Title "GUI" -Project "ArchiveMaster.UI.Desktop" -Target $target -OutDir $outputDir
+    Invoke-Publish -Title "CLI" -Project "ArchiveMaster.Cli" -Target $target -OutDir $outputDir
 
     # Windows: rename executable if single-file is enabled
     if ($target -eq "win-x64" -and -not $noSingleFile) {

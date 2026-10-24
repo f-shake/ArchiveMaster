@@ -19,8 +19,8 @@
 | 构建（含全部模块） | `dotnet build ArchiveMaster.UI.Desktop` |
 | 运行桌面版 | `dotnet run --project ArchiveMaster.UI.Desktop` |
 | 运行单元测试 | `dotnet test ArchiveMaster.Tests` |
-| 发布（单文件，Windows） | `pwsh ./build.ps1 -w`；`-s` 自包含、`-c` 压缩（仅自包含）、`-noSingleFile` 关闭单文件 |
-| 发布其他平台 | `./build.ps1 -l` / `-m` / `-all`，产物在 `./Publish/<rid>[_sc]/` |
+| 发布（单文件，Windows） | `pwsh ./build.ps1 -w`；`-s` 自包含、`-c` 压缩（仅自包含）、`-noSingleFile` 关闭单文件。GUI 与 CLI（`am`）发布到同一目录，任一项目失败都以非 0 退出 |
+| 发布其他平台 | `./build.ps1 -l` / `-m` / `-all`，产物在 `./Publish/<rid>[_sc]/`（同样含 GUI 与 `am`） |
 | 打包 Android APK | `pwsh ./build_android.ps1`（Release、android-arm64，签名配置在 `ArchiveMaster.UI.Android.csproj` 内） |
 
 构建现状：`dotnet build ArchiveMaster.UI.Desktop` 通过，0 警告 0 错误。仓库有单元测试工程 `ArchiveMaster.Tests`，没有 CI（见「验证」）。

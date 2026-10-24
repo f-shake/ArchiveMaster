@@ -29,6 +29,11 @@ mkdir ./temp/usr/lib/myprogram
 cp -f -a ./linux-x64/. ./temp/usr/lib/ArchiveMaster/ # copies all files from publish dir
 chmod -R a+rX ./temp/usr/lib/ArchiveMaster/ # set read permissions to all files
 chmod +x ./temp/usr/lib/ArchiveMaster/ArchiveMaster.UI.Desktop # set executable permissions to main executable
+# CLI（am）与 GUI 一起发布在 linux-x64 目录里；从 Windows 拷来的文件没有执行位，
+# 上面的 a+rX 不会给普通文件补 x，这里显式补上。与 Windows 安装器一致，不放进 PATH。
+if [ -f ./temp/usr/lib/ArchiveMaster/am ]; then
+  chmod +x ./temp/usr/lib/ArchiveMaster/am
+fi
 
 # Desktop shortcut
 mkdir ./temp/usr/share
