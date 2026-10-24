@@ -15,8 +15,7 @@ public static class CommandContext
 
     public static IReadOnlyList<ToolDescriptor> CreateCatalog()
     {
-        return ToolCatalog.Build(BuiltInModules.All,
-            new HashSet<Type>() { typeof(FileBackupperModuleInfo) });
+        return ToolCatalog.Build(BuiltInModules.All);
     }
 
     public static ToolDescriptor RequireTool(IReadOnlyList<ToolDescriptor> tools, string id,

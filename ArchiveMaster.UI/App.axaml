@@ -18,21 +18,4 @@
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>
-
-    <TrayIcon.Icons>
-        <TrayIcons>
-            <TrayIcon
-                Clicked="TrayIcon_Clicked"
-                Icon="/Assets/icon_light.ico"
-                ToolTipText="文件归档大师">
-                <TrayIcon.Menu>
-                    <NativeMenu>
-                        <NativeMenuItem
-                            Click="ExitMenuItem_Click"
-                            Header="退出" />
-                    </NativeMenu>
-                </TrayIcon.Menu>
-            </TrayIcon>
-        </TrayIcons>
-    </TrayIcon.Icons>
 </Application>

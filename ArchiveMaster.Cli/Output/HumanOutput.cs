@@ -26,7 +26,7 @@ public static class HumanOutput
         Console.Out.WriteLine("配置模板：");
         Console.Out.WriteLine(JsonSerializer.Serialize(config, tool.ConfigType, AppConfig.CreateJsonOptions()));
         Console.Out.WriteLine();
-        Console.Out.WriteLine("提示：可用 --set 覆盖上述字段；嵌套字段用点号，复杂类型用 JSON。");
+        Console.Out.WriteLine("提示：在 plan / run 中可用 --set 覆盖上述字段；嵌套字段用点号，复杂类型用 JSON。");
     }
 
     public static void WriteResult(ToolRunResult result)

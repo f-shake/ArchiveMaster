@@ -122,6 +122,29 @@ public class EncryptorServiceTests : IDisposable
         Assert.False(File.Exists(source));
     }
 
+    [Fact]
+    public async Task Decrypt_IgnoresLeftoverTempFiles()
+    {
+        string raw = workspace.Dir("raw");
+        string encrypted = workspace.Dir("encrypted");
+        // 加密被强杀后可能留下未替换的半截密文；解密时不能把它当成完整文件
+        workspace.WriteText("encrypted/leftover.txt.$ept$.tmp", "stale");
+        var decrypt = new EncryptorService(appConfig)
+        {
+            Config = new EncryptorConfig
+            {
+                Type = EncryptorConfig.EncryptorTaskType.Decrypt,
+                EncryptedDir = encrypted,
+                RawDir = raw,
+                Password = new SecurePassword("pass"),
+            },
+        };
+
+        await decrypt.InitializeAsync(CancellationToken.None);
+
+        Assert.Empty(decrypt.ProcessingFiles);
+    }
+
     private EncryptorService CreateService(string raw, string encrypted,
         EncryptorConfig.EncryptorTaskType type)
     {

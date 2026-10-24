@@ -10,7 +10,6 @@ namespace ArchiveMaster
 {
     public interface IModuleInfo
     {
-        public IList<Type> BackgroundServices { get; }
         public IList<ConfigMetadata> Configs { get; }
         public IList<JsonConverter> JsonConverters { get; }
         public string ModuleName { get; }

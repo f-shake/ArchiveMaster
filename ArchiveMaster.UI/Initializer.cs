@@ -18,7 +18,6 @@ using ArchiveMaster.Views;
 using Avalonia;
 using Avalonia.Controls;
 using CommunityToolkit.Mvvm.Input;
-using FzLib.Application.Startup;
 using FzLib.Avalonia.DependencyInjection;
 using FzLib.Avalonia.Dialogs;
 using FzLib.Avalonia.Services;
@@ -64,14 +63,6 @@ public static class Initializer
         }
     }
 
-    public static IReadOnlyList<IBackgroundService> GetBackgroundServices()
-    {
-        return HostServices.GetServices<IHostedService>()
-            .OfType<IBackgroundService>()
-            .ToList()
-            .AsReadOnly();
-    }
-
     public static void Initialize()
     {
         if (IsInitialized)
@@ -96,7 +87,6 @@ public static class Initializer
         builder.Services.AddViewAndViewModel<SettingDialog, SettingViewModel>();
         builder.Services.AddViewAndViewModel<MasterPasswordDialog, MasterPasswordViewModel>();
         builder.Services.AddHostedService<AppLifetime>();
-        builder.Services.TryAddStartupManager();
         builder.Services.AddDialogService();
         builder.Services.AddClipboardService();
         builder.Services.AddStorageProviderService();
@@ -155,18 +145,6 @@ public static class Initializer
                 foreach (var config in moduleInitializer.Configs ?? [])
                 {
                     appConfig.RegisterConfig(config);
-                }
-
-                //注册后台服务
-                foreach (var type in moduleInitializer.BackgroundServices ?? [])
-                {
-                    if (!typeof(IBackgroundService).IsAssignableFrom(type))
-                    {
-                        throw new Exception($"后台服务{type?.Name}没有实现{nameof(IBackgroundService)}接口");
-                    }
-
-                    services.AddSingleton(typeof(IHostedService), s => ActivatorUtilities.CreateInstance(s, type));
-                    //无法使用 services.AddHostedService(type);
                 }
 
                 //注册单例服务

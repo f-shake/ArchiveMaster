@@ -336,6 +336,13 @@ namespace ArchiveMaster.Configs
         public void LoadNextStart(string bakConfigPath)
         {
             var tempConfig = new AppConfig(bakConfigPath);
+            // 校验实例必须带上本版本已注册的配置类型，否则 ParseModules 无从反序列化，
+            // 字段类型/枚举不兼容的跨版本配置会“校验通过”，覆盖后在下次启动才解析失败并回退默认值。
+            foreach (ConfigMetadata metadata in configMetadata.Values)
+            {
+                tempConfig.RegisterConfig(metadata);
+            }
+
             var previousGlobals = GlobalConfigs.Instance;
             tempConfig.Initialize(applyPendingLoad: false);
             // Initialize 会顺带把 GlobalConfigs.Instance 换成导入文件里的值。
@@ -410,10 +417,18 @@ namespace ArchiveMaster.Configs
                 string tempPath = configFilePath + ".tmp";
                 try
                 {
+                    // 删除模块后，旧配置的 Groups 里可能残留不再注册的组名；
+                    // 保存时按已注册的组过滤，避免死键永久留在 configs.json 里。
+                    HashSet<string> knownGroups = configMetadata.Values.Select(m => m.Group).ToHashSet();
+                    Dictionary<string, string> presets = configMetadata.Count == 0
+                        ? currentPresets
+                        : currentPresets
+                            .Where(p => knownGroups.Contains(p.Key))
+                            .ToDictionary(p => p.Key, p => p.Value);
                     var json = JsonSerializer.Serialize(new Dictionary<string, object>
                     {
                         [JkeyModules] = configs,
-                        [JkeyGroups] = currentPresets,
+                        [JkeyGroups] = presets,
                         [JkeyGlobals] = GlobalConfigs.Instance
                     }, JsonOptions);
                     // 先写临时文件再替换：保存中断不会留下半截 configs.json

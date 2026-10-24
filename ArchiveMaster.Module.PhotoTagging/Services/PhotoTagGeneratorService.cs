@@ -272,6 +272,7 @@ namespace ArchiveMaster.Services
                 NotifyMessage("正在查找文件");
                 var enumerableFiles = new DirectoryInfo(Config.Dir)
                     .EnumerateFiles("*", FileEnumerateExtension.GetEnumerationOptions())
+                    .Where(f => !FileHelper.IsGpsTempFile(f.Name))
                     .ApplyFilter(ct, Config.Filter)
                     .Select(p => new TaggingPhotoFileInfo(p, Config.Dir));
 

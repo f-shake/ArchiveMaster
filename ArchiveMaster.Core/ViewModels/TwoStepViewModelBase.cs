@@ -468,8 +468,7 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
             {
                 if (!EnableInitialize)
                 {
-                    // 放进 try 内：保存失败要弹错误框，而不是只写日志后继续执行
-                    Services.AppConfig.Save();
+                    await SaveConfigAsync();
                 }
 
                 await OnExecutingAsync(ct);
@@ -506,8 +505,7 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
 
         if (await TryRunServiceMethodAsync(async () =>
             {
-                // 放进 try 内：保存失败要弹错误框，而不是只写日志后继续初始化
-                Services.AppConfig.Save();
+                await SaveConfigAsync();
                 CreateService();
                 await OnInitializingAsync();
                 Config.Check();
@@ -535,6 +533,24 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
         Message = "就绪";
         OnReset();
         DisposeService();
+    }
+
+    /// <summary>
+    /// 保存当前配置。保存失败不能让工具无法运行（例如程序安装在只读目录时仍然要能处理文件），
+    /// 但必须让用户看到；序列化会为每个密码重新派生密钥，放到线程池避免卡住 UI。
+    /// </summary>
+    private async Task SaveConfigAsync()
+    {
+        try
+        {
+            await Task.Run(() => Services.AppConfig.Save());
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "保存配置失败");
+            await Services.Dialog.ShowErrorDialogAsync("保存配置失败",
+                "配置未能写入磁盘，本次操作仍会继续。请检查配置文件所在目录是否可写。", ex.ToString());
+        }
     }
 
     private async Task<bool> TryRunServiceMethodAsync(Func<Task> action, string errorTitle)

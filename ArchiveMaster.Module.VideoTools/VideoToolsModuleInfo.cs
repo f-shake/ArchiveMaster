@@ -27,7 +27,6 @@ namespace ArchiveMaster
     public class VideoToolsModuleInfo : IModuleInfo
     {
         private readonly string baseUrl = "avares://ArchiveMaster.Module.VideoTools/Assets/";
-        public IList<Type> BackgroundServices { get; }
 
         public IList<ConfigMetadata> Configs =>
         [

@@ -17,7 +17,6 @@ namespace ArchiveMaster
     public class FileToolsModuleInfo : IModuleInfo
     {
         private readonly string baseUrl = "avares://ArchiveMaster.Module.FileTools/Assets/";
-        public IList<Type> BackgroundServices { get; }
         public IList<ConfigMetadata> Configs =>
         [
             new ConfigMetadata(typeof(EncryptorConfig)),

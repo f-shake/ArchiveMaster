@@ -135,11 +135,16 @@ namespace ArchiveMaster.Services
 
             NotifyProgressIndeterminate();
             NotifyMessage("正在枚举文件");
+            bool isEncrypting = IsEncrypting();
             await Task.Run(() =>
             {
                 TryForFiles(new DirectoryInfo(sourceDir)
                     .EnumerateFiles("*", FileEnumerateExtension.GetEnumerationOptions())
                     .Where(p => p.Extension != EncryptedFileMetadataExtension)
+                    // 解密时排除上次被强杀留下的 *.tmp：它们不是完整的密文，
+                    // 当成密文会解出垃圾文件或逐个报“找不到附带元数据”
+                    .Where(p => isEncrypting || !string.Equals(p.Extension, ".tmp",
+                        StringComparison.OrdinalIgnoreCase))
                     .ApplyFilter(ct)
                     .Select(p => new EncryptorFileInfo(p, sourceDir)), (file, s) =>
                 {

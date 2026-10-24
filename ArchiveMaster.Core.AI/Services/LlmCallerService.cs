@@ -109,32 +109,21 @@ public class LlmCallerService
         return string.Concat(result);
     }
 
-    private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, IChatClient> ClientCache =
-        new System.Collections.Concurrent.ConcurrentDictionary<string, IChatClient>();
+    // 用弱键缓存：AiProvidersViewModel 每次关闭设置页都会重建 AiProviderConfig 实例，
+    // 以实例为键可保证同一实例复用连接池，同时让被替换掉的实例连同客户端一起可回收
+    // （值持有 Config 是允许的，ConditionalWeakTable 会把这种环按弱引用处理）。
+    private static readonly ConditionalWeakTable<AiProviderConfig, IChatClient> ClientCache = new();
 
     private IChatClient GetChatClient()
     {
         // 复用 ChatClient/HttpClient：逐图打标时每次新建会把连接池和句柄耗尽
-        string key = BuildClientCacheKey();
-        return ClientCache.GetOrAdd(key, _ => Config.Type switch
+        return ClientCache.GetValue(Config, _ => Config.Type switch
         {
             AiProviderType.OpenAI => new OpenAIChatClient(Config),
             AiProviderType.Ollama => new OllamaChatClient(Config),
             // AiProviderType.OpenAICompatible => new OpenAICompatibleChatClient(Config),
             _ => throw new ArgumentOutOfRangeException()
         });
-    }
-
-    private string BuildClientCacheKey()
-    {
-        string keyHash = "";
-        if (!string.IsNullOrEmpty(Config.Key?.Password))
-        {
-            keyHash = Convert.ToHexString(
-                System.Security.Cryptography.SHA256.HashData(Encoding.UTF8.GetBytes(Config.Key.Password)));
-        }
-
-        return $"{Config.Type}|{Config.Url}|{Config.Model}|{keyHash}|{RuntimeHelpers.GetHashCode(Config)}";
     }
 
     private async Task<string> GetResponseAsync(IEnumerable<AiChatMessage> messages, ChatOptions options = null,

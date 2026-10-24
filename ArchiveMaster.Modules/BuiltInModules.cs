@@ -17,6 +17,5 @@ public static class BuiltInModules
         new TextToolsModuleInfo(),
         new OfflineSyncModuleInfo(),
         new WriteOnceArchiveModuleInfo(),
-        new FileBackupperModuleInfo(),
     ];
 }

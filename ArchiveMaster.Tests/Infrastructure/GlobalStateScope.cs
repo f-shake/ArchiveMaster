@@ -6,6 +6,7 @@ namespace ArchiveMaster.Tests.Infrastructure;
 
 /// <summary>
 /// 快照并恢复进程级全局状态。测试程序集关闭并行后，仍然需要防止用例之间互相污染。
+/// 注意：<see cref="GlobalConfigs.AiProviders"/> 是引用类型，本类没有深拷贝；涉及 AI 供应商配置的用例需自行恢复。
 /// </summary>
 public sealed class GlobalStateScope : IDisposable
 {
@@ -42,11 +43,23 @@ public sealed class GlobalStateScope : IDisposable
         ffmpegDir = snapshot.FFmpegDir;
 
         // 单测绝不能把文件丢进系统回收站或磁盘根目录。
+        // AppConfig.Initialize 会整体替换 GlobalConfigs.Instance，替换后的实例也要重新套上护栏。
+        GlobalConfigs.InstanceChanged += ProtectInstance;
         snapshot.DeleteMode = DeleteMode.DeleteDirectly;
+    }
+
+    private static void ProtectInstance(GlobalConfigs instance)
+    {
+        if (instance != null)
+        {
+            instance.DeleteMode = DeleteMode.DeleteDirectly;
+        }
     }
 
     public void Dispose()
     {
+        GlobalConfigs.InstanceChanged -= ProtectInstance;
+
         if (!ReferenceEquals(GlobalConfigs.Instance, originalInstance))
         {
             PropertyInfo property = typeof(GlobalConfigs).GetProperty(nameof(GlobalConfigs.Instance),

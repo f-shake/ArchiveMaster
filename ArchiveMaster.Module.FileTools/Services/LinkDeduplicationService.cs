@@ -25,15 +25,26 @@ public class LinkDeduplicationService(AppConfig appConfig)
                     NotifyMessage($"正在创建硬链接{s.GetFileNumberMessage()}：{file.RelativePath}");
                     // 先建临时硬链接，成功后再删原名：任何一步失败都不会丢掉文件
                     string tempLink = file.Path + "." + Guid.NewGuid().ToString("N") + ".lnk";
+                    bool originalDeleted = false;
                     try
                     {
                         HardLinkCreator.CreateHardLink(tempLink, sourceFile.Path);
                         FileHelper.DeleteByConfig(file.Path, "硬链接去重");
+                        originalDeleted = true;
                         File.Move(tempLink, file.Path);
+                        originalDeleted = false;
                         file.Success();
                     }
-                    catch
+                    catch (Exception ex)
                     {
+                        if (originalDeleted)
+                        {
+                            // 原文件已经删除（可能配置为直接删除），tempLink 是唯一剩下的副本，绝不能清理
+                            throw new IOException(
+                                $"硬链接去重失败，原文件名已不可用；文件内容保留在临时链接“{tempLink}”，请手工改回原名。{ex.Message}",
+                                ex);
+                        }
+
                         if (File.Exists(tempLink))
                         {
                             File.Delete(tempLink);

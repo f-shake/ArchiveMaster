@@ -119,7 +119,7 @@ public static class ExifHelper
         // 写到同扩展名的临时文件再替换，避免保存中途失败把原图截断。
         // 扩展名必须保留：ExifLibrary 依据扩展名判断输出格式
         string tempPath = Path.Combine(Path.GetDirectoryName(filePath) ?? "",
-            Path.GetFileNameWithoutExtension(filePath) + ".gps.tmp" + Path.GetExtension(filePath));
+            Path.GetFileNameWithoutExtension(filePath) + FileHelper.GpsTempFileMarker + Path.GetExtension(filePath));
         // 上次进程被强杀可能留下同名临时文件，先清掉，避免长期累积
         if (File.Exists(tempPath))
         {

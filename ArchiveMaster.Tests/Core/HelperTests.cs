@@ -207,6 +207,22 @@ public class HelperTests : IDisposable
     }
 
     [Fact]
+    public void FileHelper_IsGpsTempFile_MatchesMarker()
+    {
+        Assert.True(FileHelper.IsGpsTempFile("IMG_001.gps.tmp.jpg"));
+        Assert.True(FileHelper.IsGpsTempFile("IMG_001.GPS.TMP.JPG"));
+        Assert.False(FileHelper.IsGpsTempFile("IMG_001.jpg"));
+    }
+
+    [Fact]
+    public void FileHelper_IsPathInside_RejectsTraversalAndPrefixConfusion()
+    {
+        Assert.True(FileHelper.IsPathInside(workspace.Root, workspace.PathOf("a", "b.txt")));
+        Assert.False(FileHelper.IsPathInside(workspace.Root, workspace.PathOf("..", "evil.txt")));
+        Assert.False(FileHelper.IsPathInside(workspace.PathOf("a"), workspace.PathOf("a.txt")));
+    }
+
+    [Fact]
     public void FileHelper_DeleteByConfig_DirectlyDeletes()
     {
         string path = workspace.WriteText("delete-me.txt", "x");

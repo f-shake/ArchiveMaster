@@ -46,15 +46,8 @@ namespace ArchiveMaster.Services
                         throw new Exception($"包内路径不合法（绝对路径）：{file.RelativePath}");
                     }
 
-                    string targetRoot = Path.GetFullPath(Config.TargetDir);
-                    string targetFile = Path.GetFullPath(Path.Combine(targetRoot, file.RelativePath));
-                    StringComparison comparison = OperatingSystem.IsWindows() || OperatingSystem.IsMacOS()
-                        ? StringComparison.OrdinalIgnoreCase
-                        : StringComparison.Ordinal;
-                    string rootWithSeparator = targetRoot.EndsWith(Path.DirectorySeparatorChar)
-                        ? targetRoot
-                        : targetRoot + Path.DirectorySeparatorChar;
-                    if (!targetFile.StartsWith(rootWithSeparator, comparison))
+                    string targetFile = Path.GetFullPath(Path.Combine(Config.TargetDir, file.RelativePath));
+                    if (!FileHelper.IsPathInside(Config.TargetDir, targetFile))
                     {
                         throw new Exception($"包内路径不合法（超出目标目录）：{file.RelativePath}");
                     }

@@ -46,6 +46,7 @@ namespace ArchiveMaster.Services
             {
                 files = new DirectoryInfo(Config.Dir)
                     .EnumerateFiles("*", FileEnumerateExtension.GetEnumerationOptions())
+                    .Where(f => !FileHelper.IsGpsTempFile(f.Name))
                     .ApplyFilter(ct, Config.Filter)
                     .Select(p => new ExifTimeFileInfo(p, Config.Dir))
                     .ToList();

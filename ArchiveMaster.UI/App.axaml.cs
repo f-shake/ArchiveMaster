@@ -9,11 +9,9 @@ using ArchiveMaster.Views;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Avalonia.Controls;
 using FzLib;
 using FzLib.Avalonia.Dialogs;
 using Microsoft.Extensions.DependencyInjection;
@@ -91,15 +89,9 @@ public class App : Application
 
     private void ShowSplashScreenIfNeeded()
     {
-        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime && OperatingSystem.IsWindows())
         {
-            if (!(desktop.Args is { Length: > 0 } && desktop.Args[0] == "s"))
-            {
-                if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime && OperatingSystem.IsWindows())
-                {
-                    SplashWindow.CreateAndShow();
-                }
-            }
+            SplashWindow.CreateAndShow();
         }
     }
 
@@ -115,13 +107,8 @@ public class App : Application
         //BindingPlugins.DataValidators.RemoveAt(0);
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            desktop.ShutdownMode = ShutdownMode.OnExplicitShutdown;
             desktop.Exit += Desktop_Exit;
-
-            if (!(desktop.Args is { Length: > 0 } && desktop.Args[0] == "s"))
-            {
-                SetNewMainWindow(desktop);
-            }
+            SetNewMainWindow(desktop);
         }
         else if (ApplicationLifetime is ISingleViewApplicationLifetime singleViewPlatform)
         {
@@ -133,19 +120,9 @@ public class App : Application
 
     private async void Desktop_Exit(object sender, ControlledApplicationLifetimeExitEventArgs e)
     {
-        TrayIcon.GetIcons(this)?[0]?.Dispose();
         Exit?.Invoke(sender, e);
         TcpSingleInstanceHelper.Dispose();
         await Initializer.StopAsync();
-    }
-
-    private async void ExitMenuItem_Click(object sender, EventArgs e)
-    {
-        await Initializer.StopAsync();
-        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-        {
-            desktop.Shutdown();
-        }
     }
 
     private MainWindow SetNewMainWindow(IClassicDesktopStyleApplicationLifetime desktop)
@@ -163,12 +140,6 @@ public class App : Application
             desktop.MainWindow = null;
             isMainWindowOpened = false;
             Initializer.ClearViewsInstance();
-
-            var backgroundServices = Initializer.GetBackgroundServices();
-            if (backgroundServices.Count == 0 || backgroundServices.All(p => !p.IsEnabled))
-            {
-                desktop.Shutdown();
-            }
         };
         desktop.MainWindow.Opened += (s, e) => { SplashWindow.CloseCurrent(); };
         return desktop.MainWindow as MainWindow;
@@ -195,10 +166,5 @@ public class App : Application
         {
             throw new PlatformNotSupportedException();
         }
-    }
-
-    private void TrayIcon_Clicked(object sender, EventArgs e)
-    {
-        ActivateMainWindow();
     }
 }

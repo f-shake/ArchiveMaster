@@ -8,6 +8,7 @@ using System.Text.Unicode;
 using System.Xml.Serialization;
 using ArchiveMaster.Configs;
 using ArchiveMaster.Enums;
+using ArchiveMaster.Helpers;
 using ArchiveMaster.ViewModels;
 using ArchiveMaster.ViewModels.FileSystem;
 using Avalonia.Controls.Platform;
@@ -108,6 +109,14 @@ namespace ArchiveMaster.Services
         {
             Debug.Assert(OperatingSystem.IsWindows() && !Config.ExportStructureFile);
             string newPath = Path.Combine(Config.TargetDirOrFile, file.RelativePath);
+            // 结构文件可以跨机器传递，其中的相对路径不能直接拼进目标目录：
+            // 绝对路径会让 Path.Combine 丢弃 TargetDir，包含 .. 则会写到目录之外
+            if (Path.IsPathRooted(file.RelativePath)
+                || !FileHelper.IsPathInside(Config.TargetDirOrFile, newPath))
+            {
+                throw new IOException($"结构文件中的相对路径不合法（超出目标目录）：{file.RelativePath}");
+            }
+
             FileInfo newFile = new FileInfo(newPath);
             newFile.Directory.Create();
 

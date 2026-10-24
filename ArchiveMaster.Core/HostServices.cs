@@ -8,11 +8,6 @@ public static class HostServices
 {
     private static IServiceProvider Provider { get; set; }
 
-    public static IEnumerable<IBackgroundService> GetBackgroundServices()
-    {
-        return Provider.GetServices<IBackgroundService>();
-    }
-
     public static T GetRequiredService<T>()
     {
         return Provider.GetRequiredService<T>();

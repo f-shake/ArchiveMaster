@@ -7,7 +7,23 @@ public class GlobalConfigs
 {
     public static readonly string DefaultPassword = nameof(ArchiveMaster);
 
-    public static GlobalConfigs Instance { get; internal set; } = GetEmptyInstance();
+    private static GlobalConfigs instance = GetEmptyInstance();
+
+    /// <summary>
+    /// 全局配置实例被替换时触发（例如 AppConfig.Initialize 重新反序列化 Globals）。
+    /// 测试基建用它保证替换后的实例仍然禁止删除到真实回收站，生产代码不订阅。
+    /// </summary>
+    public static event Action<GlobalConfigs> InstanceChanged;
+
+    public static GlobalConfigs Instance
+    {
+        get => instance;
+        internal set
+        {
+            instance = value;
+            InstanceChanged?.Invoke(value);
+        }
+    }
 
     public FilenameCasePolicy FileNameCase { get; set; } = FilenameCasePolicy.Auto;
 

@@ -17,7 +17,6 @@ namespace ArchiveMaster
     public class PhotoTaggingModuleInfo : IModuleInfo
     {
         private readonly string baseUrl = "avares://ArchiveMaster.Module.PhotoTagging/Assets/";
-        public IList<Type> BackgroundServices { get; }
 
         public IList<ConfigMetadata> Configs =>
         [

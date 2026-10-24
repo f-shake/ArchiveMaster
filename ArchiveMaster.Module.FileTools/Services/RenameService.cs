@@ -61,6 +61,19 @@ public class RenameService(AppConfig appConfig)
         await TryForFilesAsync(processingFiles, (file, s) =>
         {
             NotifyMessage($"正在重命名（第二步，共二步）{s.GetFileNumberMessage()}：{file.Name}=>{file.NewName}");
+            bool tempExists = file.IsDir ? Directory.Exists(file.TempPath) : File.Exists(file.TempPath);
+            if (!tempExists)
+            {
+                // 第一步 Move 失败时文件仍在原名，TempPath 是一个从未存在过的 GUID 路径。
+                // 此时保留第一步的原始错误，不能让用户去一个不存在的临时路径手工恢复。
+                if (file.Status is not (ProcessStatus.Error or ProcessStatus.Warn))
+                {
+                    file.Error($"临时文件不存在：{file.TempPath}");
+                }
+
+                return;
+            }
+
             try
             {
                 if (file.IsDir)

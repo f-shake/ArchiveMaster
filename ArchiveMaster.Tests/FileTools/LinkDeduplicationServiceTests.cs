@@ -1,4 +1,5 @@
 using ArchiveMaster.Configs;
+using ArchiveMaster.Enums;
 using ArchiveMaster.Services;
 using ArchiveMaster.Tests.Infrastructure;
 
@@ -63,5 +64,49 @@ public class LinkDeduplicationServiceTests : IDisposable
 
         Assert.Equal(new DateTime(2020, 1, 1), File.GetLastWriteTime(a));
         Assert.Equal(new DateTime(2021, 1, 1), File.GetLastWriteTime(b));
+    }
+
+    [Fact]
+    public async Task Initialize_AllowsDifferentTimesWhenConfigured()
+    {
+        string dir = workspace.Dir("source");
+        string a = workspace.WriteText("source/a.txt", "same content");
+        string b = workspace.WriteText("source/b.txt", "same content");
+        File.SetLastWriteTime(a, new DateTime(2020, 1, 1));
+        File.SetLastWriteTime(b, new DateTime(2021, 1, 1));
+        var service = new LinkDeduplicationService(appConfig)
+        {
+            Config = new LinkDeduplicationConfig { Dir = dir, AllowDifferentTime = true },
+        };
+
+        await service.InitializeAsync(CancellationToken.None);
+
+        Assert.True(service.TreeRoot.SubDirs[0].IsChecked);
+    }
+
+    [Fact]
+    public async Task Execute_ReplacesDuplicatesWithHardLinks()
+    {
+        string dir = workspace.Dir("source");
+        string a = workspace.WriteText("source/a.txt", "same content");
+        string b = workspace.WriteText("source/b.txt", "same content");
+        File.SetLastWriteTime(a, new DateTime(2020, 1, 1));
+        File.SetLastWriteTime(b, new DateTime(2020, 1, 1));
+        var service = new LinkDeduplicationService(appConfig)
+        {
+            Config = new LinkDeduplicationConfig { Dir = dir },
+        };
+
+        await service.InitializeAsync(CancellationToken.None);
+        var group = Assert.Single(service.TreeRoot.SubDirs);
+        Assert.True(group.IsChecked);
+
+        await service.ExecuteAsync(CancellationToken.None);
+
+        // 覆盖建链接、删除原文件、把临时链接改回原名这一整条路径
+        Assert.All(group.SubFiles, file => Assert.Equal(ProcessStatus.Success, file.Status));
+        Assert.Equal("same content", File.ReadAllText(a));
+        Assert.Equal("same content", File.ReadAllText(b));
+        Assert.Empty(Directory.EnumerateFiles(dir, "*.lnk"));
     }
 }

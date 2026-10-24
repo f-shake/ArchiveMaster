@@ -163,6 +163,51 @@ public class AppConfigTests : IDisposable
         Assert.Throws<Exception>(() => appConfig.GetOrCreateConfig<OtherConfig>("OtherConfig"));
     }
 
+    [Fact]
+    public void Initialize_RemovedModuleConfig_IsIgnoredAndDroppedOnSave()
+    {
+        using var ws = new TempWorkspace();
+        var appConfig = TestAppConfig.Create(ws);
+        appConfig.RegisterConfig(new ConfigMetadata(typeof(SampleConfig)));
+        ws.WriteText("configs.json", """
+                                    {
+                                      "Modules": [
+                                        { "Key": "FileBackupperConfig", "Preset": "默认", "Config": {} },
+                                        { "Key": "SampleConfig", "Preset": "默认", "Config": { "Value": "保留" } }
+                                      ],
+                                      "Groups": { "SampleConfig": "默认", "FileBackupperConfig": "默认" }
+                                    }
+                                    """);
+
+        appConfig.Initialize();
+
+        Assert.Null(appConfig.LoadError);
+        Assert.Equal("保留", appConfig.GetOrCreateConfig<SampleConfig>("SampleConfig").Value);
+
+        appConfig.Save();
+        Assert.DoesNotContain("FileBackupperConfig", File.ReadAllText(appConfig.ConfigPath));
+    }
+
+    [Fact]
+    public void LoadNextStart_RejectsIncompatibleModuleConfig()
+    {
+        using var ws = new TempWorkspace();
+        string imported = ws.WriteText("import.json", """
+                                                  {
+                                                    "Modules": [
+                                                      { "Key": "SampleConfig", "Preset": "默认", "Config": { "Value": 123 } }
+                                                    ],
+                                                    "Groups": { "SampleConfig": "默认" }
+                                                  }
+                                                  """);
+        var appConfig = TestAppConfig.Create(ws);
+        appConfig.RegisterConfig(new ConfigMetadata(typeof(SampleConfig)));
+
+        // 校验实例必须真的反序列化模块配置，否则这种类型不兼容的配置会在下次启动才失败
+        Assert.ThrowsAny<Exception>(() => appConfig.LoadNextStart(imported));
+        Assert.False(File.Exists(appConfig.ConfigPath + AppConfig.NextStartLoadConfigExtension));
+    }
+
     public sealed class SampleConfig : ConfigBase
     {
         public string Value { get; set; } = "";

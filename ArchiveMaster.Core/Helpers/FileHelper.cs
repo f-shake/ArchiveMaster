@@ -11,7 +11,17 @@ namespace ArchiveMaster.Helpers;
 
 public static class FileHelper
 {
+    /// <summary>
+    /// 照片 GPS 写入时临时文件名中的标记。枚举照片时应排除，避免进程被强杀后的残留被当成照片处理。
+    /// </summary>
+    public const string GpsTempFileMarker = ".gps.tmp";
+
     public static string AndroidExternalFilesDir { get; set; }
+
+    public static bool IsGpsTempFile(string fileName)
+    {
+        return fileName?.Contains(GpsTempFileMarker, StringComparison.OrdinalIgnoreCase) == true;
+    }
 
     public static FileFilterRule ImageFileFilterRule => new FileFilterRule()
     {
@@ -50,6 +60,23 @@ public static class FileHelper
                        *.mov
                        """
     };
+
+    /// <summary>
+    /// 判断 <paramref name="path"/> 规范化后是否位于 <paramref name="rootDir"/> 之内。
+    /// 用于校验来自外部数据（包信息、结构文件）的相对路径，防止 .. 或绝对路径逃出目标目录。
+    /// </summary>
+    public static bool IsPathInside(string rootDir, string path)
+    {
+        string root = Path.TrimEndingDirectorySeparator(Path.GetFullPath(rootDir));
+        string full = Path.GetFullPath(path);
+        StringComparison comparison = OperatingSystem.IsWindows() || OperatingSystem.IsMacOS()
+            ? StringComparison.OrdinalIgnoreCase
+            : StringComparison.Ordinal;
+        string rootWithSeparator = root.EndsWith(Path.DirectorySeparatorChar)
+            ? root
+            : root + Path.DirectorySeparatorChar;
+        return full.StartsWith(rootWithSeparator, comparison);
+    }
 
     private static void TryDirectlyDelete(string path)
     {

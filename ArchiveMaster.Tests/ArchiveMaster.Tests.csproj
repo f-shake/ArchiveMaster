@@ -20,6 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\ArchiveMaster.Cli\ArchiveMaster.Cli.csproj" />
     <ProjectReference Include="..\ArchiveMaster.Core\ArchiveMaster.Core.csproj" />
     <ProjectReference Include="..\ArchiveMaster.Module.FileTools\ArchiveMaster.Module.FileTools.csproj" />
     <ProjectReference Include="..\ArchiveMaster.Module.PhotoTools\ArchiveMaster.Module.PhotoTools.csproj" />

@@ -76,6 +76,7 @@ namespace ArchiveMaster.Services
                 NotifyMessage($"正在枚举文件");
                 var files = new DirectoryInfo(Config.Dir)
                     .EnumerateFiles("*", FileEnumerateExtension.GetEnumerationOptions())
+                    .Where(f => !FileHelper.IsGpsTempFile(f.Name))
                     .ApplyFilter(ct, Config.Filter)
                     .Select(p => new GpsFileInfo(p, Config.Dir))
                     .ToList();

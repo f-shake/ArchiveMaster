@@ -128,6 +128,12 @@ public sealed class PathGuard
             return;
         }
 
+        // 密码、AI Key 等不是路径；密码里常含 / 或 \，不能当成相对路径去校验
+        if (value is SecurePassword)
+        {
+            return;
+        }
+
         Type type = value.GetType();
         if (type.IsPrimitive || type.IsEnum || type == typeof(decimal) || type == typeof(DateTime)
             || type == typeof(DateTimeOffset) || type == typeof(TimeSpan) || type == typeof(Guid)

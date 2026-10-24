@@ -7,7 +7,6 @@ using ArchiveMaster.Enums;
 using Avalonia.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using FzLib.Application.Startup;
 using FzLib.Avalonia.Services;
 
 namespace ArchiveMaster.ViewModels;
@@ -16,20 +15,14 @@ public partial class SettingViewModel : ObservableObject
 {
     public const string ConfigExtension = "amcfg";
 
-    [ObservableProperty] private bool isAutoStart;
-
-    public SettingViewModel(ViewModelServices services, AiProvidersViewModel aiProvidersViewModel,
-        IStartupManager startupManager = null)
+    public SettingViewModel(ViewModelServices services, AiProvidersViewModel aiProvidersViewModel)
     {
         Services = services;
-        StartupManager = startupManager;
-        isAutoStart = startupManager?.IsStartupEnabled() ?? false;
         AiProvidersViewModel = aiProvidersViewModel;
     }
 
     public GlobalConfigs Configs => GlobalConfigs.Instance;
     public ViewModelServices Services { get; }
-    public IStartupManager StartupManager { get; }
 
     public AiProvidersViewModel AiProvidersViewModel { get; }
 
@@ -73,24 +66,6 @@ public partial class SettingViewModel : ObservableObject
             {
                 await Services.Dialog.ShowErrorDialogAsync($"导入配置文件失败", ex);
             }
-        }
-    }
-
-    [RelayCommand]
-    private void SetAutoStart(bool autoStart)
-    {
-        if (StartupManager == null)
-        {
-            return;
-        }
-
-        if (autoStart)
-        {
-            StartupManager.EnableStartup("s");
-        }
-        else
-        {
-            StartupManager.DisableStartup();
         }
     }
 

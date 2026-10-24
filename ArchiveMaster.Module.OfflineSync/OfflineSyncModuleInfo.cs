@@ -30,7 +30,6 @@ namespace ArchiveMaster
         public const string CONFIG_GRROUP = "OfflineSync";
 
         private readonly string baseUrl = "avares://ArchiveMaster.Module.OfflineSync/Assets/";
-        public IList<Type> BackgroundServices { get; }
 
         public IList<ConfigMetadata> Configs =>
         [

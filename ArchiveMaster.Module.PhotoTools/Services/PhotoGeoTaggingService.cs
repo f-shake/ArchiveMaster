@@ -134,6 +134,8 @@ namespace ArchiveMaster.Services
             {
                 files = new DirectoryInfo(Config.Dir)
                     .EnumerateFiles("*", FileEnumerateExtension.GetEnumerationOptions())
+                    // 强杀留下的 GPS 临时文件也是合法图片，不能当照片再处理一遍
+                    .Where(f => !FileHelper.IsGpsTempFile(f.Name))
                     .ApplyFilter(ct, Config.Filter)
                     .Select(f => new GpsFileInfo(f, Config.Dir))
                     .ToList();

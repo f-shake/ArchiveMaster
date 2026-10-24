@@ -92,12 +92,6 @@
 | --------------------------------------------------- | --------------------------------------------------- | ------------------------------------------------------- |
 | ![1.打包和备份](imgs/动态固存备份/1.打包和备份.png) | ![2.重建和恢复](imgs/动态固存备份/2.重建和恢复.png) | ![3.包信息和验证](imgs/动态固存备份/3.包信息和验证.png) |
 
-## 实时备份服务
-
-| 备份任务配置                                            | 备份管理中心                                            |
-| ------------------------------------------------------- | ------------------------------------------------------- |
-| ![1.备份任务配置](imgs/实时备份服务/1.备份任务配置.png) | ![2.备份管理中心](imgs/实时备份服务/2.备份管理中心.png) |
-
 # 工具和帮助
 
 [基本使用帮助](./helps/basic.md)
@@ -192,18 +186,7 @@
 | 重建<br />`Rebuild` | 从文件归档包重建目录结构，或验证文件完整性 | [光盘归档工具](https://github.com/autodotua/DiscArchivingTool) |
 | 包信息和验证<br />`Verify` | 查看备份介质中文件包的信息，验证文件完整性 | [光盘归档工具](https://github.com/autodotua/DiscArchivingTool) |
 
-## 文件备份服务（`FileBackupper`）
-
-将目录中的文件定时或实时备份到另一个位置，支持全量备份或增量备份
-
-[自动备份服务帮助](./helps/backup.md)
-
-| 工具名       | 用途                                                         | 原项目                                                       |
-| ------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| 备份任务配置 | 对备份任务进行新增、删除、修改配置                           | [文件自动备份系统](https://github.com/autodotua/FileBackuper_New) |
-| 备份管理中心 | 查看备份任务的信息、进行手动备份，查看快照、快照文件、日志等 | [文件自动备份系统](https://github.com/autodotua/FileBackuper_New) |
-
-下一步计划：增加`FileWatcher`备份、删除日志
+> 文件备份功能已迁移到 [FileBackupTool](https://github.com/f-shake/FileBackupTool)。
 
 # 开发
 
@@ -219,7 +202,7 @@
 | `ArchiveMaster.UI`       | 依赖编译 | 界面管理程序                                                 | `ArchiveMaster.Core` |
 | `ArchiveMaster.Modules`  | 依赖编译 | 内置模块清单 `BuiltInModules.All`，GUI 与 CLI 共用           | 各 `ArchiveMaster.Module.*` |
 | `ArchiveMaster.Cli`      | 独立编译 | 命令行入口 `am`，无界面调用同一批工具                        | `ArchiveMaster.Modules` |
-| `ArchiveMaster.Tests`    | 测试     | xUnit v3 单元测试，覆盖 Core 与 7 个非备份模块的非 UI 逻辑   | `ArchiveMaster.Core`、各模块 |
+| `ArchiveMaster.Tests`    | 测试     | xUnit v3 单元测试，覆盖 Core 与 7 个模块的非 UI 逻辑   | `ArchiveMaster.Core`、各模块 |
 | `ArchiveMaster.UI.*`     | 启动模块 | 具体平台的启动器                                             | `ArchiveMaster.UI`   |
 | `ArchiveMaster.Module.*` | 独立编译 | 每个模块在界面上显示为一个组别，同一类的工具放在同一个模块中 | `ArchiveMaster.Core` |
 
@@ -266,10 +249,10 @@ dotnet test ArchiveMaster.Tests --filter FullyQualifiedName~Core
 dotnet test ArchiveMaster.Tests --filter FullyQualifiedName~FileTools
 ```
 
-- 测试工程为 `ArchiveMaster.Tests`（xUnit v3），覆盖 Core 与 FileTools、PhotoTools、PhotoTagging、VideoTools、TextTools、OfflineSync、WriteOnceArchive 的非 UI 逻辑。
-- 不覆盖 `FileBackupper`、真实 LLM 调用、HEIC 原生编码、`ffprobe` 等外部进程、View/ViewModel。
+- 测试工程为 `ArchiveMaster.Tests`（xUnit v3），覆盖 Core、CLI（参数解析、`--set` 转换、命令策略）与 FileTools、PhotoTools、PhotoTagging、VideoTools、TextTools、OfflineSync、WriteOnceArchive 的非 UI 逻辑；少量 ViewModel 数据模型（如 `TextSource`、`ObservablePhotoTags`）也有覆盖。
+- 不覆盖 Avalonia View/界面交互、真实 LLM 调用、HEIC 原生编码、`ffprobe` 等外部进程。
 - 每个用例只读写 `%TEMP%\ArchiveMaster.Tests` 下的独立目录；需要保留现场时设置环境变量 `ARCHIVEMASTER_TESTS_KEEP_TEMP=1`。
-- 当前 206 条用例（159 条既有 + 47 条 `--set` / 命令策略覆盖）；新增用例已单独通过，全量回归在最终验证阶段执行。2A 发现的 8 个缺陷已在 2B 修复，明细见 [unit-tests-bugs.md](docs/plans/unit-tests-bugs.md)。
+- 测试与历史缺陷清单见 [unit-tests-bugs.md](docs/plans/unit-tests-bugs.md)。
 
 ## 命令行（`am`）
 

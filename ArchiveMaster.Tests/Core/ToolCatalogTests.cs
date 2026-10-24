@@ -27,6 +27,14 @@ public class ToolCatalogTests
         Assert.False(tools.Single(p => p.Id == "offlineSync.step1").HasItemResults);
         Assert.False(tools.Single(p => p.Id == "photoTagging.photoTagManager").HasItemResults);
         Assert.True(tools.Single(p => p.Id == "fileTools.timeClassify").HasItemResults);
+
+        // HasPrepareStage 决定 plan 是否可用，是 CLI/Skill 的契约
+        Assert.True(tools.Single(p => p.Id == "fileTools.timeClassify").HasPrepareStage);
+        Assert.True(tools.Single(p => p.Id == "writeOnceArchive.packing").HasPrepareStage);
+        Assert.False(tools.Single(p => p.Id == "offlineSync.step1").HasPrepareStage);
+        Assert.False(tools.Single(p => p.Id == "photoTagging.photoTagManager").HasPrepareStage);
+        Assert.False(tools.Single(p => p.Id == "photoTagging.photoTagSearcher").HasPrepareStage);
+        Assert.False(tools.Single(p => p.Id == "textTools.typoChecker").HasPrepareStage);
     }
 
     [Fact]

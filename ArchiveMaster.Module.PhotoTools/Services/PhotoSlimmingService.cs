@@ -414,6 +414,7 @@ namespace ArchiveMaster.Services
                 : null;
             var files = new DirectoryInfo(Config.SourceDir)
                 .EnumerateSimpleFileInfos(ct)
+                .Where(f => !FileHelper.IsGpsTempFile(f.Name))
                 .ToList();
 
             TryForFiles(files, (file, s) =>

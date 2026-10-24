@@ -11,7 +11,6 @@ namespace ArchiveMaster
     {
         public const string CONFIG_GROUP = "WriteOnceArchive";
         private readonly string baseUrl = "avares://ArchiveMaster.Module.WriteOnceArchive/Assets/";
-        public IList<Type> BackgroundServices { get; }
 
         public IList<ConfigMetadata> Configs =>
         [

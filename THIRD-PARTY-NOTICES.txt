@@ -62,7 +62,7 @@ MIT 许可：
   SkiaSharp（含 NativeAssets.Win32/Linux/macOS）、Svg.Controls.Skia.Avalonia、System.Reactive、
   ExifLibNet.Updated、HotAvalonia、Microsoft.Extensions.DependencyInjection、
   Microsoft.Extensions.Hosting（含 Abstractions、WindowsServices）、
-  Microsoft.EntityFrameworkCore.Sqlite、Microsoft.CodeAnalysis.CSharp.Scripting
+  Microsoft.CodeAnalysis.CSharp.Scripting
   （Avalonia：https://github.com/AvaloniaUI/Avalonia ；SkiaSharp：https://github.com/mono/SkiaSharp ；
     其余各包可在 https://www.nuget.org/packages/<包名> 查到项目地址）
 

@@ -17,7 +17,6 @@ namespace ArchiveMaster
     public class PhotoToolsModuleInfo : IModuleInfo
     {
         private readonly string baseUrl = "avares://ArchiveMaster.Module.PhotoTools/Assets/";
-        public IList<Type> BackgroundServices { get; }
 
         public IList<ConfigMetadata> Configs =>
         [

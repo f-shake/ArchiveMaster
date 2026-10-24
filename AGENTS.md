@@ -29,7 +29,7 @@
 
 1. **输出目录被重定向**：`Directory.Build.props` 里 `SpecialOutputDir=true`，产物落在 `C:\CodeTemp\bin\<项目>\net10.0\`。换机器时改 `OutputDir`，或把 `SpecialOutputDir` 设为 `false`。
 2. **运行期文件跟着 exe 走**：`Program.Main` 会 `Directory.SetCurrentDirectory(AppContext.BaseDirectory)`，因此 `configs.json`、`logs/logs.txt` 都在**可执行文件所在目录**，不在仓库里。调试时以输出目录为工作目录。
-3. **单实例 + 托盘**：程序用 `TcpSingleInstanceHelper` 保证单实例，已有实例时新进程直接退出；关闭主窗口后若存在启用的后台服务（如 `FileBackupper`），程序仍在托盘运行。测试新构建前先确认旧进程已退出。
+3. **单实例**：程序用 `TcpSingleInstanceHelper` 保证单实例，已有实例时新进程激活旧窗口后退出；关闭主窗口即退出（当前没有常驻后台服务）。测试新构建前先确认旧进程已退出。
 
 `UseLocalFzLib=true` 仅在联调本地 FzLib 仓库时使用（需 `..\..\FzLib\Publish\libs`），默认走 NuGet。
 
@@ -39,11 +39,11 @@
 | --- | --- |
 | `ArchiveMaster.Core` | 接口与基类（`IModuleInfo`、`ServiceBase`、`TwoStepServiceBase`、`ViewModelBase`、`PanelBase`）、配置系统、通用视图与帮助类 |
 | `ArchiveMaster.Core.AI` | LLM 集成：`AiServiceBase`、OpenAI / Ollama 客户端、聊天面板与消息模型 |
-| `ArchiveMaster.Module.*` | 功能模块，每个模块 = 一组工具。已注册：FileTools、PhotoTools、PhotoTagging、VideoTools、TextTools、OfflineSync、WriteOnceArchive、FileBackupper |
+| `ArchiveMaster.Module.*` | 功能模块，每个模块 = 一组工具。已注册：FileTools、PhotoTools、PhotoTagging、VideoTools、TextTools、OfflineSync、WriteOnceArchive |
 | `ArchiveMaster.UI` | 主界面、DI 装配、模块加载与初始化（`Initializer.cs`） |
 | `ArchiveMaster.Modules` | 内置模块清单 `BuiltInModules.All`，UI 与 CLI 共用 |
 | `ArchiveMaster.Cli` | 命令行入口 `am`，无界面运行工具（见「命令行（am）与 Agent Skill」） |
-| `ArchiveMaster.Tests` | xUnit v3 单元测试；覆盖 Core 与 7 个非备份模块的非 UI 逻辑（见「验证」） |
+| `ArchiveMaster.Tests` | xUnit v3 单元测试；覆盖 Core 与 7 个模块的非 UI 逻辑（见「验证」） |
 | `ArchiveMaster.UI.Desktop` | 桌面启动器；HEIC 原生库也放在这里（见「原生库」） |
 | `ArchiveMaster.UI.Android` | Android 启动器；实现 `IPermissionService` 等平台接口 |
 
@@ -59,7 +59,7 @@ GUI 与模块工程都设 `RootNamespace=ArchiveMaster`，所以命名空间与�
 一个模块（`XxxModuleInfo : IModuleInfo`）要提供：
 
 - `Configs`：`ConfigMetadata` 列表，注册后才能被配置系统读写
-- `TransientServices` / `SingletonServices` / `BackgroundServices`：DI 注册；后台服务须实现 `IBackgroundService`
+- `TransientServices` / `SingletonServices`：DI 注册；本项目当前没有常驻后台服务
 - `Views`：`ToolPanelGroupInfo`，其中每个工具是一个 `ToolPanelInfo(ViewType, ViewModelType, 标题, 描述, 图标 avares://…)`
 - `ModuleName`、`ModuleDescription`、`HelpFileName`（对应 `helps/*.md`，菜单里打开 GitHub master 上的文件）
 - 可选 `JsonConverters`（模块私有 JSON 转换器）
@@ -107,9 +107,9 @@ GUI 与模块工程都设 `RootNamespace=ArchiveMaster`，所以命名空间与�
 ```
 
 - `Modules`：各配置项的预设（`ConfigItem`），默认预设名 `"默认"`；`Groups`：每组当前选中的预设；`Globals`：`GlobalConfigs`（文件名大小写策略、删除方式、调试模式、AI 供应商、FFmpeg 路径、主密码等）。
-- 启动时若存在 `configs.json.load`，会用 `File.Replace` 覆盖当前配置并留下 `.bak` 备份；正常 `Save()` 直接覆盖 `configs.json`，不额外备份。
+- 启动时若存在 `configs.json.load`，会先把当前配置复制为 `.bak`，再把 `.load` 改名覆盖；正常 `Save()` 先写临时文件再原子替换 `configs.json`，不额外备份。
 - 新增配置属性要保证旧 `configs.json` 仍能反序列化（给合理默认值）；加载失败时程序回退默认配置并记录 `LoadError`，不会崩溃。
-- 各工具的运行数据：备份数据库为备份目录下的 `db.sqlite`（EF Core + SQLite）；日志为 exe 目录下 `logs/logs.txt`（按天滚动）；敏感字符串用 `SecurePassword`（PBKDF2-SHA256 20 万次派生 + AES-GCM）加密，主密码本身用机器标识派生密钥加密后存在 `Globals`。
+- 各工具的运行数据：日志为 exe 目录下 `logs/logs.txt`（按天滚动）；敏感字符串用 `SecurePassword`（PBKDF2-SHA256 20 万次派生 + AES-GCM）加密，主密码本身用机器标识派生密钥加密后存在 `Globals`。
 - AI 工具读取 `GlobalConfigs.AiProviders.CurrentProvider`（OpenAI / Ollama）；AI 服务继承 `AiServiceBase` 或 `AiTwoStepServiceBase`，提示词接口为 `GetSystemPromptAsync` / `GetFirstUserPromptAsync`。
 
 ## 原生库（HEIC）与打包
@@ -128,7 +128,7 @@ GUI 与模块工程都设 `RootNamespace=ArchiveMaster`，所以命名空间与�
 ## 命令行（am）与 Agent Skill
 
 - `ArchiveMaster.Cli` 是独立控制台工程（产物名 `am`），复用 Core/Service 层；**不要在 CLI 里复制工具业务逻辑**。
-- 工具目录由 `ToolCatalog` 从 `IModuleInfo.Views` 反射 ViewModel 的 `TwoStepViewModelBase<TService,TConfig>` 得到；聊天类与非两步式工具会被自动跳过，`FileBackupper` 由 CLI 显式排除。
+- 工具目录由 `ToolCatalog` 从 `IModuleInfo.Views` 反射 ViewModel 的 `TwoStepViewModelBase<TService,TConfig>` 得到；聊天类与非两步式工具会被自动跳过。
 - 工具 ID = `<模块短名>.<配置类名去掉 Config 与模块前缀>`（如 `offlineSync.step1`）；**不要重命名配置类**，否则 ID 与用户已有配置一起失效。
 - `plan` 执行 `InitializeAsync`（准备阶段，可能写文件），`run` 在同一进程内继续 `ExecuteAsync`；两阶段语义见 `docs/plans/cli-and-skill.md`。新增工具若在 `InitializeAsync` 里写文件，必须登记到 `ToolCatalog.PrepareUnsafeToolIds`。
 - 只返回聚合结果的工具要登记到 `ToolCatalog.NoItemResultToolIds`；CLI 会把 `itemsAvailable` 置为 false，并从服务公开属性生成 `notes`。
@@ -151,12 +151,12 @@ GUI 与模块工程都设 `RootNamespace=ArchiveMaster`，所以命名空间与�
 仓库有单元测试工程 `ArchiveMaster.Tests`（xUnit v3），没有 CI。`ArchiveMaster.Module.Test` 仍是手写试验面板，不能当作回归保障。改动后的最低验证：
 
 1. `dotnet build ArchiveMaster.UI.Desktop` 通过且不新增警告；
-2. `dotnet test ArchiveMaster.Tests`：当前 206 条（159 条既有 + 47 条 `--set` / 命令策略覆盖）；新增用例已单独通过，全量回归在最终验证阶段执行；2A 发现的 8 个缺陷已在 2B 修复；
+2. `dotnet test ArchiveMaster.Tests` 全量用例通过；
 3. 运行 `dotnet run --project ArchiveMaster.UI.Desktop`，实际操作受影响的工具（至少走一遍「初始化 → 执行」，包括取消与报错路径）；
 4. 涉及配置结构时，用旧 `configs.json` 启动一次，确认能加载、预设不丢；
 5. 涉及文件操作时，在临时目录验证，注意工具会真实移动 / 删除文件（默认删除到回收站，`GlobalConfigs.DeleteMode` 可改）。
 
-测试边界：跳过 `FileBackupper`、真实 LLM 调用、HEIC 原生编码、`ffprobe` 等外部进程、UI/ViewModel；测试只使用 `%TEMP%\ArchiveMaster.Tests` 下的临时目录，不读写仓库或用户配置。需要保留现场时设置环境变量 `ARCHIVEMASTER_TESTS_KEEP_TEMP=1`。
+测试边界：跳过真实 LLM 调用、HEIC 原生编码、`ffprobe` 等外部进程、Avalonia View/界面交互（少量 ViewModel 数据模型有覆盖）；测试只使用 `%TEMP%\ArchiveMaster.Tests` 下的临时目录，不读写仓库或用户配置。需要保留现场时设置环境变量 `ARCHIVEMASTER_TESTS_KEEP_TEMP=1`。
 
 ## 文档与披露
 
