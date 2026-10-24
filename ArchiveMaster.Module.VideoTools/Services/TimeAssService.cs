@@ -39,6 +39,12 @@ namespace ArchiveMaster.Services
 
             string timespanFormat = "hh\\:mm\\:ss\\:ff";
             var interval = TimeSpan.FromMilliseconds(Config.Format.Interval);
+            if (interval <= TimeSpan.Zero)
+            {
+                // 兜底：配置被手工改坏时不能进入不推进的循环
+                throw new Exception("字幕刷新间隔必须大于0");
+            }
+
             TimeSpan totalTime = TimeSpan.Zero;
             foreach (var file in files)
             {

@@ -206,25 +206,36 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
 
     private async Task WithUpdatingMessageAndProgressAsync(Func<CancellationToken, Task> func, CancellationToken ct)
     {
-        CancellationTokenSource cts = new CancellationTokenSource();
-        ct.Register(cts.Cancel);
-        _ = StartMessageAndProgressTimer(cts.Token);
-        await func(cts.Token);
-        await cts.CancelAsync();
+        using CancellationTokenSource cts = new CancellationTokenSource();
+        // 注册要显式释放：cts 在本方法结束时 Dispose，回调若还挂着命令的 token，
+        // 之后点“取消”会对已释放的 cts 调 Cancel 并抛 ObjectDisposedException
+        using CancellationTokenRegistration registration = ct.Register(cts.Cancel);
+        Task timerTask = StartMessageAndProgressTimer(cts.Token);
+        try
+        {
+            await func(cts.Token);
+        }
+        finally
+        {
+            // 无论成功、失败还是取消，都必须停掉定时器，否则异常路径会留下永久空转的循环
+            await cts.CancelAsync();
+            await timerTask;
+        }
     }
 
     private async Task StartMessageAndProgressTimer(CancellationToken ct)
     {
-        PeriodicTimer timer = new PeriodicTimer(TimeSpan.FromMilliseconds(50));
-        while (await timer.WaitForNextTickAsync(ct))
+        using PeriodicTimer timer = new PeriodicTimer(TimeSpan.FromMilliseconds(50));
+        try
         {
-            if (ct.IsCancellationRequested)
+            while (await timer.WaitForNextTickAsync(ct))
             {
-                timer.Dispose();
-                return;
+                ForceUpdateMessageAndProgress();
             }
-
-            ForceUpdateMessageAndProgress();
+        }
+        catch (OperationCanceledException)
+        {
+            // 正常取消
         }
     }
 
@@ -419,6 +430,12 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
     [RelayCommand(CanExecute = nameof(CanCancel))]
     private void Cancel()
     {
+        // 先确认确实有任务在跑；否则状态会永久停在“正在取消”，遮罩也不会有人复位
+        if (!InitializeCommand.IsRunning && !ExecuteCommand.IsRunning)
+        {
+            return;
+        }
+
         Status = Cancelling;
         CancelCommand.NotifyCanExecuteChanged();
         Services.ProgressOverlay.SetVisible(true);
@@ -426,7 +443,7 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
         {
             InitializeCommand.Cancel();
         }
-        else if (ExecuteCommand.IsRunning)
+        else
         {
             ExecuteCommand.Cancel();
         }
@@ -442,7 +459,6 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
     {
         if (!EnableInitialize)
         {
-            Services.AppConfig.SaveBackground();
             CreateService();
         }
 
@@ -450,6 +466,12 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
 
         if (await TryRunServiceMethodAsync(async () =>
             {
+                if (!EnableInitialize)
+                {
+                    // 放进 try 内：保存失败要弹错误框，而不是只写日志后继续执行
+                    Services.AppConfig.Save();
+                }
+
                 await OnExecutingAsync(ct);
                 Config.Check();
                 await WithUpdatingMessageAndProgressAsync(Service.ExecuteAsync, ct);
@@ -480,12 +502,12 @@ public abstract partial class TwoStepViewModelBase<TService, TConfig> : MultiPre
     [RelayCommand(IncludeCancelCommand = true, CanExecute = nameof(CanInitialize))]
     private async Task InitializeAsync(CancellationToken ct)
     {
-        Services.AppConfig.SaveBackground();
-
         Status = Initializing;
 
         if (await TryRunServiceMethodAsync(async () =>
             {
+                // 放进 try 内：保存失败要弹错误框，而不是只写日志后继续初始化
+                Services.AppConfig.Save();
                 CreateService();
                 await OnInitializingAsync();
                 Config.Check();

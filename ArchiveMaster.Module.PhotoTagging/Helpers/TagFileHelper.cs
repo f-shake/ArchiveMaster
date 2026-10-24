@@ -53,6 +53,28 @@ public static class TagFileHelper
         CancellationToken ct = default)
     {
         var tagFileContent = JsonSerializer.Serialize(taggedPhotos, JsonOptions);
-        await File.WriteAllTextAsync(tagFile, tagFileContent, ct);
+        // 同进程内串行写入，并用临时文件替换，避免并发自动保存写出半截 JSON
+        await WriteLock.WaitAsync(ct);
+        string tempPath = tagFile + ".tmp";
+        try
+        {
+            await File.WriteAllTextAsync(tempPath, tagFileContent, ct);
+            File.Move(tempPath, tagFile, true);
+        }
+        catch
+        {
+            if (File.Exists(tempPath))
+            {
+                File.Delete(tempPath);
+            }
+
+            throw;
+        }
+        finally
+        {
+            WriteLock.Release();
+        }
     }
+
+    private static readonly SemaphoreSlim WriteLock = new SemaphoreSlim(1, 1);
 }

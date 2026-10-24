@@ -42,7 +42,16 @@ public partial class SettingViewModel : ObservableObject
             .SaveFilePickerAndGetPathAsync();
         if (path != null)
         {
-            Services.AppConfig.Save(path);
+            try
+            {
+                Services.AppConfig.Save(path);
+            }
+            catch (Exception ex)
+            {
+                await Services.Dialog.ShowErrorDialogAsync("导出配置失败", ex);
+                return;
+            }
+
             await Services.Dialog.ShowOkDialogAsync($"配置已导出", $"配置已导出到{path}");
         }
     }

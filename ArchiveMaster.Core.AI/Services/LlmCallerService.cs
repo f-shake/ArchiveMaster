@@ -109,17 +109,32 @@ public class LlmCallerService
         return string.Concat(result);
     }
 
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, IChatClient> ClientCache =
+        new System.Collections.Concurrent.ConcurrentDictionary<string, IChatClient>();
+
     private IChatClient GetChatClient()
     {
-        IChatClient chatClient = Config.Type switch
+        // 复用 ChatClient/HttpClient：逐图打标时每次新建会把连接池和句柄耗尽
+        string key = BuildClientCacheKey();
+        return ClientCache.GetOrAdd(key, _ => Config.Type switch
         {
             AiProviderType.OpenAI => new OpenAIChatClient(Config),
             AiProviderType.Ollama => new OllamaChatClient(Config),
             // AiProviderType.OpenAICompatible => new OpenAICompatibleChatClient(Config),
             _ => throw new ArgumentOutOfRangeException()
-        };
+        });
+    }
 
-        return chatClient;
+    private string BuildClientCacheKey()
+    {
+        string keyHash = "";
+        if (!string.IsNullOrEmpty(Config.Key?.Password))
+        {
+            keyHash = Convert.ToHexString(
+                System.Security.Cryptography.SHA256.HashData(Encoding.UTF8.GetBytes(Config.Key.Password)));
+        }
+
+        return $"{Config.Type}|{Config.Url}|{Config.Model}|{keyHash}|{RuntimeHelpers.GetHashCode(Config)}";
     }
 
     private async Task<string> GetResponseAsync(IEnumerable<AiChatMessage> messages, ChatOptions options = null,

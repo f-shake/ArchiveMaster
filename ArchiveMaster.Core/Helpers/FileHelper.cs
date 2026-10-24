@@ -70,18 +70,13 @@ public static class FileHelper
         {
             FileDeleteHelper.DeleteToRecycleBin(path);
         }
-        catch (Exception ex1)
+        catch (Exception ex)
         {
-            Log.Error(ex1, "删除文件{Path}到回收站时出错", path);
-            try
-            {
-                FileDeleteHelper.DirectlyDelete(path);
-            }
-            catch (Exception ex2)
-            {
-                Log.Error(ex2, "删除文件{Path}时出错", path);
-                throw new IOException($"无法删除到回收站，也无法直接删除文件{path}：{ex2.Message}", ex2);
-            }
+            // 不再降级为永久删除：用户选择“回收站”就是指望可恢复，
+            // 删除失败应当作为该文件的错误上报，由调用方继续处理其余文件
+            Log.Error(ex, "删除文件{Path}到回收站时出错", path);
+            throw new IOException(
+                $"无法删除到回收站：{path}（{ex.Message}）。请检查回收站是否可用，或改用其他删除方式。", ex);
         }
     }
 

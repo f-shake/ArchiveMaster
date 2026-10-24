@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Text;
@@ -20,7 +20,8 @@ namespace ArchiveMaster.Services;
 public class RenameService(AppConfig appConfig)
     : TwoStepServiceBase<RenameConfig>(appConfig)
 {
-    private static readonly Dictionary<string, Regex> regexes = new Dictionary<string, Regex>();
+    private static readonly Dictionary<(string Pattern, RegexOptions Options), Regex> regexes =
+        new Dictionary<(string, RegexOptions), Regex>();
     private static Dictionary<string, Script<string>> csScripts = new Dictionary<string, Script<string>>();
     private RegexOptions regexOptions;
     private StringComparison stringComparison;
@@ -60,13 +61,41 @@ public class RenameService(AppConfig appConfig)
         await TryForFilesAsync(processingFiles, (file, s) =>
         {
             NotifyMessage($"正在重命名（第二步，共二步）{s.GetFileNumberMessage()}：{file.Name}=>{file.NewName}");
-            if (file.IsDir)
+            try
             {
-                Directory.Move(file.TempPath, file.GetNewPath());
+                if (file.IsDir)
+                {
+                    Directory.Move(file.TempPath, file.GetNewPath());
+                }
+                else
+                {
+                    File.Move(file.TempPath, file.GetNewPath());
+                }
             }
-            else
+            catch (Exception renameEx)
             {
-                File.Move(file.TempPath, file.GetNewPath());
+                // 第二步失败时把临时名改回原名，避免文件永久停在 GUID 名上
+                try
+                {
+                    if (file.IsDir)
+                    {
+                        Directory.Move(file.TempPath, file.Path);
+                    }
+                    else
+                    {
+                        File.Move(file.TempPath, file.Path);
+                    }
+                }
+                catch (Exception rollbackEx)
+                {
+                    // 回滚也失败时不能让用户以为文件丢了：报出临时名，便于手工恢复
+                    throw new IOException(
+                        $"重命名失败，且无法恢复原文件名。文件现在位于临时路径“{file.TempPath}”，请手工改回原名。" +
+                        $"原始错误：{renameEx.Message}；回滚错误：{rollbackEx.Message}",
+                        new AggregateException(renameEx, rollbackEx));
+                }
+
+                throw;
             }
         }, ct, FilesLoopOptions.Builder().AutoApplyStatus().AutoApplyFileNumberProgress().Build());
     }
@@ -124,14 +153,19 @@ public class RenameService(AppConfig appConfig)
 
     private Regex GetRegex(string pattern)
     {
-        if (regexes.TryGetValue(pattern, out Regex r))
+        // 缓存键必须带上选项：同一个 pattern 在“忽略大小写”切换前后不能复用
+        var key = (pattern, regexOptions);
+        lock (regexes)
         {
+            if (regexes.TryGetValue(key, out Regex r))
+            {
+                return r;
+            }
+
+            r = new Regex(pattern, regexOptions);
+            regexes.Add(key, r);
             return r;
         }
-
-        r = new Regex(pattern, regexOptions);
-        regexes.Add(pattern, r);
-        return r;
     }
 
     private bool IsMatched(RenameFileInfo file)

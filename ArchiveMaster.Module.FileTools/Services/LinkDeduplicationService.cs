@@ -23,9 +23,24 @@ public class LinkDeduplicationService(AppConfig appConfig)
                 foreach (var file in group.SubFiles.Skip(1))
                 {
                     NotifyMessage($"正在创建硬链接{s.GetFileNumberMessage()}：{file.RelativePath}");
-                    FileHelper.DeleteByConfig(file.Path, "硬链接去重");
-                    HardLinkCreator.CreateHardLink(file.Path, sourceFile.Path);
-                    file.Success();
+                    // 先建临时硬链接，成功后再删原名：任何一步失败都不会丢掉文件
+                    string tempLink = file.Path + "." + Guid.NewGuid().ToString("N") + ".lnk";
+                    try
+                    {
+                        HardLinkCreator.CreateHardLink(tempLink, sourceFile.Path);
+                        FileHelper.DeleteByConfig(file.Path, "硬链接去重");
+                        File.Move(tempLink, file.Path);
+                        file.Success();
+                    }
+                    catch
+                    {
+                        if (File.Exists(tempLink))
+                        {
+                            File.Delete(tempLink);
+                        }
+
+                        throw;
+                    }
                 }
             }, ct, FilesLoopOptions.Builder().AutoApplyStatus().AutoApplyFileNumberProgress().Build());
         }, ct);

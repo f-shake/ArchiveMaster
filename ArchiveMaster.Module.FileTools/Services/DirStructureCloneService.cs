@@ -111,11 +111,21 @@ namespace ArchiveMaster.Services
             FileInfo newFile = new FileInfo(newPath);
             newFile.Directory.Create();
 
+            if (newFile.Exists)
+            {
+                // 稀疏文件只有长度信息，覆盖已有文件会把真实内容清空且无法恢复
+                throw new IOException($"目标文件已存在，已跳过以免覆盖：{newPath}");
+            }
+
             using (FileStream fs = File.Create(newPath))
             {
                 MarkAsSparseFile(fs.SafeFileHandle);
                 fs.SetLength(file.Length);
-                fs.Seek(-1, SeekOrigin.End);
+                if (file.Length > 0)
+                {
+                    // 0 字节文件不能 Seek(-1, End)，否则必然抛异常
+                    fs.Seek(-1, SeekOrigin.End);
+                }
             }
 
             File.SetLastWriteTime(newPath, File.GetLastWriteTime(file.Path));

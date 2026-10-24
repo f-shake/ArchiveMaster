@@ -48,26 +48,61 @@ namespace ArchiveMaster.Services
                         return;
                     }
 
-                    if (isEncrypting)
+                    // 先写临时文件再原子替换：取消/异常不会在目标位置留下半截密文，
+                    // 也就不会被下一次的“跳过已存在”当成已完成
+                    string targetPath = file.TargetPath;
+                    string tempPath = targetPath + ".tmp";
+                    string metadataPath = targetPath + EncryptedFileMetadataExtension;
+                    string tempMetadataPath = null;
+                    try
                     {
-                        await aes.EncryptFileAsync(file.Path, file.TargetPath, BufferSize,
-                            s.CreateFileProgressReporter("正在加密"),
-                            cancellationToken: ct);
-                        if (Config.EncryptDirectoryStructure)
+                        // 元数据也先写临时文件，并且放在替换目标之前：
+                        // 这样元数据写入失败时不会先落一个“缺元数据的加密文件”
+                        if (isEncrypting && Config.EncryptDirectoryStructure)
                         {
                             var bytes = aes.Encrypt(Encoding.UTF8.GetBytes(file.RelativePath));
-                            await File.WriteAllBytesAsync(file.TargetPath + EncryptedFileMetadataExtension, bytes,
-                                ct);
+                            tempMetadataPath = metadataPath + ".tmp";
+                            await File.WriteAllBytesAsync(tempMetadataPath, bytes, ct);
                         }
-                    }
-                    else
-                    {
-                        await aes.DecryptFileAsync(file.Path, file.TargetPath, BufferSize,
-                            s.CreateFileProgressReporter("正在解密"),
-                            cancellationToken: ct);
-                    }
 
-                    File.SetLastWriteTime(file.TargetPath, File.GetLastWriteTime(file.Path));
+                        if (isEncrypting)
+                        {
+                            await aes.EncryptFileAsync(file.Path, tempPath, BufferSize,
+                                s.CreateFileProgressReporter("正在加密"),
+                                cancellationToken: ct);
+                        }
+                        else
+                        {
+                            await aes.DecryptFileAsync(file.Path, tempPath, BufferSize,
+                                s.CreateFileProgressReporter("正在解密"),
+                                cancellationToken: ct);
+                        }
+
+                        File.Move(tempPath, targetPath, true);
+
+                        // 元数据只在加密时写：解密时写会把明文路径的密文留在未加密目录里
+                        if (tempMetadataPath != null)
+                        {
+                            File.Move(tempMetadataPath, metadataPath, true);
+                            tempMetadataPath = null;
+                        }
+
+                        File.SetLastWriteTime(targetPath, File.GetLastWriteTime(file.Path));
+                    }
+                    catch
+                    {
+                        if (File.Exists(tempPath))
+                        {
+                            File.Delete(tempPath);
+                        }
+
+                        if (tempMetadataPath != null && File.Exists(tempMetadataPath))
+                        {
+                            File.Delete(tempMetadataPath);
+                        }
+
+                        throw;
+                    }
 
                     if (Config.DeleteSourceFiles)
                     {

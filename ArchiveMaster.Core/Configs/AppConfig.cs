@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -101,7 +101,17 @@ namespace ArchiveMaster.Configs
         public string GetCurrentPreset(string groupName)
         {
             ArgumentException.ThrowIfNullOrEmpty(groupName);
-            return currentPresets.TryGetValue(groupName, out string value) ? value : GetPresets(groupName)[0];
+            var presets = GetPresets(groupName);
+            if (currentPresets.TryGetValue(groupName, out string value) && presets.Contains(value))
+            {
+                return value;
+            }
+
+            // 预设被删除/改名后 currentPresets 里可能残留旧名字，
+            // 若不修正，界面会显示空预设并在下次保存时“复活”一份默认配置
+            string fallback = presets[0];
+            currentPresets[groupName] = fallback;
+            return fallback;
         }
 
         public T GetOrCreateConfig<T>(string key, string preset = DefaultPresetName) where T : new()
@@ -243,8 +253,14 @@ namespace ArchiveMaster.Configs
             {
                 if (applyPendingLoad && File.Exists(ConfigPath + NextStartLoadConfigExtension))
                 {
-                    File.Replace(ConfigPath + NextStartLoadConfigExtension, ConfigPath,
-                        ConfigPath + ConfigBackupExtension);
+                    if (File.Exists(ConfigPath))
+                    {
+                        // 先留一份 .bak，再把待生效文件改名覆盖。不用 File.Replace：
+                        // 它在部分文件系统/同步盘上会直接拒绝访问
+                        File.Copy(ConfigPath, ConfigPath + ConfigBackupExtension, true);
+                    }
+
+                    File.Move(ConfigPath + NextStartLoadConfigExtension, ConfigPath, true);
                 }
 
                 if (!File.Exists(ConfigPath))
@@ -320,13 +336,17 @@ namespace ArchiveMaster.Configs
         public void LoadNextStart(string bakConfigPath)
         {
             var tempConfig = new AppConfig(bakConfigPath);
-            try
+            var previousGlobals = GlobalConfigs.Instance;
+            tempConfig.Initialize(applyPendingLoad: false);
+            // Initialize 会顺带把 GlobalConfigs.Instance 换成导入文件里的值。
+            // 导入的语义是“下次启动生效”，当前会话必须还原，否则会立刻换掉主密码/删除方式/AI 配置
+            GlobalConfigs.Instance = previousGlobals;
+            if (tempConfig.LoadError != null)
             {
-                tempConfig.Initialize();
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"加载备份配置文件{bakConfigPath}失败：{ex.Message}", ex);
+                // Initialize 内部会把异常吞成 LoadError，这里必须显式检查，
+                // 否则损坏的配置文件会被接受并在下次启动顶替现有配置
+                throw new Exception($"加载配置文件{bakConfigPath}失败：{tempConfig.LoadError.Message}",
+                    tempConfig.LoadError);
             }
 
             File.Copy(bakConfigPath, ConfigPath + NextStartLoadConfigExtension, true);
@@ -376,6 +396,8 @@ namespace ArchiveMaster.Configs
             }
         }
 
+        private readonly object saveLock = new object();
+
         public void Save()
         {
             Save(ConfigPath);
@@ -383,31 +405,38 @@ namespace ArchiveMaster.Configs
 
         public void Save(string configFilePath)
         {
-            try
+            lock (saveLock)
             {
-                var json = JsonSerializer.Serialize(new Dictionary<string, object>
+                string tempPath = configFilePath + ".tmp";
+                try
                 {
-                    [JkeyModules] = configs,
-                    [JkeyGroups] = currentPresets,
-                    [JkeyGlobals] = GlobalConfigs.Instance
-                }, JsonOptions);
-                File.WriteAllText(configFilePath, json);
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "保存配置失败");
-            }
-        }
+                    var json = JsonSerializer.Serialize(new Dictionary<string, object>
+                    {
+                        [JkeyModules] = configs,
+                        [JkeyGroups] = currentPresets,
+                        [JkeyGlobals] = GlobalConfigs.Instance
+                    }, JsonOptions);
+                    // 先写临时文件再替换：保存中断不会留下半截 configs.json
+                    File.WriteAllText(tempPath, json);
+                    File.Move(tempPath, configFilePath, true);
+                }
+                catch (Exception ex)
+                {
+                    if (File.Exists(tempPath))
+                    {
+                        try
+                        {
+                            File.Delete(tempPath);
+                        }
+                        catch
+                        {
+                            // 清理失败不影响原始异常
+                        }
+                    }
 
-        public void SaveBackground()
-        {
-            try
-            {
-                Task.Run(Save);
-            }
-            catch (Exception ex)
-            {
-                Log.Logger.Error(ex, "后台保存配置失败");
+                    Log.Error(ex, "保存配置失败");
+                    throw new IOException($"保存配置到{configFilePath}失败：{ex.Message}", ex);
+                }
             }
         }
 

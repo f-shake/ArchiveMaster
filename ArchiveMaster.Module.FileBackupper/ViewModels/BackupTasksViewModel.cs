@@ -83,7 +83,15 @@ namespace ArchiveMaster.ViewModels
         private void Save()
         {
             Config.Tasks = Tasks.Select(p => p.Clone() as BackupTask).ToList();
-            Services.AppConfig.Save();
+            try
+            {
+                Services.AppConfig.Save();
+            }
+            catch (Exception ex)
+            {
+                // 保存现在会把失败抛出，这里必须接住，否则命令里的异常会直接崩进程
+                _ = Services.Dialog.ShowErrorDialogAsync("保存配置失败", ex);
+            }
         }
     }
 }

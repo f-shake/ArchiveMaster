@@ -116,20 +116,43 @@ public static class ExifHelper
 
     public static void WriteGpsToImage(string filePath, double lat, double lon)
     {
-        var imageFile = ImageFile.FromFile(filePath);
+        // 写到同扩展名的临时文件再替换，避免保存中途失败把原图截断。
+        // 扩展名必须保留：ExifLibrary 依据扩展名判断输出格式
+        string tempPath = Path.Combine(Path.GetDirectoryName(filePath) ?? "",
+            Path.GetFileNameWithoutExtension(filePath) + ".gps.tmp" + Path.GetExtension(filePath));
+        // 上次进程被强杀可能留下同名临时文件，先清掉，避免长期累积
+        if (File.Exists(tempPath))
+        {
+            File.Delete(tempPath);
+        }
 
-        // 写入纬度（需转换为 EXIF 格式：度/分/秒）
-        var (d, m, s) = ConvertToDmsTuple(lat);
-        imageFile.Properties.Set(ExifTag.GPSLatitude, d, m, (float)s);
-        imageFile.Properties.Set(ExifTag.GPSLatitudeRef, lat >= 0 ? "N" : "S");
+        try
+        {
+            var imageFile = ImageFile.FromFile(filePath);
 
-        // 写入经度
-        (d, m, s) = ConvertToDmsTuple(lon);
-        imageFile.Properties.Set(ExifTag.GPSLongitude, d, m, (float)s);
-        imageFile.Properties.Set(ExifTag.GPSLongitudeRef, lon >= 0 ? "E" : "W");
+            // 写入纬度（需转换为 EXIF 格式：度/分/秒）
+            var (d, m, s) = ConvertToDmsTuple(lat);
+            imageFile.Properties.Set(ExifTag.GPSLatitude, d, m, (float)s);
+            imageFile.Properties.Set(ExifTag.GPSLatitudeRef, lat >= 0 ? "N" : "S");
 
-        // 保存文件
-        imageFile.Save(filePath);
+            // 写入经度
+            (d, m, s) = ConvertToDmsTuple(lon);
+            imageFile.Properties.Set(ExifTag.GPSLongitude, d, m, (float)s);
+            imageFile.Properties.Set(ExifTag.GPSLongitudeRef, lon >= 0 ? "E" : "W");
+
+            // 保存到临时文件后再原子替换
+            imageFile.Save(tempPath);
+            File.Move(tempPath, filePath, true);
+        }
+        catch
+        {
+            if (File.Exists(tempPath))
+            {
+                File.Delete(tempPath);
+            }
+
+            throw;
+        }
     }
 
     /// <summary>

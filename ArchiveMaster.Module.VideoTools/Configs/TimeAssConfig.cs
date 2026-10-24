@@ -42,6 +42,13 @@ namespace ArchiveMaster.Configs
         {
             CheckEmpty(Files, "文件列表");
             CheckEmpty(ExportFile, "导出文件");
+            if (Format == null)
+            {
+                throw new Exception("字幕格式配置为空");
+            }
+
+            // 间隔为 0 或负数会让字幕生成循环永不推进
+            CheckRange(Format.Interval, 1, 60 * 60 * 1000, "字幕刷新间隔");
         }
     }
 }

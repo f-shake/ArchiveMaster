@@ -39,7 +39,25 @@ namespace ArchiveMaster.Services
 
                 await TryForFilesAsync(files, async (file, s) =>
                 {
-                    var targetFile = Path.Combine(Config.TargetDir, file.RelativePath);
+                    // 包信息来自外部介质，RelativePath 不能直接拼进目标目录：
+                    // 绝对路径会让 Path.Combine 丢弃 TargetDir，包含 .. 则会写到目录之外
+                    if (Path.IsPathRooted(file.RelativePath))
+                    {
+                        throw new Exception($"包内路径不合法（绝对路径）：{file.RelativePath}");
+                    }
+
+                    string targetRoot = Path.GetFullPath(Config.TargetDir);
+                    string targetFile = Path.GetFullPath(Path.Combine(targetRoot, file.RelativePath));
+                    StringComparison comparison = OperatingSystem.IsWindows() || OperatingSystem.IsMacOS()
+                        ? StringComparison.OrdinalIgnoreCase
+                        : StringComparison.Ordinal;
+                    string rootWithSeparator = targetRoot.EndsWith(Path.DirectorySeparatorChar)
+                        ? targetRoot
+                        : targetRoot + Path.DirectorySeparatorChar;
+                    if (!targetFile.StartsWith(rootWithSeparator, comparison))
+                    {
+                        throw new Exception($"包内路径不合法（超出目标目录）：{file.RelativePath}");
+                    }
                     if (File.Exists(targetFile))
                     {
                         if (Config.SkipIfExisted)

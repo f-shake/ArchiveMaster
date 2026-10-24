@@ -16,6 +16,17 @@ public partial class SecurePassword : ObservableObject
     [ObservableProperty]
     private bool remember = true;
 
+    /// <summary>
+    /// 从配置文件读到的原始密文。解密失败时保留它，保存时原样写回，
+    /// 避免一次失败的读取在下次保存时把用户密码清空。
+    /// </summary>
+    internal string OriginalCipherText { get; set; }
+
+    /// <summary>
+    /// 读取时是否解密失败。只有失败时才回写原密文；用户主动清空密码仍应真正清空。
+    /// </summary>
+    internal bool DecryptionFailed { get; set; }
+
     public SecurePassword()
     {
     }
@@ -64,7 +75,7 @@ public partial class SecurePassword : ObservableObject
                     return new SecurePassword { Remember = false };
                 }
 
-                var sp = new SecurePassword();
+                var sp = new SecurePassword { OriginalCipherText = storedPassword };
                 try
                 {
                     //检测是不是新版本加密后的密码（不一定准确）
@@ -85,7 +96,10 @@ public partial class SecurePassword : ObservableObject
                 }
                 catch (Exception ex)
                 {
-                    Log.Error(ex, "读取密码失败");
+                    // 解密失败时保留原文，保存时写回，避免覆盖掉仍可能有效的密文；
+                    // 用独立标志区分“解密失败”与“用户主动清空密码”
+                    sp.DecryptionFailed = true;
+                    Log.Error(ex, "读取密码失败，保留原始密文");
                 }
 
                 return sp;
@@ -103,25 +117,26 @@ public partial class SecurePassword : ObservableObject
         {
             if (value.Remember || AlwaysRemember)
             {
+                if (string.IsNullOrEmpty(value.Password))
+                {
+                    // 只有“读取时解密失败”才回写原密文；用户主动清空密码时应当真正清空
+                    writer.WriteStringValue(value.DecryptionFailed ? value.OriginalCipherText ?? "" : "");
+                    return;
+                }
+
                 try
                 {
-                    if (string.IsNullOrEmpty(value.Password))
-                    {
-                        writer.WriteStringValue("");
-                    }
-                    else
-                    {
-                        var masterPassword = GlobalConfigs.Instance.MasterPassword;
-                        masterPassword = SecurePasswordStoreService.DecryptMasterPassword(masterPassword);
-                        string pswd =
-                            SecurePasswordStoreService.SavePassword(value.Password, masterPassword);
-                        writer.WriteStringValue(pswd);
-                    }
+                    var masterPassword = GlobalConfigs.Instance.MasterPassword;
+                    masterPassword = SecurePasswordStoreService.DecryptMasterPassword(masterPassword);
+                    string pswd =
+                        SecurePasswordStoreService.SavePassword(value.Password, masterPassword);
+                    writer.WriteStringValue(pswd);
                 }
                 catch (Exception ex)
                 {
+                    // 保存失败必须让整个配置保存失败，否则会静默丢掉密码
                     Log.Error(ex, "保存密码失败");
-                    writer.WriteStringValue("");
+                    throw new InvalidOperationException($"保存密码失败：{ex.Message}", ex);
                 }
             }
             else

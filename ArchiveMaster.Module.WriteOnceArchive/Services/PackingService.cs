@@ -101,7 +101,8 @@ namespace ArchiveMaster.Services
                     {
                         foreach (var cache in hashCaches)
                         {
-                            await hashCacheFile.WriteLineAsync($"{cache.Key}\t{cache.Value}");
+                            await hashCacheFile.WriteLineAsync(
+                                FormatHashCacheLine(cache.Value.Hash, cache.Value.Length, cache.Value.TimeTicks, cache.Key));
                         }
 
                         await hashCacheFile.FlushAsync(ct);
@@ -109,18 +110,24 @@ namespace ArchiveMaster.Services
 
                     await TryForFilesAsync(files, async (file, s) =>
                     {
-                        //从记忆中提取Hash
-                        if (!hashCaches.TryGetValue(GetFileHashCode(file), out var hash))
+                        //从记忆中提取Hash：必须同时匹配长度与修改时间，
+                        //否则文件被修改后会复用旧Hash，被当成“已打包”而静默跳过
+                        if (!hashCaches.TryGetValue(file.RelativePath, out var cache)
+                            || cache.Length != file.Length
+                            || cache.TimeTicks != file.Time.Ticks)
                         {
-                            hash = await FileHashHelper.ComputeHashStringAsync(file.Path,
-                                WriteOnceArchiveParameters.HashType, cancellationToken: ct,
-                                progress: s.CreateFileProgressReporter("正在计算文件Hash"));
+                            cache = new HashCacheEntry(file.Length, file.Time.Ticks,
+                                await FileHashHelper.ComputeHashStringAsync(file.Path,
+                                    WriteOnceArchiveParameters.HashType, cancellationToken: ct,
+                                    progress: s.CreateFileProgressReporter("正在计算文件Hash")));
                         }
 
+                        string hash = cache.Hash;
                         //放入文件目录结构
                         allFiles.Add(new WriteOnceFileInfo(file.RelativePath, hash, file.Length, file.Time));
                         //写入Hash缓存
-                        await hashCacheFile.WriteLineAsync($"{GetFileHashCode(file)}\t{hash}");
+                        await hashCacheFile.WriteLineAsync(
+                            FormatHashCacheLine(hash, file.Length, file.Time.Ticks, file.RelativePath));
 
                         //如果这个文件已经被打包过了，那么跳过
                         if (!packagedHashes.Add(hash))
@@ -336,37 +343,42 @@ namespace ArchiveMaster.Services
             }
         }
 
-        private async Task<IReadOnlyDictionary<long, string>> GetFileHashCacheAsync()
+        private readonly record struct HashCacheEntry(long Length, long TimeTicks, string Hash);
+
+        private static string FormatHashCacheLine(string hash, long length, long timeTicks, string relativePath)
         {
+            return $"{hash}\t{length}\t{timeTicks}\t{relativePath}";
+        }
+
+        private async Task<IReadOnlyDictionary<string, HashCacheEntry>> GetFileHashCacheAsync()
+        {
+            var cache = new Dictionary<string, HashCacheEntry>(StringComparer.Ordinal);
             if (string.IsNullOrEmpty(Config.HashCacheFile) || !File.Exists(Config.HashCacheFile))
             {
-                return new Dictionary<long, string>();
+                return cache;
             }
 
             var lines = await File.ReadAllLinesAsync(Config.HashCacheFile);
-            List<KeyValuePair<long, string>> dic = [];
-            foreach (var line in lines.Select(p => p.Trim()))
+            foreach (var line in lines)
             {
+                // 缓存只是加速手段：旧格式或损坏行直接跳过，不能让整个初始化失败
                 var parts = line.Split('\t');
-                if (parts.Length != 2)
+                if (parts.Length != 4)
                 {
-                    throw new FormatException($"文件{Config.HashCacheFile}中存在不正确的格式：{line}");
+                    continue;
                 }
 
-                if (!FileHashHelper.IsValidHashString(parts[1], WriteOnceArchiveParameters.HashType))
+                if (!FileHashHelper.IsValidHashString(parts[0], WriteOnceArchiveParameters.HashType)
+                    || !long.TryParse(parts[1], out long length)
+                    || !long.TryParse(parts[2], out long timeTicks))
                 {
-                    throw new Exception($"文件{Config.HashCacheFile}中存在无效的Hash值：{line}");
+                    continue;
                 }
 
-                dic.Add(new KeyValuePair<long, string>(long.Parse(parts[0]), parts[1]));
+                cache[parts[3]] = new HashCacheEntry(length, timeTicks, parts[0]);
             }
 
-            return dic.ToFrozenDictionary();
-        }
-
-        private long GetFileHashCode(SimpleFileInfo file)
-        {
-            return file.GetHashCode();
+            return cache;
         }
 
         private async Task<HashSet<string>> GetPackagedFileHashesAsync()

@@ -70,8 +70,10 @@ namespace ArchiveMaster.Services
                                 file.ErrorHashNotMatched = true;
                                 file.Error($"重建后的文件Hash{hashString}与源文件{file.Hash}不一致");
                             }
-
-                            file.Success();
+                            else
+                            {
+                                file.Success();
+                            }
                         }
                         else
                         {

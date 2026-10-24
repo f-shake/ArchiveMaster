@@ -86,8 +86,21 @@ public partial class MasterPasswordViewModel(IDialogService dialogService, AppCo
             }
             else
             {
+                string oldMasterPassword = GlobalConfigs.Instance.MasterPassword;
                 GlobalConfigs.Instance.MasterPassword = SecurePasswordStoreService.EncryptMasterPassword(NewPassword1);
-                appConfig.Save();
+                try
+                {
+                    appConfig.Save();
+                }
+                catch (Exception ex)
+                {
+                    // 保存失败就回滚主密码，避免内存中的新密钥与磁盘上的旧密文不一致
+                    GlobalConfigs.Instance.MasterPassword = oldMasterPassword;
+                    dialogService.ShowErrorDialogAsync("保存密码失败",
+                        "新密码未能写入配置文件，已恢复原来的主密码", ex.ToString());
+                    return;
+                }
+
                 Close?.Invoke(this, EventArgs.Empty);
             }
         }

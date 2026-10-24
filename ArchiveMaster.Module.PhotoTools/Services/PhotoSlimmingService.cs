@@ -152,17 +152,34 @@ namespace ArchiveMaster.Services
                 // 不同步就会出现"元数据写 17304x8652、像素实际 15000x7500"这类错位，详见 ImageMetadataHelper
                 SyncDimensionMetadata(image, Config.CompressImageFormat, GetOutputMimeType(Config.CompressImageFormat));
 
-                if (HeifEncoder.IsHeifFormat(Config.CompressImageFormat))
+                // 先写临时文件：取消或编码失败时不会在输出目录留下 0 字节/半张图
+                string targetPath = file.DistFile.Path;
+                string tempPath = targetPath + ".tmp";
+                try
                 {
-                    WriteHeif(image, file.DistFile.Path, ct);
-                }
-                else
-                {
-                    // image.Write(file.DistFile.Path, Config.CompressImageFormat);
-                    using (var stream = new FileStream(file.DistFile.Path, FileMode.Create))
+                    if (HeifEncoder.IsHeifFormat(Config.CompressImageFormat))
                     {
-                        image.Write(stream, Config.CompressImageFormat);
+                        ct.ThrowIfCancellationRequested();
+                        WriteHeif(image, tempPath, ct);
                     }
+                    else
+                    {
+                        using (var stream = new FileStream(tempPath, FileMode.Create))
+                        {
+                            image.Write(stream, Config.CompressImageFormat);
+                        }
+                    }
+
+                    File.Move(tempPath, targetPath, true);
+                }
+                catch
+                {
+                    if (File.Exists(tempPath))
+                    {
+                        File.Delete(tempPath);
+                    }
+
+                    throw;
                 }
             }
 

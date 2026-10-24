@@ -43,6 +43,20 @@ namespace ArchiveMaster.Services
                 var destDir = Path.Combine(Config.Dir, file.Region);
                 Directory.CreateDirectory(destDir);
                 var destPath = Path.Combine(destDir, file.Name);
+
+                StringComparison comparison = OperatingSystem.IsWindows() || OperatingSystem.IsMacOS()
+                    ? StringComparison.OrdinalIgnoreCase
+                    : StringComparison.Ordinal;
+                if (string.Equals(Path.GetFullPath(destPath), Path.GetFullPath(file.Path), comparison))
+                {
+                    // 重跑时已归位的文件，源和目标是同一个路径，File.Move 会抛异常。
+                    // 必须显式标记成功，否则该行会一直停在“处理中”
+                    file.Success();
+                    return;
+                }
+
+                // 不同子目录的同名照片归入同一区域时不能互相覆盖
+                destPath = FileHelper.GetNoDuplicateFile(destPath);
                 File.Move(file.Path, destPath);
             }, ct, FilesLoopOptions.Builder().AutoApplyStatus().AutoApplyFileNumberProgress().Build());
         }

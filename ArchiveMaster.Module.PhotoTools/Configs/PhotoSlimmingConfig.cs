@@ -161,6 +161,23 @@ namespace ArchiveMaster.Configs
         {
             CheckDir(SourceDir, "源目录");
             CheckEmpty(DistDir, "目标目录");
+
+            // 两个方向都要拒绝：目标在源内会被下一轮递归处理；
+            // 源在目标内时，勾选“处理前清空目标目录”会把源目录一起删掉
+            string separator = Path.DirectorySeparatorChar.ToString();
+            string sourceFull = Path.GetFullPath(SourceDir).TrimEnd(Path.DirectorySeparatorChar);
+            string distFull = Path.GetFullPath(DistDir).TrimEnd(Path.DirectorySeparatorChar);
+            // macOS 默认文件系统不区分大小写，否则 /P/Photos 与 /P/photos/out 会被误判为不重叠
+            StringComparison pathComparison = OperatingSystem.IsWindows() || OperatingSystem.IsMacOS()
+                ? StringComparison.OrdinalIgnoreCase
+                : StringComparison.Ordinal;
+            if (string.Equals(sourceFull, distFull, pathComparison)
+                || distFull.StartsWith(sourceFull + separator, pathComparison)
+                || sourceFull.StartsWith(distFull + separator, pathComparison))
+            {
+                throw new Exception("目标目录不能与源目录相同，也不能与源目录互相包含");
+            }
+
             CheckEmpty(FolderNameTemplate, "文件夹名模板");
             CheckEmpty(FileNameTemplate, "文件名模板");
             // 线程数现在是 HEIC 编码并发的唯一闸门（见 HeifEncoder.Encode 的 remarks），必须校验：

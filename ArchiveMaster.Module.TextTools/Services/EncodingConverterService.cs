@@ -36,8 +36,13 @@ namespace ArchiveMaster.Services
                     NotifyMessage($"正在转换文件编码{s.GetFileNumberMessage()}：{file.Name}");
                     string targetFile = null;
                     targetFile = Config.SaveToAnotherDir
-                        ? Path.Combine(Config.AnotherDir, file.Name)
+                        // 保留源相对路径：只用文件名会让不同子目录的同名文件互相覆盖
+                        ? Path.Combine(Config.AnotherDir, file.RelativePath)
                         : Path.Combine(Path.GetDirectoryName(file.Path), Guid.NewGuid().ToString());
+                    if (Config.SaveToAnotherDir)
+                    {
+                        Directory.CreateDirectory(Path.GetDirectoryName(targetFile));
+                    }
                     int bufferLength = 1000;
                     char[] buffer = new char[bufferLength];
                     try
