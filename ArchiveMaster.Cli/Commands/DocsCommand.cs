@@ -25,6 +25,7 @@ public static class DocsCommand
 
     public static int Execute(CliArguments args)
     {
+        CommandContext.EnsureNoOverrides(args, "docs");
         if (args.Positionals.Count > 0)
         {
             throw new CliException(2, $"docs 不接受位置参数：{string.Join(" ", args.Positionals)}");

@@ -88,6 +88,14 @@ public static class CommandContext
         moduleConvertersRegistered = true;
     }
 
+    /// <summary>
+    /// --set 只服务于会加载工具配置的 plan / run；其他命令显式拒绝，避免用户以为覆盖生效。
+    /// </summary>
+    public static void EnsureNoOverrides(CliArguments args, string command)
+    {
+        CliCommandPolicy.EnsureSetAllowed(args.Has("set"), command);
+    }
+
     public static object CreateDefaultConfig(ToolDescriptor tool)
     {
         return Activator.CreateInstance(tool.ConfigType)

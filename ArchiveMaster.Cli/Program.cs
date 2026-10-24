@@ -16,14 +16,16 @@ public static class Program
 
         try
         {
-            if (args.Length == 0 || IsHelp(args[0]))
+            if (args.Length == 0)
             {
                 PrintHelp();
                 return 0;
             }
 
             CliArguments arguments = CliArguments.Parse(args);
-            if (arguments.Has("help"))
+            CliCommandPolicy.EnsureSetAllowed(arguments.Has("set"), arguments.Command);
+
+            if (IsHelp(args[0]) || arguments.Has("help"))
             {
                 PrintHelp();
                 return 0;
@@ -82,15 +84,16 @@ public static class Program
               am list [--json]
               am describe <工具ID> [--json]
               am plan <工具ID> (--config <文件|-> | --preset <名称> [--profile <目录>])
-                     [--max-items <N>] [--allow-root <目录>]... [--report <文件>] [--json] [--quiet]
+                     [--set <字段>=<值>]... [--max-items <N>] [--allow-root <目录>]... [--report <文件>] [--json] [--quiet]
               am run  <工具ID> (--config <文件|-> | --preset <名称> [--profile <目录>]) --yes
-                     [--max-items <N>] [--allow-root <目录>]... [--report <文件>] [--json] [--quiet]
+                     [--set <字段>=<值>]... [--max-items <N>] [--allow-root <目录>]... [--report <文件>] [--json] [--quiet]
               am docs [--out <目录>] [--install] [--source <目录>]
               am --version
 
             说明：
               plan 执行工具的准备阶段（可能写入目标目录）；run 在同一进程内继续执行第二阶段。
               配置来源二选一：--config 指定单工具配置，或 --preset 复用 profile 里已保存的预设。
+              --set 可重复，覆盖配置字段；嵌套字段用点号（如 PathFilter.IncludeFiles=*.jpg），复杂类型用 JSON。
               默认 profile 为用户数据目录下的 ArchiveMaster\cli；需要复用 GUI 配置时显式传 --profile。
 
             退出码：

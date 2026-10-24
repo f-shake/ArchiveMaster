@@ -269,7 +269,7 @@ dotnet test ArchiveMaster.Tests --filter FullyQualifiedName~FileTools
 - 测试工程为 `ArchiveMaster.Tests`（xUnit v3），覆盖 Core 与 FileTools、PhotoTools、PhotoTagging、VideoTools、TextTools、OfflineSync、WriteOnceArchive 的非 UI 逻辑。
 - 不覆盖 `FileBackupper`、真实 LLM 调用、HEIC 原生编码、`ffprobe` 等外部进程、View/ViewModel。
 - 每个用例只读写 `%TEMP%\ArchiveMaster.Tests` 下的独立目录；需要保留现场时设置环境变量 `ARCHIVEMASTER_TESTS_KEEP_TEMP=1`。
-- 当前 159 条用例全部通过；2A 发现的 8 个缺陷已在 2B 修复，明细见 [unit-tests-bugs.md](docs/plans/unit-tests-bugs.md)。
+- 当前 206 条用例（159 条既有 + 47 条 `--set` / 命令策略覆盖）；新增用例已单独通过，全量回归在最终验证阶段执行。2A 发现的 8 个缺陷已在 2B 修复，明细见 [unit-tests-bugs.md](docs/plans/unit-tests-bugs.md)。
 
 ## 命令行（`am`）
 
@@ -278,11 +278,13 @@ dotnet test ArchiveMaster.Tests --filter FullyQualifiedName~FileTools
 ```bash
 am list --json                                   # 列出可用工具
 am describe fileTools.timeClassify --json        # 输出配置模板
+am plan fileTools.timeClassify --set Dir=D:\input --json  # 临时覆盖单个字段
 am plan fileTools.timeClassify --config cfg.json # 准备阶段：列出待处理项
 am run  fileTools.timeClassify --config cfg.json --yes --json  # 执行
 ```
 
 - `plan` 执行工具的准备阶段，`run` 在同一进程内继续执行第二阶段；`run` 必须带 `--yes`。
+- `--set <字段>=<值>` 可重复，覆盖 `--config`、`--preset` 或默认配置中的字段；嵌套字段用点号（如 `PathFilter.IncludeFiles=*.jpg`），复杂类型用 JSON。只有 `plan` / `run` 支持 `--set`，密码等敏感值会进入命令历史，优先用 `--config` / `--preset` 提供。
 - 结构化结果写入 `--report`（默认临时目录的 JSONL），JSON 输出见 `--json`。
 - 技能位于 `skill`，工具目录由 `am docs --out skill` 生成；`am docs --install` 可安装到 `~/.agents/skills/archive-master`。
 - 构建 CLI：`dotnet build ArchiveMaster.Cli\ArchiveMaster.Cli.csproj`；实际使用请发布 Release：`dotnet publish ArchiveMaster.Cli\ArchiveMaster.Cli.csproj -c Release`（HEIC 原生库按 RID 随包复制）。Debug 构建下 `fileTools.batchCommandLine` 只处理前 10 个文件（工具自身的调试限制）。
@@ -327,10 +329,11 @@ am run  fileTools.timeClassify --config cfg.json --yes --json  # 执行
 ### 命令行与 Agent Skill（2026-10）
 
 - `ArchiveMaster.Cli/` —— 控制台入口、参数解析、命令与输出，共 13 个文件
-- `ArchiveMaster.Core/Cli/` —— 工具目录、两阶段执行器与结果契约，共 5 个文件
+- `ArchiveMaster.Core/Cli/` —— 工具目录、两阶段执行器、结果契约、`--set` 配置覆盖与命令策略，共 8 个文件
 - `ArchiveMaster.Modules/` —— 统一模块清单，共 2 个文件
 - `skill/` —— 技能正文与由 `am docs` 生成的工具目录（`assets/`）
-- `docs/plans/cli-and-skill.md` —— 本次开发计划
+- `docs/plans/cli-and-skill.md` —— CLI 与 Skill 的开发计划
+- `docs/plans/cli-set-overrides.md` —— `--set` 配置覆盖的开发计划
 - `AGENTS.md` —— 项目约定文件
 
 ### 单元测试（2026-10）

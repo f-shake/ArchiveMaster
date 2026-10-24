@@ -88,6 +88,7 @@ public static class ToolCommand
         }
 
         object config = LoadConfig(tool, appConfig, args);
+        ConfigOverrides.Apply(config, tool.Id, args.GetAll("set"));
         // 准备阶段可能读取快照/目录；在它之前先做一次白名单校验
         guard.ValidateConfig((ConfigBase)config);
         try

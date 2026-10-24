@@ -19,6 +19,7 @@ whenToUse: 用户要求批量整理、分类、重命名、去重、加密、压
 ## 核心规则
 
 - **先 `plan`，后 `run`**。`plan` 执行工具的准备阶段并列出待处理项；把条目数、总大小与抽样给用户看，得到明确同意后才执行 `run --yes`。
+- **临时改单个字段用 `--set`**。可重复，覆盖 `--config` / `--preset` 中的同名字段；嵌套字段用点号（`PathFilter.IncludeFiles=*.jpg`），集合/对象用 JSON。只有 `plan` / `run` 支持 `--set`。
 - **不要替用户猜路径**。配置里的目录、文件必须来自用户输入或已确认的上下文；`--allow-root` 用于把操作限制在用户指定的根目录内。
 - **`plan` 不是纯只读**。准备阶段可能创建目录或中间产物；不要向用户承诺“什么都没改”。
 - **`run` 会重做准备阶段**。`plan` 与 `run` 是两次进程，`run` 不会复用上一次 `plan` 的结果；两次之间文件系统变了，以 `run` 时为准。
@@ -42,6 +43,9 @@ am plan fileTools.timeClassify --config cfg.json --json
 
 # 4. 用户确认后执行（内部重做第一阶段 + 第二阶段）
 am run fileTools.timeClassify --config cfg.json --yes --json
+
+# 也可以只覆盖少量字段，不必复制整份配置
+am run fileTools.timeClassify --config cfg.json --set Dir=D:\input --yes --json
 ```
 
 也可以把配置从标准输入传入：`--config -`。
@@ -52,8 +56,9 @@ am run fileTools.timeClassify --config cfg.json --yes --json
 | --- | --- | --- |
 | 一次性配置 | `--config <文件\|->` | `describe` 的完整输出，或只取 `config` 子树；PascalCase，与 GUI 一致 |
 | 已保存预设 | `--profile <目录> --preset <名称>` | 读取 `<目录>/configs.json` 中该工具的预设；省略 `--preset` 时用“默认” |
+| 字段覆盖 | `--set <字段>=<值>` | 可重复，覆盖前两种来源；嵌套点号、复杂 JSON；仅 `plan` / `run` |
 
-`--config` 与 `--preset` 互斥；`--preset` 指向不存在的名字会直接报错，不会静默使用默认配置。
+`--config` 与 `--preset` 互斥；`--preset` 指向不存在的名字会直接报错，不会静默使用默认配置。`--set` 可与任一种来源组合，覆盖同名字段。
 
 默认 profile 位于用户数据目录下的 `ArchiveMaster/cli`（Windows 为 `%LOCALAPPDATA%\ArchiveMaster\cli`）。要复用 GUI 的配置，显式传 `--profile <GUI 配置目录>`；GUI 的 `configs.json` 在 GUI 可执行文件旁。
 
@@ -99,6 +104,7 @@ am run fileTools.timeClassify --config cfg.json --yes --json
 ## 安全边界
 
 - 配置中的绝对路径、含分隔符的相对路径、`..` 路径、多值路径与准备结果里的条目可被 `--allow-root` 限制（可重复），越界会直接失败并指出路径。这是尽力而为的护栏，**不是安全沙箱**：简单的相对目录名（如 `out`）、`fileTools.batchCommandLine` 启动的任意程序、工具执行时新算出的输出路径都可能超出白名单，仍需用户确认。
+- `--set` 传入的密码等敏感值会留在 shell 历史和进程列表；优先用 `--config` / `--preset`。
 - `tool-catalog.json` 中 `prepareUnsafe: true` 表示该工具的准备阶段已知会写文件（当前只有 `writeOnceArchive.packing`）。
 - 同一 profile 同时只允许一个 `am` 进程；锁冲突退出码 2。
 - 报告文件含本机路径，分享前提醒用户检查。

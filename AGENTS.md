@@ -132,6 +132,7 @@ GUI 与模块工程都设 `RootNamespace=ArchiveMaster`，所以命名空间与�
 - 工具 ID = `<模块短名>.<配置类名去掉 Config 与模块前缀>`（如 `offlineSync.step1`）；**不要重命名配置类**，否则 ID 与用户已有配置一起失效。
 - `plan` 执行 `InitializeAsync`（准备阶段，可能写文件），`run` 在同一进程内继续 `ExecuteAsync`；两阶段语义见 `docs/plans/cli-and-skill.md`。新增工具若在 `InitializeAsync` 里写文件，必须登记到 `ToolCatalog.PrepareUnsafeToolIds`。
 - 只返回聚合结果的工具要登记到 `ToolCatalog.NoItemResultToolIds`；CLI 会把 `itemsAvailable` 置为 false，并从服务公开属性生成 `notes`。
+- `plan` / `run` 可用可重复的 `--set <字段>=<值>` 覆盖配置；嵌套字段用点号，复杂类型按 JSON 转换，`SecurePassword` 也支持明文自动转换（明文会进入命令历史）。`--set` 应用在路径白名单与准备阶段之前；其他命令不支持 `--set`。
 - CLI 默认 profile 在用户数据目录（`%LOCALAPPDATA%\ArchiveMaster\cli`），不写 `configs.json`，只在 profile 下创建 `.am.lock`（保留不删，避免 Unix unlink 竞态）。
 - 技能位于 `skill`；`assets/` 由 `am docs --out skill` 生成，**不要手改生成物**。用户级安装用 `am docs --install`。
 - CLI 的退出码与 JSON 字段是给 AI 的契约：改动 `ToolRunResult` / 退出码 / 工具能力标记时同步更新 `SKILL.md` 与生成物。
@@ -150,7 +151,7 @@ GUI 与模块工程都设 `RootNamespace=ArchiveMaster`，所以命名空间与�
 仓库有单元测试工程 `ArchiveMaster.Tests`（xUnit v3），没有 CI。`ArchiveMaster.Module.Test` 仍是手写试验面板，不能当作回归保障。改动后的最低验证：
 
 1. `dotnet build ArchiveMaster.UI.Desktop` 通过且不新增警告；
-2. `dotnet test ArchiveMaster.Tests`：当前 159 条全部通过；2A 发现的 8 个缺陷已在 2B 修复；
+2. `dotnet test ArchiveMaster.Tests`：当前 206 条（159 条既有 + 47 条 `--set` / 命令策略覆盖）；新增用例已单独通过，全量回归在最终验证阶段执行；2A 发现的 8 个缺陷已在 2B 修复；
 3. 运行 `dotnet run --project ArchiveMaster.UI.Desktop`，实际操作受影响的工具（至少走一遍「初始化 → 执行」，包括取消与报错路径）；
 4. 涉及配置结构时，用旧 `configs.json` 启动一次，确认能加载、预设不丢；
 5. 涉及文件操作时，在临时目录验证，注意工具会真实移动 / 删除文件（默认删除到回收站，`GlobalConfigs.DeleteMode` 可改）。

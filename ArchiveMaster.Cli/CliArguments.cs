@@ -15,7 +15,7 @@ public sealed class CliArguments
 
     private static readonly HashSet<string> ValueOptions = new(StringComparer.OrdinalIgnoreCase)
     {
-        "profile", "config", "preset", "report", "max-items", "allow-root", "source", "out",
+        "profile", "config", "preset", "report", "max-items", "allow-root", "source", "out", "set",
     };
 
     private readonly Dictionary<string, List<string>> options = new(StringComparer.OrdinalIgnoreCase);

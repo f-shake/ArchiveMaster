@@ -7,6 +7,7 @@ public static class ListCommand
 {
     public static int Execute(CliArguments args)
     {
+        CommandContext.EnsureNoOverrides(args, "list");
         if (args.Positionals.Count > 0)
         {
             throw new CliException(2, $"list 不接受位置参数：{string.Join(" ", args.Positionals)}");

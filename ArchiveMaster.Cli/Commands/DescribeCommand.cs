@@ -9,6 +9,7 @@ public static class DescribeCommand
 {
     public static int Execute(CliArguments args)
     {
+        CommandContext.EnsureNoOverrides(args, "describe");
         if (args.Positionals.Count != 1)
         {
             throw new CliException(2, args.Positionals.Count == 0
